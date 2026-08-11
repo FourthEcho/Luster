@@ -155,10 +155,6 @@ const bool colortex11MipmapEnabled = true;
 #define ATMOSPHERE_SCATTERING_LUT depthtex0
 #define TEMPORAL_REPROJECTION
 
-#ifdef PHOTONICS_IN_USE
-#define PHOTONICS_DIFFUSE
-#endif
-
 #if HANDHELD_LIGHTING_MODE == HANDHELD_LIGHTING_COLORED && defined SPECULAR_MAPPING
 vec3 held_material_light = vec3(0.0);
 #define HANDHELD_LIGHTING_MATERIAL_COLOR held_material_light
@@ -654,9 +650,6 @@ void main() {
             0.0,
 #else
             shadow_distance_fade,
-#endif
-#ifdef PHOTONICS_DIFFUSE
-            is_lod,
 #endif
             NoL,
             NoV,

@@ -37,9 +37,6 @@ screen.box                             = Selection Box
 screen.developer                       = Developer Options
 
 screen.distant_horizons                = Distant Horizons
-screen.photonics                       = Photonics
-screen.photonics_sharp                 = Sharp Settings
-screen.photonics_restir                = ReSTIR Settings
 
 screen.aurora                          = Aurora
 screen.clouds                          = Clouds
@@ -897,47 +894,6 @@ option.DH_OVERDRAW_FADE_LENGTH  = Overdraw Fade Length
 option.DH_OVERDRAW_FADE_LENGTH.comment = The length of the fade zone between the render distance and the overdraw distance
 option.NOISE_ON_DH_TERRAIN      = Noise on DH Terrain
 option.NOISE_ON_DH_TERRAIN.comment = Adds high-frequency noise to Distant Horizons terrain, masking texture repetition
-
-# Photonics
-
-option.PHOTONICS_ENABLED              = Use Photonics
-option.PHOTONICS_ENABLED.comment      = Enables Photonics, a path-traced lighting engine for block lights. Requires the Photonics mod
-option.PHOTONICS_LIGHTING_MODE        = Lighting Mode
-option.PHOTONICS_LIGHTING_MODE.comment = The lighting algorithm Photonics uses for lighting.\n\nSharp - A very simple lighting algorithm with no noise, but a limited number of lights (Max Samples)\nReSTIR - Uses ReSTIR for lighting, supports an unlimited (Max Lights) number of lights, but may be noisy in certain areas.
-value.PHOTONICS_LIGHTING_MODE.SIMPLE  = Sharp
-value.PHOTONICS_LIGHTING_MODE.RESTIR  = ReSTIR
-option.PHOTONICS_ALPHA_MODE           = Transparency Mode
-option.PHOTONICS_ALPHA_MODE.comment   = Changes how Photonics deals with transparent voxels. \n\nOpaque - Treats transparent voxels as opaque\nPer Block - Uses the first transparent voxel, then skips the rest of the block\nPer Voxel - Uses every transparent voxel in a block (HEAVY PERFORMANCE IMPACT)
-value.PHOTONICS_ALPHA_MODE.NONE       = Opaque
-value.PHOTONICS_ALPHA_MODE.BLOCK      = Per Block
-value.PHOTONICS_ALPHA_MODE.VOXEL      = Per Voxel
-option.PHOTONICS_MAX_LIGHTS           = Max Lights
-option.PHOTONICS_MAX_LIGHTS.comment   = The max number of traced lights that can be loaded
-option.PHOTONICS_GLINT_STRENGTH       = Enchantment Glint Strength
-option.PHOTONICS_GLINT_STRENGTH.comment = The strength of enchanted items in handheld lighting
-value.PHOTONICS_GLINT_STRENGTH.0      = Off
-option.PHOTONICS_TWO_HANDHELD_RAYS    = Separate Handheld Rays
-option.PHOTONICS_TWO_HANDHELD_RAYS.comment = Whether both handheld lights should cast shadows. When disabled only one shadow will be cast
-option.PHOTONICS_SHARP_MAX_SAMPLES    = Max Samples
-option.PHOTONICS_SHARP_MAX_SAMPLES.comment = The maximum number of lights sampled per pixel in Sharp mode. Higher values increase quality but hurt performance
-option.PHOTONICS_RESTIR_INITIAL_SAMPLES   = Initial Samples
-option.PHOTONICS_RESTIR_INITIAL_SAMPLES.comment = The number of lights sampled per pixel before spatial reuse
-option.PHOTONICS_RESTIR_SPR_SAMPLES       = Spatial Reuse Samples
-option.PHOTONICS_RESTIR_SPR_SAMPLES.comment = The number of samples reused from neighbouring pixels
-value.PHOTONICS_RESTIR_SPR_SAMPLES.0      = Off
-option.PHOTONICS_RESTIR_SPR_RADIUS        = Spatial Reuse Radius
-option.PHOTONICS_RESTIR_SPR_RADIUS.comment = How far away samples are reused from neighbouring pixels
-option.PHOTONICS_RESTIR_ACCUMULATION      = Accumulation Frames
-option.PHOTONICS_RESTIR_ACCUMULATION.comment = The max number of frames ReSTIR uses for accumulation. Lower values will cause lighting to be more responsive, at the cost of more noise.
-option.PHOTONICS_RESTIR_DENOISER_PASSES   = Denoiser Passes
-option.PHOTONICS_RESTIR_DENOISER_PASSES.comment = The number of denoising passes applied to the ReSTIR output
-option.PHOTONICS_RESTIR_SOFT_SHADOWS      = Soft Shadows
-option.PHOTONICS_RESTIR_SOFT_SHADOWS.comment = Uses multiple shadow rays to produce softer, more realistic shadows
-option.PHOTONICS_RESTIR_COMBINED_GI       = Include Skylight GI
-option.PHOTONICS_RESTIR_COMBINED_GI.comment = Whether Gi should be ran through ReSTIR's denoiser instead of its usual path. \nResults in much sharper Gi, at the cost of performance.
-
-
-
 
 # New Screen Names
 screen.purkinje_shift                     = Purkinje Shift

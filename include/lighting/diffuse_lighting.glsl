@@ -24,14 +24,6 @@
 #undef CLOUD_SHADOWS
 #endif
 
-#if defined PHOTONICS_DIFFUSE
-#include "/photonics/ph_samplers.glsl"
-
-#ifndef PHOTONICS_RESTIR_COMBINED_GI
-uniform sampler2D radiosity_indirect;
-#endif
-
-#endif
 
 const float sss_density = 14.0;
 const float sss_scale = 5.0 * SSS_INTENSITY;
@@ -211,9 +203,6 @@ vec3 get_diffuse_lighting(
     float cloud_shadows,
 #endif
     float shadow_distance_fade,
-#ifdef PHOTONICS_DIFFUSE
-    bool is_lod,
-#endif
     float NoL,
     float NoV,
     float NoH,
@@ -247,18 +236,8 @@ vec3 get_diffuse_lighting(
         * (1.0 - 0.5 * material.sss_amount)
     );
 
-// Disable bounced lighting with Photonics
-#if defined PHOTONICS_DIFFUSE
-#define DO_BOUNCED_LIGHTING is_lod
-#else
-#define DO_BOUNCED_LIGHTING true
-#endif
-
-    vec3 bounced = vec3(0.0);
-    if (DO_BOUNCED_LIGHTING) {
-        bounced = 0.033 * (1.0 - shadows) * (1.0 - 0.1 * max0(normal.y))
-            * pow1d5(ao + eps) * pow4(light_levels.y) * BOUNCED_LIGHT_I;
-    }
+    vec3 bounced = 0.033 * (1.0 - shadows) * (1.0 - 0.1 * max0(normal.y))
+        * pow1d5(ao + eps) * pow4(light_levels.y) * BOUNCED_LIGHT_I;
 
 #ifdef SUB_SURFACE_SCATTERING
     vec3 sss = sss_approx(
@@ -327,25 +306,6 @@ vec3 get_diffuse_lighting(
 
     // Skylight
 
-#if defined PHOTONICS_DIFFUSE
-    if (is_lod) {
-        lighting += get_sky_lighting(
-            material,
-            bent_normal,
-            light_levels,
-            ao,
-            ambient_sss,
-            directional_lighting
-        );
-    } else {
-// When combined gi is enabled
-// Photonics includes gi in the result of sample_photonics_direct
-#ifndef PHOTONICS_RESTIR_COMBINED_GI
-        lighting += texture2D(radiosity_indirect, uv).xyz * SKYLIGHT_I;
-#endif
-    }
-
-#else
     lighting += get_sky_lighting(
         material,
         bent_normal,
@@ -354,32 +314,9 @@ vec3 get_diffuse_lighting(
         ambient_sss,
         directional_lighting
     );
-#endif
 
     // Blocklight
 
-#if defined PHOTONICS_DIFFUSE
-    if (!is_lod) {
-        vec3 blocklight = vec3(0.0f);
-
-        blocklight += sample_photonics_direct(uv);
-
-#ifdef HANDHELD_LIGHTING
-        blocklight += sample_photonics_handheld(uv);
-#endif
-
-        // BLOCKLIGHT_I is applied in /photonics/modifiers/modify_lights.glsl
-        lighting += blocklight * blocklight_scale;
-    } else {
-        lighting += get_block_lighting(
-            scene_pos,
-            flat_normal,
-            light_levels,
-            ao,
-            directional_lighting
-        );
-    }
-#else
     lighting += get_block_lighting(
         scene_pos,
         flat_normal,
@@ -387,7 +324,6 @@ vec3 get_diffuse_lighting(
         ao,
         directional_lighting
     );
-#endif
 
     lighting += material.emission * emission_scale;
 

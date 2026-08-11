@@ -69,11 +69,6 @@
 #define NORMAL_MAPPING
 #endif
 
-// Photonics shorthand, 'PHOTONICS' is always defined by Photonics when it's
-// installed
-#if defined PHOTONICS && defined PHOTONICS_ENABLED
-#define PHOTONICS_IN_USE
-#endif
 
 // Compatibility fixes
 
