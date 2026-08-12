@@ -4,6 +4,7 @@ profile.low                            = §eLow
 profile.medium                         = §aMedium
 profile.high                           = §bHigh
 profile.ultra                          = §dUltra
+profile.mac                            = §cMac Compatible
 
 # Screens
 
@@ -80,6 +81,7 @@ value.INFO.0                           = §eby SixthSurge
 value.INFO.1                           = §aby SixthSurge
 value.INFO.2                           = §bby SixthSurge
 value.INFO.3                           = §dby SixthSurge
+value.INFO.4                           = §cby SixthSurge
 
 # World settings
 
