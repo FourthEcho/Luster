@@ -666,6 +666,12 @@ void main() {
 #endif
 
         // Specular reflections
+        //
+        // get_specular_reflections() in specular_lighting.glsl internally
+        // dispatches to get_ibl_specular() (the dedicated VNDF multi-sample
+        // IBL path) when ENVIRONMENT_REFLECTIONS is disabled, and runs the
+        // SSR pipeline otherwise.  Either way the result is added to the
+        // fragment color here.
 
 #if defined ENVIRONMENT_REFLECTIONS || defined SKY_REFLECTIONS
         if (material.ssr_multiplier > eps) {
@@ -686,6 +692,8 @@ void main() {
             );
         }
 #endif
+
+
         // Edge highlight
 
 #ifdef EDGE_HIGHLIGHT
