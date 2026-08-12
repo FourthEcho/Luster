@@ -10,6 +10,7 @@
 */
 
 #include "/include/global.glsl"
+#include "/include/misc/clrwl_compat.glsl"
 
 #if defined COLORWHEEL
 layout(location = 0) out vec4 shadowcolor0_out;

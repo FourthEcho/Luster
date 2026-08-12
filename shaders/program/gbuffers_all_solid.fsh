@@ -10,6 +10,7 @@
 */
 
 #include "/include/global.glsl"
+#include "/include/misc/clrwl_compat.glsl"
 
 layout(
     location = 0

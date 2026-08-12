@@ -54,6 +54,7 @@ uniform sampler2D colortex8; // Cloud shadow map
 #endif
 
 uniform sampler2D depthtex0;
+uniform sampler2D depthtex1;  // back-face depth, used by SSRT raytracer via combined_depth_tex
 
 #ifdef COLORED_LIGHTS
 uniform sampler3D light_sampler_a;

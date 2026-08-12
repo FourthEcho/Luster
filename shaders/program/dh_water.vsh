@@ -20,6 +20,29 @@ flat out uint is_water;
 flat out vec3 light_color;
 flat out vec3 ambient_color;
 
+// ------------
+//   Distant Horizons built-ins
+// ------------
+// Iris injects `dhMaterialId` as a vertex attribute when Distant Horizons
+// is active. We declare it here so static validation succeeds even when
+// the DH injection path is not present. At runtime Iris's own declaration
+// takes precedence (declarations are idempotent). Note: `flat` is not
+// allowed on vertex inputs (per-vertex attributes don't interpolate), so
+// we use the plain `in` qualifier.
+in int dhMaterialId;
+
+// DH material-ID enum. Iris defines these when DH support is enabled; we
+// provide fallbacks so the file compiles in their absence.
+#ifndef DH_BLOCK_AIR
+#define DH_BLOCK_AIR 0
+#endif
+#ifndef DH_BLOCK_WATER
+#define DH_BLOCK_WATER 11
+#endif
+#ifndef DH_BLOCK_GRASS
+#define DH_BLOCK_GRASS 13
+#endif
+
 #if defined WORLD_OVERWORLD
 #include "/include/fog/overworld/parameters.glsl"
 flat out OverworldFogParameters fog_params;

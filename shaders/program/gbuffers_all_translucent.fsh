@@ -11,6 +11,7 @@
 */
 
 #include "/include/global.glsl"
+#include "/include/misc/clrwl_compat.glsl"
 
 #ifdef PROGRAM_GBUFFERS_WATER
 layout(location = 0) out vec4 refraction_data;

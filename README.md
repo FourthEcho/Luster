@@ -101,3 +101,4 @@ Luster is built on top of Photon Shaders by SixthSurge. All of Photon's original
 This is a personal fork maintained by [shashankpgowda](https://github.com/shashankpgowda). For questions or issues specific to this fork, please open an issue on this repository.
 
 For the original Photon Shaders project, see [sixthsurge/photon](https://github.com/sixthsurge/photon) and their [Discord server](https://discord.gg/ngEW66HScd).
+

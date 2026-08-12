@@ -10,6 +10,7 @@
 */
 
 #include "/include/global.glsl"
+#include "/include/misc/clrwl_compat.glsl"
 
 layout(location = 0) out vec4 frag_color;
 
@@ -43,15 +44,15 @@ void main() {
 #endif
 
 #if defined COLORWHEEL
-	vec4 color = texture(gtexture, uv, lod_bias);
-	vec2 lmcoord;
-	float ao;
-	vec4 overlayColor;
+        vec4 color = texture(gtexture, uv, lod_bias);
+        vec2 lmcoord;
+        float ao;
+        vec4 overlayColor;
 
-	clrwl_computeFragment(color, color, lmcoord, ao, overlayColor);
-	color.rgb = mix(color.rgb, overlayColor.rgb, overlayColor.a);
+        clrwl_computeFragment(color, color, lmcoord, ao, overlayColor);
+        color.rgb = mix(color.rgb, overlayColor.rgb, overlayColor.a);
     
-	vec3 armor_glint = color.rgb;
+        vec3 armor_glint = color.rgb;
 #else
     vec3 armor_glint = texture(gtexture, uv, lod_bias).rgb;
 #endif

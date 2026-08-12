@@ -271,6 +271,14 @@ option.BLOCKLIGHT_R                    = §c▍ §fRed
 option.BLOCKLIGHT_G                    = §a▍ §fGreen
 option.BLOCKLIGHT_B                    = §9▍ §fBlue
 option.BLOCKLIGHT_I                    = Blocklight Intensity
+option.BLOCKLIGHT_BIOME_COLOR          = Biome-Aware Blocklight
+option.BLOCKLIGHT_BIOME_INTENSITY      = Blocklight Biome Tint Strength
+
+value.BLOCKLIGHT_BIOME_COLOR.true  = Enabled
+value.BLOCKLIGHT_BIOME_COLOR.false = Disabled
+
+comment.BLOCKLIGHT_BIOME_COLOR = §7Tints torches, lanterns, and other blocklight sources toward the current biome's hue (e.g. cooler in taiga/icy biomes, warmer in desert/mesa), using the biome fog color as reference. Brightness is preserved.
+comment.BLOCKLIGHT_BIOME_INTENSITY = §7How strongly the biome hue tints blocklight. 0 = no tint (vanilla blocklight color), 1 = fully biome-tinted.
 
 option.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION                 = Vanilla Lightmap Contribution
 option.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF         = Contribution Falloff

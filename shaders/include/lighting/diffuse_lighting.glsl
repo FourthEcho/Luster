@@ -131,7 +131,7 @@ vec3 get_block_lighting(
     float blocklight_falloff
         = get_blocklight_falloff(light_levels.x, light_levels.y, ao);
     vec3 mc_blocklight = (blocklight_falloff * directional_lighting)
-        * (blocklight_scale * blocklight_color);
+        * (blocklight_scale * get_blocklight_color());
 
 #ifdef COLORED_LIGHTS
     lighting += get_lpv_blocklight(

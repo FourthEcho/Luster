@@ -19,6 +19,62 @@ out vec3 color;
 flat out uint material_mask;
 
 // ------------
+//   Distant Horizons built-ins
+// ------------
+// Iris injects `dhMaterialId` as a vertex attribute when Distant Horizons
+// is active. We declare it here so static validation succeeds even when
+// the DH injection path is not present. At runtime Iris's own declaration
+// takes precedence (declarations are idempotent). Note: `flat` is not
+// allowed on vertex inputs (per-vertex attributes don't interpolate), so
+// we use the plain `in` qualifier.
+in int dhMaterialId;
+
+// DH material-ID enum. Iris defines these when DH support is enabled; we
+// provide fallbacks so the file compiles in their absence.
+#ifndef DH_BLOCK_AIR
+#define DH_BLOCK_AIR 0
+#endif
+#ifndef DH_BLOCK_GRASS
+#define DH_BLOCK_GRASS 13
+#endif
+#ifndef DH_BLOCK_DIRT
+#define DH_BLOCK_DIRT 1
+#endif
+#ifndef DH_BLOCK_STONE
+#define DH_BLOCK_STONE 2
+#endif
+#ifndef DH_BLOCK_DEEPSLATE
+#define DH_BLOCK_DEEPSLATE 4
+#endif
+#ifndef DH_BLOCK_NETHER_STONE
+#define DH_BLOCK_NETHER_STONE 3
+#endif
+#ifndef DH_BLOCK_SAND
+#define DH_BLOCK_SAND 5
+#endif
+#ifndef DH_BLOCK_WOOD
+#define DH_BLOCK_WOOD 6
+#endif
+#ifndef DH_BLOCK_METAL
+#define DH_BLOCK_METAL 7
+#endif
+#ifndef DH_BLOCK_LAVA
+#define DH_BLOCK_LAVA 8
+#endif
+#ifndef DH_BLOCK_ILLUMINATED
+#define DH_BLOCK_ILLUMINATED 9
+#endif
+#ifndef DH_BLOCK_LEAVES
+#define DH_BLOCK_LEAVES 10
+#endif
+#ifndef DH_BLOCK_WATER
+#define DH_BLOCK_WATER 11
+#endif
+#ifndef DH_BLOCK_SNOW
+#define DH_BLOCK_SNOW 12
+#endif
+
+// ------------
 //   Uniforms
 // ------------
 
@@ -37,11 +93,6 @@ void main() {
     color = gl_Color.rgb;
     normal = mat3(gbufferModelViewInverse)
         * (mat3(gl_ModelViewMatrix) * gl_Normal);
-
-// Prevent compile error on older versions of Iris
-#ifndef DH_BLOCK_GRASS
-#define DH_BLOCK_GRASS 13
-#endif
 
     // Set material mask based on dhMaterialId
     switch (dhMaterialId) {

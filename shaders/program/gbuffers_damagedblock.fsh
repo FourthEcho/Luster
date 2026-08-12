@@ -10,6 +10,7 @@
 */
 
 #include "/include/global.glsl"
+#include "/include/misc/clrwl_compat.glsl"
 
 layout(location = 0) out vec4 damage_overlay;
 
@@ -45,12 +46,12 @@ void main() {
     damage_overlay = texture(gtexture, uv, lod_bias);
 
 #if defined COLORWHEEL
-	vec2 lmcoord;
-	float ao;
-	vec4 overlayColor;
+        vec2 lmcoord;
+        float ao;
+        vec4 overlayColor;
 
-	clrwl_computeFragment(damage_overlay, damage_overlay, lmcoord, ao, overlayColor);
-	damage_overlay.rgb = mix(damage_overlay.rgb, overlayColor.rgb, overlayColor.a);
+        clrwl_computeFragment(damage_overlay, damage_overlay, lmcoord, ao, overlayColor);
+        damage_overlay.rgb = mix(damage_overlay.rgb, overlayColor.rgb, overlayColor.a);
 #endif
 
     if (damage_overlay.a < 0.1) {
