@@ -23,6 +23,8 @@ screen.moon_phase_influence            = Moon Phase Influence
 screen.colored_lights                  = Colored Lights Settings
 screen.colored_lighting                = Colored Lighting
 screen.handheld_lighting               = Handheld Lighting
+screen.main_lighting                   = Main Lighting
+screen.indirect_lighting               = Indirect Lighting
 screen.ibl                              = Image Based Lighting
 screen.rp_settings                     = Resource Pack Settings
 screen.reflections                     = Reflections
@@ -249,6 +251,15 @@ option.MOON_B                          = §9▍ §fBlue
 option.MOON_I                          = Moonlight Intensity
 option.SKYLIGHT_I                      = Skylight Intensity
 option.BOUNCED_LIGHT_I                 = Bounced Sunlight Intensity
+option.BOUNCED_LIGHT                   = Screen-Space Global Illumination
+option.BOUNCED_LIGHT.comment           = §7Physically grounded Lambertian sunlight bounce via screen-space raymarching. Replaces the constant fill-light hack with real color bleeding, directionality, and multi-bounce approximation through temporal feedback.
+option.BOUNCED_LIGHT_RAYS              = SSGI Ray Count
+option.BOUNCED_LIGHT_RAYS.comment      = §7Diffuse rays traced per pixel. More rays = less noise and better convergence. Profile default: low=1, medium=2, high=4, ultra=8.
+option.BOUNCED_LIGHT_STEPS             = SSGI Ray Steps
+option.BOUNCED_LIGHT_STEPS.comment     = §7Hi-Z raymarch steps per ray. More steps = farther hits and fewer misses. Profile default: low=8, medium=12, high=16, ultra=24.
+option.BOUNCED_LIGHT_RADIUS            = SSGI Ray Radius
+option.BOUNCED_LIGHT_RADIUS.comment    = §7Maximum ray travel distance in view-space units (blocks). Larger radius catches more bounces but increases screen-edge misses. Profile default: low=8, medium=16, high=24, ultra=32.
+suffix.BOUNCED_LIGHT_RADIUS            =  blocks
 option.CAVE_LIGHTING_I                 = Cave Brightness
 option.CAVE_LIGHTING_FALLOFF           = Cave Lighting Falloff
 option.CAVE_LIGHTING_FALLOFF.comment   = Controls how quickly cave lighting fades out as skylight increases. Higher values restrict cave lighting to darker areas
@@ -271,14 +282,6 @@ option.BLOCKLIGHT_R                    = §c▍ §fRed
 option.BLOCKLIGHT_G                    = §a▍ §fGreen
 option.BLOCKLIGHT_B                    = §9▍ §fBlue
 option.BLOCKLIGHT_I                    = Blocklight Intensity
-option.BLOCKLIGHT_BIOME_COLOR          = Biome-Aware Blocklight
-option.BLOCKLIGHT_BIOME_INTENSITY      = Blocklight Biome Tint Strength
-
-value.BLOCKLIGHT_BIOME_COLOR.true  = Enabled
-value.BLOCKLIGHT_BIOME_COLOR.false = Disabled
-
-comment.BLOCKLIGHT_BIOME_COLOR = §7Tints torches, lanterns, and other blocklight sources toward the current biome's hue (e.g. cooler in taiga/icy biomes, warmer in desert/mesa), using the biome fog color as reference. Brightness is preserved.
-comment.BLOCKLIGHT_BIOME_INTENSITY = §7How strongly the biome hue tints blocklight. 0 = no tint (vanilla blocklight color), 1 = fully biome-tinted.
 
 option.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION                 = Vanilla Lightmap Contribution
 option.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF         = Contribution Falloff

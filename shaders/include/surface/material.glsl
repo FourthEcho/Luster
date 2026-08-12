@@ -130,11 +130,13 @@ void decode_specular_map(vec4 specular_map, inout Material material) {
 void decode_specular_map(
     vec4 specular_map,
     inout Material material,
-    out bool parallax_shadow
+    out float parallax_shadow
 ) {
 #if defined POM && defined POM_SHADOW
-    // Specular map alpha >= 0.5 => parallax shadow
-    parallax_shadow = specular_map.a >= 0.5;
+    // Specular map alpha >= 0.5 => parallax shadow (binary in this path;
+    // the full-precision soft shadow is preserved through the
+    // NORMAL_MAPPING-only path which stores directly in gbuffer_data_1.z).
+    parallax_shadow = specular_map.a >= 0.5 ? 1.0 : 0.0;
     specular_map.a = fract(specular_map.a * 2.0);
 #endif
 

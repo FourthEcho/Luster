@@ -11,6 +11,9 @@
 #ifdef IBL
 #include "/include/lighting/ibl.glsl"
 #endif
+#ifdef BOUNCED_LIGHT
+#include "/include/lighting/ssgi.glsl"
+#endif
 #endif
 #ifdef COLORED_LIGHTS
 #include "/include/lighting/lpv/blocklight.glsl"
@@ -240,8 +243,22 @@ vec3 get_diffuse_lighting(
 
     vec3 bounced = vec3(0.0);
     if (DO_BOUNCED_LIGHTING) {
+#if defined WORLD_OVERWORLD && defined PROGRAM_DEFERRED4 && defined BOUNCED_LIGHT
+        // SSGI: physically grounded Lambertian bounce via screen-space
+        // raymarching. Single system — sample count scales with profile.
+        bounced = get_ssgi_bounce(
+            scene_pos,
+            normal,
+            bent_normal,
+            shadows,
+            ao,
+            light_levels
+        );
+#else
+        // Legacy fallback: constant fill-light for non-overworld or non-deferred4 paths
         bounced = 0.033 * (1.0 - shadows) * (1.0 - 0.1 * max0(normal.y))
             * pow1d5(ao + eps) * pow4(light_levels.y) * BOUNCED_LIGHT_I;
+#endif
     }
 
 #ifdef SUB_SURFACE_SCATTERING

@@ -424,7 +424,7 @@ void main() {
         );
 
         vec3 normal = flat_normal;
-        bool parallax_shadow = false;
+        float parallax_shadow = 0.0;
 
 #ifdef LOD_MOD_ACTIVE
         if (!is_lod) {
@@ -441,7 +441,7 @@ void main() {
             );
             decode_specular_map(specular_map, material, parallax_shadow);
 #elif defined NORMAL_MAPPING
-        parallax_shadow = gbuffer_data_1.z >= 0.5;
+        parallax_shadow = gbuffer_data_1.z;
 #endif
 
 #ifdef LOD_MOD_ACTIVE
@@ -617,7 +617,7 @@ void main() {
             // Apply parallax shadow
 #if defined POM && defined POM_SHADOW \
     && (defined SPECULAR_MAPPING || defined NORMAL_MAPPING)
-            shadows *= float(!parallax_shadow);
+            shadows *= (1.0 - parallax_shadow);
 #endif
         }
 #else

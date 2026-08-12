@@ -242,7 +242,7 @@ void main() {
     }
 #endif
 
-    bool parallax_shadow = false;
+    float parallax_shadow = 0.0;
     float dither = interleaved_gradient_noise(gl_FragCoord.xy, frameCounter);
 
 #if defined PROGRAM_GBUFFERS_TERRAIN && defined POM
@@ -280,12 +280,12 @@ void main() {
                 dither
             );
         } else {
-            parallax_shadow = false;
+            parallax_shadow = 0.0;
         }
 #endif
     } else {
         parallax_uv = uv;
-        parallax_shadow = false;
+        parallax_shadow = 0.0;
     }
 #endif
 
