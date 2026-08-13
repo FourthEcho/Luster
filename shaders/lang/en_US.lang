@@ -822,6 +822,9 @@ value.AUTO_EXPOSURE.AUTO_EXPOSURE_OFF       = Off
 
 # Misc settings
 
+option.COLOR_OUTPUT_MODE               = Color Output
+option.COLOR_OUTPUT_MODE.comment       = Color primaries AND transfer curve baked into the final image before it leaves the shader. sRGB is the safe default for any display. Rec.2020 widens the working gamut toward the output for HDR-capable/wide-gamut monitors (uses the sRGB curve). Display P3 targets Apple's native wide-gamut displays (all modern MacBook/iMac/Studio Display panels) using the sRGB curve. DCI-P3 uses the same P3 primaries but the theatrical 2.6 gamma curve instead - only correct if your display/pipeline expects that curve, otherwise looks too dark/contrasty. Adobe RGB targets pro photo/print-calibrated Mac displays with its own ~2.2 gamma curve. Only looks correct on a display that actually supports the selected space - if colors look oversaturated, too dark, or off, switch back to sRGB.
+
 option.DEBUG_VIEW                      = Debug View
 option.DEBUG_SAMPLER                   = Debug Sampler
 option.WHITE_WORLD                     = White World
@@ -839,6 +842,12 @@ option.CUSTOM_SKY_BRIGHTNESS.comment   = Adjust custom sky brightness
 option.ENCHANTMENT_GLINT_BRIGHTNESS    = Enchantment Glint Brightness
 option.DITHERED_TRANSLUCENCY_FALLBACK  = Dithered Translucency Fallback 
 comment.DITHERED_TRANSLUCENCY_FALLBACK = Uses dithered translucency to improve the look of objects that should be translucent but can't when separateEntityDraws is enabled. 
+
+value.COLOR_OUTPUT_MODE.COLOR_OUTPUT_SRGB       = sRGB
+value.COLOR_OUTPUT_MODE.COLOR_OUTPUT_REC2020    = Rec.2020
+value.COLOR_OUTPUT_MODE.COLOR_OUTPUT_DISPLAY_P3 = Display P3 (Mac)
+value.COLOR_OUTPUT_MODE.COLOR_OUTPUT_DCI_P3     = DCI-P3
+value.COLOR_OUTPUT_MODE.COLOR_OUTPUT_ADOBE_RGB  = Adobe RGB
 
 value.DEBUG_VIEW.DEBUG_VIEW_NONE       = OFF
 value.DEBUG_VIEW.DEBUG_VIEW_SAMPLER    = Sampler

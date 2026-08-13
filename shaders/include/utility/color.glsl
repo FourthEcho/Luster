@@ -17,7 +17,6 @@ const vec3 primary_wavelengths_ap1 = vec3(630.0, 530.0, 465.0);
 // -----------------------------------
 
 #define display_to_working_color rec709_to_rec2020
-#define working_to_display_color rec2020_to_rec709
 #define rec709_to_working_color rec709_to_rec2020
 
 // Helper macro to convert sRGB colors to working space
@@ -74,12 +73,113 @@ const mat3 rec2020_to_xyz = mat3(
 const mat3 rec709_to_rec2020 = rec709_to_xyz * xyz_to_rec2020;
 const mat3 rec2020_to_rec709 = rec2020_to_xyz * xyz_to_rec709;
 
-// ------------------------------
-//   Transfer functions (gamma)
-// ------------------------------
+// Display P3 (D65 white point, P3 primaries — Apple's native wide-gamut space)
+const mat3 xyz_to_displayp3 = mat3(
+    2.4934969,
+    -0.9313836,
+    -0.4027108,
+    -0.8294890,
+    1.7626641,
+    0.0236247,
+    0.0358458,
+    -0.0761724,
+    0.9568845
+);
+const mat3 displayp3_to_xyz = mat3(
+    0.4865709,
+    0.2656677,
+    0.1982173,
+    0.2289746,
+    0.6917385,
+    0.0792869,
+    0.0000000,
+    0.0451134,
+    1.0439444
+);
 
-#define display_eotf srgb_eotf
-#define display_eotf_inv srgb_eotf_inv
+const mat3 rec2020_to_displayp3 = rec2020_to_xyz * xyz_to_displayp3;
+const mat3 displayp3_to_rec2020 = displayp3_to_xyz * xyz_to_rec2020;
+const mat3 rec709_to_displayp3 = rec709_to_xyz * xyz_to_displayp3;
+const mat3 displayp3_to_rec709 = displayp3_to_xyz * xyz_to_rec709;
+
+// Adobe RGB (1998) (D65 white point, wider red/green than sRGB, common on
+// pro Mac displays and used in photo/print workflows)
+const mat3 xyz_to_adobergb = mat3(
+    2.0413690,
+    -0.5649464,
+    -0.3446944,
+    -0.9692660,
+    1.8760108,
+    0.0415560,
+    0.0134474,
+    -0.1183897,
+    1.0154096
+);
+const mat3 adobergb_to_xyz = mat3(
+    0.5767309,
+    0.1855540,
+    0.1881852,
+    0.2973769,
+    0.6273491,
+    0.0752741,
+    0.0270343,
+    0.0706872,
+    0.9911085
+);
+
+const mat3 rec2020_to_adobergb = rec2020_to_xyz * xyz_to_adobergb;
+const mat3 adobergb_to_rec2020 = adobergb_to_xyz * xyz_to_rec2020;
+
+// -----------------------------------
+//   Final display output color space
+// -----------------------------------
+// Selects BOTH the primaries matrix AND the transfer function (gamma
+// curve) applied to working-space (Rec.2020) color right before output in
+// program/final.fsh (via c19_color_grading.fsh for primaries). This is
+// what makes the output actually native per mode instead of just
+// reshuffled primaries with the wrong curve slapped on: sRGB and Display
+// P3 legitimately share the sRGB OETF, but DCI-P3 (2.6 pure power gamma)
+// and Adobe RGB (~2.2 pure power gamma) do not, so those get their own
+// transfer function here rather than being forced through srgb_eotf.
+//
+// Driven by COLOR_OUTPUT_MODE (settings.glsl), which is itself defaulted
+// per-profile in shaders.properties (low/medium = sRGB, high/ultra =
+// Rec.2020, mac = Display P3).
+//
+// IMPORTANT: shaders.properties sets `supportsColorCorrection = true`,
+// which tells Iris NOT to reinterpret/re-convert our output against its
+// own currentColorSpace video setting. Without that flag Iris assumes
+// every shaderpack outputs sRGB and silently re-maps colors on top of
+// whatever we do here, which is the "Iris just changes some colors"
+// double-conversion problem. With it, whatever we pick here is exactly
+// what hits the actual GL drawable pixels.
+
+// COLOR_OUTPUT_SRGB / COLOR_OUTPUT_REC2020 / COLOR_OUTPUT_DISPLAY_P3 /
+// COLOR_OUTPUT_DCI_P3 / COLOR_OUTPUT_ADOBE_RGB / COLOR_OUTPUT_MODE are
+// defined in settings.glsl (misc GUI screen).
+#if COLOR_OUTPUT_MODE == COLOR_OUTPUT_REC2020
+    const mat3 working_to_display_color = mat3(1.0); // working space already Rec.2020
+    #define display_eotf srgb_eotf
+    #define display_eotf_inv srgb_eotf_inv
+#elif COLOR_OUTPUT_MODE == COLOR_OUTPUT_DISPLAY_P3
+    #define working_to_display_color rec2020_to_displayp3
+    #define display_eotf srgb_eotf
+    #define display_eotf_inv srgb_eotf_inv
+#elif COLOR_OUTPUT_MODE == COLOR_OUTPUT_DCI_P3
+    // Same P3 primaries as Display P3; the real-world difference is the
+    // theatrical 2.6 gamma curve instead of the sRGB OETF.
+    #define working_to_display_color rec2020_to_displayp3
+    #define display_eotf dci_p3_eotf
+    #define display_eotf_inv dci_p3_eotf_inv
+#elif COLOR_OUTPUT_MODE == COLOR_OUTPUT_ADOBE_RGB
+    #define working_to_display_color rec2020_to_adobergb
+    #define display_eotf adobe_rgb_eotf
+    #define display_eotf_inv adobe_rgb_eotf_inv
+#else
+    #define working_to_display_color rec2020_to_rec709
+    #define display_eotf srgb_eotf
+    #define display_eotf_inv srgb_eotf_inv
+#endif
 
 vec3 srgb_eotf(vec3 linear) { // linear -> sRGB
     return 1.14374
@@ -91,6 +191,24 @@ vec3 srgb_eotf_inv(vec3 srgb) { // sRGB -> linear
         * (srgb * (srgb * 0.305306011 + 0.682171111)
            + 0.012522878); // https://chilliant.blogspot.com/2012/08/srgb-approximations-for-hlsl.html
 }
+
+// Pure power-law gamma, used where a display space's real transfer curve
+// is a plain gamma rather than the sRGB piecewise/near-power curve.
+vec3 gamma_eotf(vec3 linear, float gamma) { // linear -> gamma-encoded
+    return pow(max(linear, vec3(0.0)), vec3(1.0 / gamma));
+}
+
+vec3 gamma_eotf_inv(vec3 encoded, float gamma) { // gamma-encoded -> linear
+    return pow(max(encoded, vec3(0.0)), vec3(gamma));
+}
+
+// DCI-P3 theatrical gamma (SMPTE RP 431-2)
+#define dci_p3_eotf(x) gamma_eotf(x, 2.6)
+#define dci_p3_eotf_inv(x) gamma_eotf_inv(x, 2.6)
+
+// Adobe RGB (1998) gamma (spec value 2.19921875, i.e. 563/256)
+#define adobe_rgb_eotf(x) gamma_eotf(x, 2.19921875)
+#define adobe_rgb_eotf_inv(x) gamma_eotf_inv(x, 2.19921875)
 
 // -------------------------------------------------
 //   Transformations between color representations

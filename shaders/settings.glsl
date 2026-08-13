@@ -643,6 +643,13 @@ const float wetnessHalflife         = 70.0;
 
   #define DEBUG_VIEW DEBUG_VIEW_NONE // [DEBUG_VIEW_NONE DEBUG_VIEW_SAMPLER DEBUG_VIEW_HISTOGRAM DEBUG_VIEW_WEATHER]
   #define DEBUG_SAMPLER colortex1 // [colortex1 colortex2 colortex3 colortex4 colortex5 colortex6 colortex7 colortex8 colortex9 colortex10 colortex11 colortex12 colortex13 colortex14 colortex15 depthtex0 depthtex1 depthtex2 shadowtex0 shadowtex1 shadowcolor0 shadowcolor1]
+  #define COLOR_OUTPUT_SRGB 0
+  #define COLOR_OUTPUT_REC2020 1
+  #define COLOR_OUTPUT_DISPLAY_P3 2
+  #define COLOR_OUTPUT_DCI_P3 3
+  #define COLOR_OUTPUT_ADOBE_RGB 4
+
+  #define COLOR_OUTPUT_MODE COLOR_OUTPUT_SRGB // [COLOR_OUTPUT_SRGB COLOR_OUTPUT_REC2020 COLOR_OUTPUT_DISPLAY_P3 COLOR_OUTPUT_DCI_P3 COLOR_OUTPUT_ADOBE_RGB]
 //#define WHITE_WORLD
 //#define TONEMAP_COMPARISON
   #define tonemap_left tonemap_lottes // [tonemap_aces_fit tonemap_aces_full tonemap_lottes tonemap_hejl_burgess tonemap_tech tonemap_uncharted_2 tonemap_ozius tonemap_reinhard tonemap_reinhard_jodie]
