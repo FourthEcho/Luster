@@ -251,6 +251,10 @@ void main() {
         adjusted_light_levels
     );
 
+    // Wet porosity: porous DH terrain gets smoother when wet, matching the
+    // behavior of the close-range path in d4_deferred_shading.fsh.
+    apply_wet_porosity_roughness(material, wetness);
+
     // Shadows
 
 #ifndef NO_NORMAL

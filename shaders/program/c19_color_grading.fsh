@@ -80,6 +80,32 @@ vec3 grade_input(vec3 rgb) {
     float lum = dot(rgb, luminance_weights);
     rgb = max0(mix(vec3(lum), rgb, saturation));
 
+    // Vibrance — perceptual chroma boost.
+    // Unlike simple saturation, vibrance boosts chroma more strongly for
+    // mid- and low-saturation colors while leaving already-saturated colors
+    // (and skin tones) relatively untouched. Implemented in HSL space where
+    // the existing orange/teal/green grading also runs, so the visual style
+    // is consistent.
+    // GRADE_VIBRANT in [-1, 1]: negative = desaturate, positive = boost chroma.
+#if GRADE_VIBRANT != 0.0
+    {
+        vec3 hsl = rgb_to_hsl(rgb);
+
+        // Vibrance scaling: low-sat colors get a bigger boost than high-sat.
+        // This is the classic Lightroom-style "vibrance" curve.
+        float chroma = hsl.y;
+        float vibrance_scale = 1.0 + GRADE_VIBRANT * (1.0 - chroma);
+
+        // Protect very dark colors (would otherwise blow out chroma on
+        // near-blacks) by fading the boost as lightness -> 0.
+        float luma_guard = smoothstep(0.0, 0.15, hsl.z);
+        vibrance_scale = mix(1.0, vibrance_scale, luma_guard);
+
+        hsl.y = clamp01(chroma * vibrance_scale);
+        rgb = hsl_to_rgb(hsl);
+    }
+#endif
+
     // White balance
 #if GRADE_WHITE_BALANCE != 6500
     rgb = rgb * rec2020_to_xyz;
@@ -123,6 +149,13 @@ vec3 grade_output(vec3 rgb) {
     rgb = hsl_to_rgb(hsl);
 
     rgb = gain(rgb, 1.05);
+
+    // Gamma — applied post-tonemap on linear rec.709 output.
+    // pow(rgb, 1/gamma): gamma < 1 brightens midtones, gamma > 1 darkens them.
+    // Skipped at gamma == 1.0 to avoid the pow() cost on the hot path.
+#if GRADE_GAMMA != 1.0
+    rgb = pow(clamp01(rgb), vec3(1.0 / GRADE_GAMMA));
+#endif
 
     return sqr(rgb);
 }

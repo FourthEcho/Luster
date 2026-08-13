@@ -691,7 +691,7 @@ void main() {
             fragment_color.a = mix(
                 fragment_color.a,
                 1.0,
-                fresnel_dielectric_n(NoV, air_n / water_n).x
+                fresnel_dielectric_n(NoV, air_n / water_n).x * SNELLS_WINDOW_INTENSITY
             );
         }
 #endif

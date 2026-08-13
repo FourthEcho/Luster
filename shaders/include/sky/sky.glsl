@@ -353,7 +353,9 @@ vec3 draw_sky(vec3 ray_dir) {
     // Sun
 
 #ifdef END_SUN_EFFECT
-    sky += draw_sun(ray_dir);
+    // END_SUN_EFFECT_INTENSITY multiplies the disk+flare contribution so users
+    // can dial the end-sun look down without disabling it entirely.
+    sky += draw_sun(ray_dir) * END_SUN_EFFECT_INTENSITY;
 #endif
 
     // Stars

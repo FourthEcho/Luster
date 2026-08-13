@@ -484,6 +484,12 @@ void main() {
 #endif
 #endif
 
+        // Wet porosity: porous surfaces get smoother as they absorb rainwater.
+        // Applied AFTER rain-puddle code so puddle surfaces (which already
+        // get a smooth mirror finish) are unaffected; this only smooths the
+        // non-puddle regions of porous materials.
+        apply_wet_porosity_roughness(material, wetness);
+
         // Upscale ambient occlusion
 
         float lin_z = screen_to_view_space_depth(

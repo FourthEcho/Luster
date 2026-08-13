@@ -17,9 +17,11 @@ const float snow_fog_start = 0.5;
 const float snow_fog_density = 1.0;
 const vec3 snow_fog_color = from_srgb(vec3(0.957, 0.988, 0.988)) * 0.3;
 
+// CAVE_FOG_INTENSITY scales both the density and the brightness of the
+// cave fog. Default 1.0 reproduces the original look.
 const float cave_fog_start = 1.0;
-const float cave_fog_density = 0.0033;
-const vec3 cave_fog_color = vec3(0.033);
+const float cave_fog_density = 0.0033 * CAVE_FOG_INTENSITY;
+const vec3 cave_fog_color = vec3(0.033) * CAVE_FOG_INTENSITY;
 
 const float nether_fog_start = 0.0;
 const float nether_fog_density = 0.01 * NETHER_FOG_INTENSITY;
@@ -57,11 +59,13 @@ float spherical_fog(
 float border_fog(vec3 scene_pos, vec3 world_dir) {
 #ifndef LOD_MOD_ACTIVE
     float fog = cubic_length(scene_pos.xz) / far;
-    fog = exp2(-8.0 * pow8(fog));
+    // BORDER_FOG_INTENSITY scales the falloff exponent: higher = tighter
+    // fog ring at the view-distance edge, lower = softer/farther fade.
+    fog = exp2(-8.0 * BORDER_FOG_INTENSITY * pow8(fog));
     float vertical_cutoff_distance = far;
 #else
     float fog = length(scene_pos.xz) / float(lod_render_distance);
-    fog = exp2(-2.4 * sqr(fog));
+    fog = exp2(-2.4 * BORDER_FOG_INTENSITY * sqr(fog));
 #endif
 
 #if defined WORLD_OVERWORLD || defined WORLD_END

@@ -861,4 +861,30 @@ Material material_from(
     return material;
 }
 
+// Wet-porosity roughness reduction.
+//
+// Porous materials (sand, dirt, wood, etc.) absorb water as it rains. As
+// pores fill, the surface micro-geometry smooths out — wet sand gets
+// glossier, wet dirt reflects more like a mirror in the right viewing
+// angle, etc.
+//
+// The relationship the user requested:
+//
+//     roughness *= (1 - 0.85 * wetness * porosity)
+//
+// clamped to a 0.05 minimum so we never produce a perfect mirror by
+// accident (mirror surfaces need their own material path).
+//
+// `wetness` is the vanilla smoothed rain-wetness uniform (already in scope
+// everywhere `Material` is used). When wetness is 0 the multiplier is 1.0
+// (no-op), so it's safe to call unconditionally.
+void apply_wet_porosity_roughness(inout Material material, float wetness) {
+#if defined WORLD_OVERWORLD && defined POROSITY
+    if (material.porosity > eps && wetness > eps) {
+        float mul = 1.0 - 0.85 * wetness * material.porosity;
+        material.roughness = max(0.05, material.roughness * mul);
+    }
+#endif
+}
+
 #endif // INCLUDE_MISC_MATERIAL

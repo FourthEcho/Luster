@@ -6,6 +6,31 @@
 
 uniform float day_factor;
 
+// Daily random wind direction.
+//
+// Picks one of 8 compass directions per Minecraft day, derived from a hash
+// of `worldDay`. The direction is stable across a single day so rain and
+// foliage all lean the same way, then rotates to a new direction at
+// midnight. Snow uses the same particle shader as rain so it benefits
+// automatically.
+//
+// Driven by the `weather_wind_angle` uniform declared in shaders.properties:
+//
+//     uniform.float.weather_wind_angle = (worldDay % 8) * 0.7853981633974483
+//
+// (0.785398... = 45 degrees in radians, so 8 steps cover the full circle.)
+uniform float weather_wind_angle;
+
+// Returns the daily wind direction as a unit vec2 in world XZ.
+vec2 weather_wind_direction() {
+    return vec2(cos(weather_wind_angle), sin(weather_wind_angle));
+}
+
+// Returns the daily wind direction angle in radians [0, 2π).
+float weather_wind_direction_angle() {
+    return weather_wind_angle;
+}
+
 struct Weather {
     float temperature; // [0, 1]
     float humidity; // [0, 1]

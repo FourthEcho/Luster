@@ -131,7 +131,21 @@ vec3 get_specular_highlight(
     float d = distribution_ggx(NoH_squared, alpha_squared);
     float v = v2_smith_ggx(max(NoL, 1e-2), max(NoV, 1e-2), alpha_squared);
 
-    return min((NoL * d * v) * fresnel * albedo_tint, vec3(specular_max_value))
+    // Single-scatter GGX specular.
+    vec3 single_scatter = (NoL * d * v) * fresnel * albedo_tint;
+
+    // Kulla-Conty multi-bounce energy compensation.
+    // Adds back the energy lost to inter-microfacet bounces that the single-
+    // scatter BRDF doesn't model. Most visible at high roughness, where GGX
+    // otherwise darkens surfaces noticeably. See bsdf.glsl for the math.
+    vec3 multi_scatter = kulla_conty_residual(
+        max(NoL, 0.0),
+        max(NoV, 1e-2),
+        material.roughness,
+        fresnel
+    ) * albedo_tint;
+
+    return min(single_scatter + multi_scatter, vec3(specular_max_value))
         * moon_phase_attenuation;
 }
 
