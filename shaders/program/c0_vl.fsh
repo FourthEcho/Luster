@@ -123,6 +123,10 @@ uniform sampler3D light_sampler_b;
 #include "/include/fog/lpv_fog.glsl"
 #endif
 
+#if defined IBL && defined WORLD_OVERWORLD
+#include "/include/lighting/ibl.glsl"
+#endif
+
 void main() {
     ivec2 fog_texel = ivec2(gl_FragCoord.xy);
     ivec2 view_texel
@@ -177,6 +181,23 @@ void main() {
     // Volumetric lighting
 
 #if defined VL
+    // Compute the ambient color used by the air-fog raymarch.  When IBL is
+    // enabled (overworld only), evaluate a per-pixel spherical-Fibonacci sky
+    // irradiance integral along the view direction — this captures
+    // high-frequency sky variation (sun disk, horizon glow, cloud shadows)
+    // that the previous flat texelFetch lookup could not.  When IBL is off,
+    // fall back to the flat `ambient_color` from the vertex shader (row 1 of
+    // colortex4's lighting palette).
+#if defined WORLD_OVERWORLD
+    vec3 vl_ambient;
+#if defined IBL
+    vec3 view_dir_world = normalize(world_end_pos - world_start_pos);
+    vl_ambient = IBL_INTENSITY * get_ibl_irradiance_vl(view_dir_world);
+#else
+    vl_ambient = ambient_color;
+#endif
+#endif
+
     switch (isEyeInWater) {
         case 0:
 #if defined WORLD_OVERWORLD
@@ -185,7 +206,8 @@ void main() {
                 world_end_pos,
                 depth0 == 1.0,
                 skylight,
-                dither
+                dither,
+                vl_ambient
             );
 #elif defined WORLD_NETHER
             mat2x3 fog = mat2x3(vec3(0.0), vec3(1.0));

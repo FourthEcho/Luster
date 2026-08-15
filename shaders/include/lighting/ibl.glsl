@@ -307,6 +307,69 @@ vec3 get_ibl_irradiance(vec3 bent_normal, float ao) {
     return irradiance;
 }
 
+// ----------------------------------------------------------------------------
+//  Defensive fallback for the VL-specific sample count.  This is normally
+//  set in settings.glsl and overridden per-profile in shaders.properties,
+//  but we provide a sane default so the module compiles cleanly even if
+//  the define is missing.
+// ----------------------------------------------------------------------------
+#ifndef IBL_VL_SAMPLES
+  #define IBL_VL_SAMPLES 4
+#endif
+#if IBL_VL_SAMPLES < 1
+  #undef IBL_VL_SAMPLES
+  #define IBL_VL_SAMPLES 1
+#endif
+const int ibl_vl_sample_count = IBL_VL_SAMPLES;
+
+// ============================================================================
+//  Volumetric Fog Ambient — per-pixel IBL sky irradiance for VL
+// ----------------------------------------------------------------------------
+//  Same spherical-Fibonacci cosine-weighted hemisphere sampler as
+//  get_ibl_irradiance(), but with a separate (smaller) sample count and a
+//  decorrelated temporal rotation seed.  Uses the view direction as the
+//  hemisphere axis so horizon-facing fog picks up horizon-band sky color
+//  (sunset glow) and upward-facing fog picks up zenith sky color —
+//  directional ambient that the previous flat `texelFetch(colortex4, ivec2(191,1))`
+//  lookup cannot represent.
+//
+//  VL tolerates far fewer samples than surface IBL because:
+//    * VL runs at VL_RENDER_SCALE (default 0.50) — half-res
+//    * smooth_filter() upsampling in c1_blend_layers.fsh low-passes the result
+//    * TAA in c4_taa_exposure.fsh converges the residual blue-noise error
+//
+//  Returns: irradiance E(axis) = (π/N) · Σ L_i(ω_i), ready to be used as
+//           the `ambient_color` term in raymarch_air_fog().
+// ============================================================================
+vec3 get_ibl_irradiance_vl(vec3 axis) {
+    if (dot(axis, axis) < 1e-8) {
+        axis = vec3(0.0, 1.0, 0.0);
+    }
+    axis = normalize(axis);
+
+    vec3 t, b;
+    ibl_make_ortho_basis(axis, t, b);
+
+    // Decorrelate from surface IBL by offsetting the IGN seed by a prime
+    // constant.  Same ~20-second rotation period as the surface path so TAA
+    // converges at the same rate.
+    float rotation = ibl_tau * interleaved_gradient_noise(
+        ivec2(gl_FragCoord.xy) + 17,
+        frameCounter & 0x3f
+    );
+
+    vec3 irradiance = vec3(0.0);
+
+    for (int i = 0; i < ibl_vl_sample_count; ++i) {
+        vec3 local = ibl_fibonacci_hemisphere(i, ibl_vl_sample_count);
+        vec3 dir   = ibl_rotate_around_n(local, t, b, axis, rotation);
+        irradiance += ibl_sample_sky_bilinear(dir);
+    }
+
+    irradiance *= pi * rcp(float(ibl_vl_sample_count));
+    return irradiance;
+}
+
 // ============================================================================
 //  Specular IBL — VNDF importance-sampled GGX against the sky map
 // ----------------------------------------------------------------------------

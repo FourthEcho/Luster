@@ -38,7 +38,8 @@ mat2x3 raymarch_air_fog(
     vec3 world_end_pos,
     bool sky,
     float skylight,
-    float dither
+    float dither,
+    vec3 ambient_color
 ) {
     vec3 world_dir = world_end_pos - world_start_pos;
 
@@ -200,9 +201,9 @@ mat2x3 raymarch_air_fog(
     float scatter_amount = 1.0;
     float anisotropy = 1.0;
 
-#if defined PROGRAM_DEFERRED0
-    vec3 ambient_color = ambient_color_fog;
-#endif
+    // ambient_color now passed as a function parameter — supports both the
+    // legacy flat texelFetch lookup (when IBL is off) and per-pixel IBL
+    // irradiance (when IBL is on, computed in c0_vl.fsh).
 
     scattering += 2.0 * light_sky * vec2(isotropic_phase) * ambient_color;
 

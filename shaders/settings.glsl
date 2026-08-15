@@ -104,6 +104,11 @@ const float wetnessHalflife         = 70.0;
   #define IBL_INTENSITY 1.00 // [0.00 0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.45 0.50 0.55 0.60 0.65 0.70 0.75 0.80 0.85 0.90 0.95 1.00 1.05 1.10 1.15 1.20 1.25 1.30 1.35 1.40 1.45 1.50 1.55 1.60 1.65 1.70 1.75 1.80 1.85 1.90 1.95 2.00]
   #define IBL_SPECULAR_SAMPLES 8 // [1 2 4 6 8 12 16 24 32]
   #define IBL_SPECULAR_INTENSITY 1.00 // [0.00 0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.45 0.50 0.55 0.60 0.65 0.70 0.75 0.80 0.85 0.90 0.95 1.00 1.05 1.10 1.15 1.20 1.25 1.30 1.35 1.40 1.45 1.50 1.55 1.60 1.65 1.70 1.75 1.80 1.85 1.90 1.95 2.00]
+  // Hidden per-profile tuning — IBL sample count for volumetric fog ambient
+  // color.  Not exposed as a UI slider; overridden per-profile in
+  // shaders.properties.  VL tolerates far fewer samples than surface IBL
+  // because smooth_filter() upsampling and TAA both low-pass the result.
+  #define IBL_VL_SAMPLES 4
 
   #define SHADING_STRENGTH 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.40 1.50 1.60 1.70 1.80 1.90 2.00]
   #define LIGHTNING_FLASH
@@ -382,7 +387,7 @@ const float wetnessHalflife         = 70.0;
   #define BORDER_FOG_HIDE_SUNSET_GRADIENT
   #define BLOOMY_RAIN
 
-  #define VL_RENDER_SCALE 0.75 // [0.50 0.51 0.52 0.53 0.54 0.55 0.56 0.57 0.58 0.59 0.60 0.61 0.62 0.63 0.64 0.65 0.66 0.67 0.68 0.69 0.70 0.71 0.72 0.73 0.74 0.75 0.76 0.77 0.78 0.79 0.80 0.81 0.82 0.83 0.84 0.85 0.86 0.87 0.88 0.89 0.90 0.91 0.92 0.93 0.94 0.95 0.96 0.97 0.98 0.99 1.00]
+  #define VL_RENDER_SCALE 0.50 // [0.50 0.51 0.52 0.53 0.54 0.55 0.56 0.57 0.58 0.59 0.60 0.61 0.62 0.63 0.64 0.65 0.66 0.67 0.68 0.69 0.70 0.71 0.72 0.73 0.74 0.75 0.76 0.77 0.78 0.79 0.80 0.81 0.82 0.83 0.84 0.85 0.86 0.87 0.88 0.89 0.90 0.91 0.92 0.93 0.94 0.95 0.96 0.97 0.98 0.99 1.00]
 
   #define AIR_FOG_CLOUDY_NOISE                   
 //#define AIR_FOG_COLORED_LIGHT_SHAFTS
@@ -649,7 +654,7 @@ const float wetnessHalflife         = 70.0;
   #define COLOR_OUTPUT_DCI_P3 3
   #define COLOR_OUTPUT_ADOBE_RGB 4
 
-  #define COLOR_OUTPUT_MODE COLOR_OUTPUT_SRGB // [COLOR_OUTPUT_SRGB COLOR_OUTPUT_REC2020 COLOR_OUTPUT_DISPLAY_P3 COLOR_OUTPUT_DCI_P3 COLOR_OUTPUT_ADOBE_RGB]
+  #define COLOR_OUTPUT_MODE COLOR_OUTPUT_DISPLAY_P3 // [COLOR_OUTPUT_SRGB COLOR_OUTPUT_REC2020 COLOR_OUTPUT_DISPLAY_P3 COLOR_OUTPUT_DCI_P3 COLOR_OUTPUT_ADOBE_RGB]
 //#define WHITE_WORLD
 //#define TONEMAP_COMPARISON
   #define tonemap_left tonemap_lottes // [tonemap_aces_fit tonemap_aces_full tonemap_lottes tonemap_hejl_burgess tonemap_tech tonemap_uncharted_2 tonemap_ozius tonemap_reinhard tonemap_reinhard_jodie]
