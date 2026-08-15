@@ -53,6 +53,22 @@ float get_cloud_shadows(sampler2D cloud_shadow_map, vec3 scene_pos) {
         * clamp01(1.0 - altitude_fraction);
 
     float cloud_shadow = bicubic_filter(cloud_shadow_map, cloud_shadow_pos).x;
+#ifdef CLOUD_SHADOW_FILTER_SAMPLES
+    vec2 texel = 1.0 / vec2(textureSize(cloud_shadow_map, 0));
+    float sun_soft = mix(1.75, 0.45, clamp01(abs(light_dir.y)));
+    float radius = CLOUD_SHADOW_SOFTNESS * sun_soft;
+    const vec2 dirs[8] = vec2[8](
+        vec2(1.0,0.0), vec2(-1.0,0.0), vec2(0.0,1.0), vec2(0.0,-1.0),
+        vec2(0.7071,0.7071), vec2(-0.7071,0.7071), vec2(0.7071,-0.7071), vec2(-0.7071,-0.7071)
+    );
+    float filtered = cloud_shadow;
+    int taps = min(CLOUD_SHADOW_FILTER_SAMPLES, 8);
+    for (int i = 0; i < 8; ++i) {
+        if (i >= taps) break;
+        filtered += texture(cloud_shadow_map, cloud_shadow_pos + dirs[i] * texel * radius).x;
+    }
+    cloud_shadow = filtered / float(taps + 1);
+#endif
     cloud_shadow = cloud_shadow * cloud_shadow_fade + (1.0 - cloud_shadow_fade);
 
     return cloud_shadow * CLOUD_SHADOWS_INTENSITY

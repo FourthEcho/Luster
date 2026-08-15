@@ -53,8 +53,10 @@ vec4 weather_spatial_field(vec2 world_xz) {
     // Very low-frequency, stage-safe weather cells. This deliberately avoids
     // noisetex because this shared file is included by vertex and fragment
     // stages, while Iris exposes noisetex only where it is explicitly bound.
-    vec2 drift = world_xz * 0.00000135;
-    drift += vec2(world_age * 0.000000035, -world_age * 0.000000021);
+    float advect_time = float(world_age) * 0.0000000125 * WEATHER_ADVECTION_STRENGTH;
+    vec2 wind = weather_wind_direction();
+    vec2 drift = world_xz * (0.00000135 * WEATHER_CELL_SCALE);
+    drift += wind * advect_time;
 
     float large0 = weather_value_noise_2d(drift);
     float large1 = weather_value_noise_2d(drift * 0.91 + vec2(17.3, -11.7));
@@ -66,7 +68,7 @@ vec4 weather_spatial_field(vec2 world_xz) {
     float convection = clamp(0.55 * medium1 + 0.45 * large0, 0.0, 1.0);
     float storm = smoothstep(0.48, 0.82, coverage * 0.60 + humidity * 0.40);
     storm *= smoothstep(0.42, 0.86, convection);
-    storm = clamp(storm * 1.18, 0.0, 1.0);
+    storm = clamp(storm * (1.0 + WEATHER_STORM_FEEDBACK * 0.28), 0.0, 1.0);
 
     return vec4(coverage, humidity, convection, storm);
 }

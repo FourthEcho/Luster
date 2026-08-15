@@ -370,6 +370,25 @@ vec3 get_ibl_irradiance_vl(vec3 axis) {
     return irradiance;
 }
 
+
+vec3 ibl_cone_direction(vec3 R, vec3 N, float roughness, vec2 xi) {
+    float spread = clamp(roughness * roughness, 0.0, 1.0);
+    vec3 t, b;
+    ibl_make_ortho_basis(R, t, b);
+    float phi = 6.28318530718 * xi.x;
+    float cos_theta = mix(1.0, sqrt(max(0.0, 1.0 - spread)), xi.y);
+    float sin_theta = sqrt(max(0.0, 1.0 - cos_theta * cos_theta));
+    vec3 d = normalize(R * cos_theta + (t * cos(phi) + b * sin(phi)) * sin_theta);
+    return normalize(mix(R, d, spread));
+}
+
+vec3 ibl_multiscatter_compensation(vec3 f0, float roughness, float NoV) {
+    float e = max(0.0, 1.0 - roughness);
+    float grazing = pow5(1.0 - NoV);
+    float energy = mix(0.85, 1.0, e) + 0.15 * grazing;
+    return f0 * rcp(max(energy, 0.35));
+}
+
 // ============================================================================
 //  Specular IBL — VNDF importance-sampled GGX against the sky map
 // ----------------------------------------------------------------------------
@@ -554,6 +573,10 @@ vec3 get_ibl_specular(
     if (material.is_hardcoded_metal) {
         radiance *= material.albedo;
     }
+
+    vec3 compensation_f0 = material.is_metal ? material.albedo : vec3(material.f0.x);
+    radiance *= ibl_multiscatter_compensation(compensation_f0, material.roughness, NoV)
+        / max(compensation_f0, vec3(0.04));
 
     return radiance;
 }

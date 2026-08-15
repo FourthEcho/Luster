@@ -244,7 +244,7 @@ mat2x3 water_fog_simple(
 
     vec3 light_ambient = ambient_color * light_levels.y;
     light_ambient
-        += 1.41 * get_blocklight_color_raw() * blocklight_scale * sqr(light_levels.x);
+        += 1.41 * blocklight_color * blocklight_scale * sqr(light_levels.x);
 
     vec3 transmittance = exp(-extinction_coeff * dist);
 

@@ -67,7 +67,7 @@ vec3 get_moon_tint() {
     // Earthshine — the warm glow produced when sunlight reflected off Earth
     // illuminates the dark portion of the moon. We use the canonical
     // earthshine RGB (1.15, 0.85, 0.65) at 15% peak brightness.
-    const vec3 earthshine_tint = vec3(1.15, 0.85, 0.65) * 0.15;
+    vec3 earthshine_tint = from_native(vec3(1.15, 0.85, 0.65)) * 0.15;
 
     // moon_earthshine_amount is precomputed in shaders.properties from
     // moonPhase: 0 at full moon (pure user tint), 1 at new moon (full

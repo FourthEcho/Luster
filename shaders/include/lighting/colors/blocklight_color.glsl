@@ -25,7 +25,7 @@ const float emission_scale = 40.0 * EMISSION_STRENGTH;
 //    the perceived intensity of blocklight is unchanged
 vec3 get_blocklight_color() {
     // Decode the biome fog color into linear rec709, then convert to the
-    // working color space used by the selected native working-space lighting pipeline.
+    // working color space (Rec2020 linear) used by the lighting pipeline.
     vec3 biome_tint_linear = srgb_eotf_inv(fogColor) * rec709_to_working_color;
 
     // Base user color in working space.
@@ -53,9 +53,8 @@ vec3 get_blocklight_color() {
     return tinted;
 }
 
-// Backwards-compatible accessor for code that only wants the base color.
-vec3 get_blocklight_color_raw() {
-    return get_blocklight_color_base();
-}
+// Backwards-compatible name for code that only wants the base color
+// Apple GLSL is sensitive to global function-call initializers; keep this as a macro accessor.
+#define blocklight_color (get_blocklight_color_base())
 
 #endif // INCLUDE_LIGHTING_COLORS_BLOCKLIGHT_COLOR

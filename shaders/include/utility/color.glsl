@@ -374,7 +374,7 @@ vec3 blackbody(float temperature) {
     vec3 d = exp(b / temperature);
 
     vec3 rgb = a * d - a;
-    return min_of(rgb) / rgb;
+    return (min_of(rgb) / rgb) * REC2020_TO_WORKING;
 }
 
 // Isolate a range of hues

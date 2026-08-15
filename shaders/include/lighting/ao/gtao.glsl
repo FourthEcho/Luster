@@ -5,7 +5,16 @@
 #include "/include/utility/fast_math.glsl"
 #include "/include/utility/space_conversion.glsl"
 
-#define GTAO_FALLOFF_START 0.75
+#define GTAO_FALLOFF_START 0.70
+#ifndef GTAO_SLICES
+#define GTAO_SLICES 3
+#endif
+#ifndef GTAO_SAMPLE_POWER
+#define GTAO_SAMPLE_POWER 1.35
+#endif
+#ifndef GTAO_THICKNESS
+#define GTAO_THICKNESS 1.10
+#endif
 
 float integrate_arc(vec2 h, float n, float cos_n) {
     vec2 tmp = cos_n + 2.0 * h * sin(n) - cos(2.0 * h - n);
@@ -33,12 +42,11 @@ float compute_maximum_horizon_angle(
            )
            - screen_pos)
               .xy;
-    vec2 ray_pos = screen_pos.xy
-        + ray_step * (dither + max_of(view_pixel_size) * rcp_length(ray_step));
-
-    for (int i = 0; i < GTAO_STEPS; ++i, ray_pos += ray_step) {
-        ivec2 texel
-            = ivec2(clamp01(ray_pos) * view_res * taau_render_scale - 0.5);
+    for (int i = 0; i < GTAO_STEPS; ++i) {
+        float sample_u = (float(i) + 0.5 + dither) * rcp(float(GTAO_STEPS));
+        float sample_scale = pow(clamp01(sample_u), GTAO_SAMPLE_POWER) * float(GTAO_STEPS);
+        vec2 ray_pos = screen_pos.xy + ray_step * sample_scale;
+        ivec2 texel = ivec2(clamp01(ray_pos) * view_res * taau_render_scale - 0.5);
         float depth = texelFetch(combined_depth_tex, texel, 0).x;
 
         if (depth == 1.0 || depth < hand_depth || depth == screen_pos.z) {
@@ -49,11 +57,10 @@ float compute_maximum_horizon_angle(
                           combined_projection_matrix_inverse,
                           vec3(ray_pos, depth),
                           true
-                      )
-            - view_pos;
+                      ) - view_pos;
 
         float len_sq = length_squared(offset);
-        float norm = inversesqrt(len_sq);
+        float norm = inversesqrt(max(len_sq, 1e-6));
 
         float distance_falloff = linear_step(
             GTAO_FALLOFF_START * GTAO_RADIUS,
@@ -63,6 +70,8 @@ float compute_maximum_horizon_angle(
 
         float cos_theta = dot(viewer_dir, offset) * norm;
         cos_theta = mix(cos_theta, -1.0, distance_falloff);
+        cos_theta = max(cos_theta, -0.999);
+        cos_theta = mix(cos_theta, -1.0, clamp01((abs(depth - screen_pos.z) * GTAO_THICKNESS) * 32.0));
 
         max_cos_theta = max(cos_theta, max_cos_theta);
     }
@@ -102,8 +111,8 @@ vec2 compute_gtao(
     }
 #endif
 
-    for (int i = 0; i < 2; ++i) {
-        float slice_angle = (i + dither.x) * (pi / float(2));
+    for (int i = 0; i < GTAO_SLICES; ++i) {
+        float slice_angle = (i + dither.x) * (pi / float(GTAO_SLICES));
 
         vec3 slice_dir = vec3(cos(slice_angle), sin(slice_angle), 0.0);
         vec3 view_slice_dir = local_to_view * slice_dir;
@@ -155,8 +164,8 @@ vec2 compute_gtao(
 
     const float albedo = 0.2; // albedo of surroundings (for multibounce approx)
 
-    ao *= rcp(float(2));
-    ambient_sss *= rcp(float(2));
+    ao *= rcp(float(GTAO_SLICES));
+    ambient_sss *= rcp(float(GTAO_SLICES));
     ao /= albedo * ao + (1.0 - albedo);
 
     bent_normal = normalize(normalize(bent_normal) - 0.5 * viewer_dir);

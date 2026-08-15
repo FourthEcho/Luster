@@ -73,3 +73,6 @@ const vec3[16] tint_color = vec3[16](
 );
 
 #endif // INCLUDE_LIGHTING_LPV_LIGHT_COLORS
+
+vec3 get_lpv_light_color(int index) { return from_native(light_color[index]); }
+vec3 get_lpv_tint_color(int index) { return from_native(tint_color[index]); }

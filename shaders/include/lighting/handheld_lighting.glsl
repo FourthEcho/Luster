@@ -22,7 +22,7 @@ uniform int heldBlockLightValue2;
 vec3 get_handheld_light_color(int held_item_id, int held_item_light_value) {
 #if HANDHELD_LIGHTING_MODE == HANDHELD_LIGHTING_NORMAL
     // Warm vanilla blocklight color scaled by the item's light level
-    return (get_blocklight_color_raw() * blocklight_scale * rcp(15.0))
+    return (blocklight_color * blocklight_scale * rcp(15.0))
         * held_item_light_value;
 #elif HANDHELD_LIGHTING_MODE == HANDHELD_LIGHTING_COLORED
     // Per-emissive-block color and brightness from lighting_colors.glsl,
@@ -33,7 +33,7 @@ vec3 get_handheld_light_color(int held_item_id, int held_item_light_value) {
     if (brightness > 0.0) {
         return color * brightness * blocklight_scale;
     } else {
-        return (get_blocklight_color_raw() * blocklight_scale * rcp(15.0))
+        return (blocklight_color * blocklight_scale * rcp(15.0))
             * held_item_light_value;
     }
 #else

@@ -78,29 +78,36 @@ vec3 sss_approx(
     float LoV,
     float shadow
 ) {
-    // Transmittance-based SSS
-    if (sss_amount < eps) {
-        return vec3(0.0);
-    }
+    if (sss_amount < eps) return vec3(0.0);
 
-    vec3 coeff = albedo * inversesqrt(dot(albedo, luminance_weights) + eps);
-    coeff = 0.75 * clamp01(coeff);
-    coeff = (1.0 - coeff) * sss_density / sss_amount;
+    float depth = max(sss_depth, 0.0);
+    float sigma = max(0.02, 0.35 + 2.2 * sss_amount);
+    float r = depth / sigma;
+    float burley = exp(-r) * (1.0 + r) / (8.0 * pi * sigma * sigma);
+    burley *= (1.0 - 0.35 * rcp(1.0 + 3.0 * sss_amount));
 
-    float phase
-        = mix(isotropic_phase, henyey_greenstein_phase(-LoV, 0.7), 0.33);
+    float phase_front = henyey_greenstein_phase(LoV, 0.35);
+    float phase_back  = henyey_greenstein_phase(-LoV, 0.65);
+    float transmission = mix(phase_front, phase_back, clamp01(0.65 + 0.35 * (1.0 - shadow)));
 
-    vec3 sss = sss_scale * phase * exp2(-coeff * sss_depth) * dampen(sss_amount)
-        * pi;
+    vec3 diffuse_color = albedo * burley * (0.65 + 0.35 * transmission);
+    vec3 wrap = albedo * pow(clamp01(0.5 + 0.5 * LoV), 1.5) * (0.25 + 0.75 * sss_amount);
+    vec3 sss = (diffuse_color + wrap) * (1.6 * SSS_INTENSITY) * sss_amount;
 
 #ifdef SSS_SHEEN
-    vec3 sheen = (0.8 * SSS_INTENSITY) * rcp(albedo + eps)
-        * exp2(-1.0 * coeff * sss_depth) * henyey_greenstein_phase(-LoV, 0.5)
-        * linear_step(-0.8, -0.2, -LoV);
-    sss += sheen * sheen_amount * SSS_SHEEN_INTENSITY;
+    float grazing = pow5(clamp01(1.0 - abs(LoV)));
+    float sheen_lobe = mix(
+        henyey_greenstein_phase(-LoV, 0.5),
+        pow(max(0.0, 1.0 - abs(LoV)), 1.6),
+        0.55
+    );
+    vec3 sheen_tint = normalize(max(albedo, vec3(0.02))) * 0.8 + vec3(0.2);
+    vec3 sheen = sheen_tint * sheen_lobe * grazing * sheen_amount
+        * SSS_SHEEN_INTENSITY * (0.35 + 0.65 * sss_amount);
+    sss += sheen;
 #endif
 
-    return sss;
+    return max(sss * shadow, vec3(0.0));
 }
 #else
 vec3 sss_approx(

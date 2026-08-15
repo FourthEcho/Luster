@@ -19,6 +19,12 @@ const float indirect_depth_rejection = 0.35;
 const float indirect_normal_rejection = 0.15;
 const float indirect_cache_strength = 0.55;
 const float indirect_history_strength = 0.75;
+#ifndef INDIRECT_SPATIAL_REUSE
+#define INDIRECT_SPATIAL_REUSE 0.85
+#endif
+#ifndef INDIRECT_HISTORY_CLAMP
+#define INDIRECT_HISTORY_CLAMP 1.25
+#endif
 #ifndef INDIRECT_SECOND_BOUNCE_ENERGY
 #define INDIRECT_SECOND_BOUNCE_ENERGY 0.55
 #endif
@@ -138,8 +144,9 @@ vec3 indirect_gather_scene(
         float depth_weight = indirect_depth_weight(current_depth, sample_depth, max(distance, 0.25));
         float normal_weight = smoothstep(0.0, 1.0,
             max0(dot(receiver_normal, source_normal) - indirect_normal_rejection));
+        float reuse = mix(1.0, pow(max(radial, 0.0), 0.35), INDIRECT_SPATIAL_REUSE);
         float weight = receiver_cos * source_cos * radial * depth_weight
-            * mix(1.0, normal_weight, 0.75);
+            * mix(1.0, normal_weight, 0.75) * reuse;
         if (weight <= 1e-5) continue;
 
         vec3 source_radiance = texture(colortex0, sample_uv).rgb;
@@ -197,8 +204,9 @@ vec3 indirect_gather_bounce2(
         float depth_weight = indirect_depth_weight(current_depth, sample_depth, max(distance, 0.25));
         float normal_weight = smoothstep(0.0, 1.0,
             max0(dot(receiver_normal, source_normal) - indirect_normal_rejection));
+        float reuse = mix(1.0, pow(max(radial, 0.0), 0.35), INDIRECT_SPATIAL_REUSE);
         float weight = receiver_cos * source_cos * radial * depth_weight
-            * mix(1.0, normal_weight, 0.75);
+            * mix(1.0, normal_weight, 0.75) * reuse;
         if (weight <= 1e-5) continue;
 
         vec3 source_radiance = texture(colortex2, sample_uv).rgb;
@@ -256,8 +264,9 @@ vec3 indirect_gather_bounce3(
         float depth_weight = indirect_depth_weight(current_depth, sample_depth, max(distance, 0.25));
         float normal_weight = smoothstep(0.0, 1.0,
             max0(dot(receiver_normal, source_normal) - indirect_normal_rejection));
+        float reuse = mix(1.0, pow(max(radial, 0.0), 0.35), INDIRECT_SPATIAL_REUSE);
         float weight = receiver_cos * source_cos * radial * depth_weight
-            * mix(1.0, normal_weight, 0.75);
+            * mix(1.0, normal_weight, 0.75) * reuse;
         if (weight <= 1e-5) continue;
 
         vec3 source_radiance = texture(colortex1, sample_uv).rgb;
