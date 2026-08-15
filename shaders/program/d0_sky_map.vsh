@@ -61,6 +61,7 @@ uniform vec3 sun_dir;
 uniform vec3 moon_dir;
 
 uniform float world_age;
+uniform vec3 cameraPosition;
 uniform float eye_skylight;
 
 uniform float time_sunrise;
@@ -139,7 +140,7 @@ void main() {
     aurora_amount = get_aurora_amount();
     aurora_colors = get_aurora_colors();
 
-    Weather weather = get_weather();
+    Weather weather = get_weather(cameraPosition);
     rainbow_amount = get_rainbow_amount(weather);
     clouds_params = get_clouds_parameters(weather);
     fog_params = get_fog_parameters(weather);

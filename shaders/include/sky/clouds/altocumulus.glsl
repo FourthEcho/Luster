@@ -4,6 +4,7 @@
 // 2nd layer: volumetric altocumulus clouds
 
 #include "common.glsl"
+#include "coverage_map.glsl"
 
 // altitude_fraction := 0 at the bottom of the cloud layer and 1 at the top
 float clouds_altocumulus_altitude_shaping(
@@ -35,6 +36,10 @@ float clouds_altocumulus_density(vec3 pos) {
         * rcp(clouds_altocumulus_thickness * dynamic_thickness);
 
     pos.xz += cameraPosition.xz * CLOUDS_SCALE + wind_velocity * world_age;
+
+    vec4 weather_field = clouds_weather_field(pos.xz);
+    float weather_coverage = mix(0.68, 1.16, weather_field.x);
+    float moisture = mix(0.72, 1.15, weather_field.y);
 
     vec4 noise = vec4(
         // 2D noise for base shape and coverage
@@ -77,6 +82,7 @@ float clouds_altocumulus_density(vec3 pos) {
 
     float density
         = mix(density_ac, density_as, clouds_params.l1_cumulus_stratus_blend);
+    density *= weather_coverage * moisture;
 
     if (density < eps) {
         return 0.0;
@@ -158,12 +164,22 @@ vec2 clouds_altocumulus_scattering(
     float scattering_coeff,
     float step_transmittance,
     float cos_theta,
-    float bounced_light
+    float bounced_light,
+    float altitude_fraction
 ) {
     vec2 scattering = vec2(0.0);
 
     float scatter_amount = scattering_coeff;
     float extinct_amount = extinction_coeff;
+
+    float ground_weight = clouds_ground_ambient_weight(altitude_fraction);
+    float sky_weight = clouds_sky_ambient_weight(altitude_fraction);
+    float core_attenuation = clouds_core_light_attenuation(
+        density,
+        light_optical_depth,
+        altitude_fraction
+    );
+    float silver_lining = clouds_silver_lining(density, cos_theta);
 
     float scattering_integral_times_density
         = (1.0 - step_transmittance) / extinction_coeff;
@@ -178,12 +194,14 @@ vec2 clouds_altocumulus_scattering(
 
     for (uint i = 0u; i < 8u; ++i) {
         scattering.x += scatter_amount
-            * exp(-extinct_amount * light_optical_depth) * phase;
+            * exp(-extinct_amount * light_optical_depth) * phase
+            * core_attenuation * silver_lining;
         scattering.x += scatter_amount
             * exp(-extinct_amount * ground_optical_depth) * isotropic_phase
-            * bounced_light;
+            * bounced_light * ground_weight;
         scattering.y += scatter_amount
-            * exp(-extinct_amount * sky_optical_depth) * isotropic_phase;
+            * exp(-extinct_amount * sky_optical_depth) * isotropic_phase
+            * sky_weight;
 
         scatter_amount *= 0.5
             * mix(lift(clamp01(scattering_coeff / 0.05), 0.33),
@@ -359,7 +377,8 @@ CloudsResult draw_altocumulus_clouds(
                    scattering_coeff,
                    step_transmittance,
                    cos_theta,
-                   bounced_light
+                   bounced_light,
+                   altitude_fraction
                )
             * transmittance;
 

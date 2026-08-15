@@ -67,6 +67,7 @@ uniform float biome_humidity;
 uniform float desert_sandstorm;
 
 uniform float world_age;
+uniform vec3 cameraPosition;
 uniform float time_sunrise;
 uniform float time_noon;
 uniform float time_sunset;
@@ -97,7 +98,7 @@ void main() {
     ambient_color = texelFetch(colortex4, ivec2(191, 1), 0).rgb;
 
 #if defined WORLD_OVERWORLD
-    Weather weather = get_weather();
+    Weather weather = get_weather(cameraPosition);
 
     sun_color = get_sun_exposure() * get_sun_tint();
     moon_color = get_moon_exposure() * get_moon_tint();

@@ -4,8 +4,6 @@
 #include "/include/utility/fast_math.glsl"
 #include "/include/utility/random.glsl"
 
-uniform float day_factor;
-
 // Daily random wind direction.
 //
 // Picks one of 8 compass directions per Minecraft day, derived from a hash
@@ -35,7 +33,43 @@ struct Weather {
     float temperature; // [0, 1]
     float humidity; // [0, 1]
     float wind; // [0, 1]
+    float convection; // [0, 1]
+    float storm; // [0, 1]
 };
+
+float weather_value_noise_2d(vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = cubic_smooth(fract(p));
+
+    float a = hash1(dot(i, vec2(1.0, 57.0)));
+    float b = hash1(dot(i + vec2(1.0, 0.0), vec2(1.0, 57.0)));
+    float c = hash1(dot(i + vec2(0.0, 1.0), vec2(1.0, 57.0)));
+    float d = hash1(dot(i + vec2(1.0, 1.0), vec2(1.0, 57.0)));
+
+    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+}
+
+vec4 weather_spatial_field(vec2 world_xz) {
+    // Very low-frequency, stage-safe weather cells. This deliberately avoids
+    // noisetex because this shared file is included by vertex and fragment
+    // stages, while Iris exposes noisetex only where it is explicitly bound.
+    vec2 drift = world_xz * 0.00000135;
+    drift += vec2(world_age * 0.000000035, -world_age * 0.000000021);
+
+    float large0 = weather_value_noise_2d(drift);
+    float large1 = weather_value_noise_2d(drift * 0.91 + vec2(17.3, -11.7));
+    float medium0 = weather_value_noise_2d(drift * 2.33 + vec2(-31.1, 8.4));
+    float medium1 = weather_value_noise_2d(drift * 2.33 + vec2(12.6, 23.7));
+
+    float coverage = clamp(0.62 * large0 + 0.38 * medium1, 0.0, 1.0);
+    float humidity = clamp(0.55 * large1 + 0.45 * medium0, 0.0, 1.0);
+    float convection = clamp(0.55 * medium1 + 0.45 * large0, 0.0, 1.0);
+    float storm = smoothstep(0.48, 0.82, coverage * 0.60 + humidity * 0.40);
+    storm *= smoothstep(0.42, 0.86, convection);
+    storm = clamp(storm * 1.18, 0.0, 1.0);
+
+    return vec4(coverage, humidity, convection, storm);
+}
 
 float weather_temperature() {
     const float temperature_variation_speed = 0.37 * golden_ratio * rcp(600.0)
@@ -133,12 +167,18 @@ float weather_wind() {
     return clamp01(wind);
 }
 
-Weather get_weather() {
+Weather get_weather(vec3 weather_origin) {
     Weather weather;
 
     weather.temperature = weather_temperature();
     weather.humidity = weather_humidity();
     weather.wind = weather_wind();
+
+    vec4 field = weather_spatial_field(weather_origin.xz);
+    // Spatial humidity/convection modifies the slowly varying global weather.
+    weather.humidity = clamp01(mix(weather.humidity, field.y, 0.42));
+    weather.convection = clamp01(field.z * (0.55 + 0.65 * weather.humidity));
+    weather.storm = clamp01(field.w * (0.45 + 0.85 * weather.humidity));
 
     return weather;
 }

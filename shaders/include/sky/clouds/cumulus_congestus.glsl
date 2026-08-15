@@ -4,13 +4,14 @@
 // Alternative 1st layer: distant cumulus congestus clouds
 
 #include "common.glsl"
+#include "coverage_map.glsl"
 
 const float clouds_cumulus_congestus_radius
     = planet_radius + CLOUDS_CUMULUS_CONGESTUS_ALTITUDE;
 const float clouds_cumulus_congestus_thickness
     = CLOUDS_CUMULUS_CONGESTUS_ALTITUDE * CLOUDS_CUMULUS_CONGESTUS_THICKNESS;
 const float clouds_cumulus_congestus_top_radius
-    = clouds_cumulus_congestus_radius + clouds_cumulus_congestus_thickness;
+    = clouds_cumulus_congestus_radius + clouds_cumulus_congestus_thickness * 1.35;
 const float clouds_cumulus_congestus_distance = 30000.0;
 const float clouds_cumulus_congestus_end_distance = 50000.0;
 float clouds_cumulus_congestus_extinction_coeff = 0.08;
@@ -46,6 +47,13 @@ float clouds_cumulus_congestus_density(vec3 pos) {
 
     float altitude_fraction = (r - clouds_cumulus_congestus_radius)
         * rcp(clouds_cumulus_congestus_thickness);
+
+    vec4 weather_field = clouds_weather_field(pos.xz);
+    float storm = max(weather_field.w, clouds_params.storm_intensity * 0.55);
+    float max_storm_height = 1.0 + 0.35 * storm;
+    if (altitude_fraction > max_storm_height) {
+        return 0.0;
+    }
     float distance_fraction = linear_step(
         clouds_cumulus_congestus_distance,
         clouds_cumulus_congestus_end_distance,
@@ -66,6 +74,7 @@ float clouds_cumulus_congestus_density(vec3 pos) {
               .w;
 
     float density = 1.5
+        * mix(0.88, 1.28, storm)
         * sqr(linear_step(
             0.75
                 - 0.15
@@ -76,8 +85,29 @@ float clouds_cumulus_congestus_density(vec3 pos) {
             1.0,
             sqrt(noise)
         ));
-    density
-        = clouds_cumulus_congestus_altitude_shaping(density, altitude_fraction);
+    float base_density = density;
+    if (altitude_fraction <= 1.0) {
+        base_density = clouds_cumulus_congestus_altitude_shaping(
+            base_density,
+            altitude_fraction
+        );
+    } else {
+        // Storm anvils spread horizontally when strong convection reaches the
+        // top of the main cloud tower. They are thinner and softer than the core.
+        float anvil_height = smoothstep(1.0, 1.35, altitude_fraction);
+        float anvil_shape = texture(
+            noisetex,
+            0.000003 * (pos.xz + wind_velocity * world_age * 0.35)
+        ).w;
+        float anvil_mask = linear_step(0.30, 0.72, anvil_shape);
+        base_density = storm * 0.60
+            * (1.0 - anvil_height)
+            * anvil_mask;
+    }
+
+    density = base_density;
+    float tower_growth = smoothstep(0.18, 0.95, altitude_fraction);
+    density += 0.18 * storm * tower_growth * sqr(clamp01(noise));
     density *= 4.0 * distance_fraction * (1.0 - distance_fraction);
     density *= linear_step(0.0, 0.3, clouds_params.cumulus_congestus_blend);
 
@@ -162,12 +192,23 @@ vec2 clouds_cumulus_congestus_scattering(
     float ground_optical_depth,
     float step_transmittance,
     float cos_theta,
-    float bounced_light
+    float bounced_light,
+    float altitude_fraction
 ) {
     vec2 scattering = vec2(0.0);
 
     float scatter_amount = clouds_cumulus_congestus_scattering_coeff;
-    float extinct_amount = clouds_cumulus_congestus_extinction_coeff;
+    float extinct_amount = clouds_cumulus_congestus_extinction_coeff
+        * (1.0 + 0.28 * clouds_params.storm_intensity);
+
+    float ground_weight = clouds_ground_ambient_weight(altitude_fraction);
+    float sky_weight = clouds_sky_ambient_weight(altitude_fraction);
+    float core_attenuation = clouds_core_light_attenuation(
+        density,
+        light_optical_depth,
+        altitude_fraction
+    );
+    float silver_lining = clouds_silver_lining(density, cos_theta);
 
     float scattering_integral_times_density = (1.0 - step_transmittance)
         / clouds_cumulus_congestus_extinction_coeff;
@@ -179,12 +220,14 @@ vec2 clouds_cumulus_congestus_scattering(
 
     for (uint i = 0u; i < 8u; ++i) {
         scattering.x += scatter_amount
-            * exp(-extinct_amount * light_optical_depth * 0.33) * phase;
+            * exp(-extinct_amount * light_optical_depth * 0.33) * phase
+            * core_attenuation * silver_lining;
         scattering.x += scatter_amount
             * exp(-extinct_amount * ground_optical_depth * 0.33)
-            * isotropic_phase * bounced_light;
+            * isotropic_phase * bounced_light * ground_weight;
         scattering.y += scatter_amount
-            * exp(-extinct_amount * sky_optical_depth * 0.33) * isotropic_phase;
+            * exp(-extinct_amount * sky_optical_depth * 0.33) * isotropic_phase
+            * sky_weight;
 
         scatter_amount *= 0.55
             * mix(lift(
@@ -347,7 +390,8 @@ CloudsResult draw_cumulus_congestus_clouds(
                    ground_optical_depth,
                    step_transmittance,
                    cos_theta,
-                   bounced_light
+                   bounced_light,
+                   altitude_fraction
                )
             * transmittance;
 

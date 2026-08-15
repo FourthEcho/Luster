@@ -43,6 +43,7 @@ uniform vec3 sun_dir;
 uniform vec3 moon_dir;
 
 uniform float world_age;
+uniform vec3 cameraPosition;
 uniform float eye_skylight;
 
 uniform float time_sunrise;
@@ -85,7 +86,7 @@ vec3 calculate_sun_direction() {
 void main() {
     uv = gl_MultiTexCoord0.xy;
 
-    Weather weather = get_weather();
+    Weather weather = get_weather(cameraPosition);
     clouds_params = get_clouds_parameters(weather);
 
 #ifndef IS_IRIS

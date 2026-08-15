@@ -117,6 +117,11 @@ float clouds_cumulus_density(vec3 pos) {
     );
     density *= 0.1 + 0.9 * smoothstep(0.2, 0.7, altitude_fraction);
 
+    // Local convection from the weather field thickens developing towers.
+    vec4 weather_field = clouds_weather_field(pos.xz);
+    float tower_factor = weather_field.z * smoothstep(0.18, 0.9, altitude_fraction);
+    density *= 1.0 + 0.18 * tower_factor;
+
     return density;
 }
 
@@ -151,12 +156,22 @@ vec2 clouds_cumulus_scattering(
     float ground_optical_depth,
     float step_transmittance,
     float cos_theta,
-    float bounced_light
+    float bounced_light,
+    float altitude_fraction
 ) {
     vec2 scattering = vec2(0.0);
 
     float scatter_amount = clouds_params.l0_scattering_coeff;
     float extinct_amount = clouds_params.l0_extinction_coeff;
+
+    float ground_weight = clouds_ground_ambient_weight(altitude_fraction);
+    float sky_weight = clouds_sky_ambient_weight(altitude_fraction);
+    float core_attenuation = clouds_core_light_attenuation(
+        density,
+        light_optical_depth,
+        altitude_fraction
+    );
+    float silver_lining = clouds_silver_lining(density, cos_theta);
 
     float scattering_integral_times_density
         = (1.0 - step_transmittance) / clouds_params.l0_extinction_coeff;
@@ -176,16 +191,18 @@ vec2 clouds_cumulus_scattering(
     for (uint i = 0u; i < 8u; ++i) {
         scattering.x += scatter_amount
             * exp(-extinct_amount * light_optical_depth) * phase
+            * core_attenuation * silver_lining
             * (1.0 - 0.5 * clouds_params.l0_shadow);
         scattering.x += scatter_amount
             * exp(-extinct_amount * ground_optical_depth) * isotropic_phase
-            * bounced_light;
+            * bounced_light * ground_weight;
         scattering.x += scatter_amount
             * exp(-extinct_amount * sky_optical_depth) * isotropic_phase
             * clouds_params.l0_shadow
-            * 0.5; // fake bounced lighting from the layer above
+            * 0.5 * sky_weight; // fake bounced lighting from the layer above
         scattering.y += scatter_amount
-            * exp(-extinct_amount * sky_optical_depth) * isotropic_phase;
+            * exp(-extinct_amount * sky_optical_depth) * isotropic_phase
+            * sky_weight;
 
         scatter_amount *= scattering_falloff * powder_effect;
         extinct_amount *= 0.4;
@@ -355,7 +372,8 @@ CloudsResult draw_cumulus_clouds(
                    ground_optical_depth,
                    step_transmittance,
                    cos_theta,
-                   bounced_light
+                   bounced_light,
+                   altitude_fraction
                )
             * transmittance;
 

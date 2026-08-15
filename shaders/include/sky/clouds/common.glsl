@@ -68,6 +68,31 @@ vec2 curl2D(vec2 coord) {
     return vec2(gradient.y, -gradient.x);
 }
 
+
+float clouds_ground_ambient_weight(float altitude_fraction) {
+    return mix(1.30, 0.28, smoothstep(0.0, 1.0, altitude_fraction));
+}
+
+float clouds_sky_ambient_weight(float altitude_fraction) {
+    return mix(0.48, 1.18, smoothstep(0.0, 1.0, altitude_fraction));
+}
+
+float clouds_core_light_attenuation(
+    float density,
+    float light_optical_depth,
+    float altitude_fraction
+) {
+    float core = smoothstep(0.18, 0.85, density);
+    float vertical = mix(1.0, 0.72, smoothstep(0.35, 1.0, altitude_fraction));
+    return exp(-0.42 * light_optical_depth * core * vertical);
+}
+
+float clouds_silver_lining(float density, float cos_theta) {
+    float edge = 1.0 - smoothstep(0.12, 0.58, density);
+    float facing = smoothstep(0.20, 0.92, cos_theta * 0.5 + 0.5);
+    return 1.0 + 0.42 * edge * facing;
+}
+
 float clouds_phase_single(float cos_theta) { // Single scattering phase function
     float forwards_a = klein_nishina_phase(
         cos_theta,

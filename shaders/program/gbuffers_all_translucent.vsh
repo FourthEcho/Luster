@@ -206,7 +206,7 @@ void main() {
 #endif
 
 #if defined WORLD_OVERWORLD
-    fog_params = get_fog_parameters(get_weather());
+    fog_params = get_fog_parameters(get_weather(cameraPosition));
 #endif
 
     position_view = scene_to_view_space(position_scene);

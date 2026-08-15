@@ -13,6 +13,7 @@ uniform vec3 sun_dir;
 uniform vec3 moon_dir;
 
 uniform float world_age;
+uniform vec3 cameraPosition;
 
 uniform float time_sunrise;
 uniform float time_noon;
@@ -39,7 +40,7 @@ uniform float desert_sandstorm;
 void debug_weather(inout vec3 color) {
     const int number_col = 30;
 
-    Weather weather = get_weather();
+    Weather weather = get_weather(cameraPosition);
     CloudsParameters clouds_params = get_clouds_parameters(weather);
 
     begin_text(ivec2(gl_FragCoord.xy) / debug_text_scale, debug_text_position);
