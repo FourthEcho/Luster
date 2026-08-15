@@ -31,7 +31,7 @@ uniform sampler2D noisetex;
 uniform sampler2D colortex0;
 #ifdef INDIRECT_LIGHTING
 uniform sampler2D colortex1; // G-buffer albedo/material data before GI owns colortex2
-uniform sampler2D colortex17; // quarter-resolution irradiance cache
+uniform sampler2D colortex17; // full-resolution 2x2 depth-slice irradiance cache
 #endif
 
 #if defined INDIRECT_LIGHTING && defined COLORED_LIGHTS

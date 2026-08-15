@@ -2,11 +2,9 @@
 
 layout(location = 0) out vec3 irradiance_cache;
 
-/* RENDERTARGETS: 17 */
-
 in vec2 uv;
 
-uniform sampler2D colortex0; // scene radiance used to build the cache
+uniform sampler2D colortex0;
 uniform sampler2D depthtex0;
 uniform mat4 gbufferProjectionInverse;
 uniform vec2 view_res;

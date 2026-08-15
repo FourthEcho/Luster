@@ -26,7 +26,7 @@ flat in mat3 white_balance_matrix;
 // ------------
 
 uniform sampler2D colortex0; // bloom tiles
-uniform sampler2D colortex3; // bloomy-fog/transmittance factor from c1
+uniform sampler2D colortex3; // fog transmittance
 uniform sampler2D colortex5; // scene color
 
 uniform float aspectRatio;

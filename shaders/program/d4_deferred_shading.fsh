@@ -48,7 +48,7 @@ uniform sampler2D colortex2; // gbuffer 1
 uniform sampler2D colortex4; // sky map
 uniform sampler2D colortex5; // previous frame color
 uniform sampler2D colortex6; // ambient lighting data
-uniform sampler2D colortex7; // previous-frame volumetric fog scattering
+uniform sampler2D colortex7; // previous frame fog scattering
 uniform sampler2D colortex11; // clouds history
 uniform sampler2D colortex12; // clouds data
 uniform sampler2D colortex14; // ambient lighting history data

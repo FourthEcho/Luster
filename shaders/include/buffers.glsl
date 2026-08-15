@@ -17,7 +17,7 @@ const int colortex12Format = RGB16F;         // full res    | clouds pixel age, 
 const int colortex13Format = RGBA16F;        // full res    | rendered translucent layer (translucent -> c1)
 const int colortex14Format = RG16F;          // quarter res | ambient occlusion history data (always)
 const int colortex15Format = R32F;           // full res    | LoD combined depth buffer (d1 -> c2)
-const int colortex17Format = RGB16F;          // quarter res | indirect irradiance cache (composite1 -> GI passes)
+const int colortex17Format = RGB16F;         // full res    | GI irradiance cache (composite1 -> c2/c3/c4)
 
 const bool colortex0Clear  = true;
 const bool colortex1Clear  = false;
