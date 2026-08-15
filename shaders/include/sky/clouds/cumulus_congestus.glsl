@@ -86,14 +86,25 @@ float clouds_cumulus_congestus_density(vec3 pos) {
     }
 
 #ifndef PROGRAM_PREPARE
-    // Curl noise used to warp the 3D noise into swirling shapes
     vec3 wind = vec3(wind_velocity * world_age, 0.0).xzy;
 
-    // 3D worley noise for detail
+    // Use the supplied 3D curl vector field to warp the low-frequency
+    // domain before sampling the congestus detail noise.
+    vec3 curl = sample_curl_noise_3d((pos + 0.25 * wind) * 0.00016);
+    vec3 warped_pos = pos + curl * 360.0;
+
+    // Smooth volumetric Perlin structure shapes the congestus mass before
+    // high-frequency Worley erosion.
+    float perlin_shape = sample_perlin_noise_3d(
+        (warped_pos + 0.15 * wind) * 0.000060
+    );
+    density *= mix(0.892, 1.108, perlin_shape);
+
+    // 3D Worley noise for detail in the curled domain.
     float worley_0
-        = texture(SAMPLER_WORLEY_SWIRLEY, (pos + 0.2 * wind) * 0.00005).x;
+        = texture(SAMPLER_WORLEY_SWIRLEY, (warped_pos + 0.2 * wind) * 0.00005).x;
     float worley_1
-        = texture(SAMPLER_WORLEY_SWIRLEY, (pos + 0.4 * wind) * 0.00023).x;
+        = texture(SAMPLER_WORLEY_SWIRLEY, (warped_pos + 0.4 * wind) * 0.00023).x;
 #else
     const float worley_0 = 0.5;
 

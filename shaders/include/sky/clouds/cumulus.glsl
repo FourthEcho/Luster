@@ -76,11 +76,23 @@ float clouds_cumulus_density(vec3 pos) {
 
     pos.xz += cameraPosition.xz * CLOUDS_SCALE + wind.xz;
 
-    // 3D worley noise for detail
+    // 3D curl field warps the Worley domain so cloud structures develop
+    // natural swirling/rolling forms instead of remaining axis-aligned.
+    vec3 curl = sample_curl_noise_3d((pos + 0.25 * wind) * 0.00018);
+    vec3 warped_pos = pos + curl * 320.0;
+
+    // Smooth 3D Perlin modulation controls the broad volumetric mass before
+    // the higher-frequency Worley erosion is applied.
+    float perlin_shape = sample_perlin_noise_3d(
+        (warped_pos + 0.15 * wind) * 0.000055
+    );
+    density *= mix(1.0 - 0.28 * 0.45, 1.0 + 0.28 * 0.45, perlin_shape);
+
+    // 3D Worley noise for detail, sampled in the curled domain.
     float worley_0
-        = texture(SAMPLER_WORLEY_BUBBLY, (pos + 0.2 * wind) * 0.0009).x;
+        = texture(SAMPLER_WORLEY_BUBBLY, (warped_pos + 0.2 * wind) * 0.0009).x;
     float worley_1
-        = texture(SAMPLER_WORLEY_SWIRLEY, (pos + 0.4 * wind) * 0.005).x;
+        = texture(SAMPLER_WORLEY_SWIRLEY, (warped_pos + 0.4 * wind) * 0.005).x;
 #else
     const float worley_0 = 0.5;
     const float worley_1 = 0.5;

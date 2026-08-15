@@ -38,6 +38,7 @@ uniform sampler3D colortex6; // 3D bubbly worley noise
 #define SAMPLER_WORLEY_BUBBLY colortex6
 uniform sampler3D colortex7; // 3D swirley worley noise
 #define SAMPLER_WORLEY_SWIRLEY colortex7
+// curl_noise_3d is declared by /include/sky/clouds/common.glsl and bound in shaders.properties.
 
 uniform sampler2D colortex8; // cloud shadow map
 

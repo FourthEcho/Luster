@@ -85,9 +85,19 @@ float clouds_altocumulus_density(vec3 pos) {
 #ifndef PROGRAM_PREPARE
     vec3 wind = vec3(wind_velocity * world_age, 0.0).xzy;
 
-    // 3D worley noise for detail
+    // Curl the 3D detail domain for more natural turbulent cloud structure.
+    vec3 curl = sample_curl_noise_3d((pos + 0.25 * wind) * 0.00022);
+    vec3 warped_pos = pos + curl * 260.0;
+
+    // Smooth Perlin modulation provides broad, coherent volumetric variation.
+    float perlin_shape = sample_perlin_noise_3d(
+        (warped_pos + 0.15 * wind) * 0.000075
+    );
+    density *= mix(0.91, 1.09, perlin_shape);
+
+    // 3D Worley noise for detail in the curled domain.
     float worley
-        = texture(SAMPLER_WORLEY_SWIRLEY, (pos + 0.2 * wind) * 0.003).x;
+        = texture(SAMPLER_WORLEY_SWIRLEY, (warped_pos + 0.2 * wind) * 0.003).x;
 #else
     const float worley = 0.5;
 #endif

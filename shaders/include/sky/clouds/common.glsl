@@ -12,6 +12,20 @@
 
 uniform float day_factor;
 
+// 3D curl vector field loaded from shaders/image/curl_3d.dat.
+// The raw RGB8 values are encoded from [-1, 1] into [0, 1].
+uniform sampler3D curl_noise_3d;
+uniform sampler3D perlin_noise_3d;
+
+vec3 sample_curl_noise_3d(vec3 coord) {
+    return texture(curl_noise_3d, fract(coord)).xyz * 2.0 - 1.0;
+}
+
+float sample_perlin_noise_3d(vec3 coord) {
+    // Precomputed tileable 4-octave 3D improved-Perlin field, normalized to [0, 1].
+    return texture(perlin_noise_3d, fract(coord)).r;
+}
+
 // ----
 
 struct CloudsResult {
