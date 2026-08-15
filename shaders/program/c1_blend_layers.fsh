@@ -489,7 +489,7 @@ void main() {
 
 #ifdef BLOOMY_FOG
     bloomy_fog
-        = clamp01(dot(fog_transmittance, vec3(luminance_weights_rec2020)));
+        = clamp01(dot(fog_transmittance, vec3(luminance_weights)));
     bloomy_fog = isEyeInWater == 1.0 ? sqrt(bloomy_fog) : bloomy_fog;
 #endif
 #endif
@@ -534,7 +534,7 @@ void main() {
 
 #ifdef BLOOMY_FOG
         bloomy_fog
-            = clamp01(dot(fog_transmittance, vec3(luminance_weights_rec2020)));
+            = clamp01(dot(fog_transmittance, vec3(luminance_weights)));
         bloomy_fog = isEyeInWater == 1.0 ? sqrt(bloomy_fog) : bloomy_fog;
 #endif
 #else

@@ -21,16 +21,15 @@ vec3 purkinje_shift(vec3 rgb, vec2 light_levels) {
         return rgb;
     }
 
-    const vec3 purkinje_tint = vec3(0.5, 0.7, 1.0) * rec709_to_rec2020;
-    const vec3 rod_response
-        = vec3(7.15e-5, 4.81e-1, 3.28e-1) * rec709_to_rec2020;
+    vec3 purkinje_tint = from_native(vec3(0.5, 0.7, 1.0));
+    vec3 rod_response = from_native(vec3(7.15e-5, 4.81e-1, 3.28e-1));
 
-    vec3 xyz = rgb * rec2020_to_xyz;
+    vec3 xyz = rgb * WORKING_TO_XYZ;
 
     vec3 scotopic_luminance
         = xyz * (1.33 * (1.0 + (xyz.y + xyz.z) / xyz.x) - 1.68);
 
-    float purkinje = dot(rod_response, scotopic_luminance * xyz_to_rec2020);
+    float purkinje = dot(rod_response, scotopic_luminance * XYZ_TO_WORKING);
 
     rgb = mix(
         rgb,

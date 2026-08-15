@@ -60,7 +60,7 @@ void main() {
 
 #ifdef USE_SEPARATE_ENTITY_DRAWS
     damage_overlay.rgb
-        = 0.5 * srgb_eotf_inv(2.0 * damage_overlay.rgb) * rec709_to_rec2020;
+        = 0.5 * srgb_eotf_inv(2.0 * damage_overlay.rgb) * REC709_TO_WORKING;
     damage_overlay.a = 1.0;
 #else
     // Old overlay handling

@@ -23,7 +23,7 @@ float end_fog_density(vec3 world_pos) {
 
 vec3 end_fog_emission(vec3 world_pos) {
     const vec3 main_col
-        = from_srgb(vec3(END_AMBIENT_R, END_AMBIENT_G, END_AMBIENT_B))
+        = from_native(vec3(END_AMBIENT_R, END_AMBIENT_G, END_AMBIENT_B))
         * END_AMBIENT_I;
     const vec3 alt_col = 0.5 * vec3(0.25, 1.0, 0.5);
     const vec3 wind0 = vec3(1.0, 0.1, 0.5) * 0.01;
@@ -63,7 +63,7 @@ mat2x3 raymarch_end_fog(
     const float step_count_growth = 0.5;
 
     const vec3 end_color
-        = from_srgb(vec3(END_AMBIENT_R, END_AMBIENT_G, END_AMBIENT_B));
+        = from_native(vec3(END_AMBIENT_R, END_AMBIENT_G, END_AMBIENT_B));
     const float density_scale = 0.01;
     const vec3 absorption_coeff = exp2(-end_color) * density_scale;
     const vec3 scattering_coeff = vec3(1.0) * density_scale;

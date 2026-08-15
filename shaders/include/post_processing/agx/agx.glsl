@@ -4,27 +4,30 @@
 #include "/include/post_processing/agx/agx_constants.glsl"
 #include "/include/utility/color.glsl"
 
-const mat3 LINEAR_REC2020_TO_LINEAR_SRGB_AGX = mat3(
-    1.6605, -0.1246, -0.0182,
-    -0.5876, 1.1329, -0.1006,
-    -0.0728, -0.0083, 1.1187
-);
+// AgX reference implementation adapted from dmnsgn/glsl-tone-map (MIT),
+// which cites Blender/EaryChow/Filament/Three.js implementations.
+//
+// Luster's linear working space is Rec.2020. AgX's image-formation math is
+// evaluated in linear sRGB, so the working-space conversion must happen
+// BEFORE the AgX inset/log/curve and be inverted AFTER the AgX display EOTF.
+// This avoids gamut-dependent hue errors (especially green/cyan shifts).
 
-// AgX display transform, adapted for Luster's Rec.2020 linear working space.
-// Source basis: dmnsgn/glsl-tone-map (MIT), with the same matrices/polynomial
-// used by Blender/Filament-derived implementations.
 vec3 agx_transform(vec3 color, vec3 slope, vec3 offset, vec3 power, float saturation) {
     color = max(color, vec3(0.0));
 
-    // AgX working transform. The dmnsgn reference starts in linear sRGB and
-    // converts to Rec.2020 first; Luster already stores the scene in Rec.2020.
+    // Luster scene-linear selected working space -> AgX linear-sRGB domain.
+    color = WORKING_TO_REC709 * color;
+
+    // Input transform (inset).
     color = AGX_INSET * color;
     color = max(color, vec3(1e-10));
 
+    // Log2 encoding.
     color = clamp(log2(color), AGX_MIN_EV, AGX_MAX_EV);
     color = (color - AGX_MIN_EV) / (AGX_MAX_EV - AGX_MIN_EV);
     color = clamp(color, 0.0, 1.0);
 
+    // AgX sigmoid / tonescale approximation.
     vec3 x2 = color * color;
     vec3 x4 = x2 * x2;
     color = 15.5 * x4 * x2
@@ -35,20 +38,22 @@ vec3 agx_transform(vec3 color, vec3 slope, vec3 offset, vec3 power, float satura
           + 0.1191 * color
           - 0.00232;
 
-    // AgX look transform. Neutral defaults reproduce the standard AgX look.
+    // Look / ASC CDL.
     color = pow(max(color * slope + offset, vec3(0.0)), power);
-    float luma = dot(color, luminance_weights_rec709);
+    const vec3 lw = vec3(0.2126, 0.7152, 0.0722);
+    float luma = dot(color, lw);
     color = luma + saturation * (color - luma);
 
+    // Display EOTF / inverse input transform.
     color = AGX_OUTSET * color;
     color = pow(max(color, vec3(0.0)), vec3(2.2));
 
-    // Return to Luster's Rec.2020 linear working space so the common display
-    // conversion in c19_color_grading.fsh remains the single output transform.
-    color = LINEAR_REC2020_TO_LINEAR_SRGB_AGX * color;
-    color = rec709_to_rec2020 * color;
+    // AgX now produces linear display-sRGB. Return to Luster's linear
+    // Rec.2020 working space so c19's single output-gamut transform remains
+    // the only final display conversion.
+    color = REC709_TO_WORKING * color;
 
-    return clamp(color, 0.0, 1.0);
+    return max(color, vec3(0.0));
 }
 
 vec3 tonemap_agx(vec3 color) {

@@ -155,7 +155,7 @@ Material material_from(
     // Create material with default values
 
     Material material;
-    material.albedo = srgb_eotf_inv(albedo_srgb) * rec709_to_rec2020;
+    material.albedo = srgb_eotf_inv(albedo_srgb) * REC709_TO_WORKING;
     material.emission = vec3(0.0);
     material.f0 = vec3(0.02);
     material.f82 = vec3(0.0);
@@ -607,7 +607,7 @@ Material material_from(
                         if (material_mask == 38u) { // 38
 #ifdef HARDCODED_EMISSION
                             // Redstone components
-                            vec3 ap1 = material.albedo * rec2020_to_ap1_unlit;
+                            vec3 ap1 = material.albedo * working_to_ap1_unlit;
                             float l = 0.5 * (min_of(ap1) + max_of(ap1));
                             float redness = ap1.r * rcp(ap1.g + ap1.b);
                             material.emission = 0.33 * material.albedo

@@ -96,7 +96,7 @@ vec3 get_lighting_color(int item_id) {
     if (index < 0 || index >= 32) {
         return vec3(0.0);
     }
-    return from_srgb(lighting_colors[index]);
+    return from_native(lighting_colors[index]);
 }
 
 #endif // INCLUDE_LIGHTING_COLORS_LIGHTING_COLORS

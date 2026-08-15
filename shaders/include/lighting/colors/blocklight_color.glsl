@@ -6,8 +6,9 @@
 // Vanilla GL uniform — Minecraft's per-biome fog color.
 uniform vec3 fogColor;
 
-const vec3 blocklight_color_base
-    = from_srgb(vec3(BLOCKLIGHT_R, BLOCKLIGHT_G, BLOCKLIGHT_B)) * BLOCKLIGHT_I;
+vec3 get_blocklight_color_base() {
+    return from_native(vec3(BLOCKLIGHT_R, BLOCKLIGHT_G, BLOCKLIGHT_B)) * BLOCKLIGHT_I;
+}
 const float blocklight_scale = 6.0;
 const float emission_scale = 40.0 * EMISSION_STRENGTH;
 
@@ -24,11 +25,11 @@ const float emission_scale = 40.0 * EMISSION_STRENGTH;
 //    the perceived intensity of blocklight is unchanged
 vec3 get_blocklight_color() {
     // Decode the biome fog color into linear rec709, then convert to the
-    // working color space (Rec2020 linear) used by the lighting pipeline.
+    // working color space used by the selected native working-space lighting pipeline.
     vec3 biome_tint_linear = srgb_eotf_inv(fogColor) * rec709_to_working_color;
 
     // Base user color in working space.
-    vec3 base = blocklight_color_base;
+    vec3 base = get_blocklight_color_base();
 
     // Luminance-preserving tint: pull the result toward the biome color in
     // hue/chroma space, but keep the original luminance.
@@ -52,7 +53,9 @@ vec3 get_blocklight_color() {
     return tinted;
 }
 
-// Backwards-compatible name for code that only wants the base color
-const vec3 blocklight_color = blocklight_color_base;
+// Backwards-compatible accessor for code that only wants the base color.
+vec3 get_blocklight_color_raw() {
+    return get_blocklight_color_base();
+}
 
 #endif // INCLUDE_LIGHTING_COLORS_BLOCKLIGHT_COLOR

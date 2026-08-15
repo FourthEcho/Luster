@@ -108,9 +108,9 @@ vec3 grade_input(vec3 rgb) {
 
     // White balance
 #if GRADE_WHITE_BALANCE != 6500
-    rgb = rgb * rec2020_to_xyz;
+    rgb = rgb * WORKING_TO_XYZ;
     rgb = rgb * white_balance_matrix;
-    rgb = rgb * xyz_to_rec2020;
+    rgb = rgb * XYZ_TO_WORKING;
 #endif
 
     rgb = max0(rgb);

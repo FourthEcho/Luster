@@ -172,7 +172,7 @@ void main() {
 
         shadowcolor0_out = mix(vec3(1.0), base_color.rgb * tint, base_color.a);
         shadowcolor0_out
-            = 0.25 * srgb_eotf_inv(shadowcolor0_out) * rec709_to_rec2020;
+            = 0.25 * srgb_eotf_inv(shadowcolor0_out) * REC709_TO_WORKING;
         shadowcolor0_out *= step(base_color.a, 1.0 - rcp(255.0));
     }
 #else
@@ -189,7 +189,7 @@ void main() {
     }
 
     vec3 outColor = mix(vec3(1.0), base_color.rgb, base_color.a);
-    outColor = 0.25 * srgb_eotf_inv(outColor) * rec709_to_rec2020;
+    outColor = 0.25 * srgb_eotf_inv(outColor) * REC709_TO_WORKING;
     outColor *= step(base_color.a, 1.0 - rcp(255.0));
 
     shadowcolor0_out = vec4(outColor, 1.0);

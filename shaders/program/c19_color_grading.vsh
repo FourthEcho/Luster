@@ -24,8 +24,8 @@ void main() {
     uv = gl_MultiTexCoord0.xy;
 
 #if GRADE_WHITE_BALANCE != 6500
-    vec3 src_xyz = blackbody(float(GRADE_WHITE_BALANCE)) * rec2020_to_xyz;
-    vec3 dst_xyz = blackbody(6500.0) * rec2020_to_xyz;
+    vec3 src_xyz = blackbody(float(GRADE_WHITE_BALANCE)) * WORKING_TO_XYZ;
+    vec3 dst_xyz = blackbody(6500.0) * WORKING_TO_XYZ;
     white_balance_matrix = get_chromatic_adaptation_matrix(src_xyz, dst_xyz);
 #endif
 

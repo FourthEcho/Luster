@@ -181,7 +181,7 @@ vec3 get_sky_lighting(
 #if defined WORLD_NETHER
     // Brighten + desaturate nether ambient
     skylight = 16.0 * directional_lighting
-        * mix(skylight, vec3(dot(skylight, luminance_weights_rec2020)), 0.5);
+        * mix(skylight, vec3(dot(skylight, luminance_weights)), 0.5);
 #endif
 
     lighting += skylight * get_skylight_falloff(light_levels.y);

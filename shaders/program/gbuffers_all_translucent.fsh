@@ -252,7 +252,7 @@ Material get_water_material(
 
     material.albedo += 0.1 * edge_highlight
         / mix(1.0,
-              max(dot(ambient_color, luminance_weights_rec2020), 0.5),
+              max(dot(ambient_color, luminance_weights), 0.5),
               light_levels.y);
     material.albedo = clamp01(material.albedo);
     alpha += edge_highlight;

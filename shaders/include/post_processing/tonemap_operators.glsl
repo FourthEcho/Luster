@@ -19,21 +19,21 @@
 // ACES RRT and ODT
 vec3 tonemap_aces_full(vec3 rgb) {
     rgb *= 1.6;
-    rgb = rgb * rec2020_to_ap0;
+    rgb = rgb * working_to_ap0;
     rgb = aces_rrt(rgb);
     rgb = aces_odt(rgb);
-    return rgb * ap1_to_rec2020;
+    return rgb * ap1_to_working;
 }
 
 // ACES RRT and ODT approximation
 vec3 tonemap_aces_fit(vec3 rgb) {
     rgb *= 1.6;
-    rgb = rgb * rec2020_to_ap0;
+    rgb = rgb * working_to_ap0;
     rgb = rrt_sweeteners(rgb);
     rgb = rrt_and_odt_fit(rgb);
     vec3 grayscale = vec3(dot(rgb, luminance_weights));
     rgb = mix(grayscale, rgb, odt_sat_factor);
-    return rgb * ap1_to_rec2020;
+    return rgb * ap1_to_working;
 }
 
 #endif

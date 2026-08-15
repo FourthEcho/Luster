@@ -43,9 +43,9 @@ vec3 get_sun_tint() {
 
     // User tint
 
-    const vec3 tint_morning = from_srgb(vec3(SUN_MR, SUN_MG, SUN_MB));
-    const vec3 tint_noon = from_srgb(vec3(SUN_NR, SUN_NG, SUN_NB));
-    const vec3 tint_evening = from_srgb(vec3(SUN_ER, SUN_EG, SUN_EB));
+    vec3 tint_morning = from_native(vec3(SUN_MR, SUN_MG, SUN_MB));
+    vec3 tint_noon = from_native(vec3(SUN_NR, SUN_NG, SUN_NB));
+    vec3 tint_evening = from_native(vec3(SUN_ER, SUN_EG, SUN_EB));
 
     vec3 user_tint = mix(tint_noon, tint_morning, time_sunrise);
     user_tint = mix(user_tint, tint_evening, time_sunset);
@@ -62,7 +62,7 @@ float get_moon_exposure() {
 }
 
 vec3 get_moon_tint() {
-    const vec3 base_tint = from_srgb(vec3(MOON_R, MOON_G, MOON_B));
+    vec3 base_tint = from_native(vec3(MOON_R, MOON_G, MOON_B));
 
     // Earthshine — the warm glow produced when sunlight reflected off Earth
     // illuminates the dark portion of the moon. We use the canonical

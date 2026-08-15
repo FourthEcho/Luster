@@ -11,11 +11,11 @@
 
 const float lava_fog_start = 0.33;
 const float lava_fog_density = 1.0;
-const vec3 lava_fog_color = from_srgb(vec3(0.839, 0.373, 0.075)) * 2.0;
+vec3 get_lava_fog_color() { return from_native(vec3(0.839, 0.373, 0.075)) * 2.0; }
 
 const float snow_fog_start = 0.5;
 const float snow_fog_density = 1.0;
-const vec3 snow_fog_color = from_srgb(vec3(0.957, 0.988, 0.988)) * 0.3;
+vec3 get_snow_fog_color() { return from_native(vec3(0.957, 0.988, 0.988)) * 0.3; }
 
 // CAVE_FOG_INTENSITY scales both the density and the brightness of the
 // cave fog. Default 1.0 reproduces the original look.
@@ -89,6 +89,7 @@ vec4 common_fog(float view_dist, const bool sky) {
         lava_fog_start,
         lava_fog_density * float(isEyeInWater == 2)
     );
+    vec3 lava_fog_color = get_lava_fog_color();
     fog.rgb += lava_fog_color - lava_fog_color * lava_fog;
     fog.a *= lava_fog;
 
@@ -98,6 +99,7 @@ vec4 common_fog(float view_dist, const bool sky) {
         snow_fog_start,
         snow_fog_density * float(isEyeInWater == 3)
     );
+    vec3 snow_fog_color = get_snow_fog_color();
     fog.rgb += snow_fog_color - snow_fog_color * snow_fog;
     fog.a *= snow_fog;
 
@@ -242,7 +244,7 @@ mat2x3 water_fog_simple(
 
     vec3 light_ambient = ambient_color * light_levels.y;
     light_ambient
-        += 1.41 * blocklight_color * blocklight_scale * sqr(light_levels.x);
+        += 1.41 * get_blocklight_color_raw() * blocklight_scale * sqr(light_levels.x);
 
     vec3 transmittance = exp(-extinction_coeff * dist);
 

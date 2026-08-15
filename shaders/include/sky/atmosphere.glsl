@@ -55,13 +55,13 @@ const vec2 air_scale_heights = vec2(8.4e3, 1.25e3); // m
 // Coefficients for Rec. 709 primaries transformed to Rec. 2020
 const vec3 air_rayleigh_coefficient
     = vec3(8.059375432e-06, 1.671209429e-05, 4.080133294e-05)
-    * rec709_to_rec2020;
+    * REC709_TO_WORKING;
 const vec3 air_mie_coefficient
     = vec3(1.666442358e-06, 1.812685127e-06, 1.958927896e-06)
-    * rec709_to_rec2020;
+    * REC709_TO_WORKING;
 const vec3 air_ozone_coefficient
     = vec3(8.304280072e-07, 1.314911970e-06, 5.440679729e-08)
-    * rec709_to_rec2020;
+    * REC709_TO_WORKING;
 
 const mat2x3 air_scattering_coefficients
     = mat2x3(air_rayleigh_coefficient, air_mie_albedo* air_mie_coefficient);
@@ -113,7 +113,7 @@ vec3 atmosphere_mie_phase_moon(float nu) {
 vec3 atmosphere_post_processing(vec3 atmosphere) {
     // Atmosphere saturation boost
     atmosphere = mix(
-        vec3(dot(atmosphere, luminance_weights_rec2020)),
+        vec3(dot(atmosphere, luminance_weights)),
         atmosphere,
         ATMOSPHERE_SATURATION_BOOST_INTENSITY
             * atmosphere_saturation_boost_amount

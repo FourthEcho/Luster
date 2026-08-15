@@ -224,7 +224,7 @@ vec3 get_held_material_light(vec3 position_scene) {
                 unpack_unorm_2x8(tap_gbuffer_1.w)
             );
 
-            vec3 albedo = srgb_eotf_inv(albedo_srgb) * rec709_to_rec2020;
+            vec3 albedo = srgb_eotf_inv(albedo_srgb) * REC709_TO_WORKING;
 
 #if TEXTURE_FORMAT == TEXTURE_FORMAT_LAB
             // labPBR stores emission in the alpha channel of the specular map
