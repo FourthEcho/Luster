@@ -27,9 +27,11 @@ layout(location = 1) out vec3 max_color;
 in vec2 uv;
 
 uniform sampler2D colortex0;
+uniform sampler2D colortex4; // sky map — used by indirect_lighting.glsl for off-screen SSGI tap fallback
 uniform sampler2D depthtex0;
 uniform mat4 gbufferProjection;
 uniform mat4 gbufferProjectionInverse;
+uniform mat4 gbufferModelViewInverse;
 uniform float near, far;
 uniform vec2 view_res;
 uniform vec2 view_pixel_size;
@@ -44,6 +46,7 @@ uniform sampler2D colortex17; // full-resolution 2x2 depth-slice irradiance cach
 #include "/include/utility/color.glsl"
 #include "/include/utility/space_conversion.glsl"
 #ifdef INDIRECT_LIGHTING
+#include "/include/sky/projection.glsl"
 #include "/include/lighting/indirect_lighting.glsl"
 #endif
 

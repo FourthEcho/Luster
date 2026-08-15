@@ -49,6 +49,57 @@ vec3 indirect_reconstruct_view_position(vec2 coord, float depth) {
     return screen_to_view_space(gbufferProjectionInverse, vec3(coord, depth), true);
 }
 
+// ----------------------------------------------------------------------------
+//  Sky IBL fallback for off-screen SSGI taps
+// ----------------------------------------------------------------------------
+//  Screen-space GI cannot see beyond the camera frustum.  When a Vogel-disk
+//  tap lands outside [0,1] UV bounds (or hits sky depth on the edge of the
+//  frame), reconstruct the tap's view-space direction at the far plane and
+//  sample the sky map (colortex4) in that world-space direction.  This is
+//  the "wall facing sun with sun behind camera" fix — sky IBL provides the
+//  bounce light SSGI would otherwise miss entirely.
+//
+//  Returns vec3(0.0) and weight=0 when:
+//    - The tap direction is below the world horizon (don't sample ground)
+//    - The tap direction is on the back hemisphere of the receiver
+// ----------------------------------------------------------------------------
+float indirect_sky_fallback(
+    vec2  tap_uv_raw,
+    vec3  receiver_view_pos,
+    vec3  receiver_normal,
+    out vec3 sky_radiance
+) {
+    // Reconstruct the tap's view-space position at the far plane using the
+    // UNCLAMPED uv — this gives the geometric direction toward the off-screen
+    // tap rather than a clamped edge sample.
+    vec3 tap_view_far = indirect_reconstruct_view_position(tap_uv_raw, 0.99999);
+    vec3 to_source = normalize(tap_view_far - receiver_view_pos);
+
+    // Receiver cosine — sky only contributes from the receiver's upper
+    // hemisphere (same test as world taps).
+    float receiver_cos = max0(dot(receiver_normal, to_source));
+    if (receiver_cos <= 0.001) {
+        sky_radiance = vec3(0.0);
+        return 0.0;
+    }
+
+    // View → world direction for sky lookup.
+    vec3 world_dir = normalize(mat3(gbufferModelViewInverse) * to_source);
+
+    // Reject below-horizon taps — project_sky expects an upward-pointing
+    // direction.  Sky doesn't emit from below ground in the overworld.
+    if (world_dir.y <= 0.0) {
+        sky_radiance = vec3(0.0);
+        return 0.0;
+    }
+
+    sky_radiance = texture(colortex4, project_sky(world_dir)).rgb;
+    // Sky has no source geometry — no source_cos, depth_weight, or
+    // normal_weight apply.  Weight purely by receiver_cos so the SSGI
+    // weighted-average divides correctly against world taps.
+    return receiver_cos;
+}
+
 vec3 indirect_reconstruct_normal(vec2 coord) {
     ivec2 texel = ivec2(coord * view_res);
     ivec2 max_texel = ivec2(view_res) - ivec2(1);
@@ -134,11 +185,26 @@ vec3 indirect_gather_scene(
     for (int i = 0; i < INDIRECT_SAMPLES; ++i) {
         vec2 dir = rotation * taps[i];
         float scale = radius * (0.65 + 0.35 * fract(float(i) * 0.61803398875));
-        vec2 sample_uv = clamp01(uv_in + dir * texel_scale * scale);
-        float sample_depth = texture(depthtex0, sample_uv).x;
+        vec2 sample_uv_raw = uv_in + dir * texel_scale * scale;
+        bool tap_offscreen = (sample_uv_raw.x < 0.0 || sample_uv_raw.x > 1.0 ||
+                             sample_uv_raw.y < 0.0 || sample_uv_raw.y > 1.0);
+        if (tap_offscreen) {
+            // Screen-space GI cannot see beyond the camera frustum — fall back
+            // to sky IBL in the world-space direction toward the off-screen tap.
+            vec3 sky_radiance;
+            float sky_weight = indirect_sky_fallback(
+                sample_uv_raw, receiver_view_pos, receiver_normal, sky_radiance);
+            if (sky_weight > 1e-5) {
+                sky_radiance *= receiver_albedo;
+                sum += sky_radiance * sky_weight;
+                weight_sum += sky_weight;
+            }
+            continue;
+        }
+        float sample_depth = texture(depthtex0, sample_uv_raw).x;
         if (sample_depth >= 0.99999) continue;
 
-        vec3 sample_view = indirect_reconstruct_view_position(sample_uv, sample_depth);
+        vec3 sample_view = indirect_reconstruct_view_position(sample_uv_raw, sample_depth);
         vec3 to_source = normalize(sample_view - receiver_view_pos);
         // Receiver-cosine check FIRST — taps on the back side of the receiver
         // contribute nothing, so skip the 4-fetch source-normal reconstruction
@@ -147,7 +213,7 @@ vec3 indirect_gather_scene(
         if (receiver_cos <= 0.001) continue;
 
         vec3 source_to_receiver = -to_source;
-        vec3 source_normal = indirect_reconstruct_normal(sample_uv);
+        vec3 source_normal = indirect_reconstruct_normal(sample_uv_raw);
         float source_cos = max0(dot(source_normal, source_to_receiver));
         if (source_cos <= 0.001) continue;
 
@@ -162,7 +228,7 @@ vec3 indirect_gather_scene(
             * mix(1.0, normal_weight, 0.75) * reuse;
         if (weight <= 1e-5) continue;
 
-        vec3 source_radiance = texture(colortex0, sample_uv).rgb;
+        vec3 source_radiance = texture(colortex0, sample_uv_raw).rgb;
         source_radiance *= receiver_albedo;
         sum += source_radiance * weight;
         weight_sum += weight;
@@ -199,11 +265,28 @@ vec3 indirect_gather_bounce2(
     for (int i = 0; i < INDIRECT_SAMPLES; ++i) {
         vec2 dir = rotation * taps[i];
         float scale = radius * (0.60 + 0.40 * fract(float(i) * 0.754877666));
-        vec2 sample_uv = clamp01(uv_in + dir * view_pixel_size * scale);
-        float sample_depth = texture(depthtex0, sample_uv).x;
+        vec2 sample_uv_raw = uv_in + dir * view_pixel_size * scale;
+        bool tap_offscreen = (sample_uv_raw.x < 0.0 || sample_uv_raw.x > 1.0 ||
+                             sample_uv_raw.y < 0.0 || sample_uv_raw.y > 1.0);
+        if (tap_offscreen) {
+            // Sky IBL fallback — see indirect_sky_fallback() for rationale.
+            // For bounce2/3, sky radiance is the original light source (no
+            // previous bounce), and the caller multiplies by the bounce-energy
+            // factor — so we just return raw sky color here.
+            vec3 sky_radiance;
+            float sky_weight = indirect_sky_fallback(
+                sample_uv_raw, receiver_view_pos, receiver_normal, sky_radiance);
+            if (sky_weight > 1e-5) {
+                sky_radiance *= receiver_albedo;
+                sum += sky_radiance * sky_weight;
+                weight_sum += sky_weight;
+            }
+            continue;
+        }
+        float sample_depth = texture(depthtex0, sample_uv_raw).x;
         if (sample_depth >= 0.99999) continue;
 
-        vec3 sample_view = indirect_reconstruct_view_position(sample_uv, sample_depth);
+        vec3 sample_view = indirect_reconstruct_view_position(sample_uv_raw, sample_depth);
         vec3 to_source = normalize(sample_view - receiver_view_pos);
         // Receiver-cosine check FIRST — same early-exit as bounce1, saves the
         // 4-fetch source_normal reconstruction for back-side taps.
@@ -211,7 +294,7 @@ vec3 indirect_gather_bounce2(
         if (receiver_cos <= 0.001) continue;
 
         vec3 source_to_receiver = -to_source;
-        vec3 source_normal = indirect_reconstruct_normal(sample_uv);
+        vec3 source_normal = indirect_reconstruct_normal(sample_uv_raw);
         float source_cos = max0(dot(source_normal, source_to_receiver));
         if (source_cos <= 0.001) continue;
 
@@ -226,7 +309,7 @@ vec3 indirect_gather_bounce2(
             * mix(1.0, normal_weight, 0.75) * reuse;
         if (weight <= 1e-5) continue;
 
-        vec3 source_radiance = texture(colortex2, sample_uv).rgb;
+        vec3 source_radiance = texture(colortex2, sample_uv_raw).rgb;
         source_radiance *= receiver_albedo;
         sum += source_radiance * weight;
         weight_sum += weight;
@@ -263,11 +346,25 @@ vec3 indirect_gather_bounce3(
     for (int i = 0; i < INDIRECT_SAMPLES; ++i) {
         vec2 dir = rotation * taps[i];
         float scale = radius * (0.60 + 0.40 * fract(float(i) * 0.569840296));
-        vec2 sample_uv = clamp01(uv_in + dir * view_pixel_size * scale);
-        float sample_depth = texture(depthtex0, sample_uv).x;
+        vec2 sample_uv_raw = uv_in + dir * view_pixel_size * scale;
+        bool tap_offscreen = (sample_uv_raw.x < 0.0 || sample_uv_raw.x > 1.0 ||
+                             sample_uv_raw.y < 0.0 || sample_uv_raw.y > 1.0);
+        if (tap_offscreen) {
+            // Sky IBL fallback — see indirect_sky_fallback() for rationale.
+            vec3 sky_radiance;
+            float sky_weight = indirect_sky_fallback(
+                sample_uv_raw, receiver_view_pos, receiver_normal, sky_radiance);
+            if (sky_weight > 1e-5) {
+                sky_radiance *= receiver_albedo;
+                sum += sky_radiance * sky_weight;
+                weight_sum += sky_weight;
+            }
+            continue;
+        }
+        float sample_depth = texture(depthtex0, sample_uv_raw).x;
         if (sample_depth >= 0.99999) continue;
 
-        vec3 sample_view = indirect_reconstruct_view_position(sample_uv, sample_depth);
+        vec3 sample_view = indirect_reconstruct_view_position(sample_uv_raw, sample_depth);
         vec3 to_source = normalize(sample_view - receiver_view_pos);
         // Receiver-cosine check FIRST — same early-exit as bounce1/2, saves
         // the 4-fetch source_normal reconstruction for back-side taps.
@@ -275,7 +372,7 @@ vec3 indirect_gather_bounce3(
         if (receiver_cos <= 0.001) continue;
 
         vec3 source_to_receiver = -to_source;
-        vec3 source_normal = indirect_reconstruct_normal(sample_uv);
+        vec3 source_normal = indirect_reconstruct_normal(sample_uv_raw);
         float source_cos = max0(dot(source_normal, source_to_receiver));
         if (source_cos <= 0.001) continue;
 
@@ -290,7 +387,7 @@ vec3 indirect_gather_bounce3(
             * mix(1.0, normal_weight, 0.75) * reuse;
         if (weight <= 1e-5) continue;
 
-        vec3 source_radiance = texture(colortex1, sample_uv).rgb;
+        vec3 source_radiance = texture(colortex1, sample_uv_raw).rgb;
         source_radiance *= receiver_albedo;
         sum += source_radiance * weight;
         weight_sum += weight;

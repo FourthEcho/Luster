@@ -417,8 +417,13 @@ const float wetnessHalflife         = 70.0;
   #define FOG_SMOOTHING
   #define FOG_SMOOTHING_RADIUS 2.0
   #define FOG_TEMPORAL_SMOOTHING
-  #define FOG_HISTORY_STRENGTH 0.82 // [0.00 0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.45 0.50 0.55 0.60 0.65 0.70 0.75 0.80 0.85 0.90 0.95 1.00]
-  #define FOG_HISTORY_DEPTH_REJECTION 0.08 // [0.01 0.02 0.04 0.06 0.08 0.10 0.12 0.16 0.20] // [0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0 5.5 6.0 6.5 7.0 7.5 8.0 8.5 9.0 9.5 10.0]
+  // Hidden internal constants — controlled per-profile in shaders.properties
+  // (profile.low/medium/high/ultra/mac all assign FOG_HISTORY_STRENGTH=0.82
+  // and FOG_HISTORY_DEPTH_REJECTION=0.08).  Removed from the GUI because
+  // the two sliders had no perceivable user-facing effect over the
+  // profile-tuned defaults but cluttered the fog sub-screen.
+  #define FOG_HISTORY_STRENGTH 0.82
+  #define FOG_HISTORY_DEPTH_REJECTION 0.08
 
   // BORDER_FOG_HIDE_SUNSET_GRADIENT and BLOOMY_RAIN were unused dead code; removed.
 

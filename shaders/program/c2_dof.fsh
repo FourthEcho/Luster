@@ -29,6 +29,7 @@ in vec2 uv;
 uniform sampler2D noisetex;
 
 uniform sampler2D colortex0;
+uniform sampler2D colortex4; // sky map — used by indirect_lighting.glsl for off-screen SSGI tap fallback
 #ifdef INDIRECT_LIGHTING
 uniform sampler2D colortex1; // G-buffer albedo/material data before GI owns colortex2
 uniform sampler2D colortex17; // full-resolution 2x2 depth-slice irradiance cache
@@ -64,6 +65,7 @@ uniform vec2 taa_offset;
 #include "/include/utility/encoding.glsl"
 #include "/include/utility/color.glsl"
 #if defined INDIRECT_LIGHTING
+#include "/include/sky/projection.glsl"
 #include "/include/lighting/indirect_lighting.glsl"
 #endif
 #if defined INDIRECT_LIGHTING && defined COLORED_LIGHTS
