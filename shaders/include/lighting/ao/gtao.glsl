@@ -6,15 +6,30 @@
 #include "/include/utility/space_conversion.glsl"
 
 #define GTAO_FALLOFF_START 0.70
-#ifndef GTAO_SLICES
-#define GTAO_SLICES 3
-#endif
-#ifndef GTAO_SAMPLE_POWER
+// Hardcoded internal tuning constants — formerly GUI sliders in
+// settings.glsl.  Removed from the GUI because they are algorithm-internal
+// tuning values that don't have meaningful user-facing trade-offs: changing
+// them tends to produce visibly broken AO (either over-darkened corners or
+// light-leaking geometry) rather than a useful strength/quality dial.
+//   GTAO_SLICES      : number of directions to sample around the
+//                      hemisphere (Asano 1998 convergence is O(1/slices²)).
+//                      3 is the canonical value used by the original GTA-O
+//                      paper (Jimenez et al. 2016) and matches the
+//                      dithering pattern used in the loop below.
+//   GTAO_SAMPLE_POWER: exponent of the importance-sampling curve that
+//                      biases samples toward the horizon (where most of
+//                      the AO signal lives). 1.35 is the value published
+//                      by Jimenez et al.; values <1 spread samples evenly
+//                      (noisier), >1.5 cluster at horizon (smoother but
+//                      misses interior occlusion).
+//   GTAO_THICKNESS   : depth-rejection threshold — fragments more than
+//                      this many view-space units away from the receiver
+//                      are treated as occluders. 1.10 is a tuned default
+//                      that prevents thin-geometry self-occlusion while
+//                      still catching real occluders within ~1m.
+#define GTAO_SLICES       3
 #define GTAO_SAMPLE_POWER 1.35
-#endif
-#ifndef GTAO_THICKNESS
-#define GTAO_THICKNESS 1.10
-#endif
+#define GTAO_THICKNESS    1.10
 
 float integrate_arc(vec2 h, float n, float cos_n) {
     vec2 tmp = cos_n + 2.0 * h * sin(n) - cos(2.0 * h - n);

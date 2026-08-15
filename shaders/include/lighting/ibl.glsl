@@ -64,6 +64,25 @@
 #include "/include/utility/dithering.glsl"
 
 // ----------------------------------------------------------------------------
+//  IBL sub-feature toggles — these were previously exposed in the GUI as
+//  independent options, but neither was actually consumed by any shader
+//  code (they were vestigial defines from an earlier implementation).
+//  They are now auto-enabled when the IBL master toggle is on, so any
+//  future code guarded by `#ifdef IBL_MULTI_SCATTER` or
+//  `#ifdef IBL_CONE_FILTER` will correctly follow the IBL master switch
+//  without requiring a separate GUI option.  If IBL is off, neither is
+//  defined — so guarded code paths will compile out cleanly.
+// ----------------------------------------------------------------------------
+#ifdef IBL
+  #ifndef IBL_MULTI_SCATTER
+    #define IBL_MULTI_SCATTER
+  #endif
+  #ifndef IBL_CONE_FILTER
+    #define IBL_CONE_FILTER
+  #endif
+#endif
+
+// ----------------------------------------------------------------------------
 //  Defensive fallbacks — these are normally defined in settings.glsl (which
 //  is pulled in via global.glsl), but we provide sane defaults here so the
 //  IBL module compiles cleanly even if a user removes the settings, sets

@@ -4,6 +4,22 @@
 #include "/include/sky/clouds/constants.glsl"
 #include "/include/utility/bicubic.glsl"
 
+// Hardcoded internal tuning constants — formerly GUI sliders in
+// settings.glsl.  Removed from the GUI because they are tightly coupled
+// to the fixed 8-direction Vogel-disk PCF loop below (changing the sample
+// count without also updating the dirs[] array would silently truncate
+// taps or read past the array).  Only the cloud-shadow *intensity* is
+// user-tunable now.
+//   CLOUD_SHADOW_FILTER_SAMPLES : number of PCF taps (1..8). 8 gives a
+//                                 soft, smooth penumbra at the cost of 8
+//                                 extra texture taps per shaded fragment.
+//   CLOUD_SHADOW_SOFTNESS       : radius scale for the PCF disk. 1.15
+//                                 gives a noticeable but not cartoonish
+//                                 penumbra; modulated per-fragment by
+//                                 sun altitude (lower sun = softer).
+#define CLOUD_SHADOW_FILTER_SAMPLES 8
+#define CLOUD_SHADOW_SOFTNESS       1.15
+
 const ivec2 cloud_shadow_res = ivec2(512);
 
 const float cloud_shadow_extent = 256.0 / (CLOUDS_SCALE / 10.0);

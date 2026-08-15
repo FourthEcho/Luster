@@ -11,7 +11,11 @@
 #ifdef IBL
 #include "/include/lighting/ibl.glsl"
 #endif
-// SSGI system removed — bounced fill-light is now a constant.
+// Full SSGI + color bleed lives in include/lighting/indirect_lighting.glsl
+// and runs as composite passes (c2_dof → c3_taau_prep → c4_taa_exposure).
+// There is NO cheap in-gbuffer bounce fill here anymore — shadowed areas
+// are lit by skylight/blocklight/cave lighting in the gbuffer, and the
+// real multi-bounce SSGI contribution is added by the composite pipeline.
 #endif
 #ifdef COLORED_LIGHTS
 #include "/include/lighting/lpv/blocklight.glsl"
@@ -171,7 +175,15 @@ vec3 get_sky_lighting(
 
 #if defined WORLD_OVERWORLD && defined PROGRAM_DEFERRED4
 #ifdef IBL
-    vec3 skylight = IBL_INTENSITY * get_ibl_irradiance(bent_normal, ao);
+    // Skip the IBL diffuse integration (16-32 sky-map taps per pixel via
+    // get_ibl_irradiance) for pixels with negligible skylight — the result
+    // is multiplied by get_skylight_falloff(light_levels.y) = sqr(skylight)
+    // below, so for light_levels.y < 0.02 the contribution is < 0.0004 and
+    // invisible.  This is a meaningful win in cave/indoor-heavy scenes where
+    // most of the screen has light_levels.y ≈ 0.
+    vec3 skylight = light_levels.y < 0.02
+        ? vec3(0.0)
+        : IBL_INTENSITY * get_ibl_irradiance(bent_normal, ao);
     vec3 skylight_up = ambient_color;
 #else
     vec3 skylight = ambient_color * ao;
@@ -244,18 +256,16 @@ vec3 get_diffuse_lighting(
         * (1.0 - 0.5 * material.sss_amount)
     );
 
-#define DO_BOUNCED_LIGHTING true
-
-    vec3 bounced = vec3(0.0);
-    if (DO_BOUNCED_LIGHTING) {
-        // SSGI was removed. Bounced fill-light is now a constant: a small
-        // constant term that fills in shadow boundaries and gives the scene a
-        // bit of life without raymarching. This is the previous "legacy
-        // fallback" path with the intensity hard-coded to 1.0 (which was the
-        // default value of the removed BOUNCED_LIGHT_I slider).
-        bounced = 0.033 * (1.0 - shadows) * (1.0 - 0.1 * max0(normal.y))
-            * pow1d5(ao + eps) * pow4(light_levels.y);
-    }
+    // Note: there is no cheap in-gbuffer "bounced" fill-light term here
+    // anymore.  Full SSGI + multi-bounce color bleed is computed by the
+    // composite pipeline:
+    //   c2_dof.fsh         → bounce1 (direct scene gather + cache + LPV)
+    //   c3_taau_prep.fsh   → bounce2 (gather from bounce1)
+    //   c4_taa_exposure.fsh→ bounce3 (gather from bounce2), temporal
+    //                          accumulation, scaled by INDIRECT_INTENSITY,
+    //                          then added to the lit scene color.
+    // Shadowed pixels therefore rely on skylight, blocklight, cave lighting,
+    // and the composite SSGI contribution — not on a fake constant fill.
 
 #ifdef SUB_SURFACE_SCATTERING
     vec3 sss = sss_approx(
@@ -284,10 +294,10 @@ vec3 get_diffuse_lighting(
 
 #ifdef SHADOW_VPS
     // Add SSS and diffuse
-    lighting += diffuse * shadows + bounced + sss;
+    lighting += diffuse * shadows + sss;
 #else
     // Blend SSS and diffuse
-    lighting += mix(diffuse, sss, material.sss_amount) * shadows + bounced;
+    lighting += mix(diffuse, sss, material.sss_amount) * shadows;
 #endif
 #else
     // Simple shading for when shadows are disabled

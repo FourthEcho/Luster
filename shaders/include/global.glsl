@@ -52,6 +52,12 @@
 
 #include "/settings.glsl"
 
+// Internal tuning constants — previously hidden inside settings.glsl, now
+// centralized here so the user-facing options file only contains GUI-exposed
+// sliders / toggles / mode switchers. See include/internal.glsl for the full
+// list and per-option comments.
+#include "/include/internal.glsl"
+
 // Apple ships only OpenGL 4.1. The voxel/compute colored-light backend is
 // intentionally disabled there; the GL 4.1 indirect-lighting path remains
 // available. This also prevents a GUI/profile override from compiling LPV

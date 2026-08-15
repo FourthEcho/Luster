@@ -19,12 +19,20 @@ const float indirect_depth_rejection = 0.35;
 const float indirect_normal_rejection = 0.15;
 const float indirect_cache_strength = 0.55;
 const float indirect_history_strength = 0.75;
-#ifndef INDIRECT_SPATIAL_REUSE
-#define INDIRECT_SPATIAL_REUSE 0.85
-#endif
-#ifndef INDIRECT_HISTORY_CLAMP
+// Hardcoded internal tuning constants — formerly GUI sliders in
+// settings.glsl.  Removed from the GUI because they had no perceivable
+// user-facing effect over a sensible fixed value but cluttered the
+// indirect-lighting sub-screen.
+//   INDIRECT_SPATIAL_REUSE : controls the radial-falloff weight in the
+//                            12-tap spatial-reuse gather. 0.85 ≈ strong
+//                            reuse, biasing toward the historical /
+//                            neighbour reservoir.
+//   INDIRECT_HISTORY_CLAMP : reserved for the future canonical-ReSTIR
+//                            history-clamp (M-stream cap).  Currently
+//                            unused but kept here for forward-compat so
+//                            future code can rely on it existing.
+#define INDIRECT_SPATIAL_REUSE  0.85
 #define INDIRECT_HISTORY_CLAMP 1.25
-#endif
 #ifndef INDIRECT_SECOND_BOUNCE_ENERGY
 #define INDIRECT_SECOND_BOUNCE_ENERGY 0.55
 #endif
@@ -132,11 +140,16 @@ vec3 indirect_gather_scene(
 
         vec3 sample_view = indirect_reconstruct_view_position(sample_uv, sample_depth);
         vec3 to_source = normalize(sample_view - receiver_view_pos);
+        // Receiver-cosine check FIRST — taps on the back side of the receiver
+        // contribute nothing, so skip the 4-fetch source-normal reconstruction
+        // (indirect_reconstruct_normal does 4 depthtex0 taps) for those taps.
+        float receiver_cos = max0(dot(receiver_normal, to_source));
+        if (receiver_cos <= 0.001) continue;
+
         vec3 source_to_receiver = -to_source;
         vec3 source_normal = indirect_reconstruct_normal(sample_uv);
-        float receiver_cos = max0(dot(receiver_normal, to_source));
         float source_cos = max0(dot(source_normal, source_to_receiver));
-        if (receiver_cos <= 0.001 || source_cos <= 0.001) continue;
+        if (source_cos <= 0.001) continue;
 
         float distance = length(sample_view - receiver_view_pos);
         float radial = max0(1.0 - distance / max(radius * 1.5, 0.001));
@@ -192,11 +205,15 @@ vec3 indirect_gather_bounce2(
 
         vec3 sample_view = indirect_reconstruct_view_position(sample_uv, sample_depth);
         vec3 to_source = normalize(sample_view - receiver_view_pos);
+        // Receiver-cosine check FIRST — same early-exit as bounce1, saves the
+        // 4-fetch source_normal reconstruction for back-side taps.
+        float receiver_cos = max0(dot(receiver_normal, to_source));
+        if (receiver_cos <= 0.001) continue;
+
         vec3 source_to_receiver = -to_source;
         vec3 source_normal = indirect_reconstruct_normal(sample_uv);
-        float receiver_cos = max0(dot(receiver_normal, to_source));
         float source_cos = max0(dot(source_normal, source_to_receiver));
-        if (receiver_cos <= 0.001 || source_cos <= 0.001) continue;
+        if (source_cos <= 0.001) continue;
 
         float distance = length(sample_view - receiver_view_pos);
         float radial = max0(1.0 - distance / max(radius * 1.5, 0.001));
@@ -252,11 +269,15 @@ vec3 indirect_gather_bounce3(
 
         vec3 sample_view = indirect_reconstruct_view_position(sample_uv, sample_depth);
         vec3 to_source = normalize(sample_view - receiver_view_pos);
+        // Receiver-cosine check FIRST — same early-exit as bounce1/2, saves
+        // the 4-fetch source_normal reconstruction for back-side taps.
+        float receiver_cos = max0(dot(receiver_normal, to_source));
+        if (receiver_cos <= 0.001) continue;
+
         vec3 source_to_receiver = -to_source;
         vec3 source_normal = indirect_reconstruct_normal(sample_uv);
-        float receiver_cos = max0(dot(receiver_normal, to_source));
         float source_cos = max0(dot(source_normal, source_to_receiver));
-        if (receiver_cos <= 0.001 || source_cos <= 0.001) continue;
+        if (source_cos <= 0.001) continue;
 
         float distance = length(sample_view - receiver_view_pos);
         float radial = max0(1.0 - distance / max(radius * 1.5, 0.001));
