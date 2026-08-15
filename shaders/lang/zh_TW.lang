@@ -114,6 +114,20 @@ option.WEATHER_WIND_VARIATION_SPEED        = 風速變化速率
 
 # Lighting settings
 
+option.INDIRECT_LIGHTING                    = Indirect Lighting
+option.INDIRECT_LIGHTING.comment            = Master toggle for fragment-shader multi-bounce diffuse indirect lighting. Designed for OpenGL 4.1/macOS: no compute shaders, SSBOs, image load/store, or GL 4.3-only features.
+option.INDIRECT_BOUNCE_COUNT = Bounces
+value.INDIRECT_BOUNCE_COUNT.1               = 1 Bounce
+value.INDIRECT_BOUNCE_COUNT.2               = 2 Bounces
+value.INDIRECT_BOUNCE_COUNT.3               = 3 Bounces
+option.INDIRECT_INTENSITY = Indirect Lighting Intensity
+option.INDIRECT_INTENSITY.comment           = Scales the final indirect diffuse contribution.
+option.INDIRECT_RADIUS = Indirect Lighting Radius
+option.INDIRECT_RADIUS.comment              = Controls the screen-space gather radius used for indirect light.
+option.INDIRECT_SAMPLES = Indirect Lighting Samples
+option.INDIRECT_SAMPLES.comment             = Number of fragment-shader gather samples per bounce. Higher values reduce noise at greater GPU cost.
+
+
 option.COLORED_LIGHTS                  = 有色光線
 option.COLORED_LIGHTS.comment          = 使用泛洪算法的多色方塊光線，需要 Iris 1.6+
 option.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION = 原版光照貼圖貢獻
@@ -925,3 +939,6 @@ SSS_STEPS                                 = SSS Steps
 POM_SAMPLES                               = POM Samples
 POM_DISTANCE                              = POM Distance
 POM_SLOPE_NORMALS                         = POM Slope Normals
+
+option.INDIRECT_TEMPORAL_ACCUMULATION = Temporal Accumulation
+option.INDIRECT_TEMPORAL_ACCUMULATION.comment = Accumulates indirect lighting over previous frames to reduce noise and shimmer.

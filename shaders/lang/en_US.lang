@@ -21,6 +21,8 @@ screen.mods                            = Mod Options
 screen.weather                         = Weather 
 screen.moon_phase_influence            = Moon Phase Influence
 screen.colored_lights_screen          = Colored Lights
+screen.main_lighting                  = Main Lighting
+screen.indirect_lighting              = Indirect Lighting
 screen.colored_lights_settings        = Colored Lights Settings
 screen.handheld_lights_screen         = Handheld Lights
 screen.ibl                              = Image Based Lighting
@@ -139,6 +141,22 @@ option.WEATHER_WIND_VARIATION_SPEED        = Windiness Variation Speed
 option.WEATHER_WIND_VARIATION_SPEED.comment = How quickly the simulated windiness changes over time
 
 # Lighting settings
+
+option.INDIRECT_LIGHTING                    = Indirect Lighting
+option.INDIRECT_LIGHTING.comment            = Master toggle for OpenGL 4.1-compatible indirect diffuse lighting.
+option.INDIRECT_TEMPORAL_ACCUMULATION       = Temporal Accumulation
+option.INDIRECT_TEMPORAL_ACCUMULATION.comment = Accumulates indirect lighting over previous frames to reduce noise and shimmer.
+option.INDIRECT_BOUNCE_COUNT                = Bounces
+value.INDIRECT_BOUNCE_COUNT.1               = 1 Bounce
+value.INDIRECT_BOUNCE_COUNT.2               = 2 Bounces
+value.INDIRECT_BOUNCE_COUNT.3               = 3 Bounces
+option.INDIRECT_INTENSITY                   = Indirect Lighting Intensity
+option.INDIRECT_INTENSITY.comment           = Scales the final indirect diffuse contribution.
+option.INDIRECT_RADIUS                      = Indirect Lighting Radius
+option.INDIRECT_RADIUS.comment              = Controls the screen-space gather radius used for indirect light.
+option.INDIRECT_SAMPLES                     = Indirect Lighting Samples
+option.INDIRECT_SAMPLES.comment             = Number of fragment-shader gather samples per bounce. Higher values reduce noise at greater GPU cost.
+
 
 option.COLORED_LIGHTS                  = Colored Lights
 option.COLORED_LIGHTS.comment          = Variable-color block lighting using flood fill algorithm. Requires Iris 1.6 or above

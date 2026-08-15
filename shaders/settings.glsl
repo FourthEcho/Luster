@@ -110,6 +110,13 @@ const float wetnessHalflife         = 70.0;
   // because smooth_filter() upsampling and TAA both low-pass the result.
   #define IBL_VL_SAMPLES 4
 
+  #define INDIRECT_LIGHTING
+  #define INDIRECT_TEMPORAL_ACCUMULATION
+  #define INDIRECT_BOUNCE_COUNT 2 // [1 2 3]
+  #define INDIRECT_INTENSITY 0.85 // [0.00 0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.45 0.50 0.55 0.60 0.65 0.70 0.75 0.80 0.85 0.90 0.95 1.00 1.10 1.20 1.30 1.40 1.50 1.60 1.80 2.00]
+  #define INDIRECT_RADIUS 2.25 // [0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 3.00 3.50 4.00 5.00 6.00]
+  #define INDIRECT_SAMPLES 8 // [4 6 8 10 12]
+
   #define SHADING_STRENGTH 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.40 1.50 1.60 1.70 1.80 1.90 2.00]
   #define LIGHTNING_FLASH
 
