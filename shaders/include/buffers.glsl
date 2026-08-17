@@ -39,9 +39,32 @@ const bool colortex15Clear = false;
 const bool colortex17Clear = false;
 const bool colortex18Clear = false;
 
-const vec4 colortex0ClearColor = vec4(0.0, 0.0, 0.0, 0.0);
-const vec4 colortex3ClearColor = vec4(0.0, 0.0, 0.0, 0.0);
+// ----------------------------------------------------------------------------
+//  Voxel colored lights — atlas + propagation ping-pong
+//
+//  colortex19  : voxel light atlas A (initial scatter from voxelize pass +
+//                even-indexed propagation steps).  Layout: 16x8 grid of
+//                128x64-voxel Z-slices, atlas resolution 2048x512.
+//  colortex20  : voxel light atlas B (odd-indexed propagation steps).
+//                Same size/format as colortex19; ping-pong target only.
+//
+//  Both are RGBA16F so we can pack (color * intensity) into the rgb channels.
+//
+//  colortex19 IS cleared every frame.  The voxelize pass (deferred8) runs
+//  after the gbuffers pass, so the gbuffers/d4 shading passes read the
+//  PREVIOUS frame's atlas data (1-frame lag, visually imperceptible).
+//  colortex20 is also cleared because the propagation pass reads from 19
+//  and writes to 20 — if 20 had stale data, it would leak through.
+// ----------------------------------------------------------------------------
+const int colortex19Format  = RGBA16F;      // voxel atlas  | voxel colored-light field A (voxelize -> propagate ping-pong)
+const bool colortex19Clear  = true;
+const int colortex20Format  = RGBA16F;      // voxel atlas  | voxel colored-light field B (propagate ping-pong)
+const bool colortex20Clear  = true;
+
+const vec4 colortex0ClearColor  = vec4(0.0, 0.0, 0.0, 0.0);
+const vec4 colortex3ClearColor  = vec4(0.0, 0.0, 0.0, 0.0);
 const vec4 colortex13ClearColor = vec4(0.0, 0.0, 0.0, 0.0);
+const vec4 colortex19ClearColor = vec4(0.0, 0.0, 0.0, 0.0);
 const vec4 shadowcolor0ClearColor = vec4(0.0, 0.0, 0.0, 0.0);
 
 #ifdef VOXY 

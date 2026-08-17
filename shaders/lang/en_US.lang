@@ -33,7 +33,6 @@ screen.ao                              = Ambient Occlusion
 screen.ao.comment                      = Ambient occlusion methods include SSAO, GTAO and RTAO
 screen.color_grading                   = Color Grading
 screen.exposure                        = Exposure
-screen.lpv_vl                          = Colored Lights Fog Scattering
 screen.box                             = Selection Box
 screen.developer                       = Developer Options
 
@@ -162,7 +161,9 @@ value.ANISOTROPIC_FILTERING.12               = 12x
 value.ANISOTROPIC_FILTERING.14               = 14x
 value.ANISOTROPIC_FILTERING.16               = 16x
 option.COLORED_LIGHTS                  = Colored Lights
-option.COLORED_LIGHTS.comment          = Variable-color block lighting using flood fill algorithm. Requires Iris 1.6 or above
+option.COLORED_LIGHTS.comment          = Colored block lighting gathered from emissive surfaces in screen space. Tints blocklight and adds colored shafts in fog
+option.COLORED_LIGHTS_INTENSITY         = Colored Light Intensity
+option.COLORED_LIGHTS_INTENSITY.comment = Strength of the screen-space colored blocklight
 option.HANDHELD_LIGHTING_MODE          = Handheld Lighting
 option.HANDHELD_LIGHTING_MODE.comment    = Light cast by held items. Off disables it. Normal uses the vanilla blocklight color scaled by the item's light level. Colored uses per-block emissive colors
 value.HANDHELD_LIGHTING_MODE.HANDHELD_LIGHTING_OFF    = Off
@@ -263,10 +264,6 @@ option.CAVE_LIGHTING_I                 = Cave Brightness
 option.CAVE_LIGHTING_FALLOFF           = Cave Lighting Falloff
 option.CAVE_LIGHTING_FALLOFF.comment   = Controls how quickly cave lighting fades out as skylight increases. Higher values restrict cave lighting to darker areas
 option.LIGHTNING_FLASH                 = Lightning Flash
-option.VOXEL_VOLUME_CENTER               = Voxel Volume Center
-option.VOXEL_VOLUME_CENTER.comment       = Ahead - the colored-light voxel volume is centered in front of the player, covering more of what you see. Player - centered on the player
-value.VOXEL_VOLUME_CENTER.VOXEL_VOLUME_CENTER_AHEAD  = Ahead of Player
-value.VOXEL_VOLUME_CENTER.VOXEL_VOLUME_CENTER_PLAYER = Centered on Player
 option.NETHER_USE_BIOME_COLOR          = Use Biome Color
 option.NETHER_I                        = Ambient Intensity
 option.NETHER_S                        = Ambient Saturation
@@ -291,9 +288,6 @@ option.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF         = Contributi
 option.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF.comment = Falloff of the vanilla lightmap's contribution.
 Squared - brighter near the source, diminishes quickly.
 Linear - softer and travels further
-option.VOXEL_VOLUME_SIZE                                            = Voxel Volume Size
-option.VOXEL_VOLUME_SIZE.comment                                    = Adjusts the size of the volume in which colored lighting is calculated. High performance impact, also affected by shadow distance
-suffix.VOXEL_VOLUME_SIZE                                            = m³
 
 value.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF_SQUARED = Squared
 value.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF_LINEAR  = Linear
@@ -548,7 +542,7 @@ option.FOG_SMOOTHING_RADIUS.comment         = Adjusts the radius used to smooth 
 option.OVERWORLD_FOG_INTENSITY              = Overworld Fog Intensity
 option.NETHER_FOG_INTENSITY                 = Nether Fog Intensity
 option.VL                                   = Volumetric Fog
-option.LPV_VL.comment                       = Light sources illuminate the fog. Requires Colored Lights! 
+option.LPV_VL.comment                       = Tints volumetric fog with the color of nearby emissive blocks (screen-space colored fog). Requires Colored Lights. The button below opens the colored fog settings.
 option.VL.comment                           = Adds light shafts and variable fog density
 option.VL_RENDER_SCALE                      = VL Render Scale
 option.AIR_FOG_CLOUDY_NOISE                 = Cloudy Fog
@@ -558,13 +552,22 @@ option.AIR_FOG_COLORED_LIGHT_SHAFTS.comment = Light shafts passing through trans
 option.AIR_FOG_COLORED_LIGHT_SHAFTS_INTENSITY = Colored Light Shafts Intensity
 option.AIR_FOG_COLORED_LIGHT_SHAFTS_INTENSITY.comment = Adjusts the intensity of colored light shafts
 
-# LPV VL
-option.LPV_VL                          = Enabled
-option.LPV_VL_STEPS                    = Steps 
+# Colored fog (legacy option key: LPV_VL)
+# The screen key was renamed from lpv_vl to colored_fog so the button label
+# matches the actual feature. LPV_VL option keys are kept for saved-settings
+# backward compatibility.
+screen.colored_fog                       = Colored Fog
+option.LPV_VL                          = Enable Colored Fog
+option.LPV_VL_STEPS                    = Fog Raymarch Steps
+option.LPV_VL_STEPS.comment            = Number of raymarch steps used to integrate colored glow through the volumetric fog. Higher is smoother but slower.
 option.LPV_VL_INTENSITY_OVERWORLD      = Overworld Intensity
+option.LPV_VL_INTENSITY_OVERWORLD.comment = Strength of colored fog scattering in the overworld (surface).
 option.LPV_VL_INTENSITY_UNDERGROUND    = Underground Intensity
+option.LPV_VL_INTENSITY_UNDERGROUND.comment = Strength of colored fog scattering in caves and underground.
 option.LPV_VL_INTENSITY_NETHER         = Nether Intensity
+option.LPV_VL_INTENSITY_NETHER.comment = Strength of colored fog scattering in the Nether.
 option.LPV_VL_INTENSITY_END            = End Intensity
+option.LPV_VL_INTENSITY_END.comment    = Strength of colored fog scattering in the End.
 
 # Rayleigh Fog
 option.AIR_FOG_RAYLEIGH_FALLOFF_START             = Rayleigh Falloff Start

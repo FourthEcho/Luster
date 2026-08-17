@@ -26,7 +26,7 @@ screen.shadows                         = 그림자
 screen.ao                              = 주변광 차폐 (AO)
 screen.color_grading                   = 색 보정
 screen.exposure                        = 노출
-screen.lpv_vl                          = 유색 조명 안개 산란
+screen.colored_fog                          = 유색 조명 안개 산란
 screen.box                             = 선택 상자
 screen.distant_horizons                = Distant Horizons
 screen.developer                       = 개발자 옵션
@@ -203,14 +203,7 @@ option.BLOCKLIGHT_G                    = §a초록
 option.BLOCKLIGHT_B                    = §9파랑
 option.BLOCKLIGHT_I                    = 블록 조명 강도
 
-option.VOXEL_VOLUME_SIZE               = 복셀 볼륨 크기
-option.VOXEL_VOLUME_SIZE.comment       = 성능에 큰 영향을 미치며, 그림자 거리의 영향도 받습니다
-suffix.VOXEL_VOLUME_SIZE               = m³
-option.VOXEL_VOLUME_CENTER             = 복셀 볼륨 중심
-option.VOXEL_VOLUME_CENTER.comment     = 전방: 복셀 볼륨이 플레이어 앞쪽을 중심으로 배치되어 더 많은 영역이 보이게 됩니다
 
-value.VOXEL_VOLUME_CENTER.VOXEL_VOLUME_CENTER_AHEAD  = 전방
-value.VOXEL_VOLUME_CENTER.VOXEL_VOLUME_CENTER_PLAYER = 플레이어
 
 suffix.shadowMapResolution             = ²
 suffix.sunPathRotation                 = °

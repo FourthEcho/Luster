@@ -26,7 +26,7 @@ screen.shadows                         = Ombre
 screen.ao                              = Occlusione ambientale
 screen.color_grading                   = Gradiente di Colore
 screen.exposure                        = Esposizione
-screen.lpv_vl                          = Dispersione Luci Colorate Nebbia
+screen.colored_fog                          = Dispersione Luci Colorate Nebbia
 screen.box                             = Box di selezione
 
 screen.aurora                          = Aurora
@@ -196,14 +196,7 @@ option.BLOCKLIGHT_G                    = Verde
 option.BLOCKLIGHT_B                    = Blu
 option.BLOCKLIGHT_I                    = Intensità Luce Blocchi
 
-option.VOXEL_VOLUME_SIZE               = Dimensioni volume Voxel
-option.VOXEL_VOLUME_SIZE.comment       = Grosso impatto performance, anche affetto dalla Distanza Ombre
-suffix.VOXEL_VOLUME_SIZE               = m
-option.VOXEL_VOLUME_CENTER             = Centro Volume Voxel
-option.VOXEL_VOLUME_CENTER.comment     = Davanti: volume voxel è centrato davanti il giocatore, rendendolo più visibile.
 
-value.VOXEL_VOLUME_CENTER.VOXEL_VOLUME_CENTER_AHEAD  = Davanti
-value.VOXEL_VOLUME_CENTER.VOXEL_VOLUME_CENTER_PLAYER = Giocatore
 
 suffix.shadowMapResolution             = ²
 suffix.sunPathRotation                 = °

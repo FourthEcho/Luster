@@ -26,7 +26,7 @@ screen.shadows                         = 阴影
 screen.ao                              = 环境光遮蔽
 screen.color_grading                   = 颜色分级
 screen.exposure                        = 曝光
-screen.lpv_vl                          = 彩色光源雾气散射
+screen.colored_fog                          = 彩色光源雾气散射
 screen.box                             = 选择框
 screen.developer                       = 开发者选项
 
@@ -204,14 +204,7 @@ option.BLOCKLIGHT_G                    = 方块光 - 绿色
 option.BLOCKLIGHT_B                    = 方块光 - 蓝色
 option.BLOCKLIGHT_I                    = 方块光强度
 
-option.VOXEL_VOLUME_SIZE               = 体素化大小
-option.VOXEL_VOLUME_SIZE.comment       = 高性能影响, 同时也受阴影距离影响.
-suffix.VOXEL_VOLUME_SIZE               = m
-option.VOXEL_VOLUME_CENTER             = 体素化中心位置
-option.VOXEL_VOLUME_CENTER.comment     = 前置: 使体素化中心位置设定在玩家的前方, 意味着更多位于前方的事物可被体素化追踪到数据. 以玩家为中心: 体素化中心位置即是玩家所在位置.
 
-value.VOXEL_VOLUME_CENTER.VOXEL_VOLUME_CENTER_AHEAD  = 前置
-value.VOXEL_VOLUME_CENTER.VOXEL_VOLUME_CENTER_PLAYER = 以玩家为中心
 
 suffix.shadowMapResolution             = ²
 suffix.sunPathRotation                 = °

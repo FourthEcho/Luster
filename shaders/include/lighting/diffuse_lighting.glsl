@@ -15,8 +15,20 @@
 // shadowed areas are lit by skylight/blocklight/cave lighting here in
 // the gbuffer pass.
 #endif
-#ifdef COLORED_LIGHTS
-#include "/include/lighting/lpv/blocklight.glsl"
+#if defined COLORED_LIGHTS && defined VOXEL_COLORED_LIGHTS
+// Voxel colored lights: surfaces sample the propagated voxel atlas at their
+// world position to pick up the dominant nearby glow color.  The atlas is
+// populated by program/voxelize (Phase 2) and program/voxel_propagate_*
+// (Phase 3); diffuse_lighting.glsl is the Phase 4 read-back integration
+// point for opaque + translucent surfaces.
+//
+// colortex19 / colortex20 are declared inside atlas.glsl; we don't
+// redeclare them here.
+#include "/include/lighting/voxel/atlas.glsl"
+
+vec3 get_voxel_glow_color(vec3 scene_pos) {
+    return get_voxel_light_color(scene_pos + cameraPosition);
+}
 #endif
 
 #ifdef HANDHELD_LIGHTING
@@ -143,14 +155,25 @@ vec3 get_block_lighting(
     vec3 mc_blocklight = (blocklight_falloff * directional_lighting)
         * (blocklight_scale * get_blocklight_color());
 
-#ifdef COLORED_LIGHTS
-    lighting += get_lpv_blocklight(
-        scene_pos,
-        flat_normal,
-        mc_blocklight,
-        ao * directional_lighting
-    );
+#if defined COLORED_LIGHTS && defined VOXEL_COLORED_LIGHTS
+    // Tint the vanilla blocklight by the dominant nearby voxel-light color
+    vec3 glow = get_voxel_glow_color(scene_pos);
+    float glow_luminance = dot(glow, luminance_weights);
+    vec3 glow_tint = glow * rcp(max(glow_luminance, eps));
+    float tint_strength = sqr(light_levels.x)
+        * smoothstep(0.05, 0.25, glow_luminance);
+
+    // Add the propagated glow directly.  The atlas stores radiance in
+    // roughly [0, 1] range (normalized by 256 in emitter_table.glsl).
+    // COLORED_LIGHTS_INTENSITY defaults to 1.00 in settings.glsl; multiply
+    // by 0.5 for a subtle colored tint on surfaces near emitters — visible
+    // but not overwhelming.  The vanilla blocklight already provides the
+    // main illumination; this just adds the color.
+    lighting += mc_blocklight
+        * mix(vec3(1.0), glow_tint, tint_strength);
+    lighting += glow * COLORED_LIGHTS_INTENSITY * 0.5;
 #else
+    // Colored lights disabled: vanilla blocklight only.
     lighting += mc_blocklight;
 #endif
 

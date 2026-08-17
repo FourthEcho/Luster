@@ -71,21 +71,6 @@ uniform int textureFilteringMode;
 // list and per-option comments.
 #include "/include/internal.glsl"
 
-// Apple ships only OpenGL 4.1. The voxel/compute colored-light backend is
-// intentionally disabled there; the GL 4.1 indirect-lighting path remains
-// available. This also prevents a GUI/profile override from compiling LPV
-// code on macOS.
-#if defined MC_OS_MAC && defined COLORED_LIGHTS
-#undef COLORED_LIGHTS
-#endif
-
-// Material Mapping Mode
-// Translates the MATERIAL_MAPPING_MODE enum into the feature defines that
-// enable each stage of the labPBR pipeline.
-// Reflection and refraction stages are gated by their own settings
-// (ENVIRONMENT_REFLECTIONS, SKY_REFLECTIONS, REFRACTION), so only the
-// specular/normal mapping stages need translating here.
-
 #if MATERIAL_MAPPING_MODE == MATERIAL_MAPPING_MODE_SPECULAR \
     || MATERIAL_MAPPING_MODE == MATERIAL_MAPPING_MODE_SPECULAR_NORMAL
 #define SPECULAR_MAPPING

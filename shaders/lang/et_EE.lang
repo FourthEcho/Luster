@@ -26,7 +26,7 @@ screen.shadows                         = Varjud
 screen.ao                              = Ümbritsev varjutus
 screen.color_grading                   = Värvikorrektsioon
 screen.exposure                        = Valgustus
-screen.lpv_vl                          = Värviliste tulede udu hajumine
+screen.colored_fog                          = Värviliste tulede udu hajumine
 screen.box                             = Valikukast
 screen.developer                       = Arendaja valikud
 
@@ -202,14 +202,7 @@ option.BLOCKLIGHT_G                    = Roheline
 option.BLOCKLIGHT_B                    = Sinine
 option.BLOCKLIGHT_I                    = Plokivalguse intensiivsus
 
-option.VOXEL_VOLUME_SIZE               = Vokslimaht
-option.VOXEL_VOLUME_SIZE.comment       = Kõrge jõudluse mõju, sõltub ka varjude kaugusest
-suffix.VOXEL_VOLUME_SIZE               = m
-option.VOXEL_VOLUME_CENTER             = Vokslimahu keskpunkt
-option.VOXEL_VOLUME_CENTER.comment     = Ees: vokslimaht on mängijast eespool, seega rohkem sellest on nähtav
 
-value.VOXEL_VOLUME_CENTER.VOXEL_VOLUME_CENTER_AHEAD  = Ees
-value.VOXEL_VOLUME_CENTER.VOXEL_VOLUME_CENTER_PLAYER = Mängija
 
 suffix.shadowMapResolution             = ²
 suffix.sunPathRotation                 = °

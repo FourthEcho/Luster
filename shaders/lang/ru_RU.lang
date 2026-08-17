@@ -26,7 +26,7 @@ screen.shadows                         = Тени
 screen.ao                              = Окружающая окклюзия
 screen.color_grading                   = Цветовая гамма
 screen.exposure                        = Экспозиция
-screen.lpv_vl                          = Освещение тумана цветным светом
+screen.colored_fog                          = Освещение тумана цветным светом
 screen.box                             = Контур блоков
 screen.distant_horizons                = Distant Horizons
 screen.developer                       = Настройки разработчика
@@ -199,14 +199,7 @@ option.BLOCKLIGHT_G                    = §aЗеленый
 option.BLOCKLIGHT_B                    = §9Синий
 option.BLOCKLIGHT_I                    = Сила света от блоков
 
-option.VOXEL_VOLUME_SIZE               = Размер объёма вокселей
-option.VOXEL_VOLUME_SIZE.comment       = Значительное влияние на производительность, также зависит от дальности теней
-suffix.VOXEL_VOLUME_SIZE               = m³
-option.VOXEL_VOLUME_CENTER             = Центр объёма вокселей
-option.VOXEL_VOLUME_CENTER.comment     = Вперёд: объём вокселей смещён вперёд от игрока, благодаря чему большая его часть попадает в поле зрения
 
-value.VOXEL_VOLUME_CENTER.VOXEL_VOLUME_CENTER_AHEAD  = Вперёд
-value.VOXEL_VOLUME_CENTER.VOXEL_VOLUME_CENTER_PLAYER = Игрок
 
 suffix.shadowMapResolution             = ²
 suffix.sunPathRotation                 = °

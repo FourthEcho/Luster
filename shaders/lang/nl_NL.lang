@@ -26,7 +26,7 @@ screen.shadows                         = Schaduwen
 screen.ao                              = Omgevingsocclusie (AO)
 screen.color_grading                   = Kleur-instellingen
 screen.exposure                        = Belichting
-screen.lpv_vl                          = Gekleurde Lichten Mist-verstrooing
+screen.colored_fog                          = Gekleurde Lichten Mist-verstrooing
 screen.box                             = Selectievak
 screen.distant_horizons                = Distant Horizons
 screen.developer                       = Ontwikkelaars-opties
@@ -201,14 +201,7 @@ option.BLOCKLIGHT_G                    = Groen
 option.BLOCKLIGHT_B                    = Blauw
 option.BLOCKLIGHT_I                    = Bloklicht Intensiteit
 
-option.VOXEL_VOLUME_SIZE               = Voxel Volume Grootte
-option.VOXEL_VOLUME_SIZE.comment       = Wijzigt hoe ver weg gekleurde lichtbronnen zichtbaar zijn.\nHogere waarden verminderen sterk prestaties.. Ook beïnvloed door shaduwafstand.
-suffix.VOXEL_VOLUME_SIZE               = m³
-option.VOXEL_VOLUME_CENTER             = Voxel Volume Midden
-option.VOXEL_VOLUME_CENTER.comment     = Wijzigt waar het midden van het voxel volume is.\n'Voor de speler' zorgt ervoor dat er meer zichtbaar is zonder prestatiekosten door het volume voor de speler te zetten.
 
-value.VOXEL_VOLUME_CENTER.VOXEL_VOLUME_CENTER_AHEAD  = Voor de speler
-value.VOXEL_VOLUME_CENTER.VOXEL_VOLUME_CENTER_PLAYER = In de speler
 
 suffix.shadowMapResolution             = ²
 suffix.sunPathRotation                 = °

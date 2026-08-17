@@ -26,7 +26,7 @@ screen.shadows                         = Sombras
 screen.ao                              = Oclusión ambiental
 screen.color_grading                   = Gradación de color
 screen.exposure                        = Exposición
-screen.lpv_vl                          = Luces de colores que dispersan la niebla
+screen.colored_fog                          = Luces de colores que dispersan la niebla
 screen.box                             = Caja de selección
 screen.developer                       = Opciones de desarrollador
 
@@ -202,14 +202,7 @@ option.BLOCKLIGHT_G                    = Verde
 option.BLOCKLIGHT_B                    = Azul
 option.BLOCKLIGHT_I                    = Intensidad de la luz del bloque
 
-option.VOXEL_VOLUME_SIZE               = Tamaño del volumen del vóxel
-option.VOXEL_VOLUME_SIZE.comment       = Impacto de alto rendimiento, también afectado por la distancia de sombra
-suffix.VOXEL_VOLUME_SIZE               = m
-option.VOXEL_VOLUME_CENTER             = Centro de volumen de vóxel
-option.VOXEL_VOLUME_CENTER.comment     = Adelante: el volumen del vóxel se centra delante del jugador, lo que significa que se vea una mayor parte.
 
-value.VOXEL_VOLUME_CENTER.VOXEL_VOLUME_CENTER_AHEAD  = Adelante
-value.VOXEL_VOLUME_CENTER.VOXEL_VOLUME_CENTER_PLAYER = Jugador
 
 suffix.shadowMapResolution             = ²
 suffix.sunPathRotation                 = °
