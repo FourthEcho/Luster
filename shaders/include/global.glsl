@@ -71,6 +71,21 @@ uniform int textureFilteringMode;
 // list and per-option comments.
 #include "/include/internal.glsl"
 
+// Apple ships only OpenGL 4.1. The voxel/compute colored-light backend is
+// intentionally disabled there; the GL 4.1 indirect-lighting path remains
+// available. This also prevents a GUI/profile override from compiling LPV
+// code on macOS.
+#if defined MC_OS_MAC && defined COLORED_LIGHTS
+#undef COLORED_LIGHTS
+#endif
+
+// Material Mapping Mode
+// Translates the MATERIAL_MAPPING_MODE enum into the feature defines that
+// enable each stage of the labPBR pipeline.
+// Reflection and refraction stages are gated by their own settings
+// (ENVIRONMENT_REFLECTIONS, SKY_REFLECTIONS, REFRACTION), so only the
+// specular/normal mapping stages need translating here.
+
 #if MATERIAL_MAPPING_MODE == MATERIAL_MAPPING_MODE_SPECULAR \
     || MATERIAL_MAPPING_MODE == MATERIAL_MAPPING_MODE_SPECULAR_NORMAL
 #define SPECULAR_MAPPING
@@ -202,18 +217,6 @@ float get_uv_from_unit_range(float values, const int res) {
 
 // Applies a smooth minimum value to a signal, where n is the new minimum value
 // and m is the threshold after which x remains unchanged
-float almost_identity(float x, float m, float n) {
-    if (x > m) {
-        return x;
-    }
-
-    float a = 2.0 * n - m;
-    float b = 2.0 * m - 3.0 * n;
-    float t = x / m;
-
-    return (a * t + b) * t * t + n;
-}
-
 // Remaps center +/- 0.5 * width to zero and center to 1, with the same
 // smoothing function as smoothstep
 float pulse(float x, float center, float width) {
@@ -226,13 +229,6 @@ float pulse(float x, float center, float width, const float period) {
     x = fract(x) * period - (0.5 * period);
 
     return pulse(x, 0.0, width);
-}
-
-// Exponential impulse function, for when a signal rises quickly then gradually
-// falls.
-float impulse(float x, float peak) {
-    float h = peak * x;
-    return h * exp(1.0 - h);
 }
 
 // Euclidian distance is defined as sqrt(a^2 + b^2 + ...). This function instead

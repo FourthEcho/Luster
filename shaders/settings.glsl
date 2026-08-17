@@ -65,27 +65,7 @@ const float wetnessHalflife         = 70.0;
 //   Lighting
 // ------------
 
-#define COLORED_LIGHTS
-  // Strength of the voxel colored blocklight (applied by the diffuse
-  // lighting pass, sampling the propagated voxel atlas built by
-  // program/voxelize + program/voxel_propagate_*)
-  #define COLORED_LIGHTS_INTENSITY 1.00 // [0.00 0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.45 0.50 0.55 0.60 0.65 0.70 0.75 0.80 0.85 0.90 0.95 1.00 1.05 1.10 1.15 1.20 1.25 1.30 1.35 1.40 1.45 1.50 1.55 1.60 1.65 1.70 1.75 1.80 1.85 1.90 1.95 2.00]
-
-  // Master toggle for the voxel colored-lights backend (Phase 2 scatter +
-  // Phase 3 propagation).  When off, COLORED_LIGHTS falls back to vanilla
-  // blocklight only.  When on, the voxelize + propagation deferred passes
-  // run and the diffuse lighting / fog passes sample the atlas.
-#define VOXEL_COLORED_LIGHTS
-
-  // Voxel colored-light grid parameters.  These are the main perf knobs:
-  //   VOXEL_LIGHT_VOXEL_SIZE  — world blocks per voxel (1 = full res, 2 = half res / 1/4 cost)
-  //   VOXEL_LIGHT_PROPAGATION_STEPS — floodfill iterations (0 = no propagation, 3 = default, 8 = soft)
-  //   VOXEL_LIGHT_PROPAGATION_ATTENUATION — per-step intensity falloff (0.5 = default, 0.7 = tighter)
-  //   VOXEL_LIGHT_RESNAP_THRESHOLD — voxels of player movement before the grid re-snaps
-  #define VOXEL_LIGHT_VOXEL_SIZE              1.0  // [0.5 1.0 2.0 4.0]
-  #define VOXEL_LIGHT_PROPAGATION_STEPS       2    // [0 1 2 3 4 5 6 7 8]
-  #define VOXEL_LIGHT_PROPAGATION_ATTENUATION 0.35 // [0.20 0.25 0.30 0.35 0.40 0.45 0.50 0.55 0.60 0.65 0.70 0.75 0.80]
-  #define VOXEL_LIGHT_RESNAP_THRESHOLD        8    // [1 2 4 8 16 32]
+//#define COLORED_LIGHTS
 
 // Handheld Lighting
 
@@ -136,9 +116,7 @@ const float wetnessHalflife         = 70.0;
   // Consumed in include/lighting/specular_lighting.glsl as
   //   ibl_specular *= IBL_SPECULAR_INTENSITY * material.ssr_multiplier;
   #define IBL_SPECULAR_INTENSITY 1.00 // [0.00 0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.45 0.50 0.55 0.60 0.65 0.70 0.75 0.80 0.85 0.90 0.95 1.00 1.05 1.10 1.15 1.20 1.25 1.30 1.35 1.40 1.45 1.50 1.55 1.60 1.65 1.70 1.75 1.80 1.85 1.90 1.95 2.00]
-  // IBL_MULTI_SCATTER and IBL_CONE_FILTER are auto-defined alongside the IBL
-  // master toggle (see include/lighting/ibl.glsl) but currently gate no code —
-  // multi-scatter compensation always runs when IBL is enabled.
+  // IBL multi-scatter compensation runs automatically with the IBL master toggle.
   // Hidden per-profile tuning — IBL sample count for volumetric fog ambient
   // color.  Not exposed as a UI slider; overridden per-profile in
   // shaders.properties.  VL tolerates far fewer samples than surface IBL
@@ -258,10 +236,11 @@ const float wetnessHalflife         = 70.0;
   #define COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF_SQUARED 1
   #define COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF_SQUARED // [COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF_LINEAR COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF_SQUARED]
 
-  // VOXEL_VOLUME_SIZE / VOXEL_VOLUME_CENTER removed with the voxel LPV backend.
-  // The new voxel colored-lights system uses a fixed 128x64x128 clipmap
-  // centered on the player; see VOXEL_LIGHT_VOXEL_SIZE above for the tunable
-  // voxel size, and include/lighting/voxel/atlas.glsl for the layout.
+  #define VOXEL_VOLUME_SIZE 128 // [64 96 128 256 512]
+  
+  #define VOXEL_VOLUME_CENTER_AHEAD 0
+  #define VOXEL_VOLUME_CENTER_PLAYER 1
+  #define VOXEL_VOLUME_CENTER VOXEL_VOLUME_CENTER_AHEAD // [VOXEL_VOLUME_CENTER_AHEAD VOXEL_VOLUME_CENTER_PLAYER]
 
 // -------
 //   Sky
@@ -302,6 +281,7 @@ const float wetnessHalflife         = 70.0;
 
   #define CLOUDS_TEMPORAL_UPSCALING 4 // [1 2 3 4]
   #define CLOUDS_AERIAL_PERSPECTIVE_BOOST 1 // [0 1 2 3 4]
+  #define CLOUDS_LIGHTING_BOUNCES 3 // [0 1 2 3 4]
   // CLOUDS_ACCUMULATION_LIMIT moved to include/internal.glsl
   #define CLOUDS_SCALE 10.0 // [1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0 11.0 12.0 13.0 14.0 15.0]
 
@@ -821,10 +801,7 @@ const float wetnessHalflife         = 70.0;
 #ifdef VL  
 #endif
 
-#ifdef LPV_VL
-#endif
-
-#ifdef VOXEL_COLORED_LIGHTS
+#ifdef LPV_VL 
 #endif
 
 #ifdef CREPUSCULAR_RAYS 

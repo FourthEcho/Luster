@@ -46,6 +46,7 @@ uniform sampler3D depthtex0; // atmospheric scattering LUT
 uniform sampler2D depthtex1;
 
 uniform sampler2D noisetex;
+uniform sampler3D blue_noise_3d;
 
 uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
@@ -209,6 +210,14 @@ void main() {
 
     float dither = texelFetch(noisetex, ivec2(checkerboard_pos & 511), 0).b;
     dither = r1(frameCounter / checkerboard_area, dither);
+
+    // Dedicated 3D blue-noise phase for cloud raymarching.
+    vec3 blue_noise_coord = vec3(
+        fract((vec2(checkerboard_pos) + 0.5) / vec2(view_res)),
+        fract(float(frameCounter) * 0.61803398875 + taa_offset.x + taa_offset.y)
+    );
+    float blue_dither = texture(blue_noise_3d, blue_noise_coord).r;
+    dither = mix(dither, blue_dither, 0.72);
 
 #ifndef BLOCKY_CLOUDS
     CloudsResult result = draw_clouds(

@@ -270,13 +270,6 @@ void print_unsigned_int(uint value) {
     print_unsigned_int(value, len);
 }
 
-void print_int(int value) {
-    if (value < 0) {
-        print_char(_minus);
-    }
-    print_unsigned_int(uint(abs(value)));
-}
-
 void print_float(float value) {
     if (value < 0.0) {
         print_char(_minus);
@@ -299,12 +292,5 @@ void print_float(float value) {
     }
 }
 
-void print_bool(bool value) {
-    if (value) {
-        print((_t, _r, _u, _e));
-    } else {
-        print((_f, _a, _l, _s, _e));
-    }
-}
 
 #endif // INCLUDE_UTILITY_TEXT_RENDERING

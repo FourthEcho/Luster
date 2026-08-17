@@ -56,9 +56,6 @@ vec4 get_rotation_quaternion(vec3 from, vec3 to) {
 	return vec4(axis * sin_half_angle, cos_half_angle);
 }
 
-vec3 rotate(vec4 q, vec3 v) {
-	return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
-}
 #endif
 
 #endif // INCLUDE_UTILITY_ROTATION

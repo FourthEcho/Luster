@@ -195,9 +195,18 @@ vec2 clouds_cirrus_scattering(
                ));
 
     for (uint i = 0u; i < 4u; ++i) {
+        float direct_extinction = exp(-extinct_amount * light_optical_depth);
+        float internal_bounce = clouds_internal_bounce_light(
+            direct_extinction, density, light_optical_depth, 0.5, cos_theta
+        );
+
         scattering.x += scatter_amount
-            * exp(-extinct_amount * light_optical_depth) * phase
+            * direct_extinction * phase
             * powder_effect; // direct light
+        scattering.x += scatter_amount
+            * internal_bounce
+            * clouds_phase_multi(cos_theta, phase_g)
+            * 0.55; // internal cloud bounce
         scattering.y += scatter_amount
             * exp(-0.33 * CLOUDS_CIRRUS_THICKNESS * extinct_amount * density)
             * isotropic_phase; // sky light

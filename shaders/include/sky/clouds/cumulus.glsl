@@ -189,17 +189,27 @@ vec2 clouds_cumulus_scattering(
     vec3 phase_g = pow(vec3(0.6, 0.9, 0.3), vec3(1.0 + light_optical_depth));
 
     for (uint i = 0u; i < 8u; ++i) {
+        float direct_extinction = exp(-extinct_amount * light_optical_depth);
+        float internal_bounce = clouds_internal_bounce_light(
+            direct_extinction, density, light_optical_depth,
+            altitude_fraction, cos_theta
+        );
         scattering.x += scatter_amount
-            * exp(-extinct_amount * light_optical_depth) * phase
+            * direct_extinction * phase
             * core_attenuation * silver_lining
             * (1.0 - 0.5 * clouds_params.l0_shadow);
+
+        scattering.x += scatter_amount
+            * internal_bounce
+            * clouds_phase_multi(cos_theta, phase_g)
+            * mix(0.42, 0.80, clamp01(1.0 - altitude_fraction));
         scattering.x += scatter_amount
             * exp(-extinct_amount * ground_optical_depth) * isotropic_phase
             * bounced_light * ground_weight;
         scattering.x += scatter_amount
             * exp(-extinct_amount * sky_optical_depth) * isotropic_phase
             * clouds_params.l0_shadow
-            * 0.5 * sky_weight; // fake bounced lighting from the layer above
+            * 0.5 * sky_weight; // approximate bounced lighting from the layer above
         scattering.y += scatter_amount
             * exp(-extinct_amount * sky_optical_depth) * isotropic_phase
             * sky_weight;

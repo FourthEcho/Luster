@@ -1,6 +1,7 @@
 #if !defined INCLUDE_SKY_CLOUDS_COVERAGE_MAP
 #define INCLUDE_SKY_CLOUDS_COVERAGE_MAP
 
+// Dedicated weather/cloud coverage map. Channel Z of colortex8 stores this field while X/Y hold cloud shadow data.
 // Distance covered by the cumulus coverage map on each axis (m^2)
 const float clouds_cumulus_coverage_map_scale = 1.5e5;
 
