@@ -58,38 +58,6 @@ vec3 fresnel_lazanyi_2019(float cos_theta, vec3 f0, vec3 f82) {
     return clamp01(f0 + (1.0 - f0) * m - a * cos_theta * (m - m * cos_theta));
 }
 
-// Modified by Jessie to correctly account for fresnel
-vec3 diffuse_hammon(
-    vec3 albedo,
-    float roughness,
-    float f0,
-    float NoL,
-    float NoV,
-    float NoH,
-    float LoV
-) {
-    if (NoL <= 0.0) {
-        return vec3(0.0);
-    }
-
-    float facing = 0.5 * LoV + 0.5;
-
-    float fresnel_nl = fresnel_dielectric(max(NoL, 1e-2), f0).x;
-    float fresnel_nv = fresnel_dielectric(max(NoV, 1e-2), f0).x;
-    float energy_conservation_factor
-        = 1.0 - (4.0 * sqrt(f0) + 5.0 * f0 * f0) * (1.0 / 9.0);
-
-    float single_rough
-        = max0(facing) * (-0.2 * facing + 0.45) * (1.0 / NoH + 2.0);
-    float single_smooth
-        = (1.0 - fresnel_nl) * (1.0 - fresnel_nv) / energy_conservation_factor;
-
-    float single = mix(single_smooth, single_rough, roughness) * rcp_pi;
-    float multi = 0.1159 * roughness;
-
-    return albedo * multi + single;
-}
-
 // ---------------------------------------------------------------------------
 //   Kulla-Conty multi-bounce GGX energy compensation
 //

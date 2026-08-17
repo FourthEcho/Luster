@@ -24,11 +24,6 @@ vec2 weather_wind_direction() {
     return vec2(cos(weather_wind_angle), sin(weather_wind_angle));
 }
 
-// Returns the daily wind direction angle in radians [0, 2π).
-float weather_wind_direction_angle() {
-    return weather_wind_angle;
-}
-
 struct Weather {
     float temperature; // [0, 1]
     float humidity; // [0, 1]

@@ -19,15 +19,11 @@ vec3 uniform_sphere_sample(vec2 hash) {
     );
 }
 
-vec3 uniform_hemisphere_sample(vec3 vector, vec2 hash) {
-    vec3 dir = uniform_sphere_sample(hash);
-    return dot(dir, vector) < 0.0 ? -dir : dir;
-}
-
-// https://amietia.com/lambertnotangent.html
-vec3 cosine_weighted_hemisphere_sample(vec3 vector, vec2 hash) {
-    vec3 dir = normalize(uniform_sphere_sample(hash) + vector);
-    return dot(dir, vector) < 0.0 ? -dir : dir;
+vec3 cosine_weighted_hemisphere_sample(vec2 hash) {
+    float phi = tau * hash.x;
+    float cos_theta = sqrt(1.0 - hash.y);
+    float sin_theta = sqrt(hash.y);
+    return vec3(cos(phi) * sin_theta, sin(phi) * sin_theta, cos_theta);
 }
 
 #endif // INCLUDE_UTILITY_SAMPLING

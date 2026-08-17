@@ -180,7 +180,7 @@ Material material_from(
                 if (material_mask < 4u) { // 0-4
                     if (material_mask < 2u) { // 0-2
                         if (material_mask == 0u) { // 2
-#ifdef HARDCODED_SPECULAR
+#if MATERIAL_MAPPING_MODE == MATERIAL_MAPPING_MODE_HARDCODED_SPECULAR && defined(HARDCODED_SPECULAR)
                             // Default
                             float smoothness
                                 = 0.33 * smoothstep(0.2, 0.6, hsl.z);
@@ -215,7 +215,7 @@ Material material_from(
 #endif
                         } else { // 5
 // Leaves
-#ifdef HARDCODED_SPECULAR
+#if MATERIAL_MAPPING_MODE == MATERIAL_MAPPING_MODE_HARDCODED_SPECULAR && defined(HARDCODED_SPECULAR)
                             float smoothness
                                 = 0.5 * smoothstep(0.16, 0.5, hsl.z);
                             material.roughness = sqr(1.0 - smoothness);
@@ -231,7 +231,7 @@ Material material_from(
                         if (material_mask == 6u) { // 6
                         } else { // 7
 // Sand
-#ifdef HARDCODED_SPECULAR
+#if MATERIAL_MAPPING_MODE == MATERIAL_MAPPING_MODE_HARDCODED_SPECULAR && defined(HARDCODED_SPECULAR)
                             float smoothness
                                 = 0.8 * linear_step(0.81, 0.96, hsl.z);
                             material.roughness = sqr(1.0 - smoothness);
@@ -245,7 +245,7 @@ Material material_from(
                     if (material_mask < 10u) { // 8-10
                         if (material_mask == 8u) { // 8
 // Ice
-#ifdef HARDCODED_SPECULAR
+#if MATERIAL_MAPPING_MODE == MATERIAL_MAPPING_MODE_HARDCODED_SPECULAR && defined(HARDCODED_SPECULAR)
                             float smoothness
                                 = pow4(linear_step(0.4, 0.8, hsl.z)) * 0.6;
                             material.roughness = sqr(1.0 - smoothness);
@@ -259,7 +259,7 @@ Material material_from(
 #endif
                         } else { // 9
 // Red sand, birch planks
-#ifdef HARDCODED_SPECULAR
+#if MATERIAL_MAPPING_MODE == MATERIAL_MAPPING_MODE_HARDCODED_SPECULAR && defined(HARDCODED_SPECULAR)
                             float smoothness
                                 = 0.4 * linear_step(0.61, 0.85, hsl.z);
                             material.roughness = sqr(1.0 - smoothness);
@@ -269,7 +269,7 @@ Material material_from(
                     } else { // 10-12
                         if (material_mask == 10u) { // 10
 // Oak, jungle and acacia planks, granite and diorite
-#ifdef HARDCODED_SPECULAR
+#if MATERIAL_MAPPING_MODE == MATERIAL_MAPPING_MODE_HARDCODED_SPECULAR && defined(HARDCODED_SPECULAR)
                             float smoothness
                                 = 0.5 * linear_step(0.4, 0.8, hsl.z);
                             material.roughness = sqr(1.0 - smoothness);
@@ -277,7 +277,7 @@ Material material_from(
 #endif
                         } else { // 11
 // Obsidian, nether bricks
-#ifdef HARDCODED_SPECULAR
+#if MATERIAL_MAPPING_MODE == MATERIAL_MAPPING_MODE_HARDCODED_SPECULAR && defined(HARDCODED_SPECULAR)
                             float smoothness = linear_step(0.02, 0.4, hsl.z);
                             material.roughness = sqr(1.0 - smoothness);
                             material.f0 = vec3(0.02);
@@ -289,7 +289,7 @@ Material material_from(
                     if (material_mask < 14u) { // 12-14
                         if (material_mask == 12u) { // 12
 // Metals
-#ifdef HARDCODED_SPECULAR
+#if MATERIAL_MAPPING_MODE == MATERIAL_MAPPING_MODE_HARDCODED_SPECULAR && defined(HARDCODED_SPECULAR)
                             float smoothness
                                 = sqrt(linear_step(0.1, 0.9, hsl.z));
                             material.roughness
@@ -300,7 +300,7 @@ Material material_from(
 #endif
                         } else { // 13
 // Gems
-#ifdef HARDCODED_SPECULAR
+#if MATERIAL_MAPPING_MODE == MATERIAL_MAPPING_MODE_HARDCODED_SPECULAR && defined(HARDCODED_SPECULAR)
                             float smoothness
                                 = sqrt(linear_step(0.1, 0.9, hsl.z));
                             material.roughness
@@ -335,7 +335,7 @@ Material material_from(
                                 = 0.25 * albedo_sqrt * pow4(hsl.z);
 #endif
                         } else { // 17
-#ifdef HARDCODED_SPECULAR
+#if MATERIAL_MAPPING_MODE == MATERIAL_MAPPING_MODE_HARDCODED_SPECULAR && defined(HARDCODED_SPECULAR)
                             // End stone
                             float smoothness
                                 = 0.4 * linear_step(0.61, 0.85, hsl.z);
@@ -347,7 +347,7 @@ Material material_from(
                     } else { // 18-20
                         if (material_mask == 18u) { // 18
 // Metals
-#ifdef HARDCODED_SPECULAR
+#if MATERIAL_MAPPING_MODE == MATERIAL_MAPPING_MODE_HARDCODED_SPECULAR && defined(HARDCODED_SPECULAR)
                             float smoothness
                                 = sqrt(linear_step(0.1, 0.9, hsl.z));
                             material.roughness
@@ -474,7 +474,7 @@ Material material_from(
 #endif
                         } else { // 27
 // Copper
-#ifdef HARDCODED_SPECULAR
+#if MATERIAL_MAPPING_MODE == MATERIAL_MAPPING_MODE_HARDCODED_SPECULAR && defined(HARDCODED_SPECULAR)
                             vec3 hsl = rgb_to_hsl(albedo_srgb);
 
                             material.roughness = 0.5;
@@ -502,7 +502,7 @@ Material material_from(
                     if (material_mask < 30) { // 28-30
                         if (material_mask == 28u) { // 28
 // Copper
-#ifdef HARDCODED_SPECULAR
+#if MATERIAL_MAPPING_MODE == MATERIAL_MAPPING_MODE_HARDCODED_SPECULAR && defined(HARDCODED_SPECULAR)
                             vec3 hsl = rgb_to_hsl(albedo_srgb);
 
                             material.roughness = 0.5;
@@ -526,7 +526,7 @@ Material material_from(
 #endif
                         } else { // 29
 // Wood
-#ifdef HARDCODED_SPECULAR
+#if MATERIAL_MAPPING_MODE == MATERIAL_MAPPING_MODE_HARDCODED_SPECULAR && defined(HARDCODED_SPECULAR)
                             float smoothness
                                 = 0.25 * linear_step(0.4, 0.8, hsl.z);
                             material.roughness
@@ -536,7 +536,7 @@ Material material_from(
                         }
                     } else { // 30-32
                         if (material_mask == 30u) { // 30
-#ifdef HARDCODED_SPECULAR
+#if MATERIAL_MAPPING_MODE == MATERIAL_MAPPING_MODE_HARDCODED_SPECULAR && defined(HARDCODED_SPECULAR)
                             float smoothness
                                 = 0.25 * linear_step(0.4, 0.8, hsl.z);
                             material.roughness
@@ -840,7 +840,7 @@ Material material_from(
 
     if (64u <= material_mask && material_mask < 80u) {
 // Stained glass, honey and slime
-#ifdef HARDCODED_SPECULAR
+#if MATERIAL_MAPPING_MODE == MATERIAL_MAPPING_MODE_HARDCODED_SPECULAR && defined(HARDCODED_SPECULAR)
         material.f0 = vec3(0.04);
         material.roughness = 0.1;
         material.ssr_multiplier = 1.0;

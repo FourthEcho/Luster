@@ -14,7 +14,8 @@ const float clouds_cumulus_congestus_top_radius
     = clouds_cumulus_congestus_radius + clouds_cumulus_congestus_thickness * 1.35;
 const float clouds_cumulus_congestus_distance = 30000.0;
 const float clouds_cumulus_congestus_end_distance = 50000.0;
-float clouds_cumulus_congestus_extinction_coeff = 0.08;
+float clouds_cumulus_congestus_extinction_coeff
+    = 0.08 * CLOUDS_CUMULUS_CONGESTUS_DENSITY;
 float clouds_cumulus_congestus_scattering_coeff
     = clouds_cumulus_congestus_extinction_coeff * (1.0 - 0.2 * rainStrength);
 
@@ -35,9 +36,9 @@ float clouds_cumulus_congestus_altitude_shaping(
 }
 
 float clouds_cumulus_congestus_density(vec3 pos) {
-    const float wind_angle = CLOUDS_CUMULUS_WIND_ANGLE * degree;
+    const float wind_angle = CLOUDS_CUMULUS_CONGESTUS_WIND_ANGLE * degree;
     const vec2 wind_velocity
-        = CLOUDS_CUMULUS_WIND_SPEED * vec2(cos(wind_angle), sin(wind_angle));
+        = CLOUDS_CUMULUS_CONGESTUS_WIND_SPEED * vec2(cos(wind_angle), sin(wind_angle));
 
     float r = length(pos);
     if (r < clouds_cumulus_congestus_radius

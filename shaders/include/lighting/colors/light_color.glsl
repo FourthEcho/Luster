@@ -58,7 +58,13 @@ float get_moon_exposure() {
 
     float time_boost = 1.0 + 0.33 * rcp(clamp01(1.25 * max(-sun_dir.y, 0.1)));
 
-    return base_scale * mix(1.0, moon_phase_brightness, MOON_PHASE_LIGHTING_STRENGTH) * time_boost;
+#ifdef MOON_PHASE_NIGHT_LIGHTING
+    float phase_scale = mix(1.0, moon_phase_brightness, MOON_PHASE_LIGHTING_STRENGTH);
+#else
+    float phase_scale = 1.0;
+#endif
+
+    return base_scale * phase_scale * time_boost;
 }
 
 vec3 get_moon_tint() {
@@ -90,12 +96,6 @@ vec3 get_light_color() {
     light_color *= 1.0 - 0.25 * pulse(abs(light_dir.y), 0.15, 0.11);
 
     return light_color;
-}
-
-float get_skylight_boost() {
-    float early_night
-        = linear_step(0.05, 1.0, exp(-25.0 * sqr(sun_dir.y + 0.3)));
-    return 1.0 + 0.5 * early_night;
 }
 
 #endif // INCLUDE_LIGHTING_COLORS_LIGHT_COLOR

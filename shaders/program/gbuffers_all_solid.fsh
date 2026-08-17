@@ -118,12 +118,13 @@ uniform vec4 entityColor;
 #include "/include/utility/fast_math.glsl"
 #include "/include/utility/random.glsl"
 #include "/include/utility/space_conversion.glsl"
+#include "/include/utility/anisotropic_filter.glsl"
 
 
 #if defined PROGRAM_GBUFFERS_TERRAIN && defined POM
-#define read_tex(x) textureGrad(x, parallax_uv, uv_gradient[0], uv_gradient[1])
+#define read_tex(x) luster_texture_grad_anisotropic(x, parallax_uv, uv_gradient[0], uv_gradient[1])
 #else
-#define read_tex(x) texture(x, uv, lod_bias)
+#define read_tex(x) luster_texture_anisotropic(x, uv, dFdx(uv), dFdy(uv), lod_bias)
 #endif
 
 #if TEXTURE_FORMAT == TEXTURE_FORMAT_LAB

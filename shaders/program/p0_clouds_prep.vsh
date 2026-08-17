@@ -29,9 +29,10 @@ flat out vec3 light_dir_fixed;
 uniform int worldTime;
 uniform int worldDay;
 
-uniform float rainStrength;
 uniform float wetness;
 uniform float sunAngle;
+// rainStrength is declared in /include/sky/atmosphere.glsl, included below
+// via weather/clouds.glsl -> sky/clouds/constants.glsl
 
 uniform int frameCounter;
 uniform float frameTimeCounter;

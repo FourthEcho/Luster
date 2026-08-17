@@ -17,7 +17,8 @@ const int colortex12Format = RGB16F;         // full res    | clouds pixel age, 
 const int colortex13Format = RGBA16F;        // full res    | rendered translucent layer (translucent -> c1)
 const int colortex14Format = RG16F;          // quarter res | ambient occlusion history data (always)
 const int colortex15Format = R32F;           // full res    | LoD combined depth buffer (d1 -> c2)
-const int colortex17Format = RGB16F;         // full res    | GI irradiance cache (composite1 -> c2/c3/c4)
+const int colortex17Format = RGB16F;        // full res    | SSGI accumulated bounce radiance (p1 -> p2/p3, +flip)
+const int colortex18Format = RGB16F;        // full res    | SSGI temporal history (p3 -> p3, +flip, no clear)
 
 const bool colortex0Clear  = true;
 const bool colortex1Clear  = false;
@@ -35,6 +36,8 @@ const bool colortex12Clear = false;
 const bool colortex13Clear = true;
 const bool colortex14Clear = false;
 const bool colortex15Clear = false;
+const bool colortex17Clear = false;
+const bool colortex18Clear = false;
 
 const vec4 colortex0ClearColor = vec4(0.0, 0.0, 0.0, 0.0);
 const vec4 colortex3ClearColor = vec4(0.0, 0.0, 0.0, 0.0);

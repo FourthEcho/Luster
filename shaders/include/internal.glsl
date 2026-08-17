@@ -82,9 +82,6 @@
 //  Sky / atmosphere
 // ----------------------------------------------------------------------------
 
-  // Boosts sky and sunlight saturation based on the time of day.
-  // (The corresponding _INTENSITY multiplier below is the strength.)
-  #define ATMOSPHERE_SATURATION_BOOST_INTENSITY 1.00
 
   // Maximum number of temporal accumulation frames for the volumetric cloud
   // buffer before history is reset.

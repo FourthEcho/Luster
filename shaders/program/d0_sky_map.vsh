@@ -41,8 +41,9 @@ uniform sampler3D depthtex0; // atmospheric scattering LUT
 
 uniform float blindness;
 uniform float eyeAltitude;
-uniform float rainStrength;
 uniform float wetness;
+// rainStrength is declared in /include/sky/atmosphere.glsl, included below
+// via light_color.glsl and weather_color.glsl
 
 uniform int worldTime;
 uniform int worldDay;
@@ -149,7 +150,8 @@ void main() {
     vec3 aurora_lighting
         = mix(aurora_colors[0], aurora_colors[1], 0.25) * aurora_amount;
     sky_color += AURORA_CLOUD_LIGHTING * aurora_lighting;
-    ambient_color += AURORA_CLOUD_LIGHTING * aurora_lighting;
+    // Aurora ground influence — tints the ground/skylight ambient
+    ambient_color += AURORA_GROUND_LIGHTING * aurora_lighting;
 #endif
 
     gl_Position = vec4(gl_Vertex.xy * 2.0 - 1.0, 0.0, 1.0);

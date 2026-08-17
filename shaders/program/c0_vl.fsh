@@ -69,8 +69,9 @@ uniform float far;
 uniform float blindness;
 uniform float darknessFactor;
 uniform float eyeAltitude;
-uniform float rainStrength;
 uniform float wetness;
+// rainStrength is declared in /include/sky/atmosphere.glsl, included
+// (WORLD_OVERWORLD only) via fog/overworld/raymarched.glsl
 
 uniform float sunAngle;
 uniform float frameTimeCounter;
@@ -173,7 +174,11 @@ void main() {
     vec3 world_back_pos = scene_back_pos + cameraPosition;
 
     float dither = texelFetch(noisetex, fog_texel & 511, 0).b;
+#ifdef FOG_SMOOTHING
+    // Per-frame dither rotation — the jittered fog noise then converges
+    // temporally through TAA
     dither = r1(frameCounter, dither);
+#endif
 
     vec3 world_start_pos = gbufferModelViewInverse[3].xyz + cameraPosition;
     vec3 world_end_pos = world_pos;
@@ -255,6 +260,7 @@ void main() {
 
 #if defined LPV_VL && defined COLORED_LIGHTS
     fog_scattering
-        += get_lpv_fog_scattering(world_start_pos, world_end_pos, dither);
+        += get_lpv_fog_scattering(world_start_pos, world_end_pos, dither)
+           * AIR_FOG_COLORED_LIGHT_SHAFTS_INTENSITY;
 #endif
 }

@@ -111,8 +111,9 @@ uniform float far;
 uniform int worldTime;
 uniform int moonPhase;
 uniform float sunAngle;
-uniform float rainStrength;
 uniform float wetness;
+// rainStrength is declared in /include/sky/atmosphere.glsl, included below
+// via sky.glsl
 
 uniform int frameCounter;
 uniform float frameTimeCounter;

@@ -108,8 +108,9 @@ uniform float far;
 
 uniform float frameTimeCounter;
 uniform float sunAngle;
-uniform float rainStrength;
 uniform float wetness;
+// rainStrength is declared in /include/sky/atmosphere.glsl, included
+// (WORLD_OVERWORLD only) via specular_lighting.glsl
 
 uniform int worldTime;
 uniform int moonPhase;
@@ -222,6 +223,7 @@ Material get_water_material(
 #if WATER_TEXTURE == WATER_TEXTURE_HIGHLIGHT_UNDERGROUND
     texture_highlight *= 1.0 - cube(linear_step(0.0, 0.5, light_levels.y));
 #endif
+    texture_highlight *= WATER_TEXTURE_INTENSITY;
 
     material.albedo
         = clamp01(0.5 * exp(-2.0 * water_absorption_coeff) * texture_highlight);

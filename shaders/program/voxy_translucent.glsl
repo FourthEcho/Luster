@@ -85,6 +85,7 @@ Material get_water_material(
 #if WATER_TEXTURE == WATER_TEXTURE_HIGHLIGHT_UNDERGROUND
     texture_highlight *= 1.0 - cube(linear_step(0.0, 0.5, light_levels.y));
 #endif
+    texture_highlight *= WATER_TEXTURE_INTENSITY;
 
     sampled_color *= tint;
     material.albedo

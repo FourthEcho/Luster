@@ -72,7 +72,7 @@ vec4 draw_moon(vec3 ray_dir) {
     mat3 tbn = mat3(tangent, bitangent, moon_dir);
 
     // Vector from ray dir to moon dir.
-    vec2 offset = ((ray_dir - sun_dir) * tbn).xy;
+    vec2 offset = ((ray_dir - moon_dir) * tbn).xy;
     offset = fract(offset + 0.5);
 
     vec3 noise = texture(noisetex, 2.0 * offset).xyz;
@@ -207,7 +207,7 @@ vec3 draw_sky(
     // Cave sky fix
 
 #if !defined PROGRAM_DEFERRED0
-    // Fade lower part of sky into cave fog color when underground so that the
+    // Fade the lower part of the sky to black when underground so that the
     // sky isn't visible beyond the render distance
     float underground_sky_fade
         = biome_cave * smoothstep(-0.1, 0.1, 0.4 - ray_dir.y);

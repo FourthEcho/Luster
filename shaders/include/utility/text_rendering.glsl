@@ -19,7 +19,7 @@ corner)
   print_bool(false);
   print_float(sqrt(-1.0)); // Prints "NaN"
   print_int(42);
-  print_vec3(sky_color);
+  print_float(sky_color.x);
 
   // ...or arbitrarily long strings
   print((_H, _e, _l, _l, _o, _comma, _space, _w, _o, _r, _l, _d));
@@ -305,126 +305,6 @@ void print_bool(bool value) {
     } else {
         print((_f, _a, _l, _s, _e));
     }
-}
-
-void print_vec2(vec2 value) {
-    print_float(value.x);
-    print((_comma, _space));
-    print_float(value.y);
-}
-
-void print_vec3(vec3 value) {
-    print_float(value.x);
-    print((_comma, _space));
-    print_float(value.y);
-    print((_comma, _space));
-    print_float(value.z);
-}
-
-void print_vec4(vec4 value) {
-    print_float(value.x);
-    print((_comma, _space));
-    print_float(value.y);
-    print((_comma, _space));
-    print_float(value.z);
-    print((_comma, _space));
-    print_float(value.w);
-}
-
-void print_ivec2(ivec2 value) {
-    print_int(value.x);
-    print((_comma, _space));
-    print_int(value.y);
-}
-
-void print_ivec3(ivec3 value) {
-    print_int(value.x);
-    print((_comma, _space));
-    print_int(value.y);
-    print((_comma, _space));
-    print_int(value.z);
-}
-
-void print_ivec4(ivec4 value) {
-    print_int(value.x);
-    print((_comma, _space));
-    print_int(value.y);
-    print((_comma, _space));
-    print_int(value.z);
-    print((_comma, _space));
-    print_int(value.w);
-}
-
-void print_uvec2(uvec2 value) {
-    print_unsigned_int(value.x);
-    print((_comma, _space));
-    print_unsigned_int(value.y);
-}
-
-void print_uvec3(uvec3 value) {
-    print_unsigned_int(value.x);
-    print((_comma, _space));
-    print_unsigned_int(value.y);
-    print((_comma, _space));
-    print_unsigned_int(value.z);
-}
-
-void print_uvec4(uvec4 value) {
-    print_unsigned_int(value.x);
-    print((_comma, _space));
-    print_unsigned_int(value.y);
-    print((_comma, _space));
-    print_unsigned_int(value.z);
-    print((_comma, _space));
-    print_unsigned_int(value.w);
-}
-
-void print_bvec2(bvec2 value) {
-    print_bool(value.x);
-    print((_comma, _space));
-    print_bool(value.y);
-}
-
-void print_bvec3(bvec3 value) {
-    print_bool(value.x);
-    print((_comma, _space));
-    print_bool(value.y);
-    print((_comma, _space));
-    print_bool(value.z);
-}
-
-void print_bvec4(bvec4 value) {
-    print_bool(value.x);
-    print((_comma, _space));
-    print_bool(value.y);
-    print((_comma, _space));
-    print_bool(value.z);
-    print((_comma, _space));
-    print_bool(value.w);
-}
-
-void print_mat2(mat2 m) {
-    print_vec2(m[0]);
-    print_line();
-    print_vec2(m[1]);
-}
-
-void print_mat3(mat3 m) {
-    print_vec3(m[0]);
-    print_line();
-    print_vec3(m[1]);
-    print_line();
-    print_vec3(m[2]);
-}
-
-void print_mat4(mat4 m) {
-    print_vec4(m[0]);
-    print_line();
-    print_vec4(m[1]);
-    print_line();
-    print_vec4(m[2]);
-    print_line();
-    print_vec4(m[3]);
 }
 
 #endif // INCLUDE_UTILITY_TEXT_RENDERING

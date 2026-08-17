@@ -131,6 +131,7 @@ mat2x3 raymarch_air_fog(
             = step(depth0, shadow_screen_pos.z) * step(eps, max_of(color));
 
         color = color * color_weight + (1.0 - color_weight);
+        color = mix(vec3(1.0), color, AIR_FOG_COLORED_LIGHT_SHAFTS_INTENSITY);
 
         vec3 shadow = step(shadow_screen_pos.z, depth1) * color;
         shadow = (clamp01(shadow_screen_pos) == shadow_screen_pos)

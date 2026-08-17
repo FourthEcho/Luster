@@ -52,6 +52,19 @@
 
 #include "/settings.glsl"
 
+// Iris hardware texture filtering support. TEXTURE_FILTERING exposes
+// textureFilteringMode; value 2 means the host has selected anisotropic
+// filtering in Sodium/Iris. The actual GL anisotropy factor is configured
+// by the host sampler state, not by GLSL.
+#ifdef TEXTURE_FILTERING
+uniform int textureFilteringMode;
+#endif
+
+#if defined MC_GL_EXT_texture_filter_anisotropic
+#extension GL_EXT_texture_filter_anisotropic : enable
+#define LUSTER_HAS_GL_ANISOTROPIC 1
+#endif
+
 // Internal tuning constants — previously hidden inside settings.glsl, now
 // centralized here so the user-facing options file only contains GUI-exposed
 // sliders / toggles / mode switchers. See include/internal.glsl for the full
@@ -193,21 +206,11 @@ float cubic_smooth(float x) { return sqr(x) * (3.0 - 2.0 * x); }
 
 vec2 cubic_smooth(vec2 x) { return sqr(x) * (3.0 - 2.0 * x); }
 
-// Similar to the above, but even smoother with a zero second derivative at zero
-// and one
-float quintic_smooth(float x) {
-    return cube(x) * (x * (x * 6.0 - 15.0) + 10.0);
-}
-
 // Converts between the unit range [0, 1] and texture coordinates on [0.5/res, 1
 // - 0.5/res]. This prevents extrapolation at texture edges (used for atmosphere
 // lookup tables)
 float get_uv_from_unit_range(float values, const int res) {
     return values * (1.0 - 1.0 / float(res)) + (0.5 / float(res));
-}
-
-float get_unit_range_from_uv(float uv, const int res) {
-    return (uv - 0.5 / float(res)) / (1.0 - 1.0 / float(res));
 }
 
 // (the following functions are from https://iquilezles.org/articles/functions/)
@@ -225,9 +228,6 @@ float almost_identity(float x, float m, float n) {
 
     return (a * t + b) * t * t + n;
 }
-
-// Equivalent to almost_identity with n = 0 and m = 1
-float almost_unit_identity(float x) { return x * x * (2.0 - x); }
 
 // Remaps center +/- 0.5 * width to zero and center to 1, with the same
 // smoothing function as smoothstep

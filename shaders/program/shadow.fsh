@@ -87,7 +87,7 @@ vec3 refract_safe(vec3 I, vec3 N, float eta) {
 
 vec3 biome_water_coeff(vec3 biome_water_color) {
     const float density_scale = 0.15;
-    const float biome_color_contribution = 0.33;
+    const float biome_color_contribution = 0.33 * BIOME_WATER_COLOR_INTENSITY;
 
     const vec3 base_absorption_coeff
         = vec3(WATER_ABSORPTION_R, WATER_ABSORPTION_G, WATER_ABSORPTION_B)
@@ -151,6 +151,11 @@ float get_water_caustics() {
 }
 
 void main() {
+#if defined PROGRAM_SHADOW_ENTITIES && !defined ENTITY_SHADOWS
+    // Entities disabled from casting shadows — drop the fragment so it
+    // writes neither shadow depth nor shadow color
+    discard;
+#endif
 #ifndef COLORWHEEL
     if (material_mask == 1) { // Water
 #if defined PROGRAM_SHADOW_WATER || defined PROGRAM_SHADOW_FALLBACK

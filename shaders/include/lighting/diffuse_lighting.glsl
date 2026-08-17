@@ -11,11 +11,9 @@
 #ifdef IBL
 #include "/include/lighting/ibl.glsl"
 #endif
-// Full SSGI + color bleed lives in include/lighting/indirect_lighting.glsl
-// and runs as composite passes (c2_dof → c3_taau_prep → c4_taa_exposure).
-// There is NO cheap in-gbuffer bounce fill here anymore — shadowed areas
-// are lit by skylight/blocklight/cave lighting in the gbuffer, and the
-// real multi-bounce SSGI contribution is added by the composite pipeline.
+// There is no composite SSGI / multi-bounce pipeline in this pack —
+// shadowed areas are lit by skylight/blocklight/cave lighting here in
+// the gbuffer pass.
 #endif
 #ifdef COLORED_LIGHTS
 #include "/include/lighting/lpv/blocklight.glsl"
@@ -203,7 +201,7 @@ vec3 get_sky_lighting(
         * mix(skylight, vec3(dot(skylight, luminance_weights)), 0.5);
 #endif
 
-    lighting += skylight * get_skylight_falloff(light_levels.y);
+    lighting += skylight * SKYLIGHT_I * get_skylight_falloff(light_levels.y);
 
     return lighting;
 }
@@ -256,16 +254,8 @@ vec3 get_diffuse_lighting(
         * (1.0 - 0.5 * material.sss_amount)
     );
 
-    // Note: there is no cheap in-gbuffer "bounced" fill-light term here
-    // anymore.  Full SSGI + multi-bounce color bleed is computed by the
-    // composite pipeline:
-    //   c2_dof.fsh         → bounce1 (direct scene gather + cache + LPV)
-    //   c3_taau_prep.fsh   → bounce2 (gather from bounce1)
-    //   c4_taa_exposure.fsh→ bounce3 (gather from bounce2), temporal
-    //                          accumulation, scaled by INDIRECT_INTENSITY,
-    //                          then added to the lit scene color.
-    // Shadowed pixels therefore rely on skylight, blocklight, cave lighting,
-    // and the composite SSGI contribution — not on a fake constant fill.
+    // No composite SSGI / multi-bounce pipeline exists in this pack.
+    // Shadowed pixels rely on skylight, blocklight and cave lighting only.
 
 #ifdef SUB_SURFACE_SCATTERING
     vec3 sss = sss_approx(

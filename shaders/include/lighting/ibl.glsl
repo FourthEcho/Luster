@@ -177,9 +177,9 @@ vec3 ibl_rotate_around_n(vec3 local, vec3 t, vec3 b, vec3 n, float theta) {
 }
 
 // ----------------------------------------------------------------------------
-//  Sky radiance lookup.  Uses a bicubic filter (5-tap variant — actually
-//  4 bilinear taps via the catmull_rom_filter_fast approximation) for the
-//  smooth reflection path and a plain bilinear tap for the multi-sample
+//  Sky radiance lookup.  Uses the 4-bilinear-tap B-spline bicubic filter
+//  (bicubic_filter, see include/utility/bicubic.glsl) for the smooth
+//  reflection path and a plain bilinear tap for the multi-sample
 //  diffuse / specular paths (where the sampling budget dominates quality
 //  and bicubic would be wasteful).
 //
@@ -289,10 +289,8 @@ vec3 get_ibl_irradiance(vec3 bent_normal, float ao) {
     vec3 t, b;
     ibl_make_ortho_basis(axis, t, b);
 
-    // Per-pixel, per-frame rotation — temporal decorrelation for TAA.
-    // The factor 0.05 is chosen so the rotation completes a full turn in
-    // ~20 seconds, fast enough for TAA to converge on static scenes but
-    // slow enough not to shimmer on dynamic scenes.
+    // Per-pixel, per-frame random rotation from interleaved gradient noise —
+    // temporal decorrelation for TAA convergence.
     float rotation = ibl_tau * interleaved_gradient_noise(
         ivec2(gl_FragCoord.xy),
         frameCounter & 0x3f
@@ -370,8 +368,8 @@ vec3 get_ibl_irradiance_vl(vec3 axis) {
     ibl_make_ortho_basis(axis, t, b);
 
     // Decorrelate from surface IBL by offsetting the IGN seed by a prime
-    // constant.  Same ~20-second rotation period as the surface path so TAA
-    // converges at the same rate.
+    // constant.  Per-pixel, per-frame random rotation, same scheme as the
+    // surface path, so TAA converges at the same rate.
     float rotation = ibl_tau * interleaved_gradient_noise(
         ivec2(gl_FragCoord.xy) + 17,
         frameCounter & 0x3f
@@ -389,17 +387,6 @@ vec3 get_ibl_irradiance_vl(vec3 axis) {
     return irradiance;
 }
 
-
-vec3 ibl_cone_direction(vec3 R, vec3 N, float roughness, vec2 xi) {
-    float spread = clamp(roughness * roughness, 0.0, 1.0);
-    vec3 t, b;
-    ibl_make_ortho_basis(R, t, b);
-    float phi = 6.28318530718 * xi.x;
-    float cos_theta = mix(1.0, sqrt(max(0.0, 1.0 - spread)), xi.y);
-    float sin_theta = sqrt(max(0.0, 1.0 - cos_theta * cos_theta));
-    vec3 d = normalize(R * cos_theta + (t * cos(phi) + b * sin(phi)) * sin_theta);
-    return normalize(mix(R, d, spread));
-}
 
 vec3 ibl_multiscatter_compensation(vec3 f0, float roughness, float NoV) {
     float e = max(0.0, 1.0 - roughness);

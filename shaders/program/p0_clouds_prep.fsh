@@ -56,8 +56,9 @@ uniform float frameTimeCounter;
 
 uniform int isEyeInWater;
 uniform float eyeAltitude;
-uniform float rainStrength;
 uniform float blindness;
+// rainStrength is declared in /include/sky/atmosphere.glsl, included below
+// via cloud_shadows.glsl -> sky/clouds/constants.glsl
 
 uniform vec3 light_dir;
 uniform vec3 sun_dir;

@@ -147,48 +147,6 @@ vec4 common_fog(float view_dist, const bool sky) {
     return fog;
 }
 
-// Calculates the alpha component only
-float common_fog_alpha(float view_dist, bool sky) {
-    float fog = 1.0;
-
-    // Lava fog
-    fog *= spherical_fog(
-        view_dist,
-        lava_fog_start,
-        lava_fog_density * float(isEyeInWater == 2)
-    );
-
-    // Powdered snow fog
-    fog *= spherical_fog(
-        view_dist,
-        snow_fog_start,
-        snow_fog_density * float(isEyeInWater == 3)
-    );
-
-    // Blindness fog
-    fog *= spherical_fog(
-        view_dist,
-        blindness_fog_start,
-        blindness * blindness_fog_density
-    );
-
-#if defined WORLD_OVERWORLD && defined CAVE_FOG
-    // Cave fog
-    fog *= spherical_fog(
-        view_dist,
-        cave_fog_start,
-        cave_fog_density * biome_cave * float(!sky)
-    ); // Cave fog
-#endif
-
-#if defined WORLD_NETHER
-    // Nether fog
-    fog *= spherical_fog(view_dist, nether_fog_start, nether_fog_density);
-#endif
-
-    return fog;
-}
-
 // Water fog
 
 const vec3 water_absorption_coeff
@@ -197,7 +155,7 @@ const vec3 water_absorption_coeff
 
 vec3 biome_water_coeff(vec3 biome_water_color) {
     const float density_scale = 0.15;
-    const float biome_color_contribution = 0.33;
+    const float biome_color_contribution = 0.33 * BIOME_WATER_COLOR_INTENSITY;
 
     const vec3 base_absorption_coeff
         = vec3(WATER_ABSORPTION_R, WATER_ABSORPTION_G, WATER_ABSORPTION_B)

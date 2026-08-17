@@ -116,24 +116,16 @@ const float wetnessHalflife         = 70.0;
   // Consumed in include/lighting/specular_lighting.glsl as
   //   ibl_specular *= IBL_SPECULAR_INTENSITY * material.ssr_multiplier;
   #define IBL_SPECULAR_INTENSITY 1.00 // [0.00 0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.45 0.50 0.55 0.60 0.65 0.70 0.75 0.80 0.85 0.90 0.95 1.00 1.05 1.10 1.15 1.20 1.25 1.30 1.35 1.40 1.45 1.50 1.55 1.60 1.65 1.70 1.75 1.80 1.85 1.90 1.95 2.00]
-  // IBL_MULTI_SCATTER and IBL_CONE_FILTER are no longer exposed in the GUI
-  // — they auto-follow the IBL master toggle (see include/lighting/ibl.glsl).
-  // When IBL is on, both sub-features are on; when IBL is off, neither is.
+  // IBL_MULTI_SCATTER and IBL_CONE_FILTER are auto-defined alongside the IBL
+  // master toggle (see include/lighting/ibl.glsl) but currently gate no code —
+  // multi-scatter compensation always runs when IBL is enabled.
   // Hidden per-profile tuning — IBL sample count for volumetric fog ambient
   // color.  Not exposed as a UI slider; overridden per-profile in
   // shaders.properties.  VL tolerates far fewer samples than surface IBL
   // because smooth_filter() upsampling and TAA both low-pass the result.
   #define IBL_VL_SAMPLES 4
 
-  #define INDIRECT_LIGHTING
-  #define INDIRECT_TEMPORAL_ACCUMULATION
-  #define INDIRECT_BOUNCE_COUNT 2 // [1 2 3]
-  #define INDIRECT_INTENSITY 0.85 // [0.00 0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.45 0.50 0.55 0.60 0.65 0.70 0.75 0.80 0.85 0.90 0.95 1.00 1.10 1.20 1.30 1.40 1.50 1.60 1.80 2.00]
-  #define INDIRECT_RADIUS 2.25 // [0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 3.00 3.50 4.00 5.00 6.00]
-  #define INDIRECT_SAMPLES 8 // [4 6 8 10 12 16]
-  // INDIRECT_SPATIAL_REUSE (0.85) and INDIRECT_HISTORY_CLAMP (1.25) are
   // intentionally hidden from the GUI — hardcoded directly in
-  // include/lighting/indirect_lighting.glsl alongside the spatiotemporal
   // gather they tune.  Exposing them produced no perceivable user-facing
   // change but added noise to the indirect-lighting sub-screen.
 
@@ -166,17 +158,12 @@ const float wetnessHalflife         = 70.0;
   #define BLOCKLIGHT_B 0.63 // [0.00 0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.10 0.11 0.12 0.13 0.14 0.15 0.16 0.17 0.18 0.19 0.20 0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29 0.30 0.31 0.32 0.33 0.34 0.35 0.36 0.37 0.38 0.39 0.40 0.41 0.42 0.43 0.44 0.45 0.46 0.47 0.48 0.49 0.50 0.51 0.52 0.53 0.54 0.55 0.56 0.57 0.58 0.59 0.60 0.61 0.62 0.63 0.64 0.65 0.66 0.67 0.68 0.69 0.70 0.71 0.72 0.73 0.74 0.75 0.76 0.77 0.78 0.79 0.80 0.81 0.82 0.83 0.84 0.85 0.86 0.87 0.88 0.89 0.90 0.91 0.92 0.93 0.94 0.95 0.96 0.97 0.98 0.99 1.00]
   #define BLOCKLIGHT_I 1.00 // [0.00 0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.10 0.11 0.12 0.13 0.14 0.15 0.16 0.17 0.18 0.19 0.20 0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29 0.30 0.31 0.32 0.33 0.34 0.35 0.36 0.37 0.38 0.39 0.40 0.41 0.42 0.43 0.44 0.45 0.46 0.47 0.48 0.49 0.50 0.51 0.52 0.53 0.54 0.55 0.56 0.57 0.58 0.59 0.60 0.61 0.62 0.63 0.64 0.65 0.66 0.67 0.68 0.69 0.70 0.71 0.72 0.73 0.74 0.75 0.76 0.77 0.78 0.79 0.80 0.81 0.82 0.83 0.84 0.85 0.86 0.87 0.88 0.89 0.90 0.91 0.92 0.93 0.94 0.95 0.96 0.97 0.98 0.99 1.00 1.01 1.02 1.03 1.04 1.05 1.06 1.07 1.08 1.09 1.10 1.11 1.12 1.13 1.14 1.15 1.16 1.17 1.18 1.19 1.20 1.21 1.22 1.23 1.24 1.25 1.26 1.27 1.28 1.29 1.30 1.31 1.32 1.33 1.34 1.35 1.36 1.37 1.38 1.39 1.40 1.41 1.42 1.43 1.44 1.45 1.46 1.47 1.48 1.49 1.50 1.51 1.52 1.53 1.54 1.55 1.56 1.57 1.58 1.59 1.60 1.61 1.62 1.63 1.64 1.65 1.66 1.67 1.68 1.69 1.70 1.71 1.72 1.73 1.74 1.75 1.76 1.77 1.78 1.79 1.80 1.81 1.82 1.83 1.84 1.85 1.86 1.87 1.88 1.89 1.90 1.91 1.92 1.93 1.94 1.95 1.96 1.97 1.98 1.99 2.00]
 
-  // Tints blocklight (torches, lanterns, glowstone, etc.) toward the
-  // current biome's fog/foliage hue, using Minecraft's own fogColor as the
-  // biome tint source. Brightness is preserved; only hue/chroma shifts.
-  // (Biome-aware blocklight feature removed — uses vanilla blocklight color only.)
+  // Multiplies the skylight (ambient sky) contribution in diffuse lighting.
   #define SKYLIGHT_I 1.00 // [0.00 0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.10 0.11 0.12 0.13 0.14 0.15 0.16 0.17 0.18 0.19 0.20 0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29 0.30 0.31 0.32 0.33 0.34 0.35 0.36 0.37 0.38 0.39 0.40 0.41 0.42 0.43 0.44 0.45 0.46 0.47 0.48 0.49 0.50 0.51 0.52 0.53 0.54 0.55 0.56 0.57 0.58 0.59 0.60 0.61 0.62 0.63 0.64 0.65 0.66 0.67 0.68 0.69 0.70 0.71 0.72 0.73 0.74 0.75 0.76 0.77 0.78 0.79 0.80 0.81 0.82 0.83 0.84 0.85 0.86 0.87 0.88 0.89 0.90 0.91 0.92 0.93 0.94 0.95 0.96 0.97 0.98 0.99 1.00 1.01 1.02 1.03 1.04 1.05 1.06 1.07 1.08 1.09 1.10 1.11 1.12 1.13 1.14 1.15 1.16 1.17 1.18 1.19 1.20 1.21 1.22 1.23 1.24 1.25 1.26 1.27 1.28 1.29 1.30 1.31 1.32 1.33 1.34 1.35 1.36 1.37 1.38 1.39 1.40 1.41 1.42 1.43 1.44 1.45 1.46 1.47 1.48 1.49 1.50 1.51 1.52 1.53 1.54 1.55 1.56 1.57 1.58 1.59 1.60 1.61 1.62 1.63 1.64 1.65 1.66 1.67 1.68 1.69 1.70 1.71 1.72 1.73 1.74 1.75 1.76 1.77 1.78 1.79 1.80 1.81 1.82 1.83 1.84 1.85 1.86 1.87 1.88 1.89 1.90 1.91 1.92 1.93 1.94 1.95 1.96 1.97 1.98 1.99 2.00]
 
-  // Indirect lighting (full SSGI + multi-bounce color bleed) runs as
-  // composite passes — see include/lighting/indirect_lighting.glsl and
-  // program/c2_dof.fsh / c3_taau_prep.fsh / c4_taa_exposure.fsh.  There
-  // is NO cheap in-gbuffer fake ambient fill — shadowed areas get their
-  // bounce light exclusively from the composite SSGI pipeline.
+  // Cave lighting: fills in ambient light in dark, underground areas.
+  // This is a gbuffer-pass approximation only — there is no composite
+  // SSGI/multi-bounce pipeline in this pack.
   #define CAVE_LIGHTING_I 1.00 // [0.00 0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.10 0.11 0.12 0.13 0.14 0.15 0.16 0.17 0.18 0.19 0.20 0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29 0.30 0.31 0.32 0.33 0.34 0.35 0.36 0.37 0.38 0.39 0.40 0.41 0.42 0.43 0.44 0.45 0.46 0.47 0.48 0.49 0.50 0.51 0.52 0.53 0.54 0.55 0.56 0.57 0.58 0.59 0.60 0.61 0.62 0.63 0.64 0.65 0.66 0.67 0.68 0.69 0.70 0.71 0.72 0.73 0.74 0.75 0.76 0.77 0.78 0.79 0.80 0.81 0.82 0.83 0.84 0.85 0.86 0.87 0.88 0.89 0.90 0.91 0.92 0.93 0.94 0.95 0.96 0.97 0.98 0.99 1.00 1.01 1.02 1.03 1.04 1.05 1.06 1.07 1.08 1.09 1.10 1.11 1.12 1.13 1.14 1.15 1.16 1.17 1.18 1.19 1.20 1.21 1.22 1.23 1.24 1.25 1.26 1.27 1.28 1.29 1.30 1.31 1.32 1.33 1.34 1.35 1.36 1.37 1.38 1.39 1.40 1.41 1.42 1.43 1.44 1.45 1.46 1.47 1.48 1.49 1.50 1.51 1.52 1.53 1.54 1.55 1.56 1.57 1.58 1.59 1.60 1.61 1.62 1.63 1.64 1.65 1.66 1.67 1.68 1.69 1.70 1.71 1.72 1.73 1.74 1.75 1.76 1.77 1.78 1.79 1.80 1.81 1.82 1.83 1.84 1.85 1.86 1.87 1.88 1.89 1.90 1.91 1.92 1.93 1.94 1.95 1.96 1.97 1.98 1.99 2.00]
   #define CAVE_LIGHTING_FALLOFF 2.00 // [0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.40 1.50 1.60 1.70 1.80 1.90 2.00 2.10 2.20 2.30 2.40 2.50 2.60 2.70 2.80 2.90 3.00]
 
@@ -255,7 +242,7 @@ const float wetnessHalflife         = 70.0;
   
   #define VOXEL_VOLUME_CENTER_AHEAD 0
   #define VOXEL_VOLUME_CENTER_PLAYER 1
-  #define VOXEL_VOLUME_CENTER VOXEL_VOLUME_CENTER_AHEAD
+  #define VOXEL_VOLUME_CENTER VOXEL_VOLUME_CENTER_AHEAD // [VOXEL_VOLUME_CENTER_AHEAD VOXEL_VOLUME_CENTER_PLAYER]
 
 // -------
 //   Sky
@@ -263,7 +250,13 @@ const float wetnessHalflife         = 70.0;
 
 //#define SKY_GROUND
   #define SKY_GROUND_INTENSITY 1.00 // [0.00 0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.10 0.11 0.12 0.13 0.14 0.15 0.16 0.17 0.18 0.19 0.20 0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29 0.30 0.31 0.32 0.33 0.34 0.35 0.36 0.37 0.38 0.39 0.40 0.41 0.42 0.43 0.44 0.45 0.46 0.47 0.48 0.49 0.50 0.51 0.52 0.53 0.54 0.55 0.56 0.57 0.58 0.59 0.60 0.61 0.62 0.63 0.64 0.65 0.66 0.67 0.68 0.69 0.70 0.71 0.72 0.73 0.74 0.75 0.76 0.77 0.78 0.79 0.80 0.81 0.82 0.83 0.84 0.85 0.86 0.87 0.88 0.89 0.90 0.91 0.92 0.93 0.94 0.95 0.96 0.97 0.98 0.99 1.00]
-  // ATMOSPHERE_SATURATION_BOOST toggle + _INTENSITY moved to include/internal.glsl
+  // ATMOSPHERE_SATURATION_BOOST gates the saturation boost applied to sky
+  // and sunlight in atmosphere_post_processing (include/sky/atmosphere.glsl).
+#define ATMOSPHERE_SATURATION_BOOST
+  #define ATMOSPHERE_SATURATION_BOOST_INTENSITY 1.00 // [0.00 0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.45 0.50 0.55 0.60 0.65 0.70 0.75 0.80 0.85 0.90 0.95 1.00 1.05 1.10 1.15 1.20 1.25 1.30 1.35 1.40 1.45 1.50 1.55 1.60 1.65 1.70 1.75 1.80 1.85 1.90 1.95 2.00]
+  // Desaturates the sky and sunlight color during rain.
+//#define ATMOSPHERE_RAIN_DESATURATION
+  #define ATMOSPHERE_RAIN_DESATURATION_INTENSITY 1.00 // [0.00 0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.45 0.50 0.55 0.60 0.65 0.70 0.75 0.80 0.85 0.90 0.95 1.00]
   #define CREPUSCULAR_RAYS
   #define CREPUSCULAR_RAYS_INTENSITY 1.00 // [0.00 0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.10 0.11 0.12 0.13 0.14 0.15 0.16 0.17 0.18 0.19 0.20 0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29 0.30 0.31 0.32 0.33 0.34 0.35 0.36 0.37 0.38 0.39 0.40 0.41 0.42 0.43 0.44 0.45 0.46 0.47 0.48 0.49 0.50 0.51 0.52 0.53 0.54 0.55 0.56 0.57 0.58 0.59 0.60 0.61 0.62 0.63 0.64 0.65 0.66 0.67 0.68 0.69 0.70 0.71 0.72 0.73 0.74 0.75 0.76 0.77 0.78 0.79 0.80 0.81 0.82 0.83 0.84 0.85 0.86 0.87 0.88 0.89 0.90 0.91 0.92 0.93 0.94 0.95 0.96 0.97 0.98 0.99 1.00 1.01 1.02 1.03 1.04 1.05 1.06 1.07 1.08 1.09 1.10 1.11 1.12 1.13 1.14 1.15 1.16 1.17 1.18 1.19 1.20 1.21 1.22 1.23 1.24 1.25 1.26 1.27 1.28 1.29 1.30 1.31 1.32 1.33 1.34 1.35 1.36 1.37 1.38 1.39 1.40 1.41 1.42 1.43 1.44 1.45 1.46 1.47 1.48 1.49 1.50 1.51 1.52 1.53 1.54 1.55 1.56 1.57 1.58 1.59 1.60 1.61 1.62 1.63 1.64 1.65 1.66 1.67 1.68 1.69 1.70 1.71 1.72 1.73 1.74 1.75 1.76 1.77 1.78 1.79 1.80 1.81 1.82 1.83 1.84 1.85 1.86 1.87 1.88 1.89 1.90 1.91 1.92 1.93 1.94 1.95 1.96 1.97 1.98 1.99 2.00]
   #define CREPUSCULAR_RAYS_STEPS_HORIZON 20 // [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64]
@@ -414,16 +407,13 @@ const float wetnessHalflife         = 70.0;
 //#define BLOOMY_FOG
   #define BLOOMY_FOG_INTENSITY 1.0 //  [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
 
+  // Controls both spatial fog smoothing and per-frame VL dither
+  // rotation (temporal convergence through TAA).
   #define FOG_SMOOTHING
-  #define FOG_SMOOTHING_RADIUS 2.0
-  #define FOG_TEMPORAL_SMOOTHING
-  // Hidden internal constants — controlled per-profile in shaders.properties
-  // (profile.low/medium/high/ultra/mac all assign FOG_HISTORY_STRENGTH=0.82
-  // and FOG_HISTORY_DEPTH_REJECTION=0.08).  Removed from the GUI because
-  // the two sliders had no perceivable user-facing effect over the
-  // profile-tuned defaults but cluttered the fog sub-screen.
-  #define FOG_HISTORY_STRENGTH 0.82
-  #define FOG_HISTORY_DEPTH_REJECTION 0.08
+  #define FOG_SMOOTHING_RADIUS 2.0 // [0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 5.0 6.0 8.0 10.0]
+  // FOG_HISTORY_STRENGTH / FOG_HISTORY_DEPTH_REJECTION removed: there is no
+  // fog history buffer in this pack (colortex6/7 are cleared each frame and
+  // double as 3D noise / AO buffers), so they could never have an effect.
 
   // BORDER_FOG_HIDE_SUNSET_GRADIENT and BLOOMY_RAIN were unused dead code; removed.
 
@@ -496,14 +486,17 @@ const float wetnessHalflife         = 70.0;
   #define TEXTURE_FORMAT_OLD 1
 
 // Material Mapping Mode
-  #define MATERIAL_MAPPING_MODE_OFF            0
-  #define MATERIAL_MAPPING_MODE_SPECULAR        1
-  #define MATERIAL_MAPPING_MODE_NORMAL          2
-  #define MATERIAL_MAPPING_MODE_SPECULAR_NORMAL 3
+  #define MATERIAL_MAPPING_MODE_OFF                0
+  #define MATERIAL_MAPPING_MODE_HARDCODED_SPECULAR 1
+  #define MATERIAL_MAPPING_MODE_SPECULAR           2
+  #define MATERIAL_MAPPING_MODE_NORMAL             3
+  #define MATERIAL_MAPPING_MODE_SPECULAR_NORMAL    4
 
-  #define MATERIAL_MAPPING_MODE MATERIAL_MAPPING_MODE_OFF // [MATERIAL_MAPPING_MODE_OFF MATERIAL_MAPPING_MODE_SPECULAR MATERIAL_MAPPING_MODE_NORMAL MATERIAL_MAPPING_MODE_SPECULAR_NORMAL]
+  #define MATERIAL_MAPPING_MODE MATERIAL_MAPPING_MODE_HARDCODED_SPECULAR // [MATERIAL_MAPPING_MODE_OFF MATERIAL_MAPPING_MODE_HARDCODED_SPECULAR MATERIAL_MAPPING_MODE_SPECULAR MATERIAL_MAPPING_MODE_NORMAL MATERIAL_MAPPING_MODE_SPECULAR_NORMAL]
 
-  #define HARDCODED_SPECULAR
+// Filtering
+  #define ANISOTROPIC_FILTERING 0 // [0 2 4 6 8 10 12 14 16]
+
   // HARDCODED_EMISSION and HARDCODED_SSS moved to include/internal.glsl
 
 // Rain Puddles Mode
@@ -514,10 +507,22 @@ const float wetnessHalflife         = 70.0;
   #define RAIN_PUDDLES_MODE RAIN_PUDDLES_MODE_PUDDLES // [RAIN_PUDDLES_MODE_OFF RAIN_PUDDLES_MODE_PUDDLES RAIN_PUDDLES_MODE_EVERYWHERE]
   #define RAIN_PUDDLES_INTENSITY 1.00 // [0.00 0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.10 0.11 0.12 0.13 0.14 0.15 0.16 0.17 0.18 0.19 0.20 0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29 0.30 0.31 0.32 0.33 0.34 0.35 0.36 0.37 0.38 0.39 0.40 0.41 0.42 0.43 0.44 0.45 0.46 0.47 0.48 0.49 0.50 0.51 0.52 0.53 0.54 0.55 0.56 0.57 0.58 0.59 0.60 0.61 0.62 0.63 0.64 0.65 0.66 0.67 0.68 0.69 0.70 0.71 0.72 0.73 0.74 0.75 0.76 0.77 0.78 0.79 0.80 0.81 0.82 0.83 0.84 0.85 0.86 0.87 0.88 0.89 0.90 0.91 0.92 0.93 0.94 0.95 0.96 0.97 0.98 0.99 1.00]
 
+// Screen-space global illumination (Indirect Lighting screen)
+  #define SSGI
+  #define SSGI_TEMPORAL_ACCUMULATION
+  #define SSGI_INTENSITY 1.00 // [0.00 0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.45 0.50 0.55 0.60 0.65 0.70 0.75 0.80 0.85 0.90 0.95 1.00 1.05 1.10 1.15 1.20 1.25 1.30 1.35 1.40 1.45 1.50 1.55 1.60 1.65 1.70 1.75 1.80 1.85 1.90 1.95 2.00]
+  #define SSGI_RADIUS 16.0 // [4.0 6.0 8.0 12.0 16.0 24.0 32.0 48.0 64.0]
+  #define SSGI_RAY_STEPS 8 // [4 6 8 10 12 16 24 32]
+  #define SSGI_BOUNCES 1 // [1 2 3]
+  #define SSGI_TEMPORAL_WEIGHT 0.85 // [0.50 0.55 0.60 0.65 0.70 0.75 0.80 0.85 0.90 0.95]
+  #define SSGI_FILTER_RADIUS 1 // [0 1 2 3]
+
 // Resource Pack Settings
 
   #define TEXTURE_FORMAT TEXTURE_FORMAT_LAB // [TEXTURE_FORMAT_LAB TEXTURE_FORMAT_OLD]
-  #define HARDCODED_SPECULAR
+  // When MATERIAL_MAPPING_MODE is HARDCODED_SPECULAR, this toggle enables/
+  // disables the hardcoded specular materials in include/surface/material.glsl.
+#define HARDCODED_SPECULAR
   // EMISSION_STRENGTH moved to include/internal.glsl
 //#define POM
   #define POM_DEPTH 0.25 // [0.00 0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.10 0.11 0.12 0.13 0.14 0.15 0.16 0.17 0.18 0.19 0.20 0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29 0.30 0.31 0.32 0.33 0.34 0.35 0.36 0.37 0.38 0.39 0.40 0.41 0.42 0.43 0.44 0.45 0.46 0.47 0.48 0.49 0.50 0.51 0.52 0.53 0.54 0.55 0.56 0.57 0.58 0.59 0.60 0.61 0.62 0.63 0.64 0.65 0.66 0.67 0.68 0.69 0.70 0.71 0.72 0.73 0.74 0.75 0.76 0.77 0.78 0.79 0.80 0.81 0.82 0.83 0.84 0.85 0.86 0.87 0.88 0.89 0.90 0.91 0.92 0.93 0.94 0.95 0.96 0.97 0.98 0.99 1.00]
@@ -614,7 +619,6 @@ const float wetnessHalflife         = 70.0;
   // lower = sharper bloom, higher = softer/wider spread.
   #define BLOOM_SPREAD 1.00
   // BLOOM_UPSAMPLING_FILTER moved to include/internal.glsl
-// DOF was an unused dead-code toggle; removed.
   #define DOF_INTENSITY 1.00 // [0.00 0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.10 0.11 0.12 0.13 0.14 0.15 0.16 0.17 0.18 0.19 0.20 0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29 0.30 0.31 0.32 0.33 0.34 0.35 0.36 0.37 0.38 0.39 0.40 0.41 0.42 0.43 0.44 0.45 0.46 0.47 0.48 0.49 0.50 0.51 0.52 0.53 0.54 0.55 0.56 0.57 0.58 0.59 0.60 0.61 0.62 0.63 0.64 0.65 0.66 0.67 0.68 0.69 0.70 0.71 0.72 0.73 0.74 0.75 0.76 0.77 0.78 0.79 0.80 0.81 0.82 0.83 0.84 0.85 0.86 0.87 0.88 0.89 0.90 0.91 0.92 0.93 0.94 0.95 0.96 0.97 0.98 0.99 1.00 1.01 1.02 1.03 1.04 1.05 1.06 1.07 1.08 1.09 1.10 1.11 1.12 1.13 1.14 1.15 1.16 1.17 1.18 1.19 1.20 1.21 1.22 1.23 1.24 1.25 1.26 1.27 1.28 1.29 1.30 1.31 1.32 1.33 1.34 1.35 1.36 1.37 1.38 1.39 1.40 1.41 1.42 1.43 1.44 1.45 1.46 1.47 1.48 1.49 1.50 1.51 1.52 1.53 1.54 1.55 1.56 1.57 1.58 1.59 1.60 1.61 1.62 1.63 1.64 1.65 1.66 1.67 1.68 1.69 1.70 1.71 1.72 1.73 1.74 1.75 1.76 1.77 1.78 1.79 1.80 1.81 1.82 1.83 1.84 1.85 1.86 1.87 1.88 1.89 1.90 1.91 1.92 1.93 1.94 1.95 1.96 1.97 1.98 1.99 2.00]
   #define DOF_SAMPLES 40 // [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80]
   #define DOF_FOCUS -1.0 // [0.0 1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0 11.0 12.0 13.0 14.0 15.0 16.0 17.0 18.0 19.0 20.0 21.0 22.0 23.0 24.0 25.0 26.0 27.0 28.0 29.0 30.0 31.0 32.0 33.0 34.0 35.0 36.0 37.0 38.0 39.0 40.0 41.0 42.0 43.0 44.0 45.0 46.0 47.0 48.0 49.0 50.0]
@@ -625,6 +629,15 @@ const float wetnessHalflife         = 70.0;
   #define DOF_MODE_DISTANCE_BLUR 2
 
   #define DOF_MODE DOF_MODE_OFF // [DOF_MODE_OFF DOF_MODE_DOF DOF_MODE_DISTANCE_BLUR]
+
+  // Internal flags derived from DOF_MODE; consumed by program/c2_dof.fsh
+  // and the composite2.enabled directives in shaders.properties.
+#if DOF_MODE == DOF_MODE_DOF
+  #define DOF
+#elif DOF_MODE == DOF_MODE_DISTANCE_BLUR
+  #define DISTANT_BLUR
+#endif
+
   #define DISTANT_BLUR_INTENSITY 1.00 // [0.00 0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.10 0.11 0.12 0.13 0.14 0.15 0.16 0.17 0.18 0.19 0.20 0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29 0.30 0.31 0.32 0.33 0.34 0.35 0.36 0.37 0.38 0.39 0.40 0.41 0.42 0.43 0.44 0.45 0.46 0.47 0.48 0.49 0.50 0.51 0.52 0.53 0.54 0.55 0.56 0.57 0.58 0.59 0.60 0.61 0.62 0.63 0.64 0.65 0.66 0.67 0.68 0.69 0.70 0.71 0.72 0.73 0.74 0.75 0.76 0.77 0.78 0.79 0.80 0.81 0.82 0.83 0.84 0.85 0.86 0.87 0.88 0.89 0.90 0.91 0.92 0.93 0.94 0.95 0.96 0.97 0.98 0.99 1.00]
   #define DISTANCE_BLUR_START 10.0 // [1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0 15.0 20.0 25.0 30.0 40.0 50.0 64.0 80.0 100.0 128.0 200.0 256.0]
 //#define MOTION_BLUR
@@ -642,7 +655,7 @@ const float wetnessHalflife         = 70.0;
 
 // Color grading
 
-  #define tonemap tonemap_lottes // [tonemap_aces_fit tonemap_aces_full tonemap_agx tonemap_hejl_2015 tonemap_hejl_burgess tonemap_lottes tonemap_uncharted_2 tonemap_tech tonemap_ozius tonemap_reinhard tonemap_reinhard_jodie]
+  #define tonemap tonemap_lottes // [tonemap_aces_fit tonemap_aces_full tonemap_agx tonemap_agx_golden tonemap_agx_punchy tonemap_hejl_2015 tonemap_hejl_burgess tonemap_lottes tonemap_uncharted_2 tonemap_tech tonemap_ozius tonemap_reinhard tonemap_reinhard_jodie]
 
   #define GRADE_BRIGHTNESS 1.00 // [0.00 0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.10 0.11 0.12 0.13 0.14 0.15 0.16 0.17 0.18 0.19 0.20 0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29 0.30 0.31 0.32 0.33 0.34 0.35 0.36 0.37 0.38 0.39 0.40 0.41 0.42 0.43 0.44 0.45 0.46 0.47 0.48 0.49 0.50 0.51 0.52 0.53 0.54 0.55 0.56 0.57 0.58 0.59 0.60 0.61 0.62 0.63 0.64 0.65 0.66 0.67 0.68 0.69 0.70 0.71 0.72 0.73 0.74 0.75 0.76 0.77 0.78 0.79 0.80 0.81 0.82 0.83 0.84 0.85 0.86 0.87 0.88 0.89 0.90 0.91 0.92 0.93 0.94 0.95 0.96 0.97 0.98 0.99 1.00 1.01 1.02 1.03 1.04 1.05 1.06 1.07 1.08 1.09 1.10 1.11 1.12 1.13 1.14 1.15 1.16 1.17 1.18 1.19 1.20 1.21 1.22 1.23 1.24 1.25 1.26 1.27 1.28 1.29 1.30 1.31 1.32 1.33 1.34 1.35 1.36 1.37 1.38 1.39 1.40 1.41 1.42 1.43 1.44 1.45 1.46 1.47 1.48 1.49 1.50 1.51 1.52 1.53 1.54 1.55 1.56 1.57 1.58 1.59 1.60 1.61 1.62 1.63 1.64 1.65 1.66 1.67 1.68 1.69 1.70 1.71 1.72 1.73 1.74 1.75 1.76 1.77 1.78 1.79 1.80 1.81 1.82 1.83 1.84 1.85 1.86 1.87 1.88 1.89 1.90 1.91 1.92 1.93 1.94 1.95 1.96 1.97 1.98 1.99 2.00]
   #define GRADE_CONTRAST   1.00 // [0.00 0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.10 0.11 0.12 0.13 0.14 0.15 0.16 0.17 0.18 0.19 0.20 0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29 0.30 0.31 0.32 0.33 0.34 0.35 0.36 0.37 0.38 0.39 0.40 0.41 0.42 0.43 0.44 0.45 0.46 0.47 0.48 0.49 0.50 0.51 0.52 0.53 0.54 0.55 0.56 0.57 0.58 0.59 0.60 0.61 0.62 0.63 0.64 0.65 0.66 0.67 0.68 0.69 0.70 0.71 0.72 0.73 0.74 0.75 0.76 0.77 0.78 0.79 0.80 0.81 0.82 0.83 0.84 0.85 0.86 0.87 0.88 0.89 0.90 0.91 0.92 0.93 0.94 0.95 0.96 0.97 0.98 0.99 1.00 1.01 1.02 1.03 1.04 1.05 1.06 1.07 1.08 1.09 1.10 1.11 1.12 1.13 1.14 1.15 1.16 1.17 1.18 1.19 1.20 1.21 1.22 1.23 1.24 1.25 1.26 1.27 1.28 1.29 1.30 1.31 1.32 1.33 1.34 1.35 1.36 1.37 1.38 1.39 1.40 1.41 1.42 1.43 1.44 1.45 1.46 1.47 1.48 1.49 1.50 1.51 1.52 1.53 1.54 1.55 1.56 1.57 1.58 1.59 1.60 1.61 1.62 1.63 1.64 1.65 1.66 1.67 1.68 1.69 1.70 1.71 1.72 1.73 1.74 1.75 1.76 1.77 1.78 1.79 1.80 1.81 1.82 1.83 1.84 1.85 1.86 1.87 1.88 1.89 1.90 1.91 1.92 1.93 1.94 1.95 1.96 1.97 1.98 1.99 2.00]
@@ -698,8 +711,8 @@ const float wetnessHalflife         = 70.0;
   #define COLOR_OUTPUT_MODE COLOR_OUTPUT_DISPLAY_P3 // [COLOR_OUTPUT_SRGB COLOR_OUTPUT_REC2020 COLOR_OUTPUT_DISPLAY_P3 COLOR_OUTPUT_DCI_P3 COLOR_OUTPUT_ADOBE_RGB]
 //#define WHITE_WORLD
 //#define TONEMAP_COMPARISON
-  #define tonemap_left tonemap_lottes // [tonemap_aces_fit tonemap_aces_full tonemap_agx tonemap_hejl_2015 tonemap_hejl_burgess tonemap_lottes tonemap_uncharted_2 tonemap_tech tonemap_ozius tonemap_reinhard tonemap_reinhard_jodie]
-  #define tonemap_right tonemap_lottes // [tonemap_aces_fit tonemap_aces_full tonemap_agx tonemap_hejl_2015 tonemap_hejl_burgess tonemap_lottes tonemap_uncharted_2 tonemap_tech tonemap_ozius tonemap_reinhard tonemap_reinhard_jodie]
+  #define tonemap_left tonemap_lottes // [tonemap_aces_fit tonemap_aces_full tonemap_agx tonemap_agx_golden tonemap_agx_punchy tonemap_hejl_2015 tonemap_hejl_burgess tonemap_lottes tonemap_uncharted_2 tonemap_tech tonemap_ozius tonemap_reinhard tonemap_reinhard_jodie]
+  #define tonemap_right tonemap_lottes // [tonemap_aces_fit tonemap_aces_full tonemap_agx tonemap_agx_golden tonemap_agx_punchy tonemap_hejl_2015 tonemap_hejl_burgess tonemap_lottes tonemap_uncharted_2 tonemap_tech tonemap_ozius tonemap_reinhard tonemap_reinhard_jodie]
   #define FANCY_NETHER_PORTAL
 //#define CUSTOM_SKY
   #define CUSTOM_SKY_BRIGHTNESS 1.00 // [0.00 0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.10 0.11 0.12 0.13 0.14 0.15 0.16 0.17 0.18 0.19 0.20 0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29 0.30 0.31 0.32 0.33 0.34 0.35 0.36 0.37 0.38 0.39 0.40 0.41 0.42 0.43 0.44 0.45 0.46 0.47 0.48 0.49 0.50 0.51 0.52 0.53 0.54 0.55 0.56 0.57 0.58 0.59 0.60 0.61 0.62 0.63 0.64 0.65 0.66 0.67 0.68 0.69 0.70 0.71 0.72 0.73 0.74 0.75 0.76 0.77 0.78 0.79 0.80 0.81 0.82 0.83 0.84 0.85 0.86 0.87 0.88 0.89 0.90 0.91 0.92 0.93 0.94 0.95 0.96 0.97 0.98 0.99 1.00 1.01 1.02 1.03 1.04 1.05 1.06 1.07 1.08 1.09 1.10 1.11 1.12 1.13 1.14 1.15 1.16 1.17 1.18 1.19 1.20 1.21 1.22 1.23 1.24 1.25 1.26 1.27 1.28 1.29 1.30 1.31 1.32 1.33 1.34 1.35 1.36 1.37 1.38 1.39 1.40 1.41 1.42 1.43 1.44 1.45 1.46 1.47 1.48 1.49 1.50 1.51 1.52 1.53 1.54 1.55 1.56 1.57 1.58 1.59 1.60 1.61 1.62 1.63 1.64 1.65 1.66 1.67 1.68 1.69 1.70 1.71 1.72 1.73 1.74 1.75 1.76 1.77 1.78 1.79 1.80 1.81 1.82 1.83 1.84 1.85 1.86 1.87 1.88 1.89 1.90 1.91 1.92 1.93 1.94 1.95 1.96 1.97 1.98 1.99 2.00]
