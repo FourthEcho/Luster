@@ -1,6 +1,8 @@
 name: Remove colored lights
 
 on:
+  pull_request:
+    types: [opened, synchronize, reopened]
   push:
     branches: [remove-colored-lights]
 
@@ -9,326 +11,513 @@ permissions:
 
 jobs:
   cleanup:
-    if: ${{ !startsWith(github.event.head_commit.message, 'chore: complete colored-light cleanup') }}
+    if: ${{ github.head_ref == 'remove-colored-lights' || github.ref_name == 'remove-colored-lights' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout target branch
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          ref: remove-colored-lights
+          fetch-depth: 2
+          persist-credentials: true
 
-      - name: Patch and audit
+      - name: Remove colored lights and rebuild emissive map
         shell: bash
         run: |
           set -euo pipefail
           python3 <<'PY'
           from pathlib import Path
           import re
-          import subprocess
 
-          root = Path('.')
+          ROOT = Path('.')
+          SHADERS = ROOT / 'shaders'
 
-          # 1) Remove all COLORED_LIGHTS shader-code branches, while explicitly
-          #    preserving HANDHELD_LIGHTING_COLORED and its dependency tables.
-          token = 'COLORED_LIGHTS'
-          files = []
-          for p in root.joinpath('shaders').rglob('*'):
-              if not p.is_file() or p.suffix.lower() not in {'.glsl','.vsh','.fsh','.gsh','.csh','.properties'}:
+          # --- shader preprocessor cleanup ---
+          # Evaluate only the colored-light conditional blocks. Handheld colored
+          # lighting is deliberately excluded from this pass.
+          FEATURE_WORDS = (
+              'COLORED_LIGHTS',
+              'COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION',
+              'COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF',
+          )
+
+          def feature_condition_value(expr: str):
+              e = expr.strip()
+              if 'HANDHELD_LIGHTING_COLORED' in e:
+                  return None
+              if re.fullmatch(r'(?:defined\\s*\\(\\s*)?COLORED_LIGHTS(?:\\s*\\))?', e):
+                  return False
+              if re.fullmatch(r'!\\s*defined\\s*\\(\\s*COLORED_LIGHTS\\s*\\)', e):
+                  return True
+              if 'COLORED_LIGHTS' not in e:
+                  return None
+              # Collapse simple boolean expressions that become constants.
+              e2 = re.sub(r'!\\s*defined\\s*\\(\\s*COLORED_LIGHTS(?:_[A-Z0-9_]+)?\\s*\\)', '1', e)
+              e2 = re.sub(r'defined\\s*\\(\\s*COLORED_LIGHTS(?:_[A-Z0-9_]+)?\\s*\\)', '0', e2)
+              e2 = re.sub(r'\\bCOLORED_LIGHTS(?:_[A-Z0-9_]+)?\\b', '0', e2)
+              compact = re.sub(r'\\s+', '', e2)
+              if re.fullmatch(r'[01()&|!]+', compact):
+                  try:
+                      # Translate C-like boolean operators into Python equivalents.
+                      py = compact.replace('&&', ' and ').replace('||', ' or ').replace('!', ' not ')
+                      return bool(eval(py, {'__builtins__': {}}, {}))
+                  except Exception:
+                      pass
+              return None
+
+          def rewrite_conditionals(text: str) -> str:
+              lines = text.splitlines(True)
+              out = []
+              i = 0
+              while i < len(lines):
+                  s = lines[i].strip()
+                  m = re.match(r'#(ifdef|ifndef|if)\\b(.*)', s)
+                  if not m or 'COLORED_LIGHTS' not in m.group(2):
+                      out.append(lines[i])
+                      i += 1
+                      continue
+
+                  kind, expr = m.group(1), m.group(2).strip()
+                  if kind == 'ifdef' and expr == 'COLORED_LIGHTS':
+                      value = False
+                  elif kind == 'ifndef' and expr == 'COLORED_LIGHTS':
+                      value = True
+                  else:
+                      value = feature_condition_value(expr)
+
+                  # If the condition is not safely classifiable, only remove the
+                  # feature name from the expression and leave the rest intact.
+                  if value is None:
+                      repl = expr
+                      repl = re.sub(r'defined\\s*\\(\\s*COLORED_LIGHTS(?:_[A-Z0-9_]+)?\\s*\\)', '0', repl)
+                      repl = re.sub(r'\\bCOLORED_LIGHTS(?:_[A-Z0-9_]+)?\\b', '0', repl)
+                      out.append('#if ' + repl + '\n')
+                      i += 1
+                      continue
+
+                  # Collect the conditional block, respecting nested #if/#endif.
+                  start = i
+                  depth = 0
+                  branches = [[]]
+                  branch_index = 0
+                  saw_else = False
+                  i += 1
+                  while i < len(lines):
+                      inner = lines[i].strip()
+                      if re.match(r'#if(n?def)?\\b|#if\\b', inner):
+                          depth += 1
+                          branches[branch_index].append(lines[i])
+                      elif inner.startswith('#endif'):
+                          if depth == 0:
+                              break
+                          depth -= 1
+                          branches[branch_index].append(lines[i])
+                      elif depth == 0 and inner.startswith('#else'):
+                          if not saw_else:
+                              saw_else = True
+                              branch_index += 1
+                              branches.append([])
+                          else:
+                              branches[branch_index].append(lines[i])
+                      elif depth == 0 and inner.startswith('#elif'):
+                          # Treat any elif as an alternative branch. For these
+                          # cleanup targets, keeping the non-feature branch is safe.
+                          branch_index += 1
+                          branches.append([])
+                      else:
+                          branches[branch_index].append(lines[i])
+                      i += 1
+                  if i >= len(lines):
+                      # Unterminated block: preserve original source rather than corrupting it.
+                      out.extend(lines[start:i])
+                      break
+                  i += 1  # consume #endif
+
+                  if saw_else and len(branches) >= 2:
+                      chosen = branches[1] if value is False else branches[0]
+                      out.extend(chosen)
+                  elif value:
+                      out.extend(branches[0])
+                  # value == False and no else => whole feature block removed.
+              return ''.join(out)
+
+          shader_exts = {'.glsl', '.vsh', '.fsh', '.gsh', '.csh'}
+          for p in SHADERS.rglob('*'):
+              if not p.is_file() or p.suffix.lower() not in shader_exts:
                   continue
               try:
                   text = p.read_text(encoding='utf-8')
               except UnicodeDecodeError:
                   continue
-              if token in text:
-                  files.append(p)
-
-          def strip_colored_blocks(text: str) -> str:
-              lines = text.splitlines(True)
-              out = []
-              i = 0
-              n = len(lines)
-              while i < n:
-                  line = lines[i]
-                  s = line.strip()
-                  # Remove preprocessor branches whose condition directly
-                  # enables/depends on COLORED_LIGHTS. Preserve the separate
-                  # HANDHELD_LIGHTING_COLORED mode, which is a different option.
-                  starts = (
-                      s.startswith('#ifdef COLORED_LIGHTS') or
-                      s.startswith('#ifndef COLORED_LIGHTS') or
-                      s.startswith('#if defined COLORED_LIGHTS') or
-                      s.startswith('#if !defined COLORED_LIGHTS') or
-                      (s.startswith('#if ') and 'COLORED_LIGHTS' in s and 'HANDHELD_LIGHTING_COLORED' not in s)
-                  )
-                  if starts:
-                      depth = 0
-                      while i < n:
-                          inner = lines[i].strip()
-                          if inner.startswith('#if'):
-                              depth += 1
-                          elif inner.startswith('#endif'):
-                              depth -= 1
-                              if depth == 0:
-                                  i += 1
-                                  break
-                          i += 1
-                      continue
-                  if token in line and 'HANDHELD_LIGHTING_COLORED' not in line:
-                      # Remove standalone option checks/definitions/comments
-                      # rather than leaving dead colored-light settings behind.
-                      if s.startswith(('#define COLORED_LIGHTS', '#undef COLORED_LIGHTS', '#if', '#elif', '#include')):
-                          i += 1
-                          continue
-                  out.append(line)
-                  i += 1
-              return ''.join(out)
-
-          for p in files:
-              if p.as_posix().endswith('shaders/shaders.properties'):
-                  continue
-              if p.as_posix().endswith('shaders/block.properties'):
-                  continue
-              text = p.read_text(encoding='utf-8')
-              new = strip_colored_blocks(text)
-              p.write_text(new, encoding='utf-8')
-
-          # 2) Remove the Colored Lights controls and profiles from shaders.properties,
-          #    but keep a visible, intentionally empty Colored Lights screen.
-          sp = root/'shaders/shaders.properties'
-          text = sp.read_text(encoding='utf-8')
-          text = re.sub(r'!?COLORED_LIGHTS(?:\s+|$)', '', text)
-          text = re.sub(r'(?ms)^# Colored Lights sub-screen.*?^screen\.ibl\s+=', 'screen.main_lighting = [colored_lights]\n# Retained intentionally as an empty screen so the Colored Lights screen remains visible.\nscreen.colored_lights = <empty>\n\nscreen.ibl =', text)
-          text = re.sub(r'(?ms)^# Colored Lights/LPV is.*?^# Colored Lights sub-screen', '# Lighting submenus', text)
-          text = re.sub(r'(?m)^# Colored Lights Settings sub-screen.*?\nscreen\.colored_lights_settings\s*=.*?\n\n', '', text, flags=re.S)
-          text = re.sub(r'(?m)^screen\.main_lighting\s*=.*?\n', 'screen.main_lighting = [colored_lights]\n', text, count=1)
-          text = re.sub(r'(?m)^screen\.colored_lights_settings\s*=.*\n', '', text)
-          text = re.sub(r'(?m)^screen\.lpv_vl\s*=.*\n', '', text)
-          sp.write_text(text, encoding='utf-8')
-
-          # 3) Remove colored-light-only settings, but never touch the handheld
-          #    mode or the lighting_colors.glsl dependency table.
-          settings = root/'shaders/settings.glsl'
-          text = settings.read_text(encoding='utf-8')
-          text = re.sub(r'(?ms)^// Colored Lights Settings\n.*?(?=^// -------\n#  Sky)', '', text)
-          text = re.sub(r'(?m)^\s*//\#define COLORED_LIGHTS\s*\n', '', text)
-          text = re.sub(r'(?m)^\s*#define COLORED_LIGHTS[^\n]*\n', '', text)
-          text = re.sub(r'(?m)^\s*#define (?:COLORED_LIGHTS_[A-Z0-9_]+|VOXEL_VOLUME_[A-Z0-9_]+|LPV_VL(?:_[A-Z0-9_]+)?)\b[^\n]*\n', '', text)
-          settings.write_text(text, encoding='utf-8')
-
-          # 4) Remove the macOS-only colored-light undef block from global.glsl;
-          #    it is dead once the feature itself is gone.
-          globalp = root/'shaders/include/global.glsl'
-          text = globalp.read_text(encoding='utf-8')
-          text = re.sub(r'(?ms)^// Apple ships only OpenGL 4\.1\..*?^#endif\n\n', '', text)
-          globalp.write_text(text, encoding='utf-8')
-
-          # 5) Version-aware vanilla emissive block map.
-          #    IDs stay stable for handheld lookup, while the actual block names
-          #    are gated to reasonable release families so older versions don't
-          #    reference blocks that did not exist yet.
-          bp = root/'shaders/block.properties'
-          text = bp.read_text(encoding='utf-8')
-          start = text.index('# ---------------------------------------\n#   10032-10063 - Light-emitting blocks')
-          end = text.index('# --------------------------------------\n#   10064-10079 - Colors for modded light sources', start)
-          mapping = r'''# ---------------------------------------
-#   10032-10063 - Light-emitting blocks
-#
-#   Version families:
-#     1.13-1.15      base vanilla light sources
-#     1.16-1.16      Nether Update additions
-#     1.17-1.18      Caves & Cliffs additions
-#     1.19-1.19      Deep Dark / Wild Update additions
-#     1.20-1.20      Trails & Tales / calibrated sensor additions
-#     1.21-1.21.3    Trial / Copper additions
-#     1.21.4+        Pale Garden additions
-# ---------------------------------------
-
-#if MC_VERSION >= 11300
-
-# Strong white light
-block.10032 = sea_lantern
-
-# Medium white light
-block.10033 = end_rod
-
-# Strong golden light
-block.10035 = glowstone lantern redstone_lamp:lit=true
-
-# Redstone components
-block.10038 = redstone_torch:lit=true redstone_wall_torch:lit=true powered_rail:powered=true activator_rail:powered=true detector_rail:powered=true repeater:powered=true comparator:powered=true observer:powered=true redstone_ore:lit=true
-
-# Lava
-block.10039 = lava flowing_lava lava_cauldron
-
-# Brewing stand
-block.10041 = brewing_stand
-
-# Jack o' Lantern
-block.10042 = jack_o_lantern
-
-# Beacon
-block.10044 = beacon
-
-# End portal frame
-block.10045 = end_portal_frame:eye=true
-
-# Sea pickle
-block.10048 = sea_pickle:waterlogged=true
-
-# Enchanting table
-block.10054 = enchanting_table
-
-# Redstone block
-block.10058 = redstone_block redstone_wire
-
-# Nether portal
-block.10062 = nether_portal
-
-# End portal
-block.10063 = end_portal end_gateway
-
-#if MC_VERSION >= 11600
-# Medium orange light
-block.10040 = fire magma_block shroomlight
-
-# Soul lights
-block.10043 = soul_fire soul_torch soul_wall_torch soul_lantern soul_campfire:lit=true
-
-# Pink glow additions
-block.10047 = spawner dragon_head crying_obsidian
-
-# Nether plants
-block.10049 = crimson_fungus warped_fungus potted_crimson_fungus potted_warped_fungus
-#endif
-
-#if MC_VERSION >= 11700
-# Weak white light, transparent
-block.10034 = glow_lichen
-
-# Weak golden light, transparent
-block.10037 = cave_vines_plant:berries=true cave_vines:berries=true
-
-# Candles
-block.10050 = candle:lit=true white_candle:lit=true orange_candle:lit=true magenta_candle:lit=true light_blue_candle:lit=true yellow_candle:lit=true lime_candle:lit=true pink_candle:lit=true gray_candle:lit=true light_gray_candle:lit=true cyan_candle:lit=true purple_candle:lit=true blue_candle:lit=true brown_candle:lit=true green_candle:lit=true red_candle:lit=true black_candle:lit=true
-
-# Amethyst cluster
-block.10055 = small_amethyst_bud medium_amethyst_bud large_amethyst_bud amethyst_cluster
-#endif
-
-#if MC_VERSION >= 11900
-# Medium golden light additions
-block.10036 = torch wall_torch campfire:lit=true furnace:lit=true smoker:lit=true blast_furnace:lit=true
-
-# Sculk
-block.10046 = sculk sculk_vein sculk_catalyst sculk_shrieker sculk_sensor:sculk_sensor_phase=inactive sculk_sensor:sculk_sensor_phase=cooldown
-
-# Sea pickle remains in the base family above
-
-# Candles/froglights
-block.10051 = ochre_froglight
-block.10052 = verdant_froglight
-block.10053 = pearlescent_froglight
-
-# Active sculk sensor
-block.10057 = sculk_sensor:sculk_sensor_phase=active
-#endif
-
-#if MC_VERSION >= 12000
-# Calibrated sculk sensor
-block.10056 = calibrated_sculk_sensor:sculk_sensor_phase=inactive calibrated_sculk_sensor:sculk_sensor_phase=cooldown
-#endif
-
-#if MC_VERSION >= 12100
-# Trial spawner / Trial Chamber emissive states
-block.10036 = torch wall_torch campfire:lit=true furnace:lit=true smoker:lit=true blast_furnace:lit=true torchflower potted_torchflower trial_spawner:ominous=false
-block.10046 = sculk sculk_vein sculk_catalyst sculk_shrieker sculk_sensor:sculk_sensor_phase=inactive sculk_sensor:sculk_sensor_phase=cooldown trial_spawner:ominous=true
-
-# Copper bulbs / lights
-block.10060 = copper_torch copper_wall_torch
-block.10061 = weathered_copper_bulb:lit=true oxidized_copper_bulb:lit=true waxed_weathered_copper_bulb:lit=true waxed_oxidized_copper_bulb:lit=true copper_bulb:lit=true exposed_copper_bulb:lit=true waxed_copper_bulb:lit=true waxed_exposed_copper_bulb:lit=true
-#endif
-
-#if MC_VERSION >= 12104
-# Pale Garden / 1.21.4+ additions
-block.10035 = glowstone lantern redstone_lamp:lit=true creaking_heart:active=true creaking_heart:creaking_heart_state=dormant creaking_heart:creaking_heart_state=awake
-block.10059 = open_eyeblossom
-block.10060 = copper_torch copper_wall_torch copper_lantern exposed_copper_lantern weathered_copper_lantern oxidized_copper_lantern waxed_copper_lantern waxed_exposed_copper_lantern waxed_weathered_copper_lantern waxed_oxidized_copper_lantern
-#endif
-
-#endif
-
-'''
-          bp.write_text(text[:start] + mapping + text[end:], encoding='utf-8')
-
-          # 6) Delete colored-light implementation files. Handheld color tables
-          #    are intentionally retained.
-          for rel in [
-              'shaders/ph_lights.json',
-              'shaders/include/lighting/lpv/blocklight.glsl',
-              'shaders/include/lighting/lpv/floodfill.glsl',
-              'shaders/include/lighting/lpv/light_colors.glsl',
-              'shaders/include/lighting/lpv/voxelization.glsl',
-          ]:
-              p = root/rel
-              if p.exists():
-                  p.unlink()
-
-          # Remove any remaining LPV include lines from shader code.
-          for p in root.joinpath('shaders').rglob('*'):
-              if not p.is_file() or p.suffix.lower() not in {'.glsl','.vsh','.fsh','.gsh','.csh'}:
-                  continue
-              text = p.read_text(encoding='utf-8')
-              new = re.sub(r'^\s*#include\s+"/include/lighting/lpv/.*?"\s*\n', '', text, flags=re.M)
+              new = rewrite_conditionals(text)
+              # Remove standalone feature-only macro definitions/includes while
+              # preserving HANDHELD_LIGHTING_COLORED and its include tree.
+              new = re.sub(r'^\\s*#(?:define|undef)\\s+COLORED_LIGHTS(?:_\\w+)?(?:[^\\n]*\\n|$)', '', new, flags=re.M)
+              new = re.sub(r'^\\s*#include[^\\n]*COLORED_LIGHTS[^\\n]*\\n', '', new, flags=re.M)
               if new != text:
                   p.write_text(new, encoding='utf-8')
 
-          # 7) Remove the temporary workflow before the final commit.
-          wf = root/'.github/workflows/remove-colored-lights.yml'
-          if wf.exists():
-              wf.unlink()
+          # --- settings cleanup ---
+          settings = SHADERS / 'settings.glsl'
+          t = settings.read_text(encoding='utf-8')
+          t = re.sub(r'^.*COLORED_LIGHTS(?:_[A-Z0-9_]+)?[^\\n]*\\n', '', t, flags=re.M)
+          settings.write_text(t, encoding='utf-8')
 
-          # ---------------- verification ----------------
-          forbidden = []
-          for p in root.joinpath('shaders').rglob('*'):
-              if not p.is_file() or p.suffix.lower() not in {'.glsl','.vsh','.fsh','.gsh','.csh','.properties','.json'}:
+          # --- GUI cleanup ---
+          props = SHADERS / 'shaders.properties'
+          t = props.read_text(encoding='utf-8')
+          t = re.sub(r'\\s*!?COLORED_LIGHTS(?=\\s|$)', '', t)
+          # Replace the lighting entry with a retained empty Colored Lights screen.
+          t = re.sub(r'^screen\\.lighting\\s*=.*$',
+                     'screen.lighting     = [colored_lights] [indirect_lighting] [ibl] [light_sources] [shadows] [ao]', t, flags=re.M)
+          t = re.sub(r'(?ms)^# Lighting submenus.*?^screen\\.indirect_lighting\\s*=.*$',
+                     lambda m: '# Lighting submenus\\n' + next(line for line in m.group(0).splitlines() if line.startswith('screen.indirect_lighting')),
+                     t, count=1)
+          t = re.sub(r'(?ms)^# Colored Lights/LPV.*?^screen\\.indirect_lighting\\s*=.*\\n',
+                     'screen.indirect_lighting = SSGI SSGI_TEMPORAL_ACCUMULATION <empty> <empty> SSGI_INTENSITY SSGI_RADIUS SSGI_RAY_STEPS SSGI_BOUNCES SSGI_TEMPORAL_WEIGHT SSGI_FILTER_RADIUS\\n',
+                     t)
+          t = re.sub(r'(?ms)^screen\\.main_lighting\\s*=.*?(?=^screen\\.indirect_lighting)', '', t)
+          t = re.sub(r'(?m)^screen\\.colored_lights_settings\\s*=.*\\n', '', t)
+          # Keep the named Colored Lights screen, but deliberately make it empty.
+          if re.search(r'^screen\\.colored_lights\\s*=', t, flags=re.M):
+              t = re.sub(r'^screen\\.colored_lights\\s*=.*$', 'screen.colored_lights = <empty>', t, flags=re.M)
+          else:
+              anchor = 'screen.lighting     = [colored_lights] [indirect_lighting] [ibl] [light_sources] [shadows] [ao]\\n'
+              t = t.replace(anchor, anchor + 'screen.colored_lights = <empty>\\n')
+          # Remove the old Mac-only Colored Lights UI gate.
+          t = re.sub(r'(?ms)^# Colored Lights/LPV is.*?^# Water submenus', '# Water submenus', t)
+          props.write_text(t, encoding='utf-8')
+
+          # --- shared globals cleanup ---
+          global_file = SHADERS / 'include/global.glsl'
+          t = global_file.read_text(encoding='utf-8')
+          t = re.sub(r'(?ms)^// Apple ships only OpenGL 4\\.1.*?^#endif\\s*\\n', '', t)
+          global_file.write_text(t, encoding='utf-8')
+
+          # --- delete the dedicated colored-light lookup table ---
+          ph = SHADERS / 'ph_lights.json'
+          if ph.exists():
+              ph.unlink()
+
+          # The LPV voxel/floodfill path is retained for non-colored lighting.
+          # Remove its colored-light-only include if it has become unused.
+          floodfill = SHADERS / 'include/lighting/lpv/floodfill.glsl'
+          if floodfill.exists():
+              t = floodfill.read_text(encoding='utf-8')
+              # Replace colored tinting with neutral white propagation while keeping
+              # the LPV machinery available to indirect/volumetric lighting.
+              t = re.sub(r'vec3 get_emitted_light\\(uint block_id\\) \\{.*?\\n\\}',
+                         'vec3 get_emitted_light(uint block_id) {\\n    if (is_emitter(block_id)) {\\n        return vec3(1.0);\\n    }\\n    return vec3(0.0);\\n}', t, flags=re.S)
+              t = re.sub(r'vec3 get_tint\\(uint block_id, bool is_transparent\\) \\{.*?\\n\\}',
+                         'vec3 get_tint(uint block_id, bool is_transparent) {\\n    return vec3(is_transparent);\\n}', t, flags=re.S)
+              floodfill.write_text(t, encoding='utf-8')
+
+          # Remove the LPV color table if nothing still references it.
+          lpv_color = SHADERS / 'include/lighting/lpv/light_colors.glsl'
+          all_text = []
+          for p in SHADERS.rglob('*'):
+              if p.is_file() and p.suffix.lower() in shader_exts | {'.properties', '.json'}:
+                  try:
+                      all_text.append(p.read_text(encoding='utf-8'))
+                  except UnicodeDecodeError:
+                      pass
+          joined = '\\n'.join(all_text)
+          if lpv_color.exists() and not re.search(r'(?:get_lpv_light_color|get_lpv_tint_color|#include[^\\n]*lpv/light_colors)', joined):
+              lpv_color.unlink()
+
+          # --- versioned vanilla emissive block map ---
+          block_file = SHADERS / 'block.properties'
+          text = block_file.read_text(encoding='utf-8')
+          def section_span(src: str, needle: str):
+              marker = src.find(needle)
+              if marker < 0:
+                  raise RuntimeError(f'missing section marker: {needle}')
+              start = src.rfind('#', 0, marker)
+              # section separator is the line immediately before the marker
+              start = src.rfind('\\n#', 0, marker) + 1
+              nxt = re.search(r'^#[-]{8,}$', src[marker:], flags=re.M)
+              if not nxt:
+                  return start, len(src)
+              return start, marker + nxt.start()
+
+          s1, e1 = section_span(text, '10032-10063')
+          replacement = '''# ---------------------------------------
+#   Vanilla emissive block map
+#
+#   Release families are kept separate so a shaderpack built for an older
+#   Minecraft version never references blocks introduced later.
+#
+#   1.13-1.15  base light sources + conduit
+#   1.16       Nether Update additions
+#   1.17-1.18  Caves & Cliffs lighting additions
+#   1.19       Wild Update additions
+#   1.20       Calibrated sculk sensor / torchflower
+#   1.21-1.21.3 Trial Chambers / copper bulbs
+#   1.21.4-1.21.8 Pale Garden
+#   1.21.9+    Copper Age; current 26.1 uses the same light-source set
+# ---------------------------------------
+
+#if MC_VERSION >= 12109
+block.10032 = sea_lantern
+block.10033 = end_rod
+block.10034 = glow_lichen light
+block.10035 = glowstone redstone_lamp:lit=true creaking_heart:active=true creaking_heart:creaking_heart_state=dormant creaking_heart:creaking_heart_state=awake
+block.10036 = torch wall_torch lantern campfire:lit=true furnace:lit=true smoker:lit=true blast_furnace:lit=true torchflower potted_torchflower copper_torch copper_wall_torch copper_lantern exposed_copper_lantern weathered_copper_lantern oxidized_copper_lantern waxed_copper_lantern waxed_exposed_copper_lantern waxed_weathered_copper_lantern waxed_oxidized_copper_lantern
+block.10037 = cave_vines_plant:berries=true cave_vines:berries=true
+block.10038 = redstone_torch:lit=true redstone_wall_torch:lit=true powered_rail:powered=true activator_rail:powered=true detector_rail:powered=true repeater:powered=true comparator:powered=true observer:powered=true redstone_ore:lit=true deepslate_redstone_ore:lit=true
+block.10039 = lava flowing_lava lava_cauldron
+block.10040 = fire magma_block shroomlight
+block.10041 = brewing_stand
+block.10042 = jack_o_lantern
+block.10043 = soul_fire soul_torch soul_wall_torch soul_lantern soul_campfire:lit=true
+block.10044 = beacon conduit
+block.10045 = end_portal_frame:eye=true
+block.10046 = sculk sculk_vein sculk_catalyst sculk_shrieker sculk_sensor:sculk_sensor_phase=inactive sculk_sensor:sculk_sensor_phase=cooldown trial_spawner:ominous=true trial_spawner:ominous=false
+block.10047 = spawner dragon_head dragon_wall_head crying_obsidian respawn_anchor
+block.10048 = sea_pickle:waterlogged=true
+block.10049 = crimson_fungus warped_fungus potted_crimson_fungus potted_warped_fungus
+block.10050 = candle:lit=true white_candle:lit=true orange_candle:lit=true magenta_candle:lit=true light_blue_candle:lit=true yellow_candle:lit=true lime_candle:lit=true pink_candle:lit=true gray_candle:lit=true light_gray_candle:lit=true cyan_candle:lit=true purple_candle:lit=true blue_candle:lit=true brown_candle:lit=true green_candle:lit=true red_candle:lit=true black_candle:lit=true
+block.10051 = ochre_froglight
+block.10052 = verdant_froglight
+block.10053 = pearlescent_froglight
+block.10054 = enchanting_table
+block.10055 = small_amethyst_bud medium_amethyst_bud large_amethyst_bud amethyst_cluster
+block.10056 = calibrated_sculk_sensor:sculk_sensor_phase=inactive calibrated_sculk_sensor:sculk_sensor_phase=cooldown
+block.10057 = calibrated_sculk_sensor:sculk_sensor_phase=active sculk_sensor:sculk_sensor_phase=active
+block.10058 = redstone_block redstone_wire
+block.10059 = open_eyeblossom
+block.10060 = copper_torch copper_wall_torch copper_lantern exposed_copper_lantern weathered_copper_lantern oxidized_copper_lantern waxed_copper_lantern waxed_exposed_copper_lantern waxed_weathered_copper_lantern waxed_oxidized_copper_lantern
+block.10061 = copper_bulb:lit=true exposed_copper_bulb:lit=true weathered_copper_bulb:lit=true oxidized_copper_bulb:lit=true waxed_copper_bulb:lit=true waxed_exposed_copper_bulb:lit=true waxed_weathered_copper_bulb:lit=true waxed_oxidized_copper_bulb:lit=true
+block.10062 = nether_portal
+block.10063 = end_portal end_gateway
+#elif MC_VERSION >= 12100
+# Trial Chambers / Copper Bulbs (1.21-1.21.3)
+block.10032 = sea_lantern
+block.10033 = end_rod
+block.10034 = glow_lichen light
+block.10035 = glowstone redstone_lamp:lit=true
+block.10036 = torch wall_torch lantern campfire:lit=true furnace:lit=true smoker:lit=true blast_furnace:lit=true torchflower potted_torchflower
+block.10037 = cave_vines_plant:berries=true cave_vines:berries=true
+block.10038 = redstone_torch:lit=true redstone_wall_torch:lit=true powered_rail:powered=true activator_rail:powered=true detector_rail:powered=true repeater:powered=true comparator:powered=true observer:powered=true redstone_ore:lit=true deepslate_redstone_ore:lit=true
+block.10039 = lava flowing_lava lava_cauldron
+block.10040 = fire magma_block shroomlight
+block.10041 = brewing_stand
+block.10042 = jack_o_lantern
+block.10043 = soul_fire soul_torch soul_wall_torch soul_lantern soul_campfire:lit=true
+block.10044 = beacon conduit
+block.10045 = end_portal_frame:eye=true
+block.10046 = sculk sculk_vein sculk_catalyst sculk_shrieker sculk_sensor:sculk_sensor_phase=inactive sculk_sensor:sculk_sensor_phase=cooldown trial_spawner:ominous=true trial_spawner:ominous=false
+block.10047 = spawner dragon_head dragon_wall_head crying_obsidian respawn_anchor
+block.10048 = sea_pickle:waterlogged=true
+block.10049 = crimson_fungus warped_fungus potted_crimson_fungus potted_warped_fungus
+block.10050 = candle:lit=true white_candle:lit=true orange_candle:lit=true magenta_candle:lit=true light_blue_candle:lit=true yellow_candle:lit=true lime_candle:lit=true pink_candle:lit=true gray_candle:lit=true light_gray_candle:lit=true cyan_candle:lit=true purple_candle:lit=true blue_candle:lit=true brown_candle:lit=true green_candle:lit=true red_candle:lit=true black_candle:lit=true
+block.10051 = ochre_froglight
+block.10052 = verdant_froglight
+block.10053 = pearlescent_froglight
+block.10054 = enchanting_table
+block.10055 = small_amethyst_bud medium_amethyst_bud large_amethyst_bud amethyst_cluster
+block.10056 = calibrated_sculk_sensor:sculk_sensor_phase=inactive calibrated_sculk_sensor:sculk_sensor_phase=cooldown
+block.10057 = calibrated_sculk_sensor:sculk_sensor_phase=active sculk_sensor:sculk_sensor_phase=active
+block.10058 = redstone_block redstone_wire
+block.10062 = nether_portal
+block.10063 = end_portal end_gateway
+#elif MC_VERSION >= 12000
+# 1.20
+block.10032 = sea_lantern
+block.10033 = end_rod
+block.10034 = glow_lichen light
+block.10035 = glowstone redstone_lamp:lit=true
+block.10036 = torch wall_torch lantern campfire:lit=true furnace:lit=true smoker:lit=true blast_furnace:lit=true torchflower potted_torchflower
+block.10037 = cave_vines_plant:berries=true cave_vines:berries=true
+block.10038 = redstone_torch:lit=true redstone_wall_torch:lit=true powered_rail:powered=true activator_rail:powered=true detector_rail:powered=true repeater:powered=true comparator:powered=true observer:powered=true redstone_ore:lit=true deepslate_redstone_ore:lit=true
+block.10039 = lava flowing_lava lava_cauldron
+block.10040 = fire magma_block shroomlight
+block.10041 = brewing_stand
+block.10042 = jack_o_lantern
+block.10043 = soul_fire soul_torch soul_wall_torch soul_lantern soul_campfire:lit=true
+block.10044 = beacon conduit
+block.10045 = end_portal_frame:eye=true
+block.10046 = sculk sculk_vein sculk_catalyst sculk_shrieker sculk_sensor:sculk_sensor_phase=inactive sculk_sensor:sculk_sensor_phase=cooldown
+block.10047 = spawner dragon_head dragon_wall_head crying_obsidian respawn_anchor
+block.10048 = sea_pickle:waterlogged=true
+block.10049 = crimson_fungus warped_fungus potted_crimson_fungus potted_warped_fungus
+block.10050 = candle:lit=true white_candle:lit=true orange_candle:lit=true magenta_candle:lit=true light_blue_candle:lit=true yellow_candle:lit=true lime_candle:lit=true pink_candle:lit=true gray_candle:lit=true light_gray_candle:lit=true cyan_candle:lit=true purple_candle:lit=true blue_candle:lit=true brown_candle:lit=true green_candle:lit=true red_candle:lit=true black_candle:lit=true
+block.10051 = ochre_froglight
+block.10052 = verdant_froglight
+block.10053 = pearlescent_froglight
+block.10054 = enchanting_table
+block.10055 = small_amethyst_bud medium_amethyst_bud large_amethyst_bud amethyst_cluster
+block.10056 = calibrated_sculk_sensor:sculk_sensor_phase=inactive calibrated_sculk_sensor:sculk_sensor_phase=cooldown
+block.10057 = calibrated_sculk_sensor:sculk_sensor_phase=active sculk_sensor:sculk_sensor_phase=active
+block.10058 = redstone_block redstone_wire
+block.10062 = nether_portal
+block.10063 = end_portal end_gateway
+#elif MC_VERSION >= 11900
+# 1.19
+block.10032 = sea_lantern
+block.10033 = end_rod
+block.10035 = glowstone redstone_lamp:lit=true
+block.10036 = torch wall_torch lantern campfire:lit=true furnace:lit=true smoker:lit=true blast_furnace:lit=true
+block.10037 = cave_vines_plant:berries=true cave_vines:berries=true
+block.10038 = redstone_torch:lit=true redstone_wall_torch:lit=true powered_rail:powered=true activator_rail:powered=true detector_rail:powered=true repeater:powered=true comparator:powered=true observer:powered=true redstone_ore:lit=true deepslate_redstone_ore:lit=true
+block.10039 = lava flowing_lava lava_cauldron
+block.10040 = fire magma_block shroomlight
+block.10041 = brewing_stand
+block.10042 = jack_o_lantern
+block.10043 = soul_fire soul_torch soul_wall_torch soul_lantern soul_campfire:lit=true
+block.10044 = beacon conduit
+block.10045 = end_portal_frame:eye=true
+block.10046 = sculk sculk_vein sculk_catalyst sculk_shrieker sculk_sensor:sculk_sensor_phase=inactive sculk_sensor:sculk_sensor_phase=cooldown
+block.10047 = spawner dragon_head dragon_wall_head crying_obsidian respawn_anchor
+block.10048 = sea_pickle:waterlogged=true
+block.10049 = crimson_fungus warped_fungus potted_crimson_fungus potted_warped_fungus
+block.10051 = ochre_froglight
+block.10052 = verdant_froglight
+block.10053 = pearlescent_froglight
+block.10054 = enchanting_table
+block.10055 = small_amethyst_bud medium_amethyst_bud large_amethyst_bud amethyst_cluster
+block.10058 = redstone_block redstone_wire
+block.10062 = nether_portal
+block.10063 = end_portal end_gateway
+#elif MC_VERSION >= 11700
+# 1.17-1.18
+block.10032 = sea_lantern
+block.10033 = end_rod
+block.10034 = glow_lichen light
+block.10035 = glowstone redstone_lamp:lit=true
+block.10036 = torch wall_torch lantern campfire:lit=true furnace:lit=true smoker:lit=true blast_furnace:lit=true
+block.10037 = cave_vines_plant:berries=true cave_vines:berries=true
+block.10038 = redstone_torch:lit=true redstone_wall_torch:lit=true powered_rail:powered=true activator_rail:powered=true detector_rail:powered=true repeater:powered=true comparator:powered=true observer:powered=true redstone_ore:lit=true deepslate_redstone_ore:lit=true
+block.10039 = lava flowing_lava lava_cauldron
+block.10040 = fire magma_block shroomlight
+block.10041 = brewing_stand
+block.10042 = jack_o_lantern
+block.10043 = soul_fire soul_torch soul_wall_torch soul_lantern soul_campfire:lit=true
+block.10044 = beacon conduit
+block.10045 = end_portal_frame:eye=true
+block.10047 = spawner dragon_head dragon_wall_head crying_obsidian respawn_anchor
+block.10048 = sea_pickle:waterlogged=true
+block.10049 = crimson_fungus warped_fungus potted_crimson_fungus potted_warped_fungus
+block.10050 = candle:lit=true white_candle:lit=true orange_candle:lit=true magenta_candle:lit=true light_blue_candle:lit=true yellow_candle:lit=true lime_candle:lit=true pink_candle:lit=true gray_candle:lit=true light_gray_candle:lit=true cyan_candle:lit=true purple_candle:lit=true blue_candle:lit=true brown_candle:lit=true green_candle:lit=true red_candle:lit=true black_candle:lit=true
+block.10054 = enchanting_table
+block.10055 = small_amethyst_bud medium_amethyst_bud large_amethyst_bud amethyst_cluster
+block.10058 = redstone_block redstone_wire
+block.10062 = nether_portal
+block.10063 = end_portal end_gateway
+#elif MC_VERSION >= 11600
+# 1.16
+block.10032 = sea_lantern
+block.10033 = end_rod
+block.10035 = glowstone redstone_lamp:lit=true
+block.10036 = torch wall_torch lantern campfire:lit=true furnace:lit=true smoker:lit=true blast_furnace:lit=true
+block.10038 = redstone_torch:lit=true redstone_wall_torch:lit=true powered_rail:powered=true activator_rail:powered=true detector_rail:powered=true repeater:powered=true comparator:powered=true observer:powered=true redstone_ore:lit=true
+block.10039 = lava flowing_lava lava_cauldron
+block.10040 = fire magma_block shroomlight
+block.10041 = brewing_stand
+block.10042 = jack_o_lantern
+block.10043 = soul_fire soul_torch soul_wall_torch soul_lantern soul_campfire:lit=true
+block.10044 = beacon conduit
+block.10045 = end_portal_frame:eye=true
+block.10047 = spawner dragon_head dragon_wall_head crying_obsidian respawn_anchor
+block.10048 = sea_pickle:waterlogged=true
+block.10049 = crimson_fungus warped_fungus potted_crimson_fungus potted_warped_fungus
+block.10058 = redstone_block redstone_wire
+block.10062 = nether_portal
+block.10063 = end_portal end_gateway
+#else
+# 1.13-1.15
+block.10032 = sea_lantern
+block.10033 = end_rod
+block.10035 = glowstone redstone_lamp:lit=true
+block.10036 = torch wall_torch lantern campfire:lit=true furnace:lit=true smoker:lit=true blast_furnace:lit=true
+block.10038 = redstone_torch:lit=true redstone_wall_torch:lit=true powered_rail:powered=true activator_rail:powered=true detector_rail:powered=true repeater:powered=true comparator:powered=true observer:powered=true redstone_ore:lit=true
+block.10039 = lava flowing_lava lava_cauldron
+block.10041 = brewing_stand
+block.10042 = jack_o_lantern
+block.10044 = beacon conduit
+block.10045 = end_portal_frame:eye=true
+block.10047 = spawner dragon_head dragon_wall_head
+block.10048 = sea_pickle:waterlogged=true
+block.10054 = enchanting_table
+block.10058 = redstone_block redstone_wire
+block.10062 = nether_portal
+block.10063 = end_portal end_gateway
+#endif
+
+'''
+          # Remove the versioned 10032 block and the old 10064 modded-light block section,
+          # then insert the new mutually-exclusive version map.
+          text = text[:s1] + replacement + text[e1:]
+          # Remove the following modded colored-light section, if present.
+          m = re.search(r'^#[-]{8,}\\n#\\s*10064-10079.*?(?=^#[-]{8,}$)', text, flags=re.M | re.S)
+          if m:
+              text = text[:m.start()] + text[m.end():]
+          block_file.write_text(text, encoding='utf-8')
+
+          # --- final repo-wide cleanup of colored-light feature names ---
+          text_exts = shader_exts | {'.properties', '.json', '.md', '.txt'}
+          for p in ROOT.rglob('*'):
+              if not p.is_file() or p.suffix.lower() not in text_exts:
+                  continue
+              if '.git' in p.parts:
                   continue
               try:
                   t = p.read_text(encoding='utf-8')
               except UnicodeDecodeError:
                   continue
-              # COLORED_LIGHTS may only survive inside this audit's intentional empty-screen
-              # name if the user-visible screen is retained. Code/settings names are forbidden.
-              if re.search(r'\bCOLORED_LIGHTS\b', t) and p.as_posix() not in {'shaders/shaders.properties'}:
-                  forbidden.append(str(p))
+              n = re.sub(r'(?<![A-Z0-9_])COLORED_LIGHTS(?![A-Z0-9_])', '', t)
+              # Remove non-handheld colored-light setting identifiers if they remain.
+              n = re.sub(r'(?<![A-Z0-9_])COLORED_LIGHTS_(?!HANDHELD)[A-Z0-9_]+', '', n)
+              n = re.sub(r'[ ]{2,}', ' ', n)
+              if n != t:
+                  p.write_text(n, encoding='utf-8')
 
-          # Handheld colored mode and dependency must still be present.
-          handheld = (root/'shaders/include/lighting/handheld_lighting.glsl').read_text(encoding='utf-8')
-          colors = (root/'shaders/include/lighting/colors/lighting_colors.glsl').read_text(encoding='utf-8')
+          # --- verification ---
+          assert not (SHADERS / 'ph_lights.json').exists()
+          handheld = (SHADERS / 'include/lighting/handheld_lighting.glsl').read_text(encoding='utf-8')
+          handheld_colors = (SHADERS / 'include/lighting/colors/lighting_colors.glsl').read_text(encoding='utf-8')
           assert 'HANDHELD_LIGHTING_COLORED' in handheld
           assert 'get_lighting_color' in handheld
-          assert 'const vec3 lighting_colors[32]' in colors
-          assert not (root/'shaders/ph_lights.json').exists()
+          assert 'const vec3 lighting_colors[32]' in handheld_colors
 
-          bp_text = (root/'shaders/block.properties').read_text(encoding='utf-8')
-          for ident in range(10032, 10064):
-              assert f'block.{ident}' in bp_text, f'missing emissive ID {ident}'
+          all_text = []
+          for p in ROOT.rglob('*'):
+              if p.is_file() and p.suffix.lower() in text_exts:
+                  try:
+                      all_text.append((p, p.read_text(encoding='utf-8')))
+                  except UnicodeDecodeError:
+                      pass
+          bad = []
+          for p, t in all_text:
+              if re.search(r'(?<![A-Z0-9_])COLORED_LIGHTS(?![A-Z0-9_])', t):
+                  bad.append(str(p))
+              if re.search(r'(?<![A-Z0-9_])COLORED_LIGHTS_(?!HANDHELD)[A-Z0-9_]+', t):
+                  bad.append(str(p))
+          if bad:
+              raise SystemExit('Colored-light references remain: ' + ', '.join(sorted(set(bad))))
 
-          if forbidden:
-              raise SystemExit('Forbidden COLORED_LIGHTS references remain in: ' + ', '.join(forbidden))
+          # Make sure the retained screen really exists and is empty.
+          props = (SHADERS / 'shaders.properties').read_text(encoding='utf-8')
+          assert re.search(r'^screen\\.colored_lights\\s*=\\s*<empty>\\s*$', props, flags=re.M)
 
-          # Ensure only the intended files changed.
-          print('\nChanged files:')
-          subprocess.run(['git','status','--short'], check=True)
-          print('\nRemaining references (COLORED_LIGHTS only):')
-          subprocess.run(['git','grep','-n','COLORED_LIGHTS','--','shaders'], check=False)
-          print('\nHandheld colored-light references:')
-          subprocess.run(['git','grep','-n','HANDHELD_LIGHTING_COLORED','--','shaders/include/lighting','shaders/settings.glsl'], check=True)
+          # Confirm the requested version bands and all current light-source IDs are represented.
+          bp = (SHADERS / 'block.properties').read_text(encoding='utf-8')
+          for version_marker in ('12109','12100','12000','11900','11700','11600'):
+              assert version_marker in bp, f'missing MC_VERSION band {version_marker}'
+          for name in ('sea_lantern','end_rod','torch','lantern','respawn_anchor','conduit','calibrated_sculk_sensor','copper_bulb:lit=true','open_eyeblossom','copper_lantern','nether_portal','end_portal'):
+              assert name in bp, f'missing emissive mapping: {name}'
+          print('Colored-light removal and emissive-map audit passed.')
           PY
 
-      - name: Commit cleanup
+      - name: Commit and push verified cleanup
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet; then
+            echo "No changes required."
+            exit 0
+          fi
           git add shaders .github/workflows/remove-colored-lights.yml
-          git commit -m "chore: complete colored-light cleanup" || exit 0
+          git commit -m "chore: completely remove colored lights"
           git push origin HEAD:remove-colored-lights
