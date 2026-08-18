@@ -20,11 +20,6 @@
 vec3 ambient_color;
 vec3 light_color;
 
-#ifdef WORLD_OVERWORLD
-// Unused
-OverworldFogParameters fog_params;
-#endif
-
 #define TEMPORAL_REPROJECTION
 
 #include "/include/fog/simple_fog.glsl"
@@ -151,7 +146,7 @@ void voxy_emitFragment(VoxyFragmentParameters parameters) {
 
     vec4 base_color = parameters.sampledColour * parameters.tinting;
 
-    // from Cortex
+    // Apply the Voxy fragment color and material data.
     vec3 normal = vec3(
                       uint((parameters.face >> 1) == 2),
                       uint((parameters.face >> 1) == 0),
@@ -191,13 +186,12 @@ void voxy_emitFragment(VoxyFragmentParameters parameters) {
             alpha
         );
     } else {
-        vec2 unused = parameters.lightMap;
         material = material_from(
             base_color.rgb,
             material_mask,
             pos_scene + cameraPosition,
             normal,
-            unused
+            parameters.lightMap
         );
         alpha = base_color.a;
     }

@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shaders
 
   program/c4_taa_exposure:
   TAA and auto exposure

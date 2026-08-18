@@ -21,7 +21,6 @@ const vec3 primary_wavelengths_ap1 = vec3(630.0, 530.0, 465.0);
 // in the same primaries as the eventual display target instead of always
 // processing in Rec.2020 and only changing primaries at the very end.
 
-
 // Rec. 709 (sRGB primaries)
 const mat3 xyz_to_rec709 = mat3(
     3.2406,

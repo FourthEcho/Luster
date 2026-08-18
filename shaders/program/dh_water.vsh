@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shaders
 
   program/dh_water:
   Translucent Distant Horizons terrain
@@ -24,14 +24,14 @@ flat out vec3 ambient_color;
 //   Distant Horizons built-ins
 // ------------
 // Iris injects `dhMaterialId` as a vertex attribute when Distant Horizons
-// is active. We declare it here so static validation succeeds even when
+// is active. Keep the declaration local so the source remains self-contained when
 // the DH injection path is not present. At runtime Iris's own declaration
-// takes precedence (declarations are idempotent). Note: `flat` is not
+// takes precedence (declarations are idempotent). `flat` is not
 // allowed on vertex inputs (per-vertex attributes don't interpolate), so
-// we use the plain `in` qualifier.
+// the plain `in` qualifier.
 in int dhMaterialId;
 
-// DH material-ID enum. Iris defines these when DH support is enabled; we
+// DH material-ID enum. Iris defines these when support is enabled; the
 // provide fallbacks so the file compiles in their absence.
 #ifndef DH_BLOCK_AIR
 #define DH_BLOCK_AIR 0

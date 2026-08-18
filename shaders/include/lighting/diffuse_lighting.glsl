@@ -11,7 +11,7 @@
 #ifdef IBL
 #include "/include/lighting/ibl.glsl"
 #endif
-// There is no composite SSGI / multi-bounce pipeline in this pack —
+// This lighting path does not consume a composite SSGI or multi-bounce irradiance buffer.
 // shadowed areas are lit by skylight/blocklight/cave lighting here in
 // the gbuffer pass.
 #endif
@@ -26,7 +26,6 @@
 #if !defined WORLD_OVERWORLD
 #undef CLOUD_SHADOWS
 #endif
-
 
 const float sss_density = 14.0;
 const float sss_scale = 5.0 * SSS_INTENSITY;
@@ -254,7 +253,7 @@ vec3 get_diffuse_lighting(
         * (1.0 - 0.5 * material.sss_amount)
     );
 
-    // No composite SSGI / multi-bounce pipeline exists in this pack.
+    // This lighting stage does not consume a composite SSGI or multi-bounce irradiance buffer.
     // Shadowed pixels rely on skylight, blocklight and cave lighting only.
 
 #ifdef SUB_SURFACE_SCATTERING

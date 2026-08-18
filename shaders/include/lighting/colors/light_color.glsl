@@ -8,7 +8,7 @@ uniform float moon_phase_brightness;
 
 // Earthshine amount in [0, 1], precomputed from moonPhase in
 // shaders.properties. 0 at full moon (pure user tint), 1 at new moon
-// (full earthshine tint). Declared as a float uniform so we don't have
+// (full earthshine tint). The value uses a float uniform to avoid
 // to redeclare `uniform int moonPhase;` here — that would clash with
 // the local declarations in many .vsh/.fsh programs that include this
 // file and trigger a redeclaration error.
@@ -71,7 +71,7 @@ vec3 get_moon_tint() {
     vec3 base_tint = from_native(vec3(MOON_R, MOON_G, MOON_B));
 
     // Earthshine — the warm glow produced when sunlight reflected off Earth
-    // illuminates the dark portion of the moon. We use the canonical
+    // illuminates the dark portion of the moon using the canonical
     // earthshine RGB (1.15, 0.85, 0.65) at 15% peak brightness.
     vec3 earthshine_tint = from_native(vec3(1.15, 0.85, 0.65)) * 0.15;
 

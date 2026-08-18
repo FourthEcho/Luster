@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shaders
 
   program/ssgi.vsh:
   Fullscreen pass vertex shader shared by the SSGI prepare passes

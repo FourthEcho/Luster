@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shaders
 
   program/d0_sky_map:
   Render omnidirectional sky map for reflections and SH lighting

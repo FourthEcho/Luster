@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shaders
 
   program/gbuffers_skytextured:
   Handle vanilla sun and moon and custom skies

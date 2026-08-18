@@ -1,7 +1,7 @@
 /*c1.v
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shaders
 
   program/c1_blend_layers
   Apply volumetric fog

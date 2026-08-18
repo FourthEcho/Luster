@@ -17,7 +17,7 @@ const float snow_fog_start = 0.5;
 const float snow_fog_density = 1.0;
 vec3 get_snow_fog_color() { return from_native(vec3(0.957, 0.988, 0.988)) * 0.3; }
 
-// CAVE_FOG_INTENSITY scales both the density and the brightness of the
+// Scale both cave-fog density and brightness with the cave-fog control.
 // cave fog. Default 1.0 reproduces the original look.
 const float cave_fog_start = 1.0;
 const float cave_fog_density = 0.0033 * CAVE_FOG_INTENSITY;

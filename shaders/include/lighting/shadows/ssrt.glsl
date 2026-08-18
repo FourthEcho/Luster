@@ -151,7 +151,7 @@ float get_screen_space_shadows(
 
     /*
     #ifdef MC_GL_KHR_shader_subgroup
-    // Using subgroup ops, we make sure that if any fragments in a warp are
+    // Subgroup reduction identifies whether any fragment in the current execution group is
     raymarching the
     // combined depth buffer, they all do, to avoid divergent branches.
     raymarch_combined_depth = subgroupAny(raymarch_combined_depth);

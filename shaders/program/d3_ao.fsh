@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shaders
 
   program/d3_ao:
   Calculate ambient occlusion
@@ -84,8 +84,6 @@ uniform bool world_age_changed;
 #if SHADER_AO == SHADER_AO_RTAO
 #include "/include/lighting/ao/rtao.glsl"
 #endif
-
-
 
 const float ao_render_scale = 0.5;
 
@@ -226,7 +224,7 @@ void main() {
         float depth_weight
             = exp2(-abs(z0 - z1) * depth_rejection_strength * NoV * view_norm);
 
-        // Offcenter rejection from Jessie, which is originally by Zombye
+        // Off-center rejection for improved ray stability.
         // Reduces blur in motion
         vec2 pixel_offset = 1.0
             - abs(2.0

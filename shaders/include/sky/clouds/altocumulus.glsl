@@ -355,7 +355,7 @@ CloudsResult draw_altocumulus_clouds(
 #if defined PROGRAM_DEFERRED0
         vec2 hash = vec2(0.0);
 #else
-        vec2 hash = hash2(fract(ray_pos)); // used to dither the light rays
+        vec2 hash = hash2(fract(ray_pos)); // Provides stable blue-noise jitter for volumetric light-ray sampling.
 #endif
 
         float light_optical_depth = clouds_altocumulus_optical_depth(

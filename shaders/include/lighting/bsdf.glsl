@@ -67,7 +67,7 @@ vec3 fresnel_lazanyi_2019(float cos_theta, vec3 f0, vec3 f82) {
 //   Single-scatter GGX loses energy at high roughness because light that
 //   bounces between microfacets multiple times is not modeled by the
 //   single-scatter BRDF. The Kulla-Conty residual term f_ms approximates
-//   this missing multi-bounce energy and is added to the specular result.
+//   accounts for missing multi-bounce energy and contributes directly to the specular result.
 //
 //   Key quantities:
 //     E(μ_o)   = directional albedo (single-scatter reflectance for a given
@@ -84,7 +84,7 @@ vec3 fresnel_lazanyi_2019(float cos_theta, vec3 f0, vec3 f82) {
 //   where F_avg is the hemispherical-directional Fresnel:
 //     F_avg = F0 + (1 - F0) / 21
 //
-//   We return f_ms_colored * NoL so the caller can add it directly to the
+//   The function returns f_ms_colored * NoL so the caller can add it directly to the
 //   single-scatter GGX specular highlight (d * v * NoL * F).
 // ---------------------------------------------------------------------------
 
@@ -95,7 +95,7 @@ vec3 fresnel_lazanyi_2019(float cos_theta, vec3 f0, vec3 f82) {
 float directional_albedo_ggx(float NoV, float alpha) {
     NoV = max(NoV, 1e-3);
     // Frosch 2017 fit: piecewise approximation with <1% error across the
-    // full roughness range. We use a slightly simplified form that matches
+    // full roughness range. The implementation uses a simplified form that matches
     // the Filament implementation.
     float a = 1.0 - 0.5 * alpha / (alpha + 0.33);
     float b = 0.25 + 0.5 * alpha;

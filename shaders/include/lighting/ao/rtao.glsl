@@ -41,11 +41,8 @@
 //     Integrals", CGF 32(8) — golden-ratio sequence choice
 // ============================================================================
 
-// Golden ratio conjugate (sqrt(5)-1)/2 ≈ 0.6180339887 — drives the optimal
-// low-discrepancy azimuth × elevation progression for the hemisphere samples.
-// (The previous implementation used 0.7548... which is a wrong value of the
-//  golden ratio conjugate; this fix measurably reduces RTAO noise on static
-//  scenes.)
+// Golden ratio conjugate (sqrt(5)-1)/2 provides low-discrepancy angular spacing
+// for the hemisphere sample sequence.
 const float rtao_golden_ratio_conjugate = 0.6180339887498949;
 
 float compute_rtao(

@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shaders
 
   program/p1_ssgi:
   SSGI bounce 1 — gather indirect radiance from the directly lit scene

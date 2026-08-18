@@ -48,7 +48,7 @@ vec3 agx_transform(vec3 color, vec3 slope, vec3 offset, vec3 power, float satura
     color = AGX_OUTSET * color;
     color = pow(max(color, vec3(0.0)), vec3(2.2));
 
-    // AgX now produces linear display-sRGB. Return to Luster's linear
+    // AgX returns linear display-sRGB; convert back to Luster's linear
     // Rec.2020 working space so c19's single output-gamut transform remains
     // the only final display conversion.
     color = REC709_TO_WORKING * color;

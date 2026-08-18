@@ -10,12 +10,12 @@
 
   Usage:
 
-  // Call begin_text to initialize the text renderer. You can scale the fragment
+  // Initialize text rendering and select the fragment scale.
 position to adjust the size of the text begin_text(ivec2(gl_FragCoord.xy),
 ivec2(0, viewHeight)); ^ fragment position     ^ text box position (upper left
 corner)
 
-  // You can print various data types
+  // Text rendering supports the standard scalar and vector types.
   print_bool(false);
   print_float(sqrt(-1.0)); // Prints "NaN"
   print_int(42);
@@ -24,10 +24,10 @@ corner)
   // ...or arbitrarily long strings
   print((_H, _e, _l, _l, _o, _comma, _space, _w, _o, _r, _l, _d));
 
-  // To start a new line, use
+  // Use the newline helper to advance the text cursor.
   print_line();
 
-  // You can also configure the text color on the fly
+  // Text color may be updated between draw calls.
   text.fg_col = vec4(1.0, 0.0, 0.0, 1.0);
   text.bg_col = vec4(0.0, 0.0, 0.0, 1.0);
 
@@ -118,7 +118,7 @@ const uint _minus = 0x0000e000u;
 const uint _comma = 0x00000220u;
 const uint _colon = 0x02000020u;
 
-// Additional characters added by WoMspace <3
+// Additional glyphs supplied by WoMspace.
 const uint _underscore = 0x000007Cu; // _
 const uint _quote = 0x52800000u; // "
 const uint _bang = 0x21084010u; // !
@@ -291,6 +291,5 @@ void print_float(float value) {
         print_unsigned_int(fractional_part, text.fp_precision);
     }
 }
-
 
 #endif // INCLUDE_UTILITY_TEXT_RENDERING

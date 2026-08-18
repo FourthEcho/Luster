@@ -65,7 +65,7 @@ uniform int textureFilteringMode;
 #define LUSTER_HAS_GL_ANISOTROPIC 1
 #endif
 
-// Internal tuning constants — previously hidden inside settings.glsl, now
+// Internal renderer tuning constants are centralized here.
 // centralized here so the user-facing options file only contains GUI-exposed
 // sliders / toggles / mode switchers. See include/internal.glsl for the full
 // list and per-option comments.
@@ -96,8 +96,7 @@ uniform int textureFilteringMode;
 #define NORMAL_MAPPING
 #endif
 
-
-// Compatibility fixes
+// Compatibility adjustments
 
 #if MC_VERSION < 11700
 #define gtexture tex
@@ -270,9 +269,4 @@ void fix_hand_depth(inout float depth, out bool is_hand) {
         depth *= rcp(MC_HAND_DEPTH);
         depth = depth * 0.5 + 0.5;
     }
-}
-
-void fix_hand_depth(inout float depth) {
-    bool unused;
-    fix_hand_depth(depth, unused);
 }

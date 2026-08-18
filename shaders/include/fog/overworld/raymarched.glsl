@@ -202,7 +202,7 @@ mat2x3 raymarch_air_fog(
     float scatter_amount = 1.0;
     float anisotropy = 1.0;
 
-    // ambient_color now passed as a function parameter — supports both the
+    // ambient_color is supplied as a function parameter for both the
     // legacy flat texelFetch lookup (when IBL is off) and per-pixel IBL
     // irradiance (when IBL is on, computed in c0_vl.fsh).
 

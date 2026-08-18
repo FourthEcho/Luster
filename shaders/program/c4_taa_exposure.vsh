@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shaders
 
   program/c4_taa_exposure:
   TAA and auto exposure
@@ -10,7 +10,6 @@
 */
 
 #include "/include/global.glsl"
-
 
 out vec2 uv;
 

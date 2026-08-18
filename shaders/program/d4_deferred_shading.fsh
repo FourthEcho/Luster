@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shaders
 
   program/d4_deferred_shading:
   Shade terrain and entities, draw sky
@@ -677,7 +677,7 @@ void main() {
         // get_specular_reflections() in specular_lighting.glsl internally
         // dispatches to get_ibl_specular() (the dedicated VNDF multi-sample
         // IBL path) when ENVIRONMENT_REFLECTIONS is disabled, and runs the
-        // SSR pipeline otherwise.  Either way the result is added to the
+        // Use the SSR result when the reflection path is available; add it to the
         // fragment color here.
 
 #if defined ENVIRONMENT_REFLECTIONS || defined SKY_REFLECTIONS
@@ -699,7 +699,6 @@ void main() {
             );
         }
 #endif
-
 
         // Edge highlight
 

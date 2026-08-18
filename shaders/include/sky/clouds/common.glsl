@@ -68,7 +68,6 @@ vec2 curl2D(vec2 coord) {
     return vec2(gradient.y, -gradient.x);
 }
 
-
 float clouds_ground_ambient_weight(float altitude_fraction) {
     return mix(1.30, 0.28, smoothstep(0.0, 1.0, altitude_fraction));
 }

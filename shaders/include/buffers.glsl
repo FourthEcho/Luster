@@ -7,7 +7,7 @@ const int colortex2Format  = RGBA16;         // full res    | gbuffer data 1 (so
 const int colortex3Format  = RGBA8;          // full res    | OF damage overlay/enchantment glint (solid -> d4), refraction data (translucent -> c1), bloomy fog amount (c1 -> c14)
 const int colortex4Format  = RGBA16F;        // 192x108     | sky map + light colors (d0 -> c1)
 const int colortex5Format  = RGBA16F;        // full res    | scene history (always)
-const int colortex6Format  = RGBA16;         // quarter res | ambient occlusion history (always), fog transmittance (c0 -> c1 +flip) 
+const int colortex6Format  = RGBA16;         // quarter res | ambient occlusion history (always), fog transmittance (c0 -> c1 +flip)
 const int colortex7Format  = RGB16F;         // quarter res | fog scattering (always)
 const int colortex8Format  = RGB8;           // 512x512     | dedicated cloud/weather coverage + cloud shadow map (p0 -> c1)
 const int colortex9Format  = RGBA16F;        // clouds res  | low-res clouds (d1 -> d2)
@@ -44,9 +44,9 @@ const vec4 colortex3ClearColor = vec4(0.0, 0.0, 0.0, 0.0);
 const vec4 colortex13ClearColor = vec4(0.0, 0.0, 0.0, 0.0);
 const vec4 shadowcolor0ClearColor = vec4(0.0, 0.0, 0.0, 0.0);
 
-#ifdef VOXY 
-// Ty Cortex for the extra color textures! 
-const int colortex16Format = RGBA16; // Voxy water gbuffer data 
+#ifdef VOXY
+// Ty Cortex for the extra color textures!
+const int colortex16Format = RGBA16; // Voxy water gbuffer data
 const bool colortex16Clear = true;
 const vec4 colortex16ClearColor = vec4(0.0, 0.0, 0.0, 0.0);
 #endif

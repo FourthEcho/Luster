@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shaders
 
   world0/prepare.vsh:
   Create cloud base coverage map and cloud shadow map
@@ -69,7 +69,7 @@ uniform float desert_sandstorm;
 #include "/include/weather/clouds.glsl"
 
 #ifndef IS_IRIS
-// `sunPosition` fix by Builderb0y
+// Normalize the sun-position convention used by this pass.
 vec3 calculate_sun_direction() {
     const vec2 sun_rotation_data = vec2(
         cos(sunPathRotation * 0.01745329251994),

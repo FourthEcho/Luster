@@ -167,9 +167,7 @@ Material material_from(
     material.is_metal = false;
     material.is_hardcoded_metal = false;
 
-    // Hardcoded materials for specific blocks
-    // Using binary split search to minimise branches per fragment (TODO:
-    // measure impact)
+    // Hardcoded materials use a binary split search to reduce branch count.
 
     vec3 hsl = rgb_to_hsl(albedo_srgb);
     vec3 albedo_sqrt = sqrt(material.albedo);
@@ -872,7 +870,7 @@ Material material_from(
 //
 //     roughness *= (1 - 0.85 * wetness * porosity)
 //
-// clamped to a 0.05 minimum so we never produce a perfect mirror by
+// clamped to a 0.05 minimum to avoid a mathematically perfect mirror by
 // accident (mirror surfaces need their own material path).
 //
 // `wetness` is the vanilla smoothed rain-wetness uniform (already in scope

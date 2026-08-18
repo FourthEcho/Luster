@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shaders
 
   program/c14_c18_bloom_upsample.fsh
   Progressively upsample bloom tiles
@@ -42,8 +42,7 @@ void main() {
     vec2 uv_src = clamp(uv, pad_amount, 1.0 - pad_amount) * src_tile_scale
         + src_tile_offset;
 
-    const float src_weight = mix(0.25, 0.90, 0.5 * BLOOM_SPREAD);
+    const float src_weight = 0.575;
     bloom_tile = texelFetch(SRC_SAMPLER, texel, 0).rgb * (1.0 - src_weight); // Destination tile.
     bloom_tile += BLOOM_UPSAMPLING_FILTER(SRC_SAMPLER, uv_src).rgb * src_weight; // Source tile.
 }
-

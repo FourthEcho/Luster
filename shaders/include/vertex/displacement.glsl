@@ -82,9 +82,9 @@ vec3 get_wind_displacement(
     float wind_strength,
     bool is_tall_plant_top_vertex
 ) {
-    // Daily random wind direction — replaces the old hardcoded 30° vector.
+    // Daily wind direction derived from world time.
     // Picked from worldDay so it stays stable for a full Minecraft day, then
-    // rotates to a new compass direction at midnight.
+    // Change direction at each Minecraft day boundary.
     vec2 wind_dir = weather_wind_direction();
 
 #if defined WORLD_OVERWORLD

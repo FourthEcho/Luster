@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shaders
 
   program/c19_color_grading:
   Apply bloom, color grading and tone mapping then convert to rec. 709
@@ -45,7 +45,7 @@ uniform vec2 view_pixel_size;
 #include "/include/utility/color.glsl"
 
 vec3 get_bloom() {
-    // Upsample last bloom tile. 
+    // Upsample last bloom tile.
 
     vec2 pad_amount = 6.0 * view_pixel_size;
     vec2 uv_src = clamp(uv, pad_amount, 1.0 - pad_amount) * 0.5;
@@ -83,7 +83,7 @@ vec3 grade_input(vec3 rgb) {
     // Vibrance — perceptual chroma boost.
     // Unlike simple saturation, vibrance boosts chroma more strongly for
     // mid- and low-saturation colors while leaving already-saturated colors
-    // (and skin tones) relatively untouched. Implemented in HSL space where
+    // (and skin tones) relatively untouched. The curve is evaluated in HSL space where
     // the existing orange/teal/green grading also runs, so the visual style
     // is consistent.
     // GRADE_VIBRANT in [-1, 1]: negative = desaturate, positive = boost chroma.
@@ -218,14 +218,4 @@ void main() {
     scene_color = clamp01(scene_color * working_to_display_color);
     scene_color = grade_output(scene_color);
 
-#if 0 // Tonemap plot
-	const float scale = 2.0;
-	vec2 uv_scaled = uv * scale * vec2(1.0, 1.0 / aspectRatio);
-	float x = uv_scaled.x;
-	float y = tonemap(vec3(x)).x;
-
-	if (abs(uv_scaled.x - 1.0) < 0.001 * scale) scene_color = vec3(1.0, 0.0, 0.0);
-	if (abs(uv_scaled.y - 1.0) < 0.001 * scale) scene_color = vec3(1.0, 0.0, 0.0);
-	if (abs(uv_scaled.y - y) < 0.001 * scale) scene_color = vec3(1.0);
-#endif
 }

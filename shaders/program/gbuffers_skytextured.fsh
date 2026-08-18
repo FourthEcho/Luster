@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shaders
 
   program/gbuffers_skytextured:
   Handle vanilla sun and moon and custom skies
@@ -58,10 +58,9 @@ void main() {
     } else if (dot(view_pos, view_sun_dir) > 0.0) {
         // Sun
 
-        // NB: not using renderStage to distinguish sun and moon because it's
-        // broken in Iris for Minecraft 1.21.4
+        // Avoid renderStage here; stage labels can vary across Iris/Minecraft versions.
 
-        // Compute offset BEFORE the discard check — previously this was done
+        // Compute the sky-texture offset before the alpha discard so texture coordinates remain consistent for all surviving fragments.
         // after, which meant the discard used an uninitialized variable.
         offset = uv * 2.0 - 1.0;
 

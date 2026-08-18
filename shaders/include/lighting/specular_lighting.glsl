@@ -94,7 +94,7 @@ vec3 get_specular_highlight(
         = (sunAngle < 0.5) ? sun_angular_radius : moon_angular_radius;
 
 #ifdef MOON_PHASE_REFLECTIONS
-    // No specular highlight on a new moon
+    // Suppress specular highlights on the new moon.
     float moon_phase_attenuation = (sunAngle > 0.5 && moonPhase == 4)
         ? 1.0 - MOON_PHASE_REFLECTIONS_STRENGTH
         : 1.0;

@@ -96,7 +96,7 @@ vec3 rrt_sweeteners(vec3 aces) {
     float luminance = dot(rgb_pre, luminance_weights_ap1);
     rgb_pre = mix(vec3(luminance), rgb_pre, rrt_sat_factor);
 
-    // Added gamma adjustment before the RRT
+    // Apply gamma adjustment before the RRT.
     rgb_pre = pow(rgb_pre, vec3(rrt_gamma_curve));
 
     return rgb_pre;

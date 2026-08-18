@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shaders
 
   program/gbuffers_all_translucent:
   Handle translucent terrain, translucent entities (Iris), translucent handheld
@@ -525,7 +525,7 @@ void main() {
         fragment_color.rgb =
             mix(fragment_color.rgb, overlayColor.rgb, overlayColor.a);
 #elif defined PROGRAM_GBUFFERS_ENTITIES_TRANSLUCENT
-        // Lightning (old versions)
+        // Preserve the lightning bolt material as a full-bright overlay.
         if (material_mask == MATERIAL_LIGHTNING_BOLT) {
             fragment_color = vec4(1.0);
         }

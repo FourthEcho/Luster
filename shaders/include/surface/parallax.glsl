@@ -21,7 +21,7 @@ float get_depth_value(vec2 local_coord, mat2 uv_gradient) {
 // ---------------------------------------------------------------------------
 //   Parallax occlusion mapping
 //
-//   Improvements over the previous implementation:
+//   Parallax shadow evaluation characteristics:
 //     * Safe rcp(tangent_dir.z) — clamped to avoid Inf/NaN at grazing angles.
 //     * Binary search refinement between the previous and current sample
 //       positions, so the intersection is located to sub-step precision
@@ -54,7 +54,7 @@ vec2 get_parallax_uv(
 ) {
     const float depth_step = rcp(float(POM_SAMPLES));
 
-    // Perform one POM step at the original position, fixes POM tiling
+    // Perform an initial POM step at the original position.
     // Thanks to Null for teaching me this
     float depth_value = get_depth_value(atlas_tile_coord, uv_gradient);
     if (depth_value < pom_height_eps) {
@@ -108,7 +108,7 @@ vec2 get_parallax_uv(
 }
 
 // Soft parallax shadow: returns visibility in [0, 1] where 0 = fully lit,
-// 1 = fully shadowed.  The previous implementation returned a hard bool.
+// 1 = fully shadowed.  The visibility result is continuous in the range [0, 1].
 float get_parallax_shadow(
     vec3 pos,
     mat2 uv_gradient,
@@ -120,7 +120,7 @@ float get_parallax_shadow(
 
     vec3 tangent_dir = light_dir * tbn;
 
-    // Guarded rcp(tangent_dir.z) — same fix as in get_parallax_uv()
+    // Guard the reciprocal of tangent_dir.z to avoid division by zero.
     float inv_z = safe_parallax_rcp_z(tangent_dir.z);
 
     vec3 ray_step = vec3(
@@ -133,7 +133,7 @@ float get_parallax_shadow(
     pos.xy += ray_step.xy * dither;
 
     // Trace the shadow ray and accumulate a soft visibility term.
-    // The previous implementation returned a hard bool; we now integrate
+    // Integrate the shadow contribution instead of returning a binary result.
     // how far above the surface the ray manages to escape, which produces
     // a continuous penumbra.
     float visibility = 0.0;

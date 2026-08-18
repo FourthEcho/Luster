@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shaders
 
   program/program/final.glsl:
   CAS, dithering, debug views
@@ -72,7 +72,7 @@ vec3 max_of(vec3 a, vec3 b, vec3 c, vec3 d, vec3 f) {
 
 // FidelityFX contrast-adaptive sharpening filter
 // https://github.com/GPUOpen-Effects/FidelityFX-CAS
-// NOTE: colortex0 arrives here already converted to the selected display
+// colortex0 arrives here already converted to the selected display
 // primaries (sRGB / Rec.2020 / Display P3) by working_to_display_color in
 // program/c19_color_grading.fsh. Only the transfer function (display_eotf)
 // is applied at this final stage.
@@ -84,7 +84,6 @@ vec3 cas_filter(sampler2D sampler, ivec2 texel, const float sharpness) {
     // Fetch 3x3 neighborhood
     // a b c
     // d e f
-    // g h i
     vec3 a = texelFetch(sampler, texel + ivec2(-1, -1), 0).rgb;
     vec3 b = texelFetch(sampler, texel + ivec2(0, -1), 0).rgb;
     vec3 c = texelFetch(sampler, texel + ivec2(1, -1), 0).rgb;

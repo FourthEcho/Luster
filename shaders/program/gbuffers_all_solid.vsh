@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shaders
 
   program/gbuffers_all_solid:
   Handle terrain, entities, the hand, beacon beams and spider eyes
@@ -115,7 +115,7 @@ void main() {
     tint.a = 1.0;
 
 #ifdef POM
-    // from fayer3
+    // Normalize entity coordinates for consistent material mapping.
     vec2 uv_minus_mid = uv - mc_midTexCoord;
     atlas_tile_offset = min(uv, mc_midTexCoord - uv_minus_mid);
     atlas_tile_scale = abs(uv_minus_mid) * 2.0;
@@ -124,7 +124,7 @@ void main() {
 #endif
 
 #if defined PROGRAM_GBUFFERS_ENTITIES && !defined COLORWHEEL
-    // Fix fire entity not glowing with Colored Lights
+    // Preserve fire-entity emission under colored lighting.
     if (light_levels.x > 0.99) {
         material_mask = 40;
     }
@@ -143,7 +143,7 @@ void main() {
 #endif
 
 #if defined PROGRAM_GBUFFERS_ENTITIES || defined PROGRAM_GBUFFERS_HAND
-    // Calculate local uv used to fix hardcoded emission on some
+    // Calculate local UV coordinates for material-specific emission correction.
     // handheld/dropped items
     uv_local = sign(uv - mc_midTexCoord) * 0.5 + 0.5;
 #endif

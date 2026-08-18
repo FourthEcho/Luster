@@ -4,12 +4,7 @@
 #include "/include/sky/clouds/constants.glsl"
 #include "/include/utility/bicubic.glsl"
 
-// Hardcoded internal tuning constants — formerly GUI sliders in
-// settings.glsl.  Removed from the GUI because they are tightly coupled
-// to the fixed 8-direction Vogel-disk PCF loop below (changing the sample
-// count without also updating the dirs[] array would silently truncate
-// taps or read past the array).  Only the cloud-shadow *intensity* is
-// user-tunable now.
+// Internal tuning constants for the cloud-shadow sampling path.
 //   CLOUD_SHADOW_FILTER_SAMPLES : number of PCF taps (1..8). 8 gives a
 //                                 soft, smooth penumbra at the cost of 8
 //                                 extra texture taps per shaded fragment.

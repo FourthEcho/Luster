@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shaders
 
   program/gbuffers_damagedblock:
   Handle block breaking overlay
@@ -63,7 +63,7 @@ void main() {
         = 0.5 * srgb_eotf_inv(2.0 * damage_overlay.rgb) * REC709_TO_WORKING;
     damage_overlay.a = 1.0;
 #else
-    // Old overlay handling
+    // Apply the legacy overlay color path.
     // alpha of 1 <=> block breaking overlay
     damage_overlay.a = 1.0 / 255.0;
 #endif

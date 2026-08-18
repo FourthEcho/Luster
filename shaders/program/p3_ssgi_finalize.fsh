@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shaders
 
   program/p3_ssgi_finalize:
   SSGI bounce 3 (optional) + spatial filter + temporal accumulation (ping-pong
@@ -110,7 +110,7 @@ void main() {
 
 #ifdef SSGI_TEMPORAL_ACCUMULATION
     // Temporal accumulation (approach 2): reproject this pixel into the
-    // previous frame and blend with depth rejection
+    // reprojected frame and blend with depth rejection
     vec3 previous_screen = reproject(vec3(uv, depth));
     vec3 blended = bounce_radiance;
 
@@ -121,7 +121,7 @@ void main() {
             0
         ).x;
 
-        // Reject history if the reprojected surface changed
+        // Reject temporal history when reprojection lands on a materially different surface.
         float depth_rejection = exp2(-64.0 * abs(previous_depth - previous_screen.z));
         vec3 history = texelFetch(
             colortex18,

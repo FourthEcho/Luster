@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shaders
 
   program/gbuffers_weather:
   Handle rain and snow particles
@@ -30,7 +30,7 @@ uniform vec2 taa_offset;
 uniform vec2 view_pixel_size;
 
 // Daily random wind direction — same source as foliage (see
-// include/weather/core.glsl), but declared inline here so we don't pull in
+// include/weather/core.glsl), declared locally to avoid pulling in
 // the full weather/core.glsl (which would require world_age, biome_*,
 // time_sunrise, etc. uniforms that this vertex shader doesn't have).
 //
@@ -53,7 +53,7 @@ void main() {
 #ifdef SLANTED_RAIN
     const float rain_tilt_amount = 0.25;
 
-    // Daily random wind direction — replaces the old hardcoded 30° tilt.
+    // Select a stable daily wind direction from the current world-day phase.
     // Snow uses the same particle shader so it gets the same lean for free.
     vec2 rain_tilt_dir = weather_wind_direction();
     vec2 rain_tilt_offset = rain_tilt_amount * rain_tilt_dir;

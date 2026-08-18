@@ -6,8 +6,8 @@
 #include "/include/utility/space_conversion.glsl"
 
 #define GTAO_FALLOFF_START 0.70
-// Hardcoded internal tuning constants — formerly GUI sliders in
-// settings.glsl.  Removed from the GUI because they are algorithm-internal
+// Internal tuning constants for the GTAO sampling path.
+// These parameters are internal to the GTAO sampling algorithm.
 // tuning values that don't have meaningful user-facing trade-offs: changing
 // them tends to produce visibly broken AO (either over-darkened corners or
 // light-leaking geometry) rather than a useful strength/quality dial.

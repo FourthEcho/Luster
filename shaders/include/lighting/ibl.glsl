@@ -64,10 +64,10 @@
 #include "/include/utility/dithering.glsl"
 
 // ----------------------------------------------------------------------------
-//  IBL sub-feature toggles — these were previously exposed in the GUI as
+//  IBL sub-feature toggles are derived from the master IBL state.
 //  independent options, but neither was actually consumed by any shader
 //  code (they were vestigial defines from an earlier implementation).
-//  They are now auto-enabled when the IBL master toggle is on, so any
+//  This keeps the IBL feature set synchronized with the master toggle and ensures
 //  future code guarded by `#ifdef IBL_MULTI_SCATTER` or
 //  `#ifdef IBL_CONE_FILTER` will correctly follow the IBL master switch
 //  without requiring a separate GUI option.  If IBL is off, neither is
@@ -116,7 +116,7 @@ const int ibl_specular_sample_count = IBL_SPECULAR_SAMPLES;
 
 // Golden ratio — drives the low-discrepancy azimuthal progression of the
 // spherical-Fibonacci sequence.  Using it directly (rather than 2.4 as in
-// the previous implementation) gives the mathematically optimal star
+// the star
 // discrepancy O((log N)/N) for the irradiance integral.
 const float ibl_golden_ratio = 1.61803398875;
 const float ibl_tau          = 6.28318530718;
@@ -203,7 +203,7 @@ vec3 ibl_sample_sky_bicubic(vec3 dir) {
 //
 //      F_indirect = F0 * scale + bias
 //
-//  Used ONLY on the mirror path (1-sample) where we cannot afford a
+//  Used ONLY on the mirror path (1-sample) wcannot afford a
 //  per-sample VNDF loop.  On the multi-sample path the full BRDF (incl. G2)
 //  is evaluated per sample, so the LUT would double-count.
 //
@@ -316,7 +316,7 @@ vec3 get_ibl_irradiance(vec3 bent_normal, float ao) {
     irradiance *= pi * rcp(float(ibl_diffuse_sample_count));
 
     // GTAO scalar — approximates the visibility cone not captured by the
-    // bent normal alone.  This matches the previous implementation's
+    // bent normal alone. This preserves the expected
     // behaviour and is consistent with how Photon scales SH-based
     // irradiance.
     irradiance *= ao;
@@ -386,7 +386,6 @@ vec3 get_ibl_irradiance_vl(vec3 axis) {
     irradiance *= pi * rcp(float(ibl_vl_sample_count));
     return irradiance;
 }
-
 
 vec3 ibl_multiscatter_compensation(vec3 f0, float roughness, float NoV) {
     float e = max(0.0, 1.0 - roughness);

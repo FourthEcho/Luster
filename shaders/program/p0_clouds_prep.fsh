@@ -1,7 +1,7 @@
 /*p0_cl
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shaders
 
   program/p0_clouds_prep:
   Create cloud cumulus coverage map and cloud shadow map

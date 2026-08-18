@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shaders
 
   program/c20_motion_blur:
   Apply motion blur
@@ -60,8 +60,8 @@ void main() {
         return;
     }
 
-    // Reconstruct the centre pixel's view-space depth so we can compare it
-    // against each tap's depth.  This is the key fix for the ghost-trail
+    // Reconstruct the center pixel view-space depth for temporal rejection.
+    // Compare it with each tap to reject incompatible motion history.
     // artefact: taps that sample a fragment belonging to a different
     // (e.g. much closer) surface are rejected instead of being smeared along
     // the velocity vector.

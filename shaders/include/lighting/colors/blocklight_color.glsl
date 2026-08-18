@@ -21,8 +21,8 @@ const float emission_scale = 40.0 * EMISSION_STRENGTH;
 //
 //  - tint strength = 0.35 (kept subtle so user-chosen BLOCKLIGHT_RGB still
 //    dominates)
-//  - luminance is preserved (we only shift hue/chroma, never brightness) so
-//    the perceived intensity of blocklight is unchanged
+//  - luminance is preserved while hue and chroma are shifted, keeping
+//    the perceived intensity of blocklight is preserved
 vec3 get_blocklight_color() {
     // Decode the biome fog color into linear rec709, then convert to the
     // working color space (Rec2020 linear) used by the lighting pipeline.

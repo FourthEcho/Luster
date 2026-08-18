@@ -189,6 +189,14 @@ vec3 draw_sky(
         * (1.0 - rainStrength);
     sky += atmosphere;
 
+    // Preserve a very dim blue night floor so heavy rain, cloud cover, or a
+    // new moon cannot collapse the entire sky to pure black.
+    float night_factor = linear_step(0.48, 0.60, sunAngle);
+    vec3 night_floor = vec3(0.0045, 0.0065, 0.0120)
+        * mix(0.75, 1.15, max0(ray_dir.y))
+        * mix(1.0, 0.65, rainStrength);
+    sky = max(sky, night_floor * night_factor);
+
     // Clouds, aurora, crepuscular rays
 
     sky *= clouds_and_aurora.a; // Transmittance
@@ -204,7 +212,7 @@ vec3 draw_sky(
             linear_step(1.0, 0.95, clouds_and_aurora.w))
     );
 
-    // Cave sky fix
+    // Adjust cave-sky rendering.
 
 #if !defined PROGRAM_DEFERRED0
     // Fade the lower part of the sky to black when underground so that the

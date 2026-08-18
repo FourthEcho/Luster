@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shaders
 
   program/post/fxaa.fsh
   FXAA v3.11 from
@@ -54,7 +54,6 @@ void main() {
     // Fetch 3x3 neighborhood
     // a b c
     // d e f
-    // g h i
     vec3 a = texelFetch(colortex0, texel + ivec2(-1, 1), 0).rgb;
     vec3 b = texelFetch(colortex0, texel + ivec2(0, 1), 0).rgb;
     vec3 c = texelFetch(colortex0, texel + ivec2(1, 1), 0).rgb;
@@ -176,12 +175,12 @@ void main() {
     luma_end_2 -= luma_local_average;
 
     // If the luma deltas at the current extremities are larger than the local
-    // gradient, we have reached the side of the edge
+    // The local gradient identifies the current edge boundary.
     bool reached1 = abs(luma_end_1) >= gradient_scaled;
     bool reached2 = abs(luma_end_2) >= gradient_scaled;
     bool reached_both = reached1 && reached2;
 
-    // If the side is not reached, we continue to explore in this direction
+    // Continue the directional search until the edge boundary is reached or the search limit is exceeded.
     if (!reached1) {
         uv1 -= offset;
     }
@@ -206,7 +205,7 @@ void main() {
             }
 
             // If the luma deltas at the current extremities is larger than the
-            // local gradient, we have reached the side of the edge
+            // local The local gradient identifies the current edge boundary.
             reached1 = abs(luma_end_1) >= gradient_scaled;
             reached2 = abs(luma_end_2) >= gradient_scaled;
             reached_both = reached1 && reached2;

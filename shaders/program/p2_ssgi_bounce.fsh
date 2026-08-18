@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shaders
 
   program/p2_ssgi_bounce:
   SSGI bounce 2 — gather from the bounce-1 radiance and accumulate

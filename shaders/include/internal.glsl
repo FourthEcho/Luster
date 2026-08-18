@@ -4,10 +4,8 @@
 // ============================================================================
 //  Internal tuning constants
 //
-//  These options were previously defined in settings.glsl but were intentionally
-//  hidden from the user-facing GUI. They have been moved here so that
-//  settings.glsl contains only user-tunable options. Edit the values in this
-//  file directly if you want to change internal shader behaviour.
+//  Algorithm-internal constants live here when they are not intended for the
+//  user-facing GUI. Change them here only when tuning the renderer itself.
 //
 //  Consumed by: every shader pass that #include's /include/global.glsl.
 // ============================================================================
@@ -31,7 +29,7 @@
   // Inject vanilla lightning flash into ambient + sky lighting during storms.
   #define LIGHTNING_FLASH
 
-  // NOTE: HANDHELD_LIGHTING is a *derived* flag — it is defined in
+  // HANDHELD_LIGHTING is a *derived* flag — it is defined in
   // settings.glsl whenever the user-facing HANDHELD_LIGHTING_MODE selector
   // is set to anything other than HANDHELD_LIGHTING_OFF. Do not hardcode
   // here.
@@ -45,27 +43,12 @@
   #define SSS_STEPS 12
 
   // PCF step count scaling factor. Multiplies the adaptive step count derived
-  // from the penumbra size; 1.0 = use the SHADOW_PCF_STEPS_MIN/MAX range as-is.
+  // from the penumbra size; 1.0 = use the LUSTER_PCF_STEPS_MIN/MAX range as-is.
   #define SHADOW_PCF_STEPS_SCALE 1.0
 
-  // Adaptive PCF step-count range consumed by include/lighting/shadows/pcss.glsl
-  // in shadow_pcf().  The actual step count per pixel is computed as:
-  //     step_count = clamp(int(MIN + SCALE * filter_scale), MIN, MAX)
-  // where `filter_scale` is derived from the penumbra size relative to the
-  // minimum filter radius.  These were previously GUI sliders but had no
-  // user-perceivable effect over a sensible fixed range; they are now
-  // hardcoded here.  Profiles may still override them via shaders.properties
-  // profile directives — the #ifndef guard below lets those overrides win
-  // without producing a redefinition error.
-  //   4 / 8  → matches the previous profile.low / profile.medium defaults.
-  //   8 / 16 → profile.ultra override (still respected if the user picks
-  //            the Ultra profile).
-  #ifndef SHADOW_PCF_STEPS_MIN
-    #define SHADOW_PCF_STEPS_MIN 4
-  #endif
-  #ifndef SHADOW_PCF_STEPS_MAX
-    #define SHADOW_PCF_STEPS_MAX 8
-  #endif
+  // Fixed adaptive PCF step-count range used by the software PCF filter.
+  #define LUSTER_PCF_STEPS_MIN 4
+  #define LUSTER_PCF_STEPS_MAX 16
 
   // Search radius (in shadow clip space units) for the PCSS blocker search.
   #define SHADOW_BLOCKER_SEARCH_RADIUS 0.5
@@ -81,7 +64,6 @@
 // ----------------------------------------------------------------------------
 //  Sky / atmosphere
 // ----------------------------------------------------------------------------
-
 
   // Maximum number of temporal accumulation frames for the volumetric cloud
   // buffer before history is reset.

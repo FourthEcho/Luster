@@ -123,7 +123,7 @@ CloudsParameters get_clouds_parameters(Weather weather) {
     params.l0_cumulus_stratus_blend = clouds_l0_cumulus_stratus_blend(weather);
 
     // Compute congestus blend before any function is allowed to consume it.
-    // Previously params.cumulus_congestus_blend was read while uninitialized.
+    // Initialize the cloud blend parameters before use.
     params.cumulus_congestus_blend = clouds_cumulus_congestus_blend(
         weather,
         vec2(0.5, 0.5)
@@ -132,7 +132,7 @@ CloudsParameters get_clouds_parameters(Weather weather) {
     params.l0_coverage
         = clouds_l0_coverage(weather, params.cumulus_congestus_blend);
 
-    // Re-evaluate with the actual layer coverage now that it is known.
+    // Re-evaluate the layer contribution after the final layer coverage is available.
     params.cumulus_congestus_blend
         = clouds_cumulus_congestus_blend(weather, params.l0_coverage);
     params.l0_detail_weights

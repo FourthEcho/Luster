@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shaders
 
   program/d2_clouds_upscaling:
   Temporal upscaling for clouds
@@ -91,7 +91,7 @@ vec4 max_of(vec4 a, vec4 b, vec4 c, vec4 d, vec4 e) {
 }
 
 vec4 smooth_filter(sampler2D sampler, vec2 coord) {
-    // from https://iquilezles.org/www/articles/texture/texture.htm
+    // Texture filtering reference.
     vec2 res = vec2(textureSize(sampler, 0));
 
     coord = coord * res + 0.5;
@@ -258,7 +258,7 @@ void main() {
     float ambient_scattering = current_data.y;
 
     // Find the closest cloud distance between the current frame and a 4x4 area
-    // of the previous frame
+    // from the reprojected frame
     float closest_distance = min(
         apparent_distance,
         texture_min_4x4(colortex12, uv_clamped * taau_render_scale)
@@ -315,11 +315,11 @@ void main() {
     vec3 history_data
         = texture(colortex12, previous_uv_clamped * taau_render_scale).xyz;
 
-    // Depth at the previous position
+    // Depth at the reprojected position.
     float history_depth
         = 1.0 - max_of(textureGather(colortex14, previous_uv_clamped, 0));
 
-    // Get distance to terrain in the previous frame
+    // Get terrain distance at the reprojected position.
     float distance_to_terrain_squared = length_squared(screen_to_view_space(
         combined_projection_matrix_inverse,
         vec3(previous_uv, history_depth),
@@ -346,10 +346,10 @@ void main() {
     );
     float camera_rotation = 1.0 - camera_rotation_cos;
 
-    // Work out whether the history should be invalidated
+    // Determine whether temporal history remains valid.
     bool disocclusion = reprojection_outside || reprojection_near_edge;
     // About 0.5 degrees of rotation is already enough to make a full-screen
-    // cloud history noticeably stale, so reset rather than smear old pixels.
+    // Reset cloud history when it is stale enough to cause visible smearing.
     disocclusion = disocclusion || camera_rotation > 0.000038;
     disocclusion = disocclusion
         || (history_depth < 1.0
@@ -358,7 +358,7 @@ void main() {
     disocclusion = disocclusion || any(isnan(history));
     disocclusion = disocclusion || world_age_changed;
 
-    // Replace history if a disocclusion was detected
+    // Reset history after detected disocclusion.
     if (disocclusion) {
         history = current;
         history.z = ambient_scattering;
@@ -394,7 +394,6 @@ void main() {
         // Soft minimum and maximum ("Hybrid Reconstruction Antialiasing")
         //        b         a b c
         // (min d e f + min d e f) / 2
-        //        h         g h i
         vec4 aabb_min = min_of(b, d, e, f, h);
         aabb_min += min_of(aabb_min, a, c, g, i);
         aabb_min *= 0.5;
@@ -428,7 +427,7 @@ void main() {
     float history_weight = 1.0 - rcp(max(pixel_age - checkerboard_area, 1.0));
 
     // Camera motion needs a direct influence on cloud history. This prevents
-    // accumulation from slowly dragging a previous screen position behind
+    // accumulation from stale reprojected positions.
     // otherwise correct moving clouds.
     history_weight *= 1.0 - rotation_rejection;
 

@@ -18,7 +18,7 @@ screen.post                            = Post-Processing
 screen.misc                            = Misc
 screen.mods                            = Mod Options
 
-screen.weather                         = Weather 
+screen.weather                         = Weather
 screen.moon_phase_influence            = Moon Phase Influence
 screen.main_lighting                  = Colored Lights
 screen.indirect_lighting              = Indirect Lighting
@@ -76,13 +76,13 @@ screen.nether_color                    = Static Color
 
 screen.distance_view                   = Distance View
 
-option.INFO                            = Photon Shaders
+option.INFO                            = Luster Shaders
 option.INFO.comment = Displays shader information and diagnostics.
-value.INFO.0                           = §eby SixthSurge
-value.INFO.1                           = §aby SixthSurge
-value.INFO.2                           = §bby SixthSurge
-value.INFO.3                           = §dby SixthSurge
-value.INFO.4                           = §cby SixthSurge
+value.INFO.0                           = §eLuster Shaders
+value.INFO.1                           = §aLuster Shaders
+value.INFO.2                           = §bLuster Shaders
+value.INFO.3                           = §dLuster Shaders
+value.INFO.4                           = §cLuster Shaders
 
 # World settings
 
@@ -201,13 +201,11 @@ option.SHADING_STRENGTH                = Shading Strength
 option.SHADING_STRENGTH.comment          = Contrast of direct light shading. Lower values brighten faces turned away from the sun; higher values darken them
 
 option.SHADOW                          = Shadow Mapping
-option.SHADOW.comment = Adjusts shadow mapping.
-option.SHADOW_PCF                      = Shadow Map Filtering
-option.SHADOW_PCF.comment = Enables or disables shadow map filtering.
-option.SHADOW_PCF_STEPS_MIN            = Shadow PCF Steps Min
-option.SHADOW_PCF_STEPS_MIN.comment = Adjusts shadow pcf steps min.
-option.SHADOW_PCF_STEPS_MAX            = Shadow PCF Steps Max
-option.SHADOW_PCF_STEPS_MAX.comment = Adjusts shadow pcf steps max.
+option.SHADOW_PCF = PCF Filtering
+option.SHADOW_PCF.comment = Enables software percentage-closer filtering for shadow maps.
+option.SHADOW_PCF_SAMPLE_SCALE = PCF Sample Quality
+option.SHADOW_PCF_SAMPLE_SCALE.comment = Controls the adaptive sample count used by software PCF shadows. Higher values improve filtering quality at additional cost.
+option.SHADOW.comment = Enables the shadow-mapping pipeline.
 option.SHADOW_SSRT                     = SSRT Distant Shadows
 option.SHADOW_SSRT.comment = Adjusts ssrt distant shadows.
 option.SHADOW_SSRT_STEPS               = SSRT Shadow Steps
@@ -220,19 +218,17 @@ option.shadowMapResolution             = Shadow Resolution
 option.shadowMapResolution.comment = Adjusts shadow resolution.
 option.shadowDistance                  = Shadow Distance
 option.shadowDistance.comment = Selects the shadow distance mode.
-option.sunPathRotation                 = Sun Path Rotation
-option.sunPathRotation.comment = Adjusts sun path rotation.
 option.SHADOW_PENUMBRA_SCALE           = Shadow Softness
 option.SHADOW_PENUMBRA_SCALE.comment   = Adjust the softness of shadows
 option.ENTITY_SHADOWS                  = Entity Shadows
 option.ENTITY_SHADOWS.comment          = Whether entities can cast shadows.\nDisable this to improve performance in survival bases with large farms
 option.BLOCK_ENTITY_SHADOWS            = Block Entity Shadows
-option.BLOCK_ENTITY_SHADOWS.comment = Adjusts block entity shadows.
+option.BLOCK_ENTITY_SHADOWS.comment = Enables shadows cast by block entities.
 option.PIXELATED_SHADOWS               = Pixelated Shadows
 option.PIXELATED_SHADOWS.comment       = Shadows snap to block texels, creating a pixelated look
 option.PIXELATED_SHADOWS_RESOLUTION    = Pixelated Shadows Resolution
 option.PIXELATED_SHADOWS_RESOLUTION.comment = Adjusts pixelated shadows resolution.
-option.SSS_STEPS                       = SSS Steps 
+option.SSS_STEPS                       = SSS Steps
 option.SSS_STEPS.comment               = Increase to reduce noise on foliage and other materials with SSS, at the cost of performance.
 
 option.SHADER_AO                       = Shader AO
@@ -348,7 +344,6 @@ value.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF.COLORED_LIGHTS_VANILL
 
 
 suffix.shadowMapResolution             = ²
-suffix.sunPathRotation                 = °
 
 value.shadowDistance.48.0              = 3 chunks
 value.shadowDistance.64.0              = 4 chunks
@@ -375,9 +370,9 @@ value.shadowDistance.4096.0            = 256 chunks
 # Sky settings
 
 option.VANILLA_SUN                     = Vanilla Sun
-option.VANILLA_SUN.comment = Adjusts vanilla sun.
+option.VANILLA_SUN.comment = Uses the vanilla sun rendering instead of the shader sun disk.
 option.VANILLA_MOON                    = Vanilla Moon
-option.VANILLA_MOON.comment = Adjusts vanilla moon.
+option.VANILLA_MOON.comment = Uses the vanilla moon rendering instead of the shader moon disk.
 option.SUN_ANGULAR_RADIUS              = Sun Angular Radius
 option.SUN_ANGULAR_RADIUS.comment = Adjusts sun angular radius.
 option.MOON_ANGULAR_RADIUS             = Moon Angular Radius
@@ -423,7 +418,7 @@ option.GALAXY.comment                  = Galaxy image in the night sky
 option.GALAXY_INTENSITY                = Galaxy Intensity
 option.GALAXY_INTENSITY.comment        = Controls the brightness of the galaxy in the night sky
 option.CREPUSCULAR_RAYS                = Enabled
-option.CREPUSCULAR_RAYS.comment = Adjusts enabled.
+option.CREPUSCULAR_RAYS.comment = Enables volumetric sunlight shafts through the cloud shadow field.
 option.CREPUSCULAR_RAYS_INTENSITY      = Intensity
 option.CREPUSCULAR_RAYS_INTENSITY.comment = Adjusts intensity.
 option.CREPUSCULAR_RAYS_STEPS_HORIZON  = Step Count - Horizon
@@ -458,7 +453,7 @@ option.CLOUDS_CUMULUS_AMBIENT_STEPS         = Ambient Steps
 option.CLOUDS_CUMULUS_AMBIENT_STEPS.comment = Adjusts ambient steps.
 option.CLOUDS_CUMULUS_ALTITUDE              = Altitude
 option.CLOUDS_CUMULUS_ALTITUDE.comment = Adjusts altitude.
-suffix.CLOUDS_CUMULUS_ALTITUDE              = m
+suffix.CLOUDS_CUMULUS_ALTITUDE = m
 option.CLOUDS_CUMULUS_THICKNESS             = Thickness
 option.CLOUDS_CUMULUS_THICKNESS.comment = Adjusts thickness.
 option.CLOUDS_CUMULUS_DENSITY               = Density
@@ -490,7 +485,7 @@ option.CLOUDS_ALTOCUMULUS_AMBIENT_STEPS         = Ambient Steps
 option.CLOUDS_ALTOCUMULUS_AMBIENT_STEPS.comment = Adjusts ambient steps.
 option.CLOUDS_ALTOCUMULUS_ALTITUDE              = Altitude
 option.CLOUDS_ALTOCUMULUS_ALTITUDE.comment = Adjusts altitude.
-suffix.CLOUDS_ALTOCUMULUS_ALTITUDE              = m
+suffix.CLOUDS_ALTOCUMULUS_ALTITUDE = m
 option.CLOUDS_ALTOCUMULUS_THICKNESS             = Thickness
 option.CLOUDS_ALTOCUMULUS_THICKNESS.comment = Adjusts thickness.
 option.CLOUDS_ALTOCUMULUS_DENSITY               = Density
@@ -520,7 +515,7 @@ option.CLOUDS_CUMULUS_CONGESTUS_AMBIENT_STEPS         = Ambient Steps
 option.CLOUDS_CUMULUS_CONGESTUS_AMBIENT_STEPS.comment = Adjusts ambient steps.
 option.CLOUDS_CUMULUS_CONGESTUS_ALTITUDE              = Altitude
 option.CLOUDS_CUMULUS_CONGESTUS_ALTITUDE.comment = Adjusts altitude.
-suffix.CLOUDS_CUMULUS_CONGESTUS_ALTITUDE              = m
+suffix.CLOUDS_CUMULUS_CONGESTUS_ALTITUDE = m
 option.CLOUDS_CUMULUS_CONGESTUS_THICKNESS             = Thickness
 option.CLOUDS_CUMULUS_CONGESTUS_THICKNESS.comment = Adjusts thickness.
 option.CLOUDS_CUMULUS_CONGESTUS_DENSITY               = Density
@@ -600,7 +595,7 @@ option.CLOUDS_CIRRUS_AMBIENT_STEPS         = Ambient Steps
 option.CLOUDS_CIRRUS_AMBIENT_STEPS.comment = Adjusts ambient steps.
 option.CLOUDS_CIRRUS_ALTITUDE              = Altitude
 option.CLOUDS_CIRRUS_ALTITUDE.comment = Adjusts altitude.
-suffix.CLOUDS_CIRRUS_ALTITUDE              = m
+suffix.CLOUDS_CIRRUS_ALTITUDE = m
 option.CLOUDS_CIRRUS_THICKNESS             = Thickness
 option.CLOUDS_CIRRUS_THICKNESS.comment = Adjusts thickness.
 option.CLOUDS_CIRRUS_DENSITY               = Cirrus Density
@@ -679,7 +674,7 @@ option.OVERWORLD_FOG_INTENSITY.comment = Adjusts overworld fog intensity.
 option.NETHER_FOG_INTENSITY                 = Nether Fog Intensity
 option.NETHER_FOG_INTENSITY.comment = Adjusts nether fog intensity.
 option.VL                                   = Volumetric Fog
-option.LPV_VL.comment                       = Light sources illuminate the fog. Requires Colored Lights! 
+option.LPV_VL.comment                       = Light sources illuminate the fog. Requires Colored Lights!
 option.VL.comment                           = Adds light shafts and variable fog density
 option.VL_RENDER_SCALE                      = VL Render Scale
 option.VL_RENDER_SCALE.comment = Adjusts vl render scale.
@@ -692,7 +687,7 @@ option.AIR_FOG_COLORED_LIGHT_SHAFTS_INTENSITY.comment = Adjusts the intensity of
 
 # LPV VL
 option.LPV_VL                          = Enabled
-option.LPV_VL_STEPS                    = Steps 
+option.LPV_VL_STEPS                    = Steps
 option.LPV_VL_STEPS.comment = Adjusts steps.
 option.LPV_VL_INTENSITY_OVERWORLD      = Overworld Intensity
 option.LPV_VL_INTENSITY_OVERWORLD.comment = Adjusts overworld intensity.
@@ -800,7 +795,7 @@ option.NORMAL_MAPPING.comment          = Whether to use the normal maps provided
 option.SPECULAR_MAPPING                = Specular Mapping
 option.SPECULAR_MAPPING.comment        = Whether to use the specular maps provided by the resource pack. Enable this if you are using a "PBR" resource pack
 option.POM                             = Parallax Occlusion Mapping
-option.POM.comment = Adjusts parallax occlusion mapping.
+option.POM.comment = Enables parallax occlusion mapping for supported materials.
 option.TEXTURE_FORMAT                  = Texture Format
 option.TEXTURE_FORMAT.comment            = Texture format used by the resource pack. Most modern packs use labPBR; packs designed for SEUS may use OldPBR
 option.HARDCODED_EMISSION              = Hardcoded Emission
@@ -808,7 +803,7 @@ option.HARDCODED_EMISSION.comment      = Hardcoded emission for some blocks (eg 
 option.HARDCODED_SSS                   = Hardcoded SSS
 option.HARDCODED_SSS.comment           = Hardcoded subsurface scattering for some blocks (eg leaves)
 option.RAIN_PUDDLES                    = Rain Puddles
-option.RAIN_PUDDLES.comment = Adjusts rain puddles.
+option.RAIN_PUDDLES.comment = Applies wet-surface puddling to eligible materials during rainy weather.
 option.EMISSION_STRENGTH               = Emission Strength
 option.EMISSION_STRENGTH.comment         = Brightness of emissive objects like torches. Affects only the light source itself, not the light it casts. Also applies to hardcoded emissives
 option.DIRECTIONAL_LIGHTMAPS           = Directional Lightmaps
@@ -827,7 +822,7 @@ option.POM_DISTANCE                    = POM Distance
 option.POM_DISTANCE.comment = Adjusts pom distance.
 
 option.REFRACTION                      = Refraction
-option.REFRACTION.comment = Selects the refraction mode.
+option.REFRACTION.comment = Selects whether refraction is disabled, applied broadly, or limited to water.
 value.REFRACTION.REFRACTION_OFF        = Off
 value.REFRACTION.REFRACTION_ALL        = Everything
 value.REFRACTION.REFRACTION_WATER_ONLY = Water Only
@@ -884,7 +879,7 @@ option.BIOME_WATER_COLOR.comment       = Water absorption takes the biome water 
 option.BIOME_WATER_COLOR_INTENSITY     = Biome-Colored Water Intensity
 option.BIOME_WATER_COLOR_INTENSITY.comment = Adjusts how strongly the biome water color affects water absorption
 option.RAIN_PUDDLES_MODE               = Rain Puddles Mode
-option.RAIN_PUDDLES_MODE.comment         = Off - no rain puddles.
+option.RAIN_PUDDLES_MODE.comment = Off disables puddles. Rain Puddles uses weather-driven wetness. Everywhere applies puddles to all eligible surfaces.
 Rain Puddles - puddles form on porous surfaces during rain.
 Everywhere - puddles form on all applicable surfaces regardless of weather
 value.RAIN_PUDDLES_MODE.RAIN_PUDDLES_MODE_OFF      = Off
@@ -899,7 +894,7 @@ value.WATER_TEXTURE.WATER_TEXTURE_VANILLA               = Vanilla
 value.WATER_TEXTURE.WATER_TEXTURE_HIGHLIGHT_UNDERGROUND = Highlights (Underground only)
 
 option.WATER_WAVES                     = Enabled
-option.WATER_WAVES.comment = Adjusts enabled.
+option.WATER_WAVES.comment = Enables procedural water-surface displacement.
 option.WATER_WAVE_ITERATIONS           = Iterations
 option.WATER_WAVE_ITERATIONS.comment = Adjusts iterations.
 option.WATER_WAVE_STRENGTH             = Intensity
@@ -920,7 +915,7 @@ option.WATER_PARALLAX                  = Water Parallax
 option.WATER_PARALLAX.comment          = Makes water waves appear 3D
 option.WATER_DISPLACEMENT              = Water Displacement
 option.WATER_DISPLACEMENT.comment      = Similar to how waving leaves work, it makes the water geometry itself wave slightly, so the shore line appears less flat
-option.WATER_WAVES_HEIGHT_VARIATION           = Local Height Variation 
+option.WATER_WAVES_HEIGHT_VARIATION           = Local Height Variation
 option.WATER_WAVES_HEIGHT_VARIATION.comment   = The height of water waves varies in space
 
 option.WATER_ABSORPTION_R              = §c▍ §fRed Absorption
@@ -1088,8 +1083,8 @@ option.CUSTOM_SKY_BRIGHTNESS           = Custom Sky Brightness
 option.CUSTOM_SKY_BRIGHTNESS.comment   = Adjust custom sky brightness
 option.ENCHANTMENT_GLINT_BRIGHTNESS    = Enchantment Glint Brightness
 option.ENCHANTMENT_GLINT_BRIGHTNESS.comment = Adjusts enchantment glint brightness.
-option.DITHERED_TRANSLUCENCY_FALLBACK  = Dithered Translucency Fallback 
-option.DITHERED_TRANSLUCENCY_FALLBACK.comment = Uses dithered translucency to improve the look of objects that should be translucent but can't when separateEntityDraws is enabled. 
+option.DITHERED_TRANSLUCENCY_FALLBACK  = Dithered Translucency Fallback
+option.DITHERED_TRANSLUCENCY_FALLBACK.comment = Uses ordered dithering for objects that need translucent coverage when separateEntityDraws is enabled.
 
 value.COLOR_OUTPUT_MODE.COLOR_OUTPUT_SRGB       = sRGB
 value.COLOR_OUTPUT_MODE.COLOR_OUTPUT_REC2020    = Rec.2020
@@ -1130,14 +1125,14 @@ value.tonemap_right.tonemap_ozius          = Ozius
 value.tonemap_right.tonemap_reinhard       = Reinhard
 value.tonemap_right.tonemap_reinhard_jodie = Reinhard-Jodie
 
-# Distance View 
+# Distance View
 
 option.DISTANCE_VIEW                   = Enabled
-option.DISTANCE_VIEW.comment = Adjusts enabled.
+option.DISTANCE_VIEW.comment = Enables the distance-view debug overlay.
 option.DISTANCE_VIEW_METHOD            = Method
-option.DISTANCE_VIEW_METHOD.comment = Selects the method mode.
+option.DISTANCE_VIEW_METHOD.comment = Selects whether the overlay uses reconstructed distance or depth.
 option.DISTANCE_VIEW_MAX_DISTANCE      = Max Distance
-option.DISTANCE_VIEW_MAX_DISTANCE.comment = Adjusts max distance.
+option.DISTANCE_VIEW_MAX_DISTANCE.comment = Sets the maximum distance displayed by the overlay.
 suffix.DISTANCE_VIEW_MAX_DISTANCE      = m
 
 value.DISTANCE_VIEW_METHOD.DISTANCE_VIEW_DISTANCE = Distance

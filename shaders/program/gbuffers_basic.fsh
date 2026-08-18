@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shaders
 
   program/gbuffers_basic:
   Handle lines
@@ -40,9 +40,9 @@ uniform float frameTimeCounter;
 const vec3 normal = vec3(0.0, 1.0, 0.0);
 
 // gbuffers_basic is abused by mods for rendering overlays and the like, for now
-// we mostly just want to reduce the intensity of these translucent overlays.
+// Reduce the intensity of translucent overlays.
 // This shader and vanilla are still both affected by Z-fighting in some areas,
-// we could attempt to fix this in the vertex shader but this would require mods
+// Keep the correction in the fragment stage to avoid geometry-specific dependencies.
 // to send correct normals for their geometry which unfortunately doesn't happen
 // often.
 float fixup_translucent(float alpha) {
@@ -57,7 +57,6 @@ void main() {
     }
 #endif
 
-    // I have yet to see anything render something transparent but we assume it
     // can happen.
     if (tint.a < 0.1) {
         discard;

@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shaders
 
   program/c0_vl:
   Calculate volumetric fog
@@ -174,9 +174,9 @@ void main() {
     vec3 world_back_pos = scene_back_pos + cameraPosition;
 
     float dither = texelFetch(noisetex, fog_texel & 511, 0).b;
+    float volumetric_dither = dither;
 #ifdef FOG_SMOOTHING
-    // Per-frame dither rotation — the jittered fog noise then converges
-    // temporally through TAA
+    // Rotate the air-fog sample each frame so TAA can converge the raymarch.
     dither = r1(frameCounter, dither);
 #endif
 
@@ -235,7 +235,7 @@ void main() {
                 world_start_pos,
                 world_end_pos,
                 depth0 == 1.0,
-                dither
+                volumetric_dither
             );
 
             fog_scattering = water_fog[0];
