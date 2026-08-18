@@ -1,0 +1,334 @@
+name: Remove colored lights
+
+on:
+  push:
+    branches: [remove-colored-lights]
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    if: ${{ !startsWith(github.event.head_commit.message, 'chore: complete colored-light cleanup') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Patch and audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          import re
+          import subprocess
+
+          root = Path('.')
+
+          # 1) Remove all COLORED_LIGHTS shader-code branches, while explicitly
+          #    preserving HANDHELD_LIGHTING_COLORED and its dependency tables.
+          token = 'COLORED_LIGHTS'
+          files = []
+          for p in root.joinpath('shaders').rglob('*'):
+              if not p.is_file() or p.suffix.lower() not in {'.glsl','.vsh','.fsh','.gsh','.csh','.properties'}:
+                  continue
+              try:
+                  text = p.read_text(encoding='utf-8')
+              except UnicodeDecodeError:
+                  continue
+              if token in text:
+                  files.append(p)
+
+          def strip_colored_blocks(text: str) -> str:
+              lines = text.splitlines(True)
+              out = []
+              i = 0
+              n = len(lines)
+              while i < n:
+                  line = lines[i]
+                  s = line.strip()
+                  # Remove preprocessor branches whose condition directly
+                  # enables/depends on COLORED_LIGHTS. Preserve the separate
+                  # HANDHELD_LIGHTING_COLORED mode, which is a different option.
+                  starts = (
+                      s.startswith('#ifdef COLORED_LIGHTS') or
+                      s.startswith('#ifndef COLORED_LIGHTS') or
+                      s.startswith('#if defined COLORED_LIGHTS') or
+                      s.startswith('#if !defined COLORED_LIGHTS') or
+                      (s.startswith('#if ') and 'COLORED_LIGHTS' in s and 'HANDHELD_LIGHTING_COLORED' not in s)
+                  )
+                  if starts:
+                      depth = 0
+                      while i < n:
+                          inner = lines[i].strip()
+                          if inner.startswith('#if'):
+                              depth += 1
+                          elif inner.startswith('#endif'):
+                              depth -= 1
+                              if depth == 0:
+                                  i += 1
+                                  break
+                          i += 1
+                      continue
+                  if token in line and 'HANDHELD_LIGHTING_COLORED' not in line:
+                      # Remove standalone option checks/definitions/comments
+                      # rather than leaving dead colored-light settings behind.
+                      if s.startswith(('#define COLORED_LIGHTS', '#undef COLORED_LIGHTS', '#if', '#elif', '#include')):
+                          i += 1
+                          continue
+                  out.append(line)
+                  i += 1
+              return ''.join(out)
+
+          for p in files:
+              if p.as_posix().endswith('shaders/shaders.properties'):
+                  continue
+              if p.as_posix().endswith('shaders/block.properties'):
+                  continue
+              text = p.read_text(encoding='utf-8')
+              new = strip_colored_blocks(text)
+              p.write_text(new, encoding='utf-8')
+
+          # 2) Remove the Colored Lights controls and profiles from shaders.properties,
+          #    but keep a visible, intentionally empty Colored Lights screen.
+          sp = root/'shaders/shaders.properties'
+          text = sp.read_text(encoding='utf-8')
+          text = re.sub(r'!?COLORED_LIGHTS(?:\s+|$)', '', text)
+          text = re.sub(r'(?ms)^# Colored Lights sub-screen.*?^screen\.ibl\s+=', 'screen.main_lighting = [colored_lights]\n# Retained intentionally as an empty screen so the Colored Lights screen remains visible.\nscreen.colored_lights = <empty>\n\nscreen.ibl =', text)
+          text = re.sub(r'(?ms)^# Colored Lights/LPV is.*?^# Colored Lights sub-screen', '# Lighting submenus', text)
+          text = re.sub(r'(?m)^# Colored Lights Settings sub-screen.*?\nscreen\.colored_lights_settings\s*=.*?\n\n', '', text, flags=re.S)
+          text = re.sub(r'(?m)^screen\.main_lighting\s*=.*?\n', 'screen.main_lighting = [colored_lights]\n', text, count=1)
+          text = re.sub(r'(?m)^screen\.colored_lights_settings\s*=.*\n', '', text)
+          text = re.sub(r'(?m)^screen\.lpv_vl\s*=.*\n', '', text)
+          sp.write_text(text, encoding='utf-8')
+
+          # 3) Remove colored-light-only settings, but never touch the handheld
+          #    mode or the lighting_colors.glsl dependency table.
+          settings = root/'shaders/settings.glsl'
+          text = settings.read_text(encoding='utf-8')
+          text = re.sub(r'(?ms)^// Colored Lights Settings\n.*?(?=^// -------\n#  Sky)', '', text)
+          text = re.sub(r'(?m)^\s*//\#define COLORED_LIGHTS\s*\n', '', text)
+          text = re.sub(r'(?m)^\s*#define COLORED_LIGHTS[^\n]*\n', '', text)
+          text = re.sub(r'(?m)^\s*#define (?:COLORED_LIGHTS_[A-Z0-9_]+|VOXEL_VOLUME_[A-Z0-9_]+|LPV_VL(?:_[A-Z0-9_]+)?)\b[^\n]*\n', '', text)
+          settings.write_text(text, encoding='utf-8')
+
+          # 4) Remove the macOS-only colored-light undef block from global.glsl;
+          #    it is dead once the feature itself is gone.
+          globalp = root/'shaders/include/global.glsl'
+          text = globalp.read_text(encoding='utf-8')
+          text = re.sub(r'(?ms)^// Apple ships only OpenGL 4\.1\..*?^#endif\n\n', '', text)
+          globalp.write_text(text, encoding='utf-8')
+
+          # 5) Version-aware vanilla emissive block map.
+          #    IDs stay stable for handheld lookup, while the actual block names
+          #    are gated to reasonable release families so older versions don't
+          #    reference blocks that did not exist yet.
+          bp = root/'shaders/block.properties'
+          text = bp.read_text(encoding='utf-8')
+          start = text.index('# ---------------------------------------\n#   10032-10063 - Light-emitting blocks')
+          end = text.index('# --------------------------------------\n#   10064-10079 - Colors for modded light sources', start)
+          mapping = r'''# ---------------------------------------
+#   10032-10063 - Light-emitting blocks
+#
+#   Version families:
+#     1.13-1.15      base vanilla light sources
+#     1.16-1.16      Nether Update additions
+#     1.17-1.18      Caves & Cliffs additions
+#     1.19-1.19      Deep Dark / Wild Update additions
+#     1.20-1.20      Trails & Tales / calibrated sensor additions
+#     1.21-1.21.3    Trial / Copper additions
+#     1.21.4+        Pale Garden additions
+# ---------------------------------------
+
+#if MC_VERSION >= 11300
+
+# Strong white light
+block.10032 = sea_lantern
+
+# Medium white light
+block.10033 = end_rod
+
+# Strong golden light
+block.10035 = glowstone lantern redstone_lamp:lit=true
+
+# Redstone components
+block.10038 = redstone_torch:lit=true redstone_wall_torch:lit=true powered_rail:powered=true activator_rail:powered=true detector_rail:powered=true repeater:powered=true comparator:powered=true observer:powered=true redstone_ore:lit=true
+
+# Lava
+block.10039 = lava flowing_lava lava_cauldron
+
+# Brewing stand
+block.10041 = brewing_stand
+
+# Jack o' Lantern
+block.10042 = jack_o_lantern
+
+# Beacon
+block.10044 = beacon
+
+# End portal frame
+block.10045 = end_portal_frame:eye=true
+
+# Sea pickle
+block.10048 = sea_pickle:waterlogged=true
+
+# Enchanting table
+block.10054 = enchanting_table
+
+# Redstone block
+block.10058 = redstone_block redstone_wire
+
+# Nether portal
+block.10062 = nether_portal
+
+# End portal
+block.10063 = end_portal end_gateway
+
+#if MC_VERSION >= 11600
+# Medium orange light
+block.10040 = fire magma_block shroomlight
+
+# Soul lights
+block.10043 = soul_fire soul_torch soul_wall_torch soul_lantern soul_campfire:lit=true
+
+# Pink glow additions
+block.10047 = spawner dragon_head crying_obsidian
+
+# Nether plants
+block.10049 = crimson_fungus warped_fungus potted_crimson_fungus potted_warped_fungus
+#endif
+
+#if MC_VERSION >= 11700
+# Weak white light, transparent
+block.10034 = glow_lichen
+
+# Weak golden light, transparent
+block.10037 = cave_vines_plant:berries=true cave_vines:berries=true
+
+# Candles
+block.10050 = candle:lit=true white_candle:lit=true orange_candle:lit=true magenta_candle:lit=true light_blue_candle:lit=true yellow_candle:lit=true lime_candle:lit=true pink_candle:lit=true gray_candle:lit=true light_gray_candle:lit=true cyan_candle:lit=true purple_candle:lit=true blue_candle:lit=true brown_candle:lit=true green_candle:lit=true red_candle:lit=true black_candle:lit=true
+
+# Amethyst cluster
+block.10055 = small_amethyst_bud medium_amethyst_bud large_amethyst_bud amethyst_cluster
+#endif
+
+#if MC_VERSION >= 11900
+# Medium golden light additions
+block.10036 = torch wall_torch campfire:lit=true furnace:lit=true smoker:lit=true blast_furnace:lit=true
+
+# Sculk
+block.10046 = sculk sculk_vein sculk_catalyst sculk_shrieker sculk_sensor:sculk_sensor_phase=inactive sculk_sensor:sculk_sensor_phase=cooldown
+
+# Sea pickle remains in the base family above
+
+# Candles/froglights
+block.10051 = ochre_froglight
+block.10052 = verdant_froglight
+block.10053 = pearlescent_froglight
+
+# Active sculk sensor
+block.10057 = sculk_sensor:sculk_sensor_phase=active
+#endif
+
+#if MC_VERSION >= 12000
+# Calibrated sculk sensor
+block.10056 = calibrated_sculk_sensor:sculk_sensor_phase=inactive calibrated_sculk_sensor:sculk_sensor_phase=cooldown
+#endif
+
+#if MC_VERSION >= 12100
+# Trial spawner / Trial Chamber emissive states
+block.10036 = torch wall_torch campfire:lit=true furnace:lit=true smoker:lit=true blast_furnace:lit=true torchflower potted_torchflower trial_spawner:ominous=false
+block.10046 = sculk sculk_vein sculk_catalyst sculk_shrieker sculk_sensor:sculk_sensor_phase=inactive sculk_sensor:sculk_sensor_phase=cooldown trial_spawner:ominous=true
+
+# Copper bulbs / lights
+block.10060 = copper_torch copper_wall_torch
+block.10061 = weathered_copper_bulb:lit=true oxidized_copper_bulb:lit=true waxed_weathered_copper_bulb:lit=true waxed_oxidized_copper_bulb:lit=true copper_bulb:lit=true exposed_copper_bulb:lit=true waxed_copper_bulb:lit=true waxed_exposed_copper_bulb:lit=true
+#endif
+
+#if MC_VERSION >= 12104
+# Pale Garden / 1.21.4+ additions
+block.10035 = glowstone lantern redstone_lamp:lit=true creaking_heart:active=true creaking_heart:creaking_heart_state=dormant creaking_heart:creaking_heart_state=awake
+block.10059 = open_eyeblossom
+block.10060 = copper_torch copper_wall_torch copper_lantern exposed_copper_lantern weathered_copper_lantern oxidized_copper_lantern waxed_copper_lantern waxed_exposed_copper_lantern waxed_weathered_copper_lantern waxed_oxidized_copper_lantern
+#endif
+
+#endif
+
+'''
+          bp.write_text(text[:start] + mapping + text[end:], encoding='utf-8')
+
+          # 6) Delete colored-light implementation files. Handheld color tables
+          #    are intentionally retained.
+          for rel in [
+              'shaders/ph_lights.json',
+              'shaders/include/lighting/lpv/blocklight.glsl',
+              'shaders/include/lighting/lpv/floodfill.glsl',
+              'shaders/include/lighting/lpv/light_colors.glsl',
+              'shaders/include/lighting/lpv/voxelization.glsl',
+          ]:
+              p = root/rel
+              if p.exists():
+                  p.unlink()
+
+          # Remove any remaining LPV include lines from shader code.
+          for p in root.joinpath('shaders').rglob('*'):
+              if not p.is_file() or p.suffix.lower() not in {'.glsl','.vsh','.fsh','.gsh','.csh'}:
+                  continue
+              text = p.read_text(encoding='utf-8')
+              new = re.sub(r'^\s*#include\s+"/include/lighting/lpv/.*?"\s*\n', '', text, flags=re.M)
+              if new != text:
+                  p.write_text(new, encoding='utf-8')
+
+          # 7) Remove the temporary workflow before the final commit.
+          wf = root/'.github/workflows/remove-colored-lights.yml'
+          if wf.exists():
+              wf.unlink()
+
+          # ---------------- verification ----------------
+          forbidden = []
+          for p in root.joinpath('shaders').rglob('*'):
+              if not p.is_file() or p.suffix.lower() not in {'.glsl','.vsh','.fsh','.gsh','.csh','.properties','.json'}:
+                  continue
+              try:
+                  t = p.read_text(encoding='utf-8')
+              except UnicodeDecodeError:
+                  continue
+              # COLORED_LIGHTS may only survive inside this audit's intentional empty-screen
+              # name if the user-visible screen is retained. Code/settings names are forbidden.
+              if re.search(r'\bCOLORED_LIGHTS\b', t) and p.as_posix() not in {'shaders/shaders.properties'}:
+                  forbidden.append(str(p))
+
+          # Handheld colored mode and dependency must still be present.
+          handheld = (root/'shaders/include/lighting/handheld_lighting.glsl').read_text(encoding='utf-8')
+          colors = (root/'shaders/include/lighting/colors/lighting_colors.glsl').read_text(encoding='utf-8')
+          assert 'HANDHELD_LIGHTING_COLORED' in handheld
+          assert 'get_lighting_color' in handheld
+          assert 'const vec3 lighting_colors[32]' in colors
+          assert not (root/'shaders/ph_lights.json').exists()
+
+          bp_text = (root/'shaders/block.properties').read_text(encoding='utf-8')
+          for ident in range(10032, 10064):
+              assert f'block.{ident}' in bp_text, f'missing emissive ID {ident}'
+
+          if forbidden:
+              raise SystemExit('Forbidden COLORED_LIGHTS references remain in: ' + ', '.join(forbidden))
+
+          # Ensure only the intended files changed.
+          print('\nChanged files:')
+          subprocess.run(['git','status','--short'], check=True)
+          print('\nRemaining references (COLORED_LIGHTS only):')
+          subprocess.run(['git','grep','-n','COLORED_LIGHTS','--','shaders'], check=False)
+          print('\nHandheld colored-light references:')
+          subprocess.run(['git','grep','-n','HANDHELD_LIGHTING_COLORED','--','shaders/include/lighting','shaders/settings.glsl'], check=True)
+          PY
+
+      - name: Commit cleanup
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add shaders .github/workflows/remove-colored-lights.yml
+          git commit -m "chore: complete colored-light cleanup" || exit 0
+          git push origin HEAD:remove-colored-lights
