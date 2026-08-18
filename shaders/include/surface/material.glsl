@@ -19,6 +19,7 @@ struct Material {
     float ssr_multiplier;
     bool is_metal;
     bool is_hardcoded_metal;
+    uint material_mask; // block ID for colored lighting lookup
 };
 
 const Material water_material = Material(
@@ -32,7 +33,8 @@ const Material water_material = Material(
     0.0,
     1.0,
     false,
-    false
+    false,
+    0u
 );
 
 #if TEXTURE_FORMAT == TEXTURE_FORMAT_LAB
@@ -855,6 +857,8 @@ Material material_from(
     material.sss_amount = 0.0;
     material.sheen_amount = 0.0;
 #endif
+
+    material.material_mask = material_mask;
 
     return material;
 }

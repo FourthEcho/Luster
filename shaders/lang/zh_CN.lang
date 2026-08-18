@@ -109,9 +109,6 @@ option.WEATHER_WIND_VARIATION_SPEED        = 风度偏差变化速度
 # Lighting settings
 
 
-option.COLORED_LIGHTS                  = 彩色光源
-option.COLORED_LIGHTS.comment          = 使用泛洪填充(flood fill)算法实现可变彩色光源. 需要 Iris 1.6.0 或更高版本.
-option.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION = 原版光照贴图贡献
 option.HANDHELD_LIGHTING_INTENSITY     = 手持光源强度
 option.HANDHELD_LIGHTING_INTENSITY.comment = 调节手持光源的亮度.
 option.CLOUD_SHADOWS                   = 云影
@@ -203,14 +200,7 @@ option.BLOCKLIGHT_G                    = 方块光 - 绿色
 option.BLOCKLIGHT_B                    = 方块光 - 蓝色
 option.BLOCKLIGHT_I                    = 方块光强度
 
-option.VOXEL_VOLUME_SIZE               = 体素化大小
-option.VOXEL_VOLUME_SIZE.comment       = 高性能影响, 同时也受阴影距离影响.
-suffix.VOXEL_VOLUME_SIZE               = m
-option.VOXEL_VOLUME_CENTER             = 体素化中心位置
-option.VOXEL_VOLUME_CENTER.comment     = 前置: 使体素化中心位置设定在玩家的前方, 意味着更多位于前方的事物可被体素化追踪到数据. 以玩家为中心: 体素化中心位置即是玩家所在位置.
 
-value.VOXEL_VOLUME_CENTER.VOXEL_VOLUME_CENTER_AHEAD  = 前置
-value.VOXEL_VOLUME_CENTER.VOXEL_VOLUME_CENTER_PLAYER = 以玩家为中心
 
 suffix.shadowMapResolution             = ²
 
@@ -400,21 +390,12 @@ option.BLOOMY_FOG_INTENSITY.comment    = 调节泛光雾的强度.
 option.OVERWORLD_FOG_INTENSITY         = 主世界雾气强度
 option.NETHER_FOG_INTENSITY            = 下界雾气强度
 option.VL                              = 体积雾
-option.LPV_VL.comment                  = 光源可点亮雾气. 需启用彩色光源!
 option.VL.comment                      = 添加光轴和可变雾气密度.
 option.VL_RENDER_SCALE                 = 体积光渲染规模
 option.AIR_FOG_CLOUDY_NOISE            = 云雾
 option.AIR_FOG_CLOUDY_NOISE.comment    = 为雾气边缘添加微妙的云层形状, 在清晨更容易看清楚. 需要启用体积雾!
-option.AIR_FOG_COLORED_LIGHT_SHAFTS    = 光轴着色
-option.AIR_FOG_COLORED_LIGHT_SHAFTS.comment = 光轴穿过半透明事物时会被其颜色所沾染.
 
 # LPV VL
-option.LPV_VL                          = 启用
-option.LPV_VL_STEPS                    = 采样数
-option.LPV_VL_INTENSITY_OVERWORLD      = 强度 - 主世界
-option.LPV_VL_INTENSITY_UNDERGROUND    = 强度 - 地下
-option.LPV_VL_INTENSITY_NETHER         = 强度 - 下界
-option.LPV_VL_INTENSITY_END            = 强度 - 末地
 
 # Rayleigh Fog
 option.AIR_FOG_RAYLEIGH_FALLOFF_START     = 瑞利 - 雾气消散起始位置
@@ -876,7 +857,6 @@ option.CLOUDS_NOCTILUCENT.comment = Enables or disables noctilucent clouds.
 option.CLOUDS_NOCTILUCENT_INTENSITY.comment = Adjusts intensity.
 option.CLOUDS_NOCTILUCENT_RARITY.comment = Adjusts rarity.
 option.CLOUDS_TEMPORAL_UPSCALING.comment = Selects the temporal upscaling mode.
-option.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION.comment = Adjusts vanilla lightmap contribution.
 option.CREPUSCULAR_RAYS.comment = Adjusts enabled.
 option.CREPUSCULAR_RAYS_INTENSITY.comment = Adjusts intensity.
 option.CREPUSCULAR_RAYS_STEPS_HORIZON.comment = Adjusts step count - horizon.
@@ -911,11 +891,6 @@ option.HISTOGRAM_BINS.comment = Adjusts histogram bins.
 option.HISTOGRAM_TARGET.comment = Adjusts histogram target cdf value.
 option.INFO.comment = Displays shader information and diagnostics.
 option.LIGHTNING_FLASH.comment = Adjusts lightning flash.
-option.LPV_VL_INTENSITY_END.comment = Adjusts end intensity.
-option.LPV_VL_INTENSITY_NETHER.comment = Adjusts nether intensity.
-option.LPV_VL_INTENSITY_OVERWORLD.comment = Adjusts overworld intensity.
-option.LPV_VL_INTENSITY_UNDERGROUND.comment = Adjusts underground intensity.
-option.LPV_VL_STEPS.comment = Adjusts steps.
 option.MANUAL_EXPOSURE_VALUE.comment = Adjusts manual exposure value.
 option.MOON_ANGULAR_RADIUS.comment = Adjusts moon angular radius.
 option.MOON_B.comment = Adjusts §9▍ §fblue.
@@ -988,7 +963,6 @@ option.tonemap_left.comment = Selects the left tonemap mode.
 option.tonemap_right.comment = Selects the right tonemap mode.
 
 # GUI fallback labels and comments
-option.AIR_FOG_COLORED_LIGHT_SHAFTS_INTENSITY = Colored Light Shafts Intensity
 option.ANISOTROPIC_FILTERING = Anisotropic Filtering
 option.ATMOSPHERE_RAIN_DESATURATION = Atmosphere Rain Desaturation
 option.ATMOSPHERE_RAIN_DESATURATION_INTENSITY = Atmosphere Rain Desaturation Intensity
@@ -1006,7 +980,6 @@ option.BLOCKY_CLOUDS_WIND_SPEED = Wind Speed
 option.BORDER_FOG_INTENSITY = Border Fog Intensity
 option.CAVE_FOG_INTENSITY = Cave Fog Intensity
 option.CAVE_LIGHTING_FALLOFF = Cave Lighting Falloff
-option.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF = Contribution Falloff
 option.COLOR_OUTPUT_MODE = Color Output
 option.DESERT_SANDSTORM_INTENSITY = Desert Sandstorm Intensity
 option.DISTANCE_BLUR_START = Distance Blur Start
@@ -1052,7 +1025,6 @@ option.SUB_SURFACE_SCATTERING = Sub-Surface Scattering
 option.TAA_VARIANCE_CLIPPING = TAA Variance Clipping
 option.WATER_TEXTURE_INTENSITY = Water Texture Intensity
 option.WATER_WAVE_NOISE_STRENGTH = Noise Strength
-option.AIR_FOG_COLORED_LIGHT_SHAFTS_INTENSITY.comment = Adjusts the intensity of colored light shafts
 option.ANISOTROPIC_FILTERING.comment = Controls anisotropic texture filtering level.
 option.ATMOSPHERE_RAIN_DESATURATION.comment = Desaturates the sky and sunlight color while it is raining
 option.ATMOSPHERE_RAIN_DESATURATION_INTENSITY.comment = Adjusts the intensity of the rain desaturation
@@ -1070,7 +1042,6 @@ option.BLOCKY_CLOUDS_WIND_SPEED.comment = Adjusts wind speed.
 option.BORDER_FOG_INTENSITY.comment = Adjusts the intensity of border fog
 option.CAVE_FOG_INTENSITY.comment = Adjusts the intensity of cave fog
 option.CAVE_LIGHTING_FALLOFF.comment = Controls how quickly cave lighting fades out as skylight increases. Higher values restrict cave lighting to darker areas
-option.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF.comment = Falloff of the vanilla lightmap's contribution.
 option.COLOR_OUTPUT_MODE.comment = Color space of the final image. sRGB is the safe default; the wide-gamut options (Rec.2020, P3, Adobe RGB) need a display that supports them, otherwise switch back to sRGB
 option.DESERT_SANDSTORM_INTENSITY.comment = How dense the sandstorm is during rain in desert biomes
 option.DISTANCE_BLUR_START.comment = Adjusts the distance at which distance blur begins
@@ -1116,3 +1087,16 @@ option.SUB_SURFACE_SCATTERING.comment = Simulates light passing through thin mat
 option.TAA_VARIANCE_CLIPPING.comment = How strongly TAA rejects history samples that deviate from the current frame. Higher values reduce ghosting but can increase flickering
 option.WATER_TEXTURE_INTENSITY.comment = Adjusts the strength of the water texture effect
 option.WATER_WAVE_NOISE_STRENGTH.comment = Adjusts the strength of the fine noise detail added to water waves
+option.COLORED_LIGHTS = 彩色灯光
+option.COLORED_LIGHTS.comment = 使用每个方块的发光颜色来着色原版光照图，而非统一颜色
+option.COLORED_LIGHTS_INTENSITY = 彩色灯光强度
+option.COLORED_LIGHTS_INTENSITY.comment = 控制每个方块颜色替代原版方块光颜色的强度
+option.COLORED_LIGHTS_VANILLA_BLEND = 原版混合
+option.COLORED_LIGHTS_VANILLA_BLEND.comment = 在原版单色方块光和每方块彩色方块光之间混合。0=纯原版，1=完全着色
+option.COLORED_LIGHTS_SPREAD = 颜色扩散
+option.COLORED_LIGHTS_SPREAD.comment = 为附近非发光表面着色的屏幕空间扩散半径
+option.COLORED_LIGHTS_FALLOFF = 衰减模式
+option.COLORED_LIGHTS_FALLOFF.comment = 彩色光强度随距离衰减的方式
+value.COLORED_LIGHTS_FALLOFF.COLORED_LIGHTS_FALLOFF_VANILLA = 原版
+value.COLORED_LIGHTS_FALLOFF.COLORED_LIGHTS_FALLOFF_SMOOTH = 平滑
+screen.colored_lights_settings = 彩色灯光设置

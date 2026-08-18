@@ -28,9 +28,7 @@ uniform sampler2D DEBUG_SAMPLER;
 uniform float viewHeight;
 uniform float frameTimeCounter;
 
-#ifdef COLORED_LIGHTS
-uniform sampler2D shadowtex0;
-#endif
+
 
 #include "/include/utility/bicubic.glsl"
 #include "/include/utility/color.glsl"
@@ -271,10 +269,7 @@ void draw_iris_required_error_message() {
 }
 
 void main() {
-#if defined COLORED_LIGHTS && !defined IS_IRIS
-    draw_iris_required_error_message();
-    return;
-#endif
+
 
     ivec2 texel = ivec2(gl_FragCoord.xy);
 
@@ -333,12 +328,7 @@ void main() {
         : vec3(clamp01(dist * rcp(DISTANCE_VIEW_MAX_DISTANCE)));
 #endif
 
-#if defined COLORED_LIGHTS && (defined WORLD_NETHER || !defined SHADOW)
-    // Must sample shadowtex0 so that the shadow map is rendered
-    if (uv.x < 0.0) {
-        fragment_color = texture(shadowtex0, uv).rgb;
-    }
-#endif
+
 }
 
 #include "/include/buffers.glsl"

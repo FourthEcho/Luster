@@ -117,12 +117,7 @@ uniform float time_midnight;
 #include "/include/utility/random.glsl"
 #include "/include/utility/space_conversion.glsl"
 
-#if defined LPV_VL && defined COLORED_LIGHTS
-uniform sampler3D light_sampler_a;
-uniform sampler3D light_sampler_b;
 
-#include "/include/fog/lpv_fog.glsl"
-#endif
 
 #if defined IBL && defined WORLD_OVERWORLD
 #include "/include/lighting/ibl.glsl"
@@ -174,9 +169,9 @@ void main() {
     vec3 world_back_pos = scene_back_pos + cameraPosition;
 
     float dither = texelFetch(noisetex, fog_texel & 511, 0).b;
-    float volumetric_dither = dither;
 #ifdef FOG_SMOOTHING
-    // Rotate the air-fog sample each frame so TAA can converge the raymarch.
+    // Per-frame dither rotation — the jittered fog noise then converges
+    // temporally through TAA
     dither = r1(frameCounter, dither);
 #endif
 
@@ -235,7 +230,7 @@ void main() {
                 world_start_pos,
                 world_end_pos,
                 depth0 == 1.0,
-                volumetric_dither
+                dither
             );
 
             fog_scattering = water_fog[0];
@@ -258,9 +253,5 @@ void main() {
     fog_transmittance = vec3(1.0);
 #endif
 
-#if defined LPV_VL && defined COLORED_LIGHTS
-    fog_scattering
-        += get_lpv_fog_scattering(world_start_pos, world_end_pos, dither)
-           * AIR_FOG_COLORED_LIGHT_SHAFTS_INTENSITY;
-#endif
+
 }

@@ -162,8 +162,6 @@ value.ANISOTROPIC_FILTERING.10               = 10x
 value.ANISOTROPIC_FILTERING.12               = 12x
 value.ANISOTROPIC_FILTERING.14               = 14x
 value.ANISOTROPIC_FILTERING.16               = 16x
-option.COLORED_LIGHTS                  = Colored Lights
-option.COLORED_LIGHTS.comment          = Variable-color block lighting using flood fill algorithm. Requires Iris 1.6 or above
 option.HANDHELD_LIGHTING_MODE          = Handheld Lighting
 option.HANDHELD_LIGHTING_MODE.comment    = Light cast by held items. Off disables it. Normal uses the vanilla blocklight color scaled by the item's light level. Colored uses per-block emissive colors
 value.HANDHELD_LIGHTING_MODE.HANDHELD_LIGHTING_OFF    = Off
@@ -288,10 +286,6 @@ option.CAVE_LIGHTING_FALLOFF           = Cave Lighting Falloff
 option.CAVE_LIGHTING_FALLOFF.comment   = Controls how quickly cave lighting fades out as skylight increases. Higher values restrict cave lighting to darker areas
 option.LIGHTNING_FLASH                 = Lightning Flash
 option.LIGHTNING_FLASH.comment = Adjusts lightning flash.
-option.VOXEL_VOLUME_CENTER               = Voxel Volume Center
-option.VOXEL_VOLUME_CENTER.comment       = Ahead - the colored-light voxel volume is centered in front of the player, covering more of what you see. Player - centered on the player
-value.VOXEL_VOLUME_CENTER.VOXEL_VOLUME_CENTER_AHEAD  = Ahead of Player
-value.VOXEL_VOLUME_CENTER.VOXEL_VOLUME_CENTER_PLAYER = Centered on Player
 option.NETHER_USE_BIOME_COLOR          = Use Biome Color
 option.NETHER_USE_BIOME_COLOR.comment = Adjusts use biome color.
 option.NETHER_I                        = Ambient Intensity
@@ -329,18 +323,9 @@ option.BLOCKLIGHT_B.comment = Adjusts §9▍ §fblue.
 option.BLOCKLIGHT_I                    = Blocklight Intensity
 option.BLOCKLIGHT_I.comment = Adjusts blocklight intensity.
 
-option.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION                 = Vanilla Lightmap Contribution
-option.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION.comment = Adjusts vanilla lightmap contribution.
-option.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF         = Contribution Falloff
-option.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF.comment = Falloff of the vanilla lightmap's contribution.
 Squared - brighter near the source, diminishes quickly.
 Linear - softer and travels further
-option.VOXEL_VOLUME_SIZE                                            = Voxel Volume Size
-option.VOXEL_VOLUME_SIZE.comment                                    = Adjusts the size of the volume in which colored lighting is calculated. High performance impact, also affected by shadow distance
-suffix.VOXEL_VOLUME_SIZE                                            = m³
 
-value.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF_SQUARED = Squared
-value.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF_LINEAR  = Linear
 
 
 suffix.shadowMapResolution             = ²
@@ -674,29 +659,13 @@ option.OVERWORLD_FOG_INTENSITY.comment = Adjusts overworld fog intensity.
 option.NETHER_FOG_INTENSITY                 = Nether Fog Intensity
 option.NETHER_FOG_INTENSITY.comment = Adjusts nether fog intensity.
 option.VL                                   = Volumetric Fog
-option.LPV_VL.comment                       = Light sources illuminate the fog. Requires Colored Lights!
 option.VL.comment                           = Adds light shafts and variable fog density
 option.VL_RENDER_SCALE                      = VL Render Scale
 option.VL_RENDER_SCALE.comment = Adjusts vl render scale.
 option.AIR_FOG_CLOUDY_NOISE                 = Cloudy Fog
 option.AIR_FOG_CLOUDY_NOISE.comment         = Subtle cloudy shapes in the fog, best visible in the morning.\nRequires volumetric fog!
-option.AIR_FOG_COLORED_LIGHT_SHAFTS         = Colored Light Shafts
-option.AIR_FOG_COLORED_LIGHT_SHAFTS.comment = Light shafts passing through translucent objects are tinted by their color
-option.AIR_FOG_COLORED_LIGHT_SHAFTS_INTENSITY = Colored Light Shafts Intensity
-option.AIR_FOG_COLORED_LIGHT_SHAFTS_INTENSITY.comment = Adjusts the intensity of colored light shafts
 
 # LPV VL
-option.LPV_VL                          = Enabled
-option.LPV_VL_STEPS                    = Steps
-option.LPV_VL_STEPS.comment = Adjusts steps.
-option.LPV_VL_INTENSITY_OVERWORLD      = Overworld Intensity
-option.LPV_VL_INTENSITY_OVERWORLD.comment = Adjusts overworld intensity.
-option.LPV_VL_INTENSITY_UNDERGROUND    = Underground Intensity
-option.LPV_VL_INTENSITY_UNDERGROUND.comment = Adjusts underground intensity.
-option.LPV_VL_INTENSITY_NETHER         = Nether Intensity
-option.LPV_VL_INTENSITY_NETHER.comment = Adjusts nether intensity.
-option.LPV_VL_INTENSITY_END            = End Intensity
-option.LPV_VL_INTENSITY_END.comment = Adjusts end intensity.
 
 # Rayleigh Fog
 option.AIR_FOG_RAYLEIGH_FALLOFF_START             = Rayleigh Falloff Start
@@ -1177,3 +1146,15 @@ value.CLOUDS_LIGHTING_BOUNCES.1 = 1
 value.CLOUDS_LIGHTING_BOUNCES.2 = 2
 value.CLOUDS_LIGHTING_BOUNCES.3 = 3
 value.CLOUDS_LIGHTING_BOUNCES.4 = 4
+option.COLORED_LIGHTS = Colored Lights
+option.COLORED_LIGHTS.comment = Tint the vanilla blocklight lightmap with per-block emissive colors instead of a uniform color
+option.COLORED_LIGHTS_INTENSITY = Colored Lights Intensity
+option.COLORED_LIGHTS_INTENSITY.comment = Controls how strongly per-block colors replace the vanilla blocklight color
+option.COLORED_LIGHTS_VANILLA_BLEND = Vanilla Blend
+option.COLORED_LIGHTS_VANILLA_BLEND.comment = Blend between vanilla monochrome blocklight and per-block colored blocklight for non-emissive surfaces. 0 = pure vanilla, 1 = full per-block coloring
+option.COLORED_LIGHTS_SPREAD = Color Spread
+option.COLORED_LIGHTS_SPREAD.comment = Screen-space spread radius for coloring nearby non-emissive surfaces
+option.COLORED_LIGHTS_FALLOFF = Falloff Mode
+option.COLORED_LIGHTS_FALLOFF.comment = How colored light intensity falls off with distance
+value.COLORED_LIGHTS_FALLOFF.COLORED_LIGHTS_FALLOFF_VANILLA = Vanilla
+value.COLORED_LIGHTS_FALLOFF.COLORED_LIGHTS_FALLOFF_SMOOTH = Smooth

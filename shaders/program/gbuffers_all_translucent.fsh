@@ -70,10 +70,7 @@ uniform sampler2D colortex8; // Cloud shadow map
 
 uniform sampler2D depthtex1;
 
-#ifdef COLORED_LIGHTS
-uniform sampler3D light_sampler_a;
-uniform sampler3D light_sampler_b;
-#endif
+
 
 #ifdef SHADOW
 #ifdef WORLD_OVERWORLD

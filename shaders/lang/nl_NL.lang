@@ -107,9 +107,6 @@ option.WEATHER_WIND_VARIATION_SPEED        = Winderigheidsvariatie-snelheid
 # Lighting settings
 
 
-option.COLORED_LIGHTS                  = Gekleurde Lichtbronnen
-option.COLORED_LIGHTS.comment          = Gekleurd bloklicht door gebruik te maken van het 'Iris Floodfill-algoritme'. Werkt niet bij Iris versies onder de 1.6.
-option.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION = Vanilla Lichtmap-bijdrage
 option.HANDHELD_LIGHTING_INTENSITY     = Vastgehouden Belichting Felheid
 option.HANDHELD_LIGHTING_INTENSITY.comment = Wijzigt de felheid van vastgehouden belichting.
 option.CLOUD_SHADOWS                   = Wolkschaduwen
@@ -200,14 +197,7 @@ option.BLOCKLIGHT_G                    = Groen
 option.BLOCKLIGHT_B                    = Blauw
 option.BLOCKLIGHT_I                    = Bloklicht Intensiteit
 
-option.VOXEL_VOLUME_SIZE               = Voxel Volume Grootte
-option.VOXEL_VOLUME_SIZE.comment       = Wijzigt hoe ver weg gekleurde lichtbronnen zichtbaar zijn.\nHogere waarden verminderen sterk prestaties.. Ook beïnvloed door shaduwafstand.
-suffix.VOXEL_VOLUME_SIZE               = m³
-option.VOXEL_VOLUME_CENTER             = Voxel Volume Midden
-option.VOXEL_VOLUME_CENTER.comment     = Wijzigt waar het midden van het voxel volume is.\n'Voor de speler' zorgt ervoor dat er meer zichtbaar is zonder prestatiekosten door het volume voor de speler te zetten.
 
-value.VOXEL_VOLUME_CENTER.VOXEL_VOLUME_CENTER_AHEAD  = Voor de speler
-value.VOXEL_VOLUME_CENTER.VOXEL_VOLUME_CENTER_PLAYER = In de speler
 
 suffix.shadowMapResolution             = ²
 
@@ -397,21 +387,12 @@ option.BLOOMY_FOG_INTENSITY.comment    = Wijzigt de intensiteit van Gloed Mist.
 option.OVERWORLD_FOG_INTENSITY         = Overworld Mist Intensiteit
 option.NETHER_FOG_INTENSITY            = Nether Mist Intensiteit
 option.VL                              = Volumetrische Mist
-option.LPV_VL.comment                  = Lichtbronnen belichten de mist. Vereist Gekleurde Lichtbronnen!
 option.VL.comment                      = Voegt lichtstralen en variabele mist-dichtheid toe.
 option.VL_RENDER_SCALE                 = VM Resolutie Vermenigvuldiger
 option.AIR_FOG_CLOUDY_NOISE            = Wolkerige Mist
 option.AIR_FOG_CLOUDY_NOISE.comment    = Subtiele wolkerige vormen in de mist voor een interessanter resultaat.\nVereist Volumetrische Mist!
-option.AIR_FOG_COLORED_LIGHT_SHAFTS    = Gekleurde Lichtstralen
-option.AIR_FOG_COLORED_LIGHT_SHAFTS.comment = Lichtstralen die door doorzichtige voorwerpen gaan worden gekleurd.
 
 # LPV VL
-option.LPV_VL                          = Gekleurde Lichtbronnen Mist-verstrooing
-option.LPV_VL_STEPS                    = Stappen
-option.LPV_VL_INTENSITY_OVERWORLD      = Overworld Intensiteit
-option.LPV_VL_INTENSITY_UNDERGROUND    = Underground Intensiteit
-option.LPV_VL_INTENSITY_NETHER         = Nether Intensiteit
-option.LPV_VL_INTENSITY_END            = End Intensiteit
 
 # Rayleigh Fog
 option.AIR_FOG_RAYLEIGH_FALLOFF_START     = Rayleigh Vervaging Start
@@ -867,7 +848,6 @@ option.CLOUDS_NOCTILUCENT.comment = Enables or disables noctilucent clouds.
 option.CLOUDS_NOCTILUCENT_INTENSITY.comment = Adjusts intensity.
 option.CLOUDS_NOCTILUCENT_RARITY.comment = Adjusts rarity.
 option.CLOUDS_TEMPORAL_UPSCALING.comment = Selects the temporal upscaling mode.
-option.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION.comment = Adjusts vanilla lightmap contribution.
 option.CREPUSCULAR_RAYS.comment = Adjusts enabled.
 option.CREPUSCULAR_RAYS_INTENSITY.comment = Adjusts intensity.
 option.CREPUSCULAR_RAYS_STEPS_HORIZON.comment = Adjusts step count - horizon.
@@ -902,11 +882,6 @@ option.HISTOGRAM_BINS.comment = Adjusts histogram bins.
 option.HISTOGRAM_TARGET.comment = Adjusts histogram target cdf value.
 option.INFO.comment = Displays shader information and diagnostics.
 option.LIGHTNING_FLASH.comment = Adjusts lightning flash.
-option.LPV_VL_INTENSITY_END.comment = Adjusts end intensity.
-option.LPV_VL_INTENSITY_NETHER.comment = Adjusts nether intensity.
-option.LPV_VL_INTENSITY_OVERWORLD.comment = Adjusts overworld intensity.
-option.LPV_VL_INTENSITY_UNDERGROUND.comment = Adjusts underground intensity.
-option.LPV_VL_STEPS.comment = Adjusts steps.
 option.MANUAL_EXPOSURE_VALUE.comment = Adjusts manual exposure value.
 option.MOON_ANGULAR_RADIUS.comment = Adjusts moon angular radius.
 option.MOON_B.comment = Adjusts §9▍ §fblue.
@@ -979,7 +954,6 @@ option.tonemap_left.comment = Selects the left tonemap mode.
 option.tonemap_right.comment = Selects the right tonemap mode.
 
 # GUI fallback labels and comments
-option.AIR_FOG_COLORED_LIGHT_SHAFTS_INTENSITY = Colored Light Shafts Intensity
 option.ANISOTROPIC_FILTERING = Anisotropic Filtering
 option.ATMOSPHERE_RAIN_DESATURATION = Atmosphere Rain Desaturation
 option.ATMOSPHERE_RAIN_DESATURATION_INTENSITY = Atmosphere Rain Desaturation Intensity
@@ -997,7 +971,6 @@ option.BLOCKY_CLOUDS_WIND_SPEED = Wind Speed
 option.BORDER_FOG_INTENSITY = Border Fog Intensity
 option.CAVE_FOG_INTENSITY = Cave Fog Intensity
 option.CAVE_LIGHTING_FALLOFF = Cave Lighting Falloff
-option.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF = Contribution Falloff
 option.COLOR_OUTPUT_MODE = Color Output
 option.DESERT_SANDSTORM_INTENSITY = Desert Sandstorm Intensity
 option.DISTANCE_BLUR_START = Distance Blur Start
@@ -1044,7 +1017,6 @@ option.SUB_SURFACE_SCATTERING = Sub-Surface Scattering
 option.TAA_VARIANCE_CLIPPING = TAA Variance Clipping
 option.WATER_TEXTURE_INTENSITY = Water Texture Intensity
 option.WATER_WAVE_NOISE_STRENGTH = Noise Strength
-option.AIR_FOG_COLORED_LIGHT_SHAFTS_INTENSITY.comment = Adjusts the intensity of colored light shafts
 option.ANISOTROPIC_FILTERING.comment = Controls anisotropic texture filtering level.
 option.ATMOSPHERE_RAIN_DESATURATION.comment = Desaturates the sky and sunlight color while it is raining
 option.ATMOSPHERE_RAIN_DESATURATION_INTENSITY.comment = Adjusts the intensity of the rain desaturation
@@ -1062,7 +1034,6 @@ option.BLOCKY_CLOUDS_WIND_SPEED.comment = Adjusts wind speed.
 option.BORDER_FOG_INTENSITY.comment = Adjusts the intensity of border fog
 option.CAVE_FOG_INTENSITY.comment = Adjusts the intensity of cave fog
 option.CAVE_LIGHTING_FALLOFF.comment = Controls how quickly cave lighting fades out as skylight increases. Higher values restrict cave lighting to darker areas
-option.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF.comment = Falloff of the vanilla lightmap's contribution.
 option.COLOR_OUTPUT_MODE.comment = Color space of the final image. sRGB is the safe default; the wide-gamut options (Rec.2020, P3, Adobe RGB) need a display that supports them, otherwise switch back to sRGB
 option.DESERT_SANDSTORM_INTENSITY.comment = How dense the sandstorm is during rain in desert biomes
 option.DISTANCE_BLUR_START.comment = Adjusts the distance at which distance blur begins
@@ -1108,3 +1079,16 @@ option.SUB_SURFACE_SCATTERING.comment = Simulates light passing through thin mat
 option.TAA_VARIANCE_CLIPPING.comment = How strongly TAA rejects history samples that deviate from the current frame. Higher values reduce ghosting but can increase flickering
 option.WATER_TEXTURE_INTENSITY.comment = Adjusts the strength of the water texture effect
 option.WATER_WAVE_NOISE_STRENGTH.comment = Adjusts the strength of the fine noise detail added to water waves
+option.COLORED_LIGHT1_LIGHTS = Colored Lights
+option.COLORED_LIGHTS.comment = Tint the vanilla blocklight lightmap with per-block emissive colors instead of a uniform color
+option.COLORED_LIGHTS_INTENSITY = Colored Lights Intensity
+option.COLORED_LIGHTS_INTENSITY.comment = Controls how strongly per-block colors replace the vanilla blocklight color
+option.COLORED_LIGHTS_VANILLA_BLEND = Vanilla Blend
+option.COLORED_LIGHTS_VANILLA_BLEND.comment = Blend between vanilla monochrome blocklight and per-block colored blocklight for non-emissive surfaces. 0 = pure vanilla, 1 = full per-block coloring
+option.COLORED_LIGHTS_SPREAD = Color Spread
+option.COLORED_LIGHTS_SPREAD.comment = Screen-space spread radius for coloring nearby non-emissive surfaces
+option.COLORED_LIGHTS_FALLOFF = Falloff Mode
+option.COLORED_LIGHTS_FALLOFF.comment = How colored light intensity falls off with distance
+value.COLORED_LIGHTS_FALLOFF.COLORED_LIGHTS_FALLOFF_VANILLA = Vanilla
+value.COLORED_LIGHTS_FALLOFF.COLORED_LIGHTS_FALLOFF_SMOOTH = Smooth
+screen.colored_lights_settings = Colored Lights Settings

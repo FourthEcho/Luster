@@ -208,21 +208,15 @@ void main() {
         /* use_klein_nishina_phase */ false
     );
 
-    float cloud_dither
-        = texelFetch(noisetex, ivec2(checkerboard_pos & 511), 0).b;
-    cloud_dither = r1(frameCounter / checkerboard_area, cloud_dither);
+    float dither = texelFetch(noisetex, ivec2(checkerboard_pos & 511), 0).b;
+    dither = r1(frameCounter / checkerboard_area, dither);
 
-    // Blue-noise jitter changes each frame for cloud temporal accumulation.
     vec3 blue_noise_coord = vec3(
         fract((vec2(checkerboard_pos) + 0.5) / vec2(view_res)),
         fract(float(frameCounter) * 0.61803398875 + taa_offset.x + taa_offset.y)
     );
     float blue_dither = texture(blue_noise_3d, blue_noise_coord).r;
-    cloud_dither = mix(cloud_dither, blue_dither, 0.72);
-
-    // Keep volumetric shafts spatially stable. Frame-varying jitter was
-    // producing crawling grain in distant crepuscular rays.
-    float ray_dither = texelFetch(noisetex, texel & 511, 0).b;
+    dither = mix(dither, blue_dither, 0.72);
 
 #ifndef BLOCKY_CLOUDS
     CloudsResult result = draw_clouds(
@@ -230,7 +224,7 @@ void main() {
         ray_dir,
         clear_sky,
         distance_to_terrain,
-        cloud_dither
+        dither
     );
 
     clouds.xyz = result.scattering.xyz;
@@ -250,7 +244,7 @@ void main() {
         colortex8,
         ray_dir,
         distance_to_terrain > 0.0,
-        ray_dither
+        dither
     );
     clouds *= crepuscular_rays.w;
     clouds.rgb += crepuscular_rays.xyz;
@@ -258,6 +252,6 @@ void main() {
 
     // Aurora
 
-    clouds.xyz += draw_aurora(ray_dir, cloud_dither) * clouds.w;
+    clouds.xyz += draw_aurora(ray_dir, dither) * clouds.w;
 #endif
 }

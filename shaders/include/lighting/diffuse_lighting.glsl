@@ -15,8 +15,10 @@
 // shadowed areas are lit by skylight/blocklight/cave lighting here in
 // the gbuffer pass.
 #endif
+
+
 #ifdef COLORED_LIGHTS
-#include "/include/lighting/lpv/blocklight.glsl"
+#include "/include/lighting/colored_blocklight.glsl"
 #endif
 
 #ifdef HANDHELD_LIGHTING
@@ -134,6 +136,9 @@ vec3 get_block_lighting(
     vec2 light_levels,
     float ao,
     float directional_lighting
+#ifdef COLORED_LIGHTS
+    , uint material_mask
+#endif
 ) {
     vec3 lighting = vec3(0.0f);
 
@@ -143,12 +148,7 @@ vec3 get_block_lighting(
         * (blocklight_scale * get_blocklight_color());
 
 #ifdef COLORED_LIGHTS
-    lighting += get_lpv_blocklight(
-        scene_pos,
-        flat_normal,
-        mc_blocklight,
-        ao * directional_lighting
-    );
+    lighting += get_colored_blocklight(mc_blocklight, material_mask, blocklight_falloff);
 #else
     lighting += mc_blocklight;
 #endif
@@ -340,6 +340,9 @@ vec3 get_diffuse_lighting(
         light_levels,
         ao,
         directional_lighting
+    #ifdef COLORED_LIGHTS
+        , material.material_mask
+    #endif
     );
 
     lighting += material.emission * emission_scale;

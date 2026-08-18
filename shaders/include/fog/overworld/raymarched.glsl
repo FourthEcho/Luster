@@ -121,30 +121,12 @@ mat2x3 raymarch_air_fog(
             shadow_screen_pos.xy * shadowMapResolution * MC_SHADOW_QUALITY
         );
 
-#ifdef AIR_FOG_COLORED_LIGHT_SHAFTS
-#ifdef SHADOW_COLOR
-        float depth0 = texelFetch(shadowtex0, shadow_texel, 0).x;
-        float depth1 = texelFetch(shadowtex1, shadow_texel, 0).x;
-        vec3 color
-            = clamp01(texelFetch(shadowcolor0, shadow_texel, 0).rgb * 4.0);
-        float color_weight
-            = step(depth0, shadow_screen_pos.z) * step(eps, max_of(color));
-
-        color = color * color_weight + (1.0 - color_weight);
-        color = mix(vec3(1.0), color, AIR_FOG_COLORED_LIGHT_SHAFTS_INTENSITY);
-
-        vec3 shadow = step(shadow_screen_pos.z, depth1) * color;
-        shadow = (clamp01(shadow_screen_pos) == shadow_screen_pos)
-            ? shadow
-            : vec3(1.0);
-#else
         float depth1 = texelFetch(shadowtex1, shadow_texel, 0).x;
         float shadow = step(
             float(clamp01(shadow_screen_pos) == shadow_screen_pos)
                 * shadow_screen_pos.z,
             depth1
         );
-#endif
 #else
         float depth1 = texelFetch(shadowtex1, shadow_texel, 0).x;
         float shadow = step(

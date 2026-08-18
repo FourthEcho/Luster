@@ -64,7 +64,7 @@ mat2x3 raymarch_water_fog(
 
     // Calculations moved out of the loop
 
-    float t = frameTimeCounter * 0.08;
+    float t = frameTimeCounter * 0.25;
     float skylight = eye_skylight;
 
     float LoV = dot(world_dir, light_dir);
@@ -113,7 +113,7 @@ mat2x3 raymarch_water_fog(
             = exp(-extinction_coeff * distance_traveled) * shadow;
         vec3 sky_transmittance = exp(-extinction_coeff * distance_traveled_sky);
 
-        // Coherent caustics pattern for underwater light shafts
+        // Caustics pattern to create underwater light shafts
         float caustics = 0.67
             * texture(noisetex, (caustics_pos + caustics_dir_0 * t) * 0.02).y;
         caustics += 0.33
