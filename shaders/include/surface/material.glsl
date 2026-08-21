@@ -116,20 +116,6 @@ void decode_specular_map(vec4 specular_map, inout Material material) {
 }
 #endif
 
-void decode_specular_map(
-    vec4 specular_map,
-    inout Material material,
-    out bool parallax_shadow
-) {
-#if defined POM && defined POM_SHADOW
-    // Specular map alpha >= 0.5 => parallax shadow
-    parallax_shadow = specular_map.a >= 0.5;
-    specular_map.a = fract(specular_map.a * 2.0);
-#endif
-
-    decode_specular_map(specular_map, material);
-}
-
 Material material_from(
     vec3 albedo_srgb,
     uint material_mask,
