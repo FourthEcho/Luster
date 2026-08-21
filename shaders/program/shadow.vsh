@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Luster Shaders
+  Photon Shader by SixthSurge
 
   program/shadow:
   Render shadow map
@@ -64,7 +64,11 @@ uniform float time_midnight;
 uniform float biome_temperature;
 uniform float biome_humidity;
 
+#ifdef COLORED_LIGHTS
+writeonly uniform uimage3D voxel_img;
 
+uniform int renderStage;
+#endif
 
 // ------------
 //   Includes
@@ -73,14 +77,18 @@ uniform float biome_humidity;
 #include "/include/lighting/shadows/distortion.glsl"
 #include "/include/vertex/displacement.glsl"
 
-
+#ifdef COLORED_LIGHTS
+#include "/include/lighting/lpv/voxelization.glsl"
+#endif
 
 void main() {
     uv = gl_MultiTexCoord0.xy;
     material_mask = uint(mc_Entity.x - 10000.0);
     tint = gl_Color.rgb;
 
-
+#if defined COLORED_LIGHTS && !defined PROGRAM_SHADOW_ENTITIES
+    update_voxel_map(material_mask);
+#endif
 
 #if defined WORLD_NETHER
     // No shadows, discard vertices now

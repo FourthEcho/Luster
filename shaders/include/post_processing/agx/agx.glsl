@@ -1,71 +1,100 @@
-#if !defined POST_AGX_GLSL
-#define POST_AGX_GLSL
+#if !defined INCLUDE_POST_PROCESSING_AGX
+#define INCLUDE_POST_PROCESSING_AGX
 
-#include "/include/post_processing/agx/agx_constants.glsl"
+// AGX — Algorithmic tonemapping by Troy Sobotka (OpenColorIO)
+// Reference: https://github.com/AcademySoftwareFoundation/OpenColorIO
+// Three "look" variants are provided: Base, Golden, Punchy.
+
+// ACES matrices.glsl already declares rec2020_to_ap0 and ap0_to_rec2020,
+// so we just include it to get the conversion matrices we need.
+#include "/include/post_processing/aces/matrices.glsl"
 #include "/include/utility/color.glsl"
 
-// AgX reference implementation adapted from dmnsgn/glsl-tone-map (MIT),
-// which cites Blender/EaryChow/Filament/Three.js implementations.
-//
-// Luster's linear working space is Rec.2020. AgX's image-formation math is
-// evaluated in linear sRGB, so the working-space conversion must happen
-// BEFORE the AgX inset/log/curve and be inverted AFTER the AgX display EOTF.
-// This avoids gamut-dependent hue errors (especially green/cyan shifts).
+// --- AGX parameters ----------------------------------------------------------
 
-vec3 agx_transform(vec3 color, vec3 slope, vec3 offset, vec3 power, float saturation) {
-    color = max(color, vec3(0.0));
+const float agx_min_ev = -12.47393;
+const float agx_max_ev =  4.026069;
+const float agx_pre_exposure = 1.0;
 
-    // Luster scene-linear selected working space -> AgX linear-sRGB domain.
-    color = WORKING_TO_REC709 * color;
+// 3-stop inset: slope (desaturate), power (shape midtone)
+const vec3 agx_inset_slope = vec3(0.42);
+const vec3 agx_inset_power = vec3(1.95);
 
-    // Input transform (inset).
-    color = AGX_INSET * color;
-    color = max(color, vec3(1e-10));
+// --- AGX log encode / decode -------------------------------------------------
 
-    // Log2 encoding.
-    color = clamp(log2(color), AGX_MIN_EV, AGX_MAX_EV);
-    color = (color - AGX_MIN_EV) / (AGX_MAX_EV - AGX_MIN_EV);
-    color = clamp(color, 0.0, 1.0);
+vec3 agx_log_enc(vec3 rgb) {
+    // Inset (desaturate + shape)
+    vec3 luma = vec3(dot(rgb, luminance_weights_rec2020));
+    vec3 inset = luma + (rgb - luma) * agx_inset_slope;
+    inset = pow(max(inset, vec3(0.0)), agx_inset_power);
 
-    // AgX sigmoid / tonescale approximation.
-    vec3 x2 = color * color;
-    vec3 x4 = x2 * x2;
-    color = 15.5 * x4 * x2
-          - 40.14 * x4 * color
-          + 31.96 * x4
-          - 6.868 * x2 * color
-          + 0.4298 * x2
-          + 0.1191 * color
-          - 0.00232;
-
-    // Look / ASC CDL.
-    color = pow(max(color * slope + offset, vec3(0.0)), power);
-    const vec3 lw = vec3(0.2126, 0.7152, 0.0722);
-    float luma = dot(color, lw);
-    color = luma + saturation * (color - luma);
-
-    // Display EOTF / inverse input transform.
-    color = AGX_OUTSET * color;
-    color = pow(max(color, vec3(0.0)), vec3(2.2));
-
-    // AgX returns linear display-sRGB; convert back to Luster's linear
-    // Rec.2020 working space so c19's single output-gamut transform remains
-    // the only final display conversion.
-    color = REC709_TO_WORKING * color;
-
-    return max(color, vec3(0.0));
+    vec3 log_rgb = log2(inset + eps);
+    log_rgb = (log_rgb - agx_min_ev) / (agx_max_ev - agx_min_ev);
+    return clamp(log_rgb, 0.0, 1.0);
 }
 
-vec3 tonemap_agx(vec3 color) {
-    return agx_transform(color, vec3(1.0), vec3(0.0), vec3(1.0), 1.0);
+vec3 agx_log_dec(vec3 log_rgb) {
+    vec3 inset = agx_min_ev + log_rgb * (agx_max_ev - agx_min_ev);
+    vec3 rgb = pow(vec3(2.0), inset);
+    rgb = pow(max(rgb, vec3(0.0)), 1.0 / agx_inset_power);
+    vec3 luma = vec3(dot(rgb, luminance_weights_rec2020));
+    return luma + (rgb - luma) / agx_inset_slope;
 }
 
-vec3 tonemap_agx_golden(vec3 color) {
-    return agx_transform(color, vec3(1.0, 0.9, 0.5), vec3(0.0), vec3(0.8), 1.3);
+// --- AGX base ----------------------------------------------------------------
+
+vec3 agx_base(vec3 rgb) {
+    rgb = clamp(rgb, vec3(0.0), vec3(1e8));
+    rgb *= agx_pre_exposure;
+
+    // Rec.2020 -> AP0
+    rgb = rec2020_to_ap0 * rgb;
+
+    vec3 log_rgb = agx_log_enc(rgb);
+    log_rgb = log_rgb / (1.0 + log_rgb);
+    vec3 out_rgb = agx_log_dec(log_rgb);
+
+    return ap0_to_rec2020 * out_rgb;
 }
 
-vec3 tonemap_agx_punchy(vec3 color) {
-    return agx_transform(color, vec3(1.0), vec3(0.0), vec3(1.35), 1.4);
+// --- AGX "look" transforms (applied on the [0,1] Rec.2020 output) ------------
+
+vec3 agx_look_golden(vec3 rgb) {
+    // Warmer, slightly desaturated, lifted shadows
+    const vec3 slope  = vec3(1.0, 0.97, 0.90);
+    const vec3 offset = vec3(0.0, 0.005, 0.012);
+    const vec3 power  = vec3(0.95, 1.0, 1.05);
+    const float sat   = 0.95;
+
+    float luma = dot(rgb, luminance_weights_rec2020);
+    vec3 tint = (rgb - luma) * sat + luma;
+    return pow(max(tint * slope + offset, vec3(0.0)), power);
 }
 
-#endif
+vec3 agx_look_punchy(vec3 rgb) {
+    // Higher contrast + saturation, deeper blacks
+    const vec3 slope  = vec3(1.15);
+    const vec3 offset = vec3(0.0);
+    const vec3 power  = vec3(0.90);
+    const float sat   = 1.20;
+
+    float luma = dot(rgb, luminance_weights_rec2020);
+    vec3 tint = (rgb - luma) * sat + luma;
+    return pow(max(tint * slope + offset, vec3(0.0)), power);
+}
+
+// --- Public tonemap entries --------------------------------------------------
+
+vec3 tonemap_agx(vec3 rgb) {
+    return agx_base(rgb);
+}
+
+vec3 tonemap_agx_golden(vec3 rgb) {
+    return agx_look_golden(agx_base(rgb));
+}
+
+vec3 tonemap_agx_punchy(vec3 rgb) {
+    return agx_look_punchy(agx_base(rgb));
+}
+
+#endif // INCLUDE_POST_PROCESSING_AGX

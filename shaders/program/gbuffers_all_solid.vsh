@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Luster Shaders
+  Photon Shader by SixthSurge
 
   program/gbuffers_all_solid:
   Handle terrain, entities, the hand, beacon beams and spider eyes
@@ -39,6 +39,10 @@ float vanilla_ao;
 
 #if defined PROGRAM_GBUFFERS_ENTITIES || defined PROGRAM_GBUFFERS_HAND
 out vec2 uv_local;
+#endif
+
+#if defined PROGRAM_GBUFFERS_VOXELS
+out vec3 block_normal;
 #endif
 
 // --------------
@@ -106,6 +110,10 @@ void main() {
     material_mask = get_material_mask();
     tbn = get_tbn_matrix();
 
+#if defined PROGRAM_GBUFFERS_VOXELS
+    block_normal = gl_Normal;
+#endif
+
 #if defined PROGRAM_GBUFFERS_TERRAIN
     vanilla_ao = gl_Color.a < 0.1
         ? 1.0
@@ -115,7 +123,7 @@ void main() {
     tint.a = 1.0;
 
 #ifdef POM
-    // Normalize entity coordinates for consistent material mapping.
+    // from fayer3
     vec2 uv_minus_mid = uv - mc_midTexCoord;
     atlas_tile_offset = min(uv, mc_midTexCoord - uv_minus_mid);
     atlas_tile_scale = abs(uv_minus_mid) * 2.0;
@@ -124,7 +132,7 @@ void main() {
 #endif
 
 #if defined PROGRAM_GBUFFERS_ENTITIES && !defined COLORWHEEL
-    // Preserve fire-entity emission under colored lighting.
+    // Fix fire entity not glowing with Colored Lights
     if (light_levels.x > 0.99) {
         material_mask = 40;
     }
@@ -143,7 +151,7 @@ void main() {
 #endif
 
 #if defined PROGRAM_GBUFFERS_ENTITIES || defined PROGRAM_GBUFFERS_HAND
-    // Calculate local UV coordinates for material-specific emission correction.
+    // Calculate local uv used to fix hardcoded emission on some
     // handheld/dropped items
     uv_local = sign(uv - mc_midTexCoord) * 0.5 + 0.5;
 #endif

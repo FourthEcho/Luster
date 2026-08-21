@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Luster Shaders
+  Photon Shader by SixthSurge
 
   program/c0_vl:
   Calculate volumetric fog
@@ -33,8 +33,9 @@ flat in OverworldFogParameters fog_params;
 uniform sampler2D noisetex;
 
 uniform sampler3D colortex0; // 3D worley noise
+uniform sampler3D perlin_3d; // existing 3D Perlin volume used by Nether smoke
 uniform sampler2D colortex1; // gbuffer data
-
+uniform sampler2D colortex3; // translucent color
 uniform sampler2D colortex4; // sky map
 uniform sampler2D colortex8; // cloud shadow map
 
@@ -62,6 +63,7 @@ uniform mat4 shadowProjection;
 uniform mat4 shadowProjectionInverse;
 
 uniform vec3 cameraPosition;
+uniform vec3 fogColor;
 
 uniform float near;
 uniform float far;
@@ -69,9 +71,8 @@ uniform float far;
 uniform float blindness;
 uniform float darknessFactor;
 uniform float eyeAltitude;
+uniform float rainStrength;
 uniform float wetness;
-// rainStrength is declared in /include/sky/atmosphere.glsl, included
-// (WORLD_OVERWORLD only) via fog/overworld/raymarched.glsl
 
 uniform float sunAngle;
 uniform float frameTimeCounter;
@@ -112,15 +113,17 @@ uniform float time_midnight;
 #endif
 
 #include "/include/fog/water_fog_vl.glsl"
+#include "/include/fog/nether_smoke_vl.glsl"
 #include "/include/misc/lod_mod_support.glsl"
 #include "/include/utility/encoding.glsl"
 #include "/include/utility/random.glsl"
 #include "/include/utility/space_conversion.glsl"
 
+#if defined LPV_VL && defined COLORED_LIGHTS
+uniform sampler3D light_sampler_a;
+uniform sampler3D light_sampler_b;
 
-
-#if defined IBL && defined WORLD_OVERWORLD
-#include "/include/lighting/ibl.glsl"
+#include "/include/fog/lpv_fog.glsl"
 #endif
 
 void main() {
@@ -169,11 +172,7 @@ void main() {
     vec3 world_back_pos = scene_back_pos + cameraPosition;
 
     float dither = texelFetch(noisetex, fog_texel & 511, 0).b;
-#ifdef FOG_SMOOTHING
-    // Per-frame dither rotation — the jittered fog noise then converges
-    // temporally through TAA
     dither = r1(frameCounter, dither);
-#endif
 
     vec3 world_start_pos = gbufferModelViewInverse[3].xyz + cameraPosition;
     vec3 world_end_pos = world_pos;
@@ -181,23 +180,6 @@ void main() {
     // Volumetric lighting
 
 #if defined VL
-    // Compute the ambient color used by the air-fog raymarch.  When IBL is
-    // enabled (overworld only), evaluate a per-pixel spherical-Fibonacci sky
-    // irradiance integral along the view direction — this captures
-    // high-frequency sky variation (sun disk, horizon glow, cloud shadows)
-    // that the previous flat texelFetch lookup could not.  When IBL is off,
-    // fall back to the flat `ambient_color` from the vertex shader (row 1 of
-    // colortex4's lighting palette).
-#if defined WORLD_OVERWORLD
-    vec3 vl_ambient;
-#if defined IBL
-    vec3 view_dir_world = normalize(world_end_pos - world_start_pos);
-    vl_ambient = IBL_INTENSITY * get_ibl_irradiance_vl(view_dir_world);
-#else
-    vl_ambient = ambient_color;
-#endif
-#endif
-
     switch (isEyeInWater) {
         case 0:
 #if defined WORLD_OVERWORLD
@@ -206,11 +188,18 @@ void main() {
                 world_end_pos,
                 depth0 == 1.0,
                 skylight,
-                dither,
-                vl_ambient
+                dither
             );
 #elif defined WORLD_NETHER
+#ifdef NETHER_SMOKE
+            mat2x3 fog = raymarch_nether_smoke(
+                world_start_pos,
+                world_end_pos,
+                dither
+            );
+#else
             mat2x3 fog = mat2x3(vec3(0.0), vec3(1.0));
+#endif
 #elif defined WORLD_END
             mat2x3 fog = raymarch_end_fog(
                 world_start_pos,
@@ -253,5 +242,8 @@ void main() {
     fog_transmittance = vec3(1.0);
 #endif
 
-
+#if defined LPV_VL && defined COLORED_LIGHTS
+    fog_scattering
+        += get_lpv_fog_scattering(world_start_pos, world_end_pos, dither);
+#endif
 }

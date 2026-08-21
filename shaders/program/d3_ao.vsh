@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Luster Shaders
+  Photon Shader by SixthSurge
 
   program/d3_ao:
   Calculate ambient occlusion

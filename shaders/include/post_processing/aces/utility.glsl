@@ -68,6 +68,7 @@ float rgb_to_saturation(vec3 rgb) {
 
 // Returns a geometric hue angle in degrees (0-360) based on RGB values
 // For neutral colors, hue is undefined and the function will return zero (The
+// reference implementation returns NaN but I think that's silly)
 float rgb_to_hue(vec3 rgb) {
     if (rgb.r == rgb.g && rgb.g == rgb.b) {
         return float(0.0);

@@ -57,7 +57,7 @@ float get_water_height(vec2 coord, vec2 wave_dir, mat2 wave_rot, float t) {
 
     // Noise
     const float noise_frequency = 0.007;
-    const float noise_strength = 2.0 * WATER_WAVE_NOISE_STRENGTH;
+    const float noise_strength = 2.0;
 
     // Height variation
     const float height_variation_frequency = 0.001;

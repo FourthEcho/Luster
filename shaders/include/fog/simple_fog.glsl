@@ -11,20 +11,22 @@
 
 const float lava_fog_start = 0.33;
 const float lava_fog_density = 1.0;
-vec3 get_lava_fog_color() { return from_native(vec3(0.839, 0.373, 0.075)) * 2.0; }
+const vec3 lava_fog_color = from_srgb(vec3(0.839, 0.373, 0.075)) * 2.0;
 
 const float snow_fog_start = 0.5;
 const float snow_fog_density = 1.0;
-vec3 get_snow_fog_color() { return from_native(vec3(0.957, 0.988, 0.988)) * 0.3; }
+const vec3 snow_fog_color = from_srgb(vec3(0.957, 0.988, 0.988)) * 0.3;
 
-// Scale both cave-fog density and brightness with the cave-fog control.
-// cave fog. Default 1.0 reproduces the original look.
 const float cave_fog_start = 1.0;
-const float cave_fog_density = 0.0033 * CAVE_FOG_INTENSITY;
-const vec3 cave_fog_color = vec3(0.033) * CAVE_FOG_INTENSITY;
+const float cave_fog_density = 0.0033;
+const vec3 cave_fog_color = vec3(0.033);
 
 const float nether_fog_start = 0.0;
-const float nether_fog_density = 0.01 * NETHER_FOG_INTENSITY;
+#ifdef NETHER_SMOKE
+const float nether_fog_density = 0.01 * NETHER_SMOKE_INTENSITY;
+#else
+const float nether_fog_density = 0.01;
+#endif
 
 const float blindness_fog_start = 2.0;
 const float blindness_fog_density = 1.0;
@@ -34,38 +36,52 @@ const float darkness_fog_density = 2.0;
 
 const float nether_bloomy_fog_density = 0.25 * nether_fog_density;
 
+#ifdef NETHER_SMOKE
+uniform sampler3D perlin_3d;
+
+float nether_smoke_density(vec3 world_pos) {
+    float altitude = world_pos.y;
+    float smoke_fade = sqr(1.0 - linear_step(128.0, 256.0, altitude));
+    smoke_fade *= exp(-max(altitude - 32.0, 0.0) * 0.015) * 0.6 + 0.4;
+
+    if (smoke_fade <= 1e-6) return 0.0;
+
+    vec3 wind = frameTimeCounter * 0.6 * vec3(1.0, -0.9, 0.1);
+    vec3 p = world_pos * 0.03;
+
+    vec3 a = texture(perlin_3d, p * 4.0 + wind * 0.5).rgb;
+    p += (a.r * 0.55 + a.g * 0.30 + a.b * 0.15 - 0.5) * 1.5;
+    p += texture(perlin_3d, p * 8.0 - wind).r - 0.5;
+    p.x *= 0.7;
+
+    float noise = texture(perlin_3d, p * 4.0 + wind).r;
+    noise += texture(perlin_3d, p * 8.0 + wind * 2.0 + vec3(noise * 0.5)).g * 0.5;
+    noise *= 0.6666666667;
+
+    float smoke = max(smoke_fade - noise, 0.0);
+    smoke = smoothstep(0.0, 1.0, smoke);
+    smoke = smoke * smoke * smoke * (smoke_fade * 0.5 + 0.5);
+
+    return smoke;
+}
+#endif
+
 float spherical_fog(
     float view_dist,
     float fog_start_distance,
     float fog_density
 ) {
-#ifdef FOG_SMOOTHING
-    // Smoothly ramp the fog in across FOG_SMOOTHING_RADIUS so it doesn't pop
-    // in abruptly at the fog start distance
-    float fog_ramp = smoothstep(
-        fog_start_distance,
-        fog_start_distance + FOG_SMOOTHING_RADIUS,
-        view_dist
-    );
-
-    return exp2(
-        -fog_density * fog_ramp * max0(view_dist - fog_start_distance)
-    );
-#else
     return exp2(-fog_density * max0(view_dist - fog_start_distance));
-#endif
 }
 
 float border_fog(vec3 scene_pos, vec3 world_dir) {
 #ifndef LOD_MOD_ACTIVE
     float fog = cubic_length(scene_pos.xz) / far;
-    // BORDER_FOG_INTENSITY scales the falloff exponent: higher = tighter
-    // fog ring at the view-distance edge, lower = softer/farther fade.
-    fog = exp2(-8.0 * BORDER_FOG_INTENSITY * pow8(fog));
+    fog = exp2(-8.0 * pow8(fog));
     float vertical_cutoff_distance = far;
 #else
     float fog = length(scene_pos.xz) / float(lod_render_distance);
-    fog = exp2(-2.4 * BORDER_FOG_INTENSITY * sqr(fog));
+    fog = exp2(-2.4 * sqr(fog));
 #endif
 
 #if defined WORLD_OVERWORLD || defined WORLD_END
@@ -80,7 +96,7 @@ float border_fog(vec3 scene_pos, vec3 world_dir) {
     return fog;
 }
 
-vec4 common_fog(float view_dist, const bool sky) {
+vec4 common_fog(float view_dist, const bool sky, vec3 scene_pos) {
     vec4 fog = vec4(vec3(0.0), 1.0);
 
     // Lava fog
@@ -89,7 +105,6 @@ vec4 common_fog(float view_dist, const bool sky) {
         lava_fog_start,
         lava_fog_density * float(isEyeInWater == 2)
     );
-    vec3 lava_fog_color = get_lava_fog_color();
     fog.rgb += lava_fog_color - lava_fog_color * lava_fog;
     fog.a *= lava_fog;
 
@@ -99,7 +114,6 @@ vec4 common_fog(float view_dist, const bool sky) {
         snow_fog_start,
         snow_fog_density * float(isEyeInWater == 3)
     );
-    vec3 snow_fog_color = get_snow_fog_color();
     fog.rgb += snow_fog_color - snow_fog_color * snow_fog;
     fog.a *= snow_fog;
 
@@ -136,12 +150,68 @@ vec4 common_fog(float view_dist, const bool sky) {
     fog.a *= cave_fog;
 #endif
 
-#if defined WORLD_NETHER
-    // Nether fog
+#if defined WORLD_NETHER && !defined VL
+    // Fallback Nether fog is only used when volumetric fog is disabled.
+#ifdef NETHER_SMOKE
+    float smoke_factor = nether_smoke_density(scene_pos + cameraPosition);
+    float nether_fog_local_density = nether_fog_density * mix(0.35, 1.75, smoke_factor);
+    vec3 nether_fog_color = mix(ambient_color, ambient_color * vec3(0.75, 0.68, 0.62), smoke_factor);
+#else
+    float nether_fog_local_density = nether_fog_density;
+    vec3 nether_fog_color = ambient_color;
+#endif
     float nether_fog
-        = spherical_fog(view_dist, nether_fog_start, nether_fog_density);
-    fog.rgb += ambient_color - ambient_color * nether_fog;
+        = spherical_fog(view_dist, nether_fog_start, nether_fog_local_density);
+    fog.rgb += nether_fog_color - nether_fog_color * nether_fog;
     fog.a *= nether_fog;
+#endif
+
+    return fog;
+}
+
+// Calculates the alpha component only
+float common_fog_alpha(float view_dist, bool sky, vec3 scene_pos) {
+    float fog = 1.0;
+
+    // Lava fog
+    fog *= spherical_fog(
+        view_dist,
+        lava_fog_start,
+        lava_fog_density * float(isEyeInWater == 2)
+    );
+
+    // Powdered snow fog
+    fog *= spherical_fog(
+        view_dist,
+        snow_fog_start,
+        snow_fog_density * float(isEyeInWater == 3)
+    );
+
+    // Blindness fog
+    fog *= spherical_fog(
+        view_dist,
+        blindness_fog_start,
+        blindness * blindness_fog_density
+    );
+
+#if defined WORLD_OVERWORLD && defined CAVE_FOG
+    // Cave fog
+    fog *= spherical_fog(
+        view_dist,
+        cave_fog_start,
+        cave_fog_density * biome_cave * float(!sky)
+    ); // Cave fog
+#endif
+
+#if defined WORLD_NETHER && !defined VL
+    // Fallback Nether fog is only used when volumetric fog is disabled.
+#ifdef NETHER_SMOKE
+    float smoke_factor_a = nether_smoke_density(scene_pos + cameraPosition);
+    float nether_fog_local_density_a = nether_fog_density * mix(0.35, 1.75, smoke_factor_a);
+#else
+    float nether_fog_local_density_a = nether_fog_density;
+#endif
+    fog *= spherical_fog(view_dist, nether_fog_start, nether_fog_local_density_a);
 #endif
 
     return fog;
@@ -155,7 +225,7 @@ const vec3 water_absorption_coeff
 
 vec3 biome_water_coeff(vec3 biome_water_color) {
     const float density_scale = 0.15;
-    const float biome_color_contribution = 0.33 * BIOME_WATER_COLOR_INTENSITY;
+    const float biome_color_contribution = 0.33;
 
     const vec3 base_absorption_coeff
         = vec3(WATER_ABSORPTION_R, WATER_ABSORPTION_G, WATER_ABSORPTION_B)

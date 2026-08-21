@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Luster Shaders
+  Photon Shader by SixthSurge
 
   program/d2_clouds_upscaling:
   Temporal upscaling for clouds
@@ -18,6 +18,12 @@ layout(location = 1) out vec3 clouds_data;
 /* RENDERTARGETS: 11,12 */
 
 #ifdef LOD_MOD_ACTIVE
+// When LOD_MOD_ACTIVE is on, this pass also creates a combined depth buffer
+// (vanilla + Distant Horizons LoD depth merged into a single screen-space
+// depth texture) and writes it to colortex15. The combined_depth_tex macro
+// (defined in include/misc/lod_mod_support.glsl) expands to colortex15, and
+// is then sampled by d3_ao, d4_deferred_shading, gtao, ssao, ssrt, and
+// edge_highlight. So this write IS consumed — do NOT remove.
 layout(location = 2) out float combined_depth;
 
 /* RENDERTARGETS: 11,12,15 */
@@ -28,6 +34,8 @@ in vec2 uv;
 // ------------
 //   Uniforms
 // ------------
+
+uniform sampler2D noisetex;
 
 uniform sampler2D colortex14; // previous frame depth
 uniform sampler2D colortex9; // low-res clouds
@@ -91,7 +99,7 @@ vec4 max_of(vec4 a, vec4 b, vec4 c, vec4 d, vec4 e) {
 }
 
 vec4 smooth_filter(sampler2D sampler, vec2 coord) {
-    // Texture filtering reference.
+    // from https://iquilezles.org/www/articles/texture/texture.htm
     vec2 res = vec2(textureSize(sampler, 0));
 
     coord = coord * res + 0.5;
@@ -209,7 +217,7 @@ void main() {
 
 #ifdef LOD_MOD_ACTIVE
     // Check for LoD terrain
-    float depth_lod = texelFetch(lod_depth_tex, dst_texel, 0).x;
+    float depth_lod = texelFetch(lod_depth_tex_shading, dst_texel, 0).x;
     bool is_lod = is_lod_terrain(depth, depth_lod);
 
     float depth_linear
@@ -217,6 +225,11 @@ void main() {
     float depth_linear_dh
         = screen_to_view_space_depth(lod_projection_matrix_inverse, depth_lod);
 
+    // Write the combined depth buffer to colortex15. This IS consumed —
+    // see the comment at the top of this file (the `combined_depth_tex`
+    // macro expands to colortex15 in include/misc/lod_mod_support.glsl
+    // and is sampled by d3_ao, d4_deferred_shading, gtao, ssao, ssrt,
+    // edge_highlight).
     combined_depth = is_lod
         ? view_to_screen_space_depth(
               combined_projection_matrix,
@@ -244,12 +257,8 @@ void main() {
 #endif
 
 #if defined TAAU
-    // Do not collapse the screen edge onto a single stale history coordinate.
-    vec2 uv_clamped = clamp(
-        uv,
-        vec2(0.0),
-        1.0 - 2.0 * view_pixel_size / taau_render_scale
-    );
+    // Fixes issue at the top and left side of the screen with TAAU
+    vec2 uv_clamped = clamp(uv, 0.0, 0.95);
 #else
 #define uv_clamped uv
 #endif
@@ -258,7 +267,7 @@ void main() {
     float ambient_scattering = current_data.y;
 
     // Find the closest cloud distance between the current frame and a 4x4 area
-    // from the reprojected frame
+    // of the previous frame
     float closest_distance = min(
         apparent_distance,
         texture_min_4x4(colortex12, uv_clamped * taau_render_scale)
@@ -279,8 +288,6 @@ void main() {
 
     // Reproject clouds
     vec2 previous_uv = reproject_clouds(uv, closest_distance).xy;
-    bool reprojection_outside = any(lessThan(previous_uv, vec2(0.0)))
-        || any(greaterThan(previous_uv, vec2(1.0)));
 
 #ifdef TAAU
     vec2 previous_uv_clamped = clamp(
@@ -292,21 +299,6 @@ void main() {
 #define previous_uv_clamped previous_uv
 #endif
 
-    // Keep a safety margin around the screen edge. A reprojection that lands
-    // only a few pixels inside the edge can still sample the previous frame's
-    // rectangular boundary and produce a very visible cloud-shaped screen
-    // ghost during camera motion.
-    const float history_edge_margin_px = 8.0;
-    vec2 history_edge_margin
-        = history_edge_margin_px * view_pixel_size / taau_render_scale;
-    bool reprojection_near_edge = any(lessThan(
-        previous_uv,
-        history_edge_margin
-    )) || any(greaterThan(
-        previous_uv,
-        1.0 - history_edge_margin
-    ));
-
     vec4 history = max0(catmull_rom_filter_fast(
         colortex11,
         previous_uv_clamped * taau_render_scale,
@@ -315,42 +307,19 @@ void main() {
     vec3 history_data
         = texture(colortex12, previous_uv_clamped * taau_render_scale).xyz;
 
-    // Depth at the reprojected position.
+    // Depth at the previous position
     float history_depth
         = 1.0 - max_of(textureGather(colortex14, previous_uv_clamped, 0));
 
-    // Get terrain distance at the reprojected position.
+    // Get distance to terrain in the previous frame
     float distance_to_terrain_squared = length_squared(screen_to_view_space(
         combined_projection_matrix_inverse,
         vec3(previous_uv, history_depth),
         true
     ));
 
-    // Camera rotation is especially destructive to cloud history because the
-    // sky is effectively an infinite surface. Translation alone is not enough
-    // to detect the large screen-space changes caused by mouse look.
-    vec3 current_view_forward = normalize(vec3(
-        gbufferModelView[2].x,
-        gbufferModelView[2].y,
-        gbufferModelView[2].z
-    ));
-    vec3 previous_view_forward = normalize(vec3(
-        gbufferPreviousModelView[2].x,
-        gbufferPreviousModelView[2].y,
-        gbufferPreviousModelView[2].z
-    ));
-    float camera_rotation_cos = clamp(
-        dot(current_view_forward, previous_view_forward),
-        -1.0,
-        1.0
-    );
-    float camera_rotation = 1.0 - camera_rotation_cos;
-
-    // Determine whether temporal history remains valid.
-    bool disocclusion = reprojection_outside || reprojection_near_edge;
-    // About 0.5 degrees of rotation is already enough to make a full-screen
-    // Reset cloud history when it is stale enough to cause visible smearing.
-    disocclusion = disocclusion || camera_rotation > 0.000038;
+    // Work out whether the history should be invalidated
+    bool disocclusion = clamp01(previous_uv) != previous_uv;
     disocclusion = disocclusion
         || (history_depth < 1.0
             && distance_to_terrain_squared < sqr(closest_distance));
@@ -358,7 +327,7 @@ void main() {
     disocclusion = disocclusion || any(isnan(history));
     disocclusion = disocclusion || world_age_changed;
 
-    // Reset history after detected disocclusion.
+    // Replace history if a disocclusion was detected
     if (disocclusion) {
         history = current;
         history.z = ambient_scattering;
@@ -369,15 +338,6 @@ void main() {
         * length_squared(cameraPosition - previousCameraPosition);
     float velocity_factor = 75.0 * velocity / max(sqr(closest_distance), eps);
     velocity_factor = velocity_factor / (velocity_factor + 1.0);
-
-    // Also make history fade aggressively with camera rotation instead of
-    // allowing a small residual weight to keep a screen-edge ghost alive.
-    float rotation_rejection = smoothstep(
-        0.000002,
-        0.000038,
-        camera_rotation
-    );
-    velocity_factor = max(velocity_factor, rotation_rejection);
 
     if (velocity_factor > 0.1) {
         // Fetch 3x3 neighborhood
@@ -394,6 +354,7 @@ void main() {
         // Soft minimum and maximum ("Hybrid Reconstruction Antialiasing")
         //        b         a b c
         // (min d e f + min d e f) / 2
+        //        h         g h i
         vec4 aabb_min = min_of(b, d, e, f, h);
         aabb_min += min_of(aabb_min, a, c, g, i);
         aabb_min *= 0.5;
@@ -425,11 +386,6 @@ void main() {
 
     float pixel_age = max0(history_data.y) * float(!disocclusion);
     float history_weight = 1.0 - rcp(max(pixel_age - checkerboard_area, 1.0));
-
-    // Camera motion needs a direct influence on cloud history. This prevents
-    // accumulation from stale reprojected positions.
-    // otherwise correct moving clouds.
-    history_weight *= 1.0 - rotation_rejection;
 
 #ifndef TAAU
     // Offcenter rejection

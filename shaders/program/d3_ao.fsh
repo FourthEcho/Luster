@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Luster Shaders
+  Photon Shader by SixthSurge
 
   program/d3_ao:
   Calculate ambient occlusion
@@ -81,10 +81,6 @@ uniform bool world_age_changed;
 #include "/include/lighting/ao/gtao.glsl"
 #endif
 
-#if SHADER_AO == SHADER_AO_RTAO
-#include "/include/lighting/ao/rtao.glsl"
-#endif
-
 const float ao_render_scale = 0.5;
 
 void main() {
@@ -112,7 +108,7 @@ void main() {
 
 #ifdef LOD_MOD_ACTIVE
     float depth_mc = texelFetch(depthtex1, view_texel, 0).x;
-    float depth_lod = texelFetch(lod_depth_tex, view_texel, 0).x;
+    float depth_lod = texelFetch(lod_depth_tex_shading, view_texel, 0).x;
     bool is_lod = is_lod_terrain(depth_mc, depth_lod);
 #else
 #define depth_mc depth
@@ -176,10 +172,6 @@ void main() {
         is_lod,
         bent_normal
     );
-#elif SHADER_AO == SHADER_AO_RTAO
-    ao.x = compute_rtao(screen_pos, view_pos, view_normal, dither);
-    ao.y = 0.0;
-    bent_normal = view_normal;
 #endif
 
     // Temporal accumulation
@@ -224,7 +216,7 @@ void main() {
         float depth_weight
             = exp2(-abs(z0 - z1) * depth_rejection_strength * NoV * view_norm);
 
-        // Off-center rejection for improved ray stability.
+        // Offcenter rejection from Jessie, which is originally by Zombye
         // Reduces blur in motion
         vec2 pixel_offset = 1.0
             - abs(2.0

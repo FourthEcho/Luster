@@ -4,7 +4,7 @@
 // Sample filtered clouds
 vec4 read_clouds_and_aurora(vec2 uv, out float apparent_distance) {
 #if defined WORLD_OVERWORLD
-    // Soften newly reconstructed cloud pixels.
+    // Soften clouds for new pixels
     float pixel_age
         = texelFetch(colortex12, ivec2(uv * view_res * taau_render_scale), 0).y;
     float ld = 2.0 * dampen(max0(1.0 - 0.1 * pixel_age));

@@ -55,13 +55,13 @@ const vec2 air_scale_heights = vec2(8.4e3, 1.25e3); // m
 // Coefficients for Rec. 709 primaries transformed to Rec. 2020
 const vec3 air_rayleigh_coefficient
     = vec3(8.059375432e-06, 1.671209429e-05, 4.080133294e-05)
-    * REC709_TO_WORKING;
+    * rec709_to_rec2020;
 const vec3 air_mie_coefficient
     = vec3(1.666442358e-06, 1.812685127e-06, 1.958927896e-06)
-    * REC709_TO_WORKING;
+    * rec709_to_rec2020;
 const vec3 air_ozone_coefficient
     = vec3(8.304280072e-07, 1.314911970e-06, 5.440679729e-08)
-    * REC709_TO_WORKING;
+    * rec709_to_rec2020;
 
 const mat2x3 air_scattering_coefficients
     = mat2x3(air_rayleigh_coefficient, air_mie_albedo* air_mie_coefficient);
@@ -72,7 +72,6 @@ const mat3x3 air_extinction_coefficients = mat3x3(
 );
 
 uniform float atmosphere_saturation_boost_amount;
-uniform float rainStrength;
 
 float atmosphere_mie_phase(float nu, bool use_klein_nishina_phase) {
     return use_klein_nishina_phase
@@ -95,13 +94,9 @@ vec3 atmosphere_mie_phase_sun(float nu) {
 vec3 atmosphere_mie_phase_moon(float nu) {
     float moonIntensity = 1.02;
 
-#ifdef MOON_PHASE_NIGHT_ATMOSPHERE
     float t = float(moonPhase) / 4.0;
     t = t > 1.0 ? 2.0 - t : t;
-    t = mix(1.0, sqr(1.0 - t) * 0.04 + 0.96, MOON_PHASE_ATMOSPHERE_STRENGTH);
-#else
-    const float t = 1.0;
-#endif
+    t = sqr(1.0 - t) * 0.04 + 0.96; // small phase difference
 
     float r = nvidia_phase_area(nu, 0.895 * t, 1.0, 2 * moon_angular_radius);
     float g = nvidia_phase_area(nu, 0.90 * t, 1.0, 2 * moon_angular_radius);
@@ -112,24 +107,13 @@ vec3 atmosphere_mie_phase_moon(float nu) {
 
 // Post-processing applied to the atmosphere color
 vec3 atmosphere_post_processing(vec3 atmosphere) {
-    // Atmosphere saturation boost
-#ifdef ATMOSPHERE_SATURATION_BOOST
+    // Atmosphere saturation boost and rain saturation influence
     atmosphere = mix(
-        vec3(dot(atmosphere, luminance_weights)),
+        vec3(dot(atmosphere, luminance_weights_rec2020)),
         atmosphere,
-        ATMOSPHERE_SATURATION_BOOST_INTENSITY
-            * atmosphere_saturation_boost_amount
+        (1 + ATMOSPHERE_SATURATION_BOOST_INTENSITY * atmosphere_saturation_boost_amount)
+            * (1 - rainStrength * ATMOSPHERE_RAIN_DESATURATION_INTENSITY)
     );
-#endif
-
-    // Rain desaturation — reduces saturation during rainfall
-#ifdef ATMOSPHERE_RAIN_DESATURATION
-    atmosphere = mix(
-        atmosphere,
-        vec3(dot(atmosphere, luminance_weights)),
-        rainStrength * ATMOSPHERE_RAIN_DESATURATION_INTENSITY
-    );
-#endif
 
     return atmosphere;
 }
@@ -143,6 +127,27 @@ vec3 atmosphere_post_processing(vec3 atmosphere) {
  * mu_s: cos light-zenith angle
  * r: distance to planet centre
  */
+
+vec3 atmosphere_density(float r) {
+    const vec2 rcp_scale_heights = rcp(air_scale_heights);
+    const vec2 scaled_planet_radius = planet_radius * rcp_scale_heights;
+
+    vec2 rayleigh_mie = exp(r * -rcp_scale_heights + scaled_planet_radius);
+
+    // Ozone density distribution from Jessie -
+    // https://www.desmos.com/calculator/b66xr8madc
+    float altitude_km = r * 1e-3 - (planet_radius * 1e-3);
+    float o1 = 12.5 * exp(rcp(8.0) * (0.0 - altitude_km));
+    float o2
+        = 30.0 * exp(rcp(80.0) * (18.0 - altitude_km) * (altitude_km - 18.0));
+    float o3
+        = 75.0 * exp(rcp(50.0) * (23.5 - altitude_km) * (altitude_km - 23.5));
+    float o4
+        = 50.0 * exp(rcp(150.0) * (30.0 - altitude_km) * (altitude_km - 30.0));
+    float ozone = 7.428e-3 * (o1 + o2 + o3 + o4);
+
+    return vec3(rayleigh_mie, ozone);
+}
 
 #if defined ATMOSPHERE_SCATTERING_LUT
 vec3 atmosphere_scattering_uv(float nu, float mu, float mu_s) {
@@ -247,9 +252,6 @@ vec3 atmosphere_scattering(
 #ifndef SKY_GROUND
     float horizon_mu = mix(-0.01, 0.03, smoothstep(-0.05, 0.1, mu_s));
     mu = max(mu, horizon_mu);
-#else
-    // Scale the brightness of the fake sky below the horizon
-    float sky_ground_scale = mix(SKY_GROUND_INTENSITY, 1.0, linear_step(-0.05, 0.0, mu));
 #endif
 
     vec3 uv = atmosphere_scattering_uv(nu, mu, mu_s);
@@ -265,10 +267,6 @@ vec3 atmosphere_scattering(
     // Single mie scattering
     uv.x += 0.5;
     scattering += texture(ATMOSPHERE_SCATTERING_LUT, uv).rgb * mie_phase;
-
-#ifdef SKY_GROUND
-    scattering *= sky_ground_scale;
-#endif
 
     return atmosphere_post_processing(scattering);
 }
@@ -305,10 +303,7 @@ vec3 atmosphere_scattering(
     float mu_sun = sun_dir.y;
     float mu_moon = moon_dir.y;
 
-#ifdef SKY_GROUND
-    // Scale the brightness of the fake sky below the horizon
-    float sky_ground_scale = mix(SKY_GROUND_INTENSITY, 1.0, linear_step(-0.05, 0.0, mu));
-#else
+#ifndef SKY_GROUND
     float horizon_mu = mix(
         -0.01,
         0.03,
@@ -466,10 +461,6 @@ vec3 atmosphere_scattering(
     vec3 atmosphere
         = (scattering_sc + scattering_sm * mie_phase_sun) * sun_color
         + (scattering_mc + scattering_mm * mie_phase_moon) * moon_color;
-
-#ifdef SKY_GROUND
-    atmosphere *= sky_ground_scale;
-#endif
 
     return atmosphere_post_processing(atmosphere);
 }

@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Luster Shaders
+  Photon Shader by SixthSurge
 
   program/gbuffers_damagedblock:
   Handle block breaking overlay
@@ -10,7 +10,6 @@
 */
 
 #include "/include/global.glsl"
-#include "/include/misc/clrwl_compat.glsl"
 
 layout(location = 0) out vec4 damage_overlay;
 
@@ -46,12 +45,12 @@ void main() {
     damage_overlay = texture(gtexture, uv, lod_bias);
 
 #if defined COLORWHEEL
-        vec2 lmcoord;
-        float ao;
-        vec4 overlayColor;
+	vec2 lmcoord;
+	float ao;
+	vec4 overlayColor;
 
-        clrwl_computeFragment(damage_overlay, damage_overlay, lmcoord, ao, overlayColor);
-        damage_overlay.rgb = mix(damage_overlay.rgb, overlayColor.rgb, overlayColor.a);
+	clrwl_computeFragment(damage_overlay, damage_overlay, lmcoord, ao, overlayColor);
+	damage_overlay.rgb = mix(damage_overlay.rgb, overlayColor.rgb, overlayColor.a);
 #endif
 
     if (damage_overlay.a < 0.1) {
@@ -60,10 +59,10 @@ void main() {
 
 #ifdef USE_SEPARATE_ENTITY_DRAWS
     damage_overlay.rgb
-        = 0.5 * srgb_eotf_inv(2.0 * damage_overlay.rgb) * REC709_TO_WORKING;
+        = 0.5 * srgb_eotf_inv(2.0 * damage_overlay.rgb) * rec709_to_rec2020;
     damage_overlay.a = 1.0;
 #else
-    // Apply the legacy overlay color path.
+    // Old overlay handling
     // alpha of 1 <=> block breaking overlay
     damage_overlay.a = 1.0 / 255.0;
 #endif

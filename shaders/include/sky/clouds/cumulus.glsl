@@ -76,26 +76,34 @@ float clouds_cumulus_density(vec3 pos) {
 
     pos.xz += cameraPosition.xz * CLOUDS_SCALE + wind.xz;
 
-    // 3D curl field warps the Worley domain so cloud structures develop
-    // natural swirling/rolling forms instead of remaining axis-aligned.
-    vec3 curl = sample_curl_noise_3d((pos + 0.25 * wind) * 0.00018);
-    vec3 warped_pos = pos + curl * 320.0;
-
-    // Smooth 3D Perlin modulation controls the broad volumetric mass before
-    // the higher-frequency Worley erosion is applied.
-    float perlin_shape = sample_perlin_noise_3d(
-        (warped_pos + 0.15 * wind) * 0.000055
-    );
-    density *= mix(1.0 - 0.28 * 0.45, 1.0 + 0.28 * 0.45, perlin_shape);
-
-    // 3D Worley noise for detail, sampled in the curled domain.
+    // 3D worley noise for detail
     float worley_0
-        = texture(SAMPLER_WORLEY_BUBBLY, (warped_pos + 0.2 * wind) * 0.0009).x;
+        = texture(SAMPLER_WORLEY_BUBBLY, (pos + 0.2 * wind) * 0.0009).x;
     float worley_1
-        = texture(SAMPLER_WORLEY_SWIRLEY, (warped_pos + 0.4 * wind) * 0.005).x;
+        = texture(SAMPLER_WORLEY_SWIRLEY, (pos + 0.4 * wind) * 0.005).x;
+
+    // 3D curl noise — advects the sample position with a divergence-free
+    // velocity field. This makes the cloud volume look like it's tumbling /
+    // rolling rather than just translating with the wind. The advection
+    // magnitude scales with altitude so the cloud tops deform more than
+    // the flat bottoms.
+    vec3 curl_offset = texture(curl_3d, pos * 0.0015).rgb * 2.0 - 1.0;
+    pos += 25.0 * curl_offset * smoothstep(0.3, 1.0, altitude_fraction);
+
+    // 3D Perlin noise — three channels at frequencies 1/2/4 provide
+    // multi-octave detail. Channel R (low freq) shapes the cloud body
+    // to break up the too-uniform worley pattern. Channels G/B add
+    // higher-frequency wisps at higher altitudes.
+    vec3 perlin_detail = texture(perlin_3d, pos * 0.0008).rgb;
+    float perlin_low  = perlin_detail.r * 2.0 - 1.0;
+    float perlin_mid  = perlin_detail.g * 2.0 - 1.0;
+    float perlin_high = perlin_detail.b * 2.0 - 1.0;
 #else
     const float worley_0 = 0.5;
     const float worley_1 = 0.5;
+    const float perlin_low = 0.0;
+    const float perlin_mid = 0.0;
+    const float perlin_high = 0.0;
 #endif
 
     float detail_fade = 0.20 * smoothstep(0.85, 1.0, 1.0 - altitude_fraction)
@@ -105,6 +113,13 @@ float clouds_cumulus_density(vec3 pos) {
         * dampen(clamp01(1.0 - density));
     density -= clouds_params.l0_detail_weights.y * sqr(worley_1)
         * dampen(clamp01(1.0 - density)) * detail_fade;
+
+    // Add Perlin octaves on top of the worley base. Low-freq modulates the
+    // cloud body shape (breaks up the uniform worley pattern); mid/high
+    // frequencies add wispy detail at higher altitudes.
+    density += 0.15 * perlin_low * dampen(clamp01(1.0 - density));
+    density += 0.08 * perlin_mid * dampen(clamp01(1.0 - density)) * detail_fade;
+    density += 0.04 * perlin_high * dampen(clamp01(1.0 - density)) * sqr(detail_fade);
 
     // Adjust density so that the clouds are wispy at the bottom and hard at the
     // top
@@ -116,11 +131,6 @@ float clouds_cumulus_density(vec3 pos) {
             altitude_fraction)
     );
     density *= 0.1 + 0.9 * smoothstep(0.2, 0.7, altitude_fraction);
-
-    // Local convection from the weather field thickens developing towers.
-    vec4 weather_field = clouds_weather_field(pos.xz);
-    float tower_factor = weather_field.z * smoothstep(0.18, 0.9, altitude_fraction);
-    density *= 1.0 + 0.18 * tower_factor;
 
     return density;
 }
@@ -156,22 +166,12 @@ vec2 clouds_cumulus_scattering(
     float ground_optical_depth,
     float step_transmittance,
     float cos_theta,
-    float bounced_light,
-    float altitude_fraction
+    float bounced_light
 ) {
     vec2 scattering = vec2(0.0);
 
     float scatter_amount = clouds_params.l0_scattering_coeff;
     float extinct_amount = clouds_params.l0_extinction_coeff;
-
-    float ground_weight = clouds_ground_ambient_weight(altitude_fraction);
-    float sky_weight = clouds_sky_ambient_weight(altitude_fraction);
-    float core_attenuation = clouds_core_light_attenuation(
-        density,
-        light_optical_depth,
-        altitude_fraction
-    );
-    float silver_lining = clouds_silver_lining(density, cos_theta);
 
     float scattering_integral_times_density
         = (1.0 - step_transmittance) / clouds_params.l0_extinction_coeff;
@@ -189,30 +189,18 @@ vec2 clouds_cumulus_scattering(
     vec3 phase_g = pow(vec3(0.6, 0.9, 0.3), vec3(1.0 + light_optical_depth));
 
     for (uint i = 0u; i < 8u; ++i) {
-        float direct_extinction = exp(-extinct_amount * light_optical_depth);
-        float internal_bounce = clouds_internal_bounce_light(
-            direct_extinction, density, light_optical_depth,
-            altitude_fraction, cos_theta
-        );
         scattering.x += scatter_amount
-            * direct_extinction * phase
-            * core_attenuation * silver_lining
+            * exp(-extinct_amount * light_optical_depth) * phase
             * (1.0 - 0.5 * clouds_params.l0_shadow);
-
-        scattering.x += scatter_amount
-            * internal_bounce
-            * clouds_phase_multi(cos_theta, phase_g)
-            * mix(0.42, 0.80, clamp01(1.0 - altitude_fraction));
         scattering.x += scatter_amount
             * exp(-extinct_amount * ground_optical_depth) * isotropic_phase
-            * bounced_light * ground_weight;
+            * bounced_light;
         scattering.x += scatter_amount
             * exp(-extinct_amount * sky_optical_depth) * isotropic_phase
             * clouds_params.l0_shadow
-            * 0.5 * sky_weight; // approximate bounced lighting from the layer above
+            * 0.5; // fake bounced lighting from the layer above
         scattering.y += scatter_amount
-            * exp(-extinct_amount * sky_optical_depth) * isotropic_phase
-            * sky_weight;
+            * exp(-extinct_amount * sky_optical_depth) * isotropic_phase;
 
         scatter_amount *= scattering_falloff * powder_effect;
         extinct_amount *= 0.4;
@@ -353,7 +341,7 @@ CloudsResult draw_cumulus_clouds(
 #if defined PROGRAM_DEFERRED0
         vec2 hash = vec2(0.0);
 #else
-        vec2 hash = hash2(fract(ray_pos)); // Provides stable blue-noise jitter for volumetric light-ray sampling.
+        vec2 hash = hash2(fract(ray_pos)); // used to dither the light rays
 #endif
 
         float light_optical_depth = clouds_cumulus_optical_depth(
@@ -382,8 +370,7 @@ CloudsResult draw_cumulus_clouds(
                    ground_optical_depth,
                    step_transmittance,
                    cos_theta,
-                   bounced_light,
-                   altitude_fraction
+                   bounced_light
                )
             * transmittance;
 

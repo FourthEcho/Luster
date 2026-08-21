@@ -17,9 +17,6 @@ struct CloudsParameters {
     vec2 l1_coverage;
     float l1_cumulus_stratus_blend;
     float l1_shadow;
-    // Spatial weather/convection controls derived from the low-frequency weather field.
-    float storm_intensity;
-    float convection;
     // Planar clouds
     float cirrus_amount;
     float cirrocumulus_amount;

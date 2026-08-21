@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Luster Shaders
+  Photon Shader by SixthSurge
 
   program/c1_blend_layers
   Combine:
@@ -19,11 +19,12 @@
 
 layout(location = 0) out vec3 fragment_color;
 
-#ifdef BLOOMY_FOG
-layout(location = 2) out float bloomy_fog;
-/* RENDERTARGETS: 0,3 */
-#else
 /* RENDERTARGETS: 0 */
+
+#ifdef BLOOMY_FOG
+layout(location = 1) out float bloomy_fog;
+
+/* RENDERTARGETS: 0,3 */
 #endif
 
 in vec2 uv;
@@ -46,15 +47,18 @@ uniform sampler2D colortex0; // scene color
 uniform sampler2D colortex3; // refraction data
 uniform sampler2D colortex4; // sky map
 uniform sampler2D colortex5; // scene history
-uniform sampler2D colortex6; // volumetric fog transmittance
-uniform sampler2D colortex7; // volumetric fog scattering
+uniform sampler2D colortex6; // volumetric fog scattering
+uniform sampler2D colortex7; // volumetric fog transmittance
 uniform sampler2D colortex11; // clouds history
 uniform sampler2D colortex12; // clouds data
 uniform sampler2D colortex13; // rendered translucent layer
 
 #ifdef SHADOW
-
-
+#ifdef AIR_FOG_COLORED_LIGHT_SHAFTS
+uniform sampler2D shadowcolor0;
+uniform sampler2D shadowtex0;
+#endif
+uniform sampler2D shadowtex1;
 #endif
 
 #ifdef DISTANT_HORIZONS
@@ -84,11 +88,11 @@ uniform vec3 previousCameraPosition;
 
 uniform float near;
 uniform float far;
+
 uniform float frameTimeCounter;
 uniform float sunAngle;
+uniform float rainStrength;
 uniform float wetness;
-// rainStrength is declared in /include/sky/atmosphere.glsl, included
-// (WORLD_OVERWORLD only) via fog/overworld/analytic.glsl
 
 uniform int worldTime;
 uniform int moonPhase;
@@ -105,6 +109,7 @@ uniform vec3 sun_dir;
 uniform vec3 moon_dir;
 
 uniform vec2 view_res;
+uniform vec2 view_pixel_size;
 uniform vec2 taa_offset;
 
 uniform float eye_skylight;
@@ -210,7 +215,7 @@ void main() {
     vec4 refraction_data = texelFetch(colortex3, texel, 0);
     vec4 translucent_color = texelFetch(colortex13, texel, 0);
 
-#ifdef VL
+#if defined VL || defined LPV_VL
     vec3 fog_transmittance = smooth_filter(colortex6, uv).rgb;
     vec3 fog_scattering = smooth_filter(colortex7, uv).rgb;
 #endif
@@ -431,14 +436,14 @@ void main() {
 
     // Blend fog
 
-#ifdef VL
+#if defined VL || defined LPV_VL
     // Volumetric fog
 
     fragment_color = fragment_color * fog_transmittance + fog_scattering;
 
 #ifdef BLOOMY_FOG
     bloomy_fog
-        = clamp01(dot(fog_transmittance, vec3(luminance_weights)));
+        = clamp01(dot(fog_transmittance, vec3(luminance_weights_rec2020)));
     bloomy_fog = isEyeInWater == 1.0 ? sqrt(bloomy_fog) : bloomy_fog;
 #endif
 #endif
@@ -483,7 +488,7 @@ void main() {
 
 #ifdef BLOOMY_FOG
         bloomy_fog
-            = clamp01(dot(fog_transmittance, vec3(luminance_weights)));
+            = clamp01(dot(fog_transmittance, vec3(luminance_weights_rec2020)));
         bloomy_fog = isEyeInWater == 1.0 ? sqrt(bloomy_fog) : bloomy_fog;
 #endif
 #else

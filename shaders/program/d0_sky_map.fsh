@@ -1,10 +1,10 @@
 /*
 --------------------------------------------------------------------------------
 
-  Luster Shaders
+  Photon Shader by SixthSurge
 
   program/d0_sky_map:
-  Render omnidirectional sky map for reflections and SH lighting
+  Render omnidirectional sky map for reflections and environment irradiance
 
 --------------------------------------------------------------------------------
 */
@@ -45,7 +45,10 @@ uniform sampler3D colortex6; // 3D bubbly worley noise
 #define SAMPLER_WORLEY_BUBBLY colortex6
 uniform sampler3D colortex7; // 3D swirley worley noise
 #define SAMPLER_WORLEY_SWIRLEY colortex7
-// curl_noise_3d is declared by /include/sky/clouds/common.glsl and bound in shaders.properties.
+
+uniform sampler3D perlin_3d;
+uniform sampler3D curl_3d;
+
 
 #if defined WORLD_OVERWORLD && defined GALAXY
 uniform sampler2D colortex13;
@@ -84,10 +87,9 @@ uniform float frameTimeCounter;
 
 uniform int isEyeInWater;
 uniform float eyeAltitude;
+uniform float rainStrength;
 uniform float blindness;
 uniform float darknessFactor;
-// rainStrength is declared in /include/sky/atmosphere.glsl, included below
-// via sky.glsl
 
 uniform vec3 light_dir;
 uniform vec3 sun_dir;

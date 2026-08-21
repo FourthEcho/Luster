@@ -72,7 +72,7 @@ vec4 draw_moon(vec3 ray_dir) {
     mat3 tbn = mat3(tangent, bitangent, moon_dir);
 
     // Vector from ray dir to moon dir.
-    vec2 offset = ((ray_dir - moon_dir) * tbn).xy;
+    vec2 offset = ((ray_dir - sun_dir) * tbn).xy;
     offset = fract(offset + 0.5);
 
     vec3 noise = texture(noisetex, 2.0 * offset).xyz;
@@ -189,14 +189,6 @@ vec3 draw_sky(
         * (1.0 - rainStrength);
     sky += atmosphere;
 
-    // Preserve a very dim blue night floor so heavy rain, cloud cover, or a
-    // new moon cannot collapse the entire sky to pure black.
-    float night_factor = linear_step(0.48, 0.60, sunAngle);
-    vec3 night_floor = vec3(0.0045, 0.0065, 0.0120)
-        * mix(0.75, 1.15, max0(ray_dir.y))
-        * mix(1.0, 0.65, rainStrength);
-    sky = max(sky, night_floor * night_factor);
-
     // Clouds, aurora, crepuscular rays
 
     sky *= clouds_and_aurora.a; // Transmittance
@@ -212,10 +204,10 @@ vec3 draw_sky(
             linear_step(1.0, 0.95, clouds_and_aurora.w))
     );
 
-    // Adjust cave-sky rendering.
+    // Cave sky fix
 
 #if !defined PROGRAM_DEFERRED0
-    // Fade the lower part of the sky to black when underground so that the
+    // Fade lower part of sky into cave fog color when underground so that the
     // sky isn't visible beyond the render distance
     float underground_sky_fade
         = biome_cave * smoothstep(-0.1, 0.1, 0.4 - ray_dir.y);
@@ -361,9 +353,7 @@ vec3 draw_sky(vec3 ray_dir) {
     // Sun
 
 #ifdef END_SUN_EFFECT
-    // END_SUN_EFFECT_INTENSITY multiplies the disk+flare contribution so users
-    // can dial the end-sun look down without disabling it entirely.
-    sky += draw_sun(ray_dir) * END_SUN_EFFECT_INTENSITY;
+    sky += draw_sun(ray_dir);
 #endif
 
     // Stars

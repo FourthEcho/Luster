@@ -8,7 +8,7 @@ void voxy_emitFragment(VoxyFragmentParameters parameters) {
 
     vec3 base_color = parameters.sampledColour.rgb * parameters.tinting.rgb;
 
-    // Apply the Voxy fragment color and material data.
+    // from Cortex
     vec3 normal = vec3(
                       uint((parameters.face >> 1) == 2),
                       uint((parameters.face >> 1) == 0),

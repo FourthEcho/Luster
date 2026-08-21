@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Luster Shaders
+  Photon Shader by SixthSurge
 
   program/shadow:
   Render shadow map
@@ -10,7 +10,6 @@
 */
 
 #include "/include/global.glsl"
-#include "/include/misc/clrwl_compat.glsl"
 
 #if defined COLORWHEEL
 layout(location = 0) out vec4 shadowcolor0_out;
@@ -37,7 +36,7 @@ uniform sampler2D tex;
 uniform sampler2D noisetex;
 
 #ifdef SHADOW_COLOR
-
+uniform sampler2D shadowtex1;
 #endif
 
 uniform mat4 gbufferModelView;
@@ -87,7 +86,7 @@ vec3 refract_safe(vec3 I, vec3 N, float eta) {
 
 vec3 biome_water_coeff(vec3 biome_water_color) {
     const float density_scale = 0.15;
-    const float biome_color_contribution = 0.33 * BIOME_WATER_COLOR_INTENSITY;
+    const float biome_color_contribution = 0.33;
 
     const vec3 base_absorption_coeff
         = vec3(WATER_ABSORPTION_R, WATER_ABSORPTION_G, WATER_ABSORPTION_B)
@@ -151,11 +150,6 @@ float get_water_caustics() {
 }
 
 void main() {
-#if defined PROGRAM_SHADOW_ENTITIES && !defined ENTITY_SHADOWS
-    // Entities disabled from casting shadows — drop the fragment so it
-    // writes neither shadow depth nor shadow color
-    discard;
-#endif
 #ifndef COLORWHEEL
     if (material_mask == 1) { // Water
 #if defined PROGRAM_SHADOW_WATER || defined PROGRAM_SHADOW_FALLBACK
@@ -177,7 +171,7 @@ void main() {
 
         shadowcolor0_out = mix(vec3(1.0), base_color.rgb * tint, base_color.a);
         shadowcolor0_out
-            = 0.25 * srgb_eotf_inv(shadowcolor0_out) * REC709_TO_WORKING;
+            = 0.25 * srgb_eotf_inv(shadowcolor0_out) * rec709_to_rec2020;
         shadowcolor0_out *= step(base_color.a, 1.0 - rcp(255.0));
     }
 #else
@@ -194,7 +188,7 @@ void main() {
     }
 
     vec3 outColor = mix(vec3(1.0), base_color.rgb, base_color.a);
-    outColor = 0.25 * srgb_eotf_inv(outColor) * REC709_TO_WORKING;
+    outColor = 0.25 * srgb_eotf_inv(outColor) * rec709_to_rec2020;
     outColor *= step(base_color.a, 1.0 - rcp(255.0));
 
     shadowcolor0_out = vec4(outColor, 1.0);

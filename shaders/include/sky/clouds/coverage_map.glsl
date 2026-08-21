@@ -1,28 +1,10 @@
 #if !defined INCLUDE_SKY_CLOUDS_COVERAGE_MAP
 #define INCLUDE_SKY_CLOUDS_COVERAGE_MAP
 
-// Dedicated weather/cloud coverage map. Channel Z of colortex8 stores this field while X/Y hold cloud shadow data.
 // Distance covered by the cumulus coverage map on each axis (m^2)
 const float clouds_cumulus_coverage_map_scale = 1.5e5;
 
 const float clouds_coverage_map_distortion = 0.8;
-
-vec4 clouds_weather_field(vec2 world_xz) {
-    vec2 p = world_xz * 0.00000135;
-    p += vec2(world_age * 0.000000035, -world_age * 0.000000021);
-
-    vec4 large = texture(noisetex, p);
-    vec4 medium = texture(noisetex, p * 0.43 + vec2(0.173, 0.417));
-
-    float coverage = clamp(0.62 * large.x + 0.38 * medium.w, 0.0, 1.0);
-    float humidity = clamp(0.55 * large.w + 0.45 * medium.x, 0.0, 1.0);
-    float convection = clamp(0.55 * medium.y + 0.45 * large.z, 0.0, 1.0);
-    float storm = smoothstep(0.48, 0.82, coverage * 0.60 + humidity * 0.40);
-    storm *= smoothstep(0.42, 0.86, convection);
-    storm = clamp(storm * 1.18, 0.0, 1.0);
-
-    return vec4(coverage, humidity, convection, storm);
-}
 
 float clouds_cumulus_local_coverage(vec2 pos) {
     const float wind_angle = CLOUDS_CUMULUS_WIND_ANGLE * degree;
@@ -64,15 +46,11 @@ float clouds_cumulus_local_coverage(vec2 pos) {
         coverage_st = coverage_st / (coverage_st + 1.0);
     }
 
-    vec4 weather_field = clouds_weather_field(pos);
-    float weather_coverage = mix(0.60, 1.18, weather_field.x);
-    float moisture = mix(0.72, 1.20, weather_field.y);
-
-    return clamp01(mix(
+    return mix(
         coverage_cu,
         coverage_st,
         clouds_params.l0_cumulus_stratus_blend
-    ) * weather_coverage * moisture);
+    );
 }
 
 vec2 project_clouds_cumulus_coverage_map(vec3 pos) {

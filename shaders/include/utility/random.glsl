@@ -14,6 +14,11 @@ float r1(int n, float seed) {
 
 float r1(int n) { return r1(n, 0.5); }
 
+float r1_next(float u) {
+    const float alpha = 1.0 / phi1;
+    return fract(u + alpha);
+}
+
 vec2 r2(int n, vec2 seed) {
     const vec2 alpha = 1.0 / vec2(phi2, phi2 * phi2);
     return fract(seed + n * alpha);
@@ -21,12 +26,22 @@ vec2 r2(int n, vec2 seed) {
 
 vec2 r2(int n) { return r2(n, vec2(0.5)); }
 
+vec2 r2_next(vec2 u) {
+    const vec2 alpha = 1.0 / vec2(phi2, phi2 * phi2);
+    return fract(u + alpha);
+}
+
 vec3 r3(int n, vec3 seed) {
     const vec3 alpha = 1.0 / vec3(phi3, phi3 * phi3, phi3 * phi3 * phi3);
     return fract(seed + n * alpha);
 }
 
 vec3 r3(int n) { return r3(n, vec3(0.5)); }
+
+vec3 r3_next(vec3 u) {
+    const vec3 alpha = 1.0 / vec3(phi3, phi3 * phi3, phi3 * phi3 * phi3);
+    return fract(u + alpha);
+}
 
 //----------------------------------------------------------------------------//
 
@@ -41,9 +56,30 @@ uint lowbias32(uint x) {
     return x;
 }
 
+uint lowbias32_inverse(uint x) {
+    x ^= x >> 16;
+    x *= 0x43021123u;
+    x ^= x >> 15 ^ x >> 30;
+    x *= 0x1d69e2a5u;
+    x ^= x >> 16;
+    return x;
+}
+
 float rand_next_float(inout uint state) {
     state = lowbias32(state);
     return float(state) / float(0xffffffffu);
+}
+
+vec2 rand_next_vec2(inout uint state) {
+    return vec2(rand_next_float(state), rand_next_float(state));
+}
+
+vec3 rand_next_vec3(inout uint state) {
+    return vec3(
+        rand_next_float(state),
+        rand_next_float(state),
+        rand_next_float(state)
+    );
 }
 
 vec4 rand_next_vec4(inout uint state) {

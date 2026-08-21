@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Luster Shaders
+  Photon Shader by SixthSurge
 
   program/gbuffers_all_translucent:
   Handle translucent terrain, translucent entities (Iris), translucent handheld
@@ -158,7 +158,7 @@ void main() {
         position_tangent
             = (position_scene - gbufferModelViewInverse[3].xyz) * tbn;
 
-        // Normalize entity coordinates for consistent material mapping.
+        // (from fayer3)
         vec2 uv_minus_mid = uv - mc_midTexCoord;
         atlas_tile_offset = min(uv, mc_midTexCoord - uv_minus_mid);
         atlas_tile_scale = abs(uv_minus_mid) * 2.0;
@@ -169,7 +169,7 @@ void main() {
 #if defined PROGRAM_GBUFFERS_LIGHTNING && defined WORLD_END
     // For some reason the Ender Dragon death beams also use gbuffers_lightning
 
-    // Preserve the Ender Dragon death-beam material path.
+    // Ender Dragon death beam check from Euphoria Patches by SpacEagle17, used
     // with permission https://www.euphoriapatches.com/
     bool is_dragon_death_beam
         = entityId == 0 && (tint.a < 0.2 || tint.a == 1.0);
@@ -199,14 +199,14 @@ void main() {
 #endif
 
 #if defined PROGRAM_GBUFFERS_WATER
-    // Correct the lower water-surface normal orientation.
+    // Fix issue where the normal of the bottom of the water surface is flipped
     if (dot(position_scene, tbn[2]) > 0.0) {
         tbn[2] = -tbn[2];
     }
 #endif
 
 #if defined WORLD_OVERWORLD
-    fog_params = get_fog_parameters(get_weather(cameraPosition));
+    fog_params = get_fog_parameters(get_weather());
 #endif
 
     position_view = scene_to_view_space(position_scene);

@@ -54,6 +54,33 @@ float sigmoid_shaper(float x) {
 
 // "Red modifier" functions
 
+float cubic_basis_shaper(float x, const float width) {
+    const mat4 M = mat4(
+        vec4(-1.0, 3.0, -3.0, 1.0) / 6.0,
+        vec4(3.0, -6.0, 3.0, 0.0) / 6.0,
+        vec4(-3.0, 0.0, 3.0, 0.0) / 6.0,
+        vec4(1.0, 4.0, 1.0, 0.0) / 6.0
+    );
+
+    float knots[5]
+        = float[](-0.5 * width, -0.25 * width, 0.0, 0.25 * width, 0.5 * width);
+
+    float knot_coord = (x - knots[0]) * 4.0 / width;
+    uint i = 3 - uint(clamp(knot_coord, 0.0, 3.0));
+    float f = fract(knot_coord);
+
+    if (x < knots[0] || x > knots[4] || i > 3) {
+        return 0.0;
+    }
+
+    vec4 monomials = vec4(f * f * f, f * f, f, 1.0);
+
+    float y = monomials[0] * M[0][i] + monomials[1] * M[1][i]
+        + monomials[2] * M[2][i] + monomials[3] * M[3][i];
+
+    return 1.5 * y;
+}
+
 float cubic_basis_shaper_fit(float x, const float width) {
     float radius = 0.5 * width;
     return abs(x) < radius ? sqr(cubic_smooth(1.0 - abs(x) / radius)) : 0.0;
@@ -96,7 +123,7 @@ vec3 rrt_sweeteners(vec3 aces) {
     float luminance = dot(rgb_pre, luminance_weights_ap1);
     rgb_pre = mix(vec3(luminance), rgb_pre, rrt_sat_factor);
 
-    // Apply gamma adjustment before the RRT.
+    // Added gamma adjustment before the RRT
     rgb_pre = pow(rgb_pre, vec3(rrt_gamma_curve));
 
     return rgb_pre;

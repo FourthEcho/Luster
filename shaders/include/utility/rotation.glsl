@@ -32,4 +32,33 @@ mat3 get_rotation_matrix(vec3 axis, float angle) {
     return get_rotation_matrix(axis, cos(angle), sin(angle));
 }
 
+#if 0
+// Not tested!
+// q0 + q1 i + q2 j + q3 k -> vec4(q1, q2, q3, q0)
+// https://www.geeks3d.com/20141201/how-to-rotate-a-vertex-by-a-quaternion-in-glsl/
+
+vec4 get_rotation_quaternion(vec3 axis, float angle) {
+	angle *= 0.5;
+	float sin_half_angle = sin(angle);
+	float cos_half_angle = cos(angle);
+
+	return vec4(axis * sin_half_angle, cos_half_angle);
+}
+
+vec4 get_rotation_quaternion(vec3 from, vec3 to) {
+	vec3 axis = cross(from, to);
+	float cos_angle = dot(from, to);
+
+	// Find sine and cosine of half angle using half angle identities
+	float sin_half_angle = sqrt(0.5 - 0.5 * cos_angle);
+	float cos_half_angle = sqrt(0.5 + 0.5 * cos_angle);
+
+	return vec4(axis * sin_half_angle, cos_half_angle);
+}
+
+vec3 rotate(vec4 q, vec3 v) {
+	return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
+}
+#endif
+
 #endif // INCLUDE_UTILITY_ROTATION

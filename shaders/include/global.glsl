@@ -52,45 +52,7 @@
 
 #include "/settings.glsl"
 
-// Iris hardware texture filtering support. TEXTURE_FILTERING exposes
-// textureFilteringMode; value 2 means the host has selected anisotropic
-// filtering in Sodium/Iris. The actual GL anisotropy factor is configured
-// by the host sampler state, not by GLSL.
-#ifdef TEXTURE_FILTERING
-uniform int textureFilteringMode;
-#endif
-
-#if defined MC_GL_EXT_texture_filter_anisotropic
-#extension GL_EXT_texture_filter_anisotropic : enable
-#define LUSTER_HAS_GL_ANISOTROPIC 1
-#endif
-
-// Internal renderer tuning constants are centralized here.
-// centralized here so the user-facing options file only contains GUI-exposed
-// sliders / toggles / mode switchers. See include/internal.glsl for the full
-// list and per-option comments.
-#include "/include/internal.glsl"
-
-
-
-// Material Mapping Mode
-// Translates the MATERIAL_MAPPING_MODE enum into the feature defines that
-// enable each stage of the labPBR pipeline.
-// Reflection and refraction stages are gated by their own settings
-// (ENVIRONMENT_REFLECTIONS, SKY_REFLECTIONS, REFRACTION), so only the
-// specular/normal mapping stages need translating here.
-
-#if MATERIAL_MAPPING_MODE == MATERIAL_MAPPING_MODE_SPECULAR \
-    || MATERIAL_MAPPING_MODE == MATERIAL_MAPPING_MODE_SPECULAR_NORMAL
-#define SPECULAR_MAPPING
-#endif
-
-#if MATERIAL_MAPPING_MODE == MATERIAL_MAPPING_MODE_NORMAL \
-    || MATERIAL_MAPPING_MODE == MATERIAL_MAPPING_MODE_SPECULAR_NORMAL
-#define NORMAL_MAPPING
-#endif
-
-// Compatibility adjustments
+// Compatibility fixes
 
 #if MC_VERSION < 11700
 #define gtexture tex
@@ -199,6 +161,12 @@ float cubic_smooth(float x) { return sqr(x) * (3.0 - 2.0 * x); }
 
 vec2 cubic_smooth(vec2 x) { return sqr(x) * (3.0 - 2.0 * x); }
 
+// Similar to the above, but even smoother with a zero second derivative at zero
+// and one
+float quintic_smooth(float x) {
+    return cube(x) * (x * (x * 6.0 - 15.0) + 10.0);
+}
+
 // Converts between the unit range [0, 1] and texture coordinates on [0.5/res, 1
 // - 0.5/res]. This prevents extrapolation at texture edges (used for atmosphere
 // lookup tables)
@@ -206,10 +174,29 @@ float get_uv_from_unit_range(float values, const int res) {
     return values * (1.0 - 1.0 / float(res)) + (0.5 / float(res));
 }
 
+float get_unit_range_from_uv(float uv, const int res) {
+    return (uv - 0.5 / float(res)) / (1.0 - 1.0 / float(res));
+}
+
 // (the following functions are from https://iquilezles.org/articles/functions/)
 
 // Applies a smooth minimum value to a signal, where n is the new minimum value
 // and m is the threshold after which x remains unchanged
+float almost_identity(float x, float m, float n) {
+    if (x > m) {
+        return x;
+    }
+
+    float a = 2.0 * n - m;
+    float b = 2.0 * m - 3.0 * n;
+    float t = x / m;
+
+    return (a * t + b) * t * t + n;
+}
+
+// Equivalent to almost_identity with n = 0 and m = 1
+float almost_unit_identity(float x) { return x * x * (2.0 - x); }
+
 // Remaps center +/- 0.5 * width to zero and center to 1, with the same
 // smoothing function as smoothstep
 float pulse(float x, float center, float width) {
@@ -222,6 +209,13 @@ float pulse(float x, float center, float width, const float period) {
     x = fract(x) * period - (0.5 * period);
 
     return pulse(x, 0.0, width);
+}
+
+// Exponential impulse function, for when a signal rises quickly then gradually
+// falls.
+float impulse(float x, float peak) {
+    float h = peak * x;
+    return h * exp(1.0 - h);
 }
 
 // Euclidian distance is defined as sqrt(a^2 + b^2 + ...). This function instead
@@ -263,4 +257,9 @@ void fix_hand_depth(inout float depth, out bool is_hand) {
         depth *= rcp(MC_HAND_DEPTH);
         depth = depth * 0.5 + 0.5;
     }
+}
+
+void fix_hand_depth(inout float depth) {
+    bool unused;
+    fix_hand_depth(depth, unused);
 }

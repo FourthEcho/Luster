@@ -1,7 +1,9 @@
 #ifndef INCLUDE_LIGHTING_HANDHELD_LIGHTING
 #define INCLUDE_LIGHTING_HANDHELD_LIGHTING
 
-#include "/include/lighting/colors/lighting_colors.glsl"
+#ifdef COLORED_LIGHTS
+uniform sampler2D light_data_sampler;
+#endif
 
 #ifdef IS_IRIS
 uniform vec3 relativeEyePosition;
@@ -12,32 +14,23 @@ uniform int heldItemId2;
 uniform int heldBlockLightValue;
 uniform int heldBlockLightValue2;
 
-// Optional material-based override for the colored mode, set by the deferred
-// pass when the held item has a labPBR/OldPBR emissive map (see
-// program/d4_deferred_shading.fsh). Defaults to no override.
-#ifndef HANDHELD_LIGHTING_MATERIAL_COLOR
-#define HANDHELD_LIGHTING_MATERIAL_COLOR vec3(0.0)
-#endif
-
 vec3 get_handheld_light_color(int held_item_id, int held_item_light_value) {
-#if HANDHELD_LIGHTING_MODE == HANDHELD_LIGHTING_NORMAL
-    // Warm vanilla blocklight color scaled by the item's light level
-    return (blocklight_color * blocklight_scale * rcp(15.0))
-        * held_item_light_value;
-#elif HANDHELD_LIGHTING_MODE == HANDHELD_LIGHTING_COLORED
-    // Per-emissive-block color and brightness from lighting_colors.glsl,
-    // falling back to the vanilla blocklight color for unmapped items
-    vec3 color = get_lighting_color(held_item_id);
-    float brightness = get_lighting_brightness(held_item_id);
+#ifdef COLORED_LIGHTS
+    bool is_emitter = 10032 <= held_item_id && held_item_id < 10080;
 
-    if (brightness > 0.0) {
-        return color * brightness * blocklight_scale;
+    if (is_emitter) {
+        return texelFetch(
+                   light_data_sampler,
+                   ivec2(int(held_item_id) - 10032, 0),
+                   0
+        )
+            .rgb;
     } else {
-        return (blocklight_color * blocklight_scale * rcp(15.0))
-            * held_item_light_value;
+        return vec3(0.0);
     }
 #else
-    return vec3(0.0);
+    return (blocklight_color * blocklight_scale * rcp(15.0))
+        * held_item_light_value;
 #endif
 }
 
@@ -57,16 +50,6 @@ vec3 get_handheld_lighting(vec3 scene_pos, float ao) {
         get_handheld_light_color(heldItemId, heldBlockLightValue),
         get_handheld_light_color(heldItemId2, heldBlockLightValue2)
     );
-
-#if HANDHELD_LIGHTING_MODE == HANDHELD_LIGHTING_COLORED
-    // The held item's own labPBR/OldPBR emission takes priority over the
-    // built-in mapping when the material map contains an emissive value
-    light_color = mix(
-        light_color,
-        HANDHELD_LIGHTING_MATERIAL_COLOR,
-        smoothstep(0.0, 0.02, max_of(HANDHELD_LIGHTING_MATERIAL_COLOR))
-    );
-#endif
 
     float falloff = get_handheld_light_falloff(scene_pos, ao);
 

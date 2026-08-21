@@ -1,7 +1,7 @@
 /*p0_cl
 --------------------------------------------------------------------------------
 
-  Luster Shaders
+  Photon Shader by SixthSurge
 
   program/p0_clouds_prep:
   Create cloud cumulus coverage map and cloud shadow map
@@ -31,6 +31,10 @@ flat in CloudsParameters clouds_params;
 
 uniform sampler2D noisetex;
 
+uniform sampler3D perlin_3d;
+uniform sampler3D curl_3d;
+
+
 uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
 uniform mat4 gbufferProjection;
@@ -56,9 +60,8 @@ uniform float frameTimeCounter;
 
 uniform int isEyeInWater;
 uniform float eyeAltitude;
+uniform float rainStrength;
 uniform float blindness;
-// rainStrength is declared in /include/sky/atmosphere.glsl, included below
-// via cloud_shadows.glsl -> sky/clouds/constants.glsl
 
 uniform vec3 light_dir;
 uniform vec3 sun_dir;
@@ -94,10 +97,6 @@ const vec3 sky_color = vec3(0.0);
 #include "/include/sky/clouds/coverage_map.glsl"
 
 void main() {
-    // X/Y default to no shadow; Z is the dedicated dynamic weather/cloud
-    // coverage field when local coverage precomputation is enabled.
-    fragment_color = vec3(1.0, 1.0, 0.0);
-
     // Cloud shadow map
 
 #ifdef CLOUD_SHADOWS

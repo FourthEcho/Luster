@@ -117,20 +117,6 @@ float get_screen_space_shadows(
     bool has_sss,
     inout float sss_depth
 ) {
-    // Early-exit for pixels with negligible skylight (deep caves, indoors,
-    // under overhangs).  The function returns `float(!hit) *
-    // get_lightmap_light_leak_prevention(skylight)` (line 190 below), which is
-    // approximately 0 for skylight < 0.05 because leak_prevention scales with
-    // skylight.  Skipping the entire raymarch saves SHADOW_SSRT_STEPS depth
-    // taps + projection math per pixel — meaningful in cave/indoor-heavy
-    // scenes.  sss_depth is set to 0 (no SSS contribution) which matches the
-    // no-hit case where exit_pos = ray_origin_view (line 52) gives
-    // distance=0 → sss_depth=0.
-    if (skylight < 0.05) {
-        sss_depth = 0.0;
-        return 0.0;
-    }
-
     // Dithering for ray offset
     float dither = texelFetch(noisetex, ivec2(gl_FragCoord.xy) & 511, 0).b;
     dither = r1(frameCounter, dither);
@@ -151,7 +137,7 @@ float get_screen_space_shadows(
 
     /*
     #ifdef MC_GL_KHR_shader_subgroup
-    // Subgroup reduction identifies whether any fragment in the current execution group is
+    // Using subgroup ops, we make sure that if any fragments in a warp are
     raymarching the
     // combined depth buffer, they all do, to avoid divergent branches.
     raymarch_combined_depth = subgroupAny(raymarch_combined_depth);

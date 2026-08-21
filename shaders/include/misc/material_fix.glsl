@@ -1,7 +1,7 @@
 #if !defined INCLUDE_MISC_MATERIAL_FIX
 #define INCLUDE_MISC_MATERIAL_FIX
 
-// Adjust material classification for handheld and dropped items so fixed material responses remain physically consistent.
+// Change the material mask of some handheld/dropped items to help the hardcoded
 // emission
 
 #if defined PROGRAM_GBUFFERS_ENTITIES || defined PROGRAM_GBUFFERS_HAND

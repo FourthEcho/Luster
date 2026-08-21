@@ -3,25 +3,50 @@
 
 #include "/include/misc/material_masks.glsl"
 
+float get_ripple_height(vec2 coord) {
+    const float ripple_frequency = 0.3;
+    const float ripple_speed = 0.1;
+    const vec2 ripple_dir_0 = vec2(3.0, 4.0) / 5.0;
+    const vec2 ripple_dir_1 = vec2(-5.0, -12.0) / 13.0;
+
+    float ripple_noise_1
+        = texture(
+              noisetex,
+              coord * ripple_frequency
+                  + frameTimeCounter * ripple_speed * ripple_dir_0
+        )
+              .y;
+    float ripple_noise_2
+        = texture(
+              noisetex,
+              coord * ripple_frequency
+                  + frameTimeCounter * ripple_speed * ripple_dir_1
+        )
+              .y;
+
+    return mix(ripple_noise_1, ripple_noise_2, 0.5);
+}
+
 float get_puddle_noise(vec3 world_pos, vec3 flat_normal, vec2 light_levels) {
     const float puddle_frequency = 0.025;
 
-    float puddle = texture(noisetex, world_pos.xz * puddle_frequency).w;
-    puddle = linear_step(0.45, 0.55, puddle) * step(0.99, flat_normal.y);
-
-    // "Everywhere" mode forms puddles on all applicable surfaces regardless of
-    // rain
-#if RAIN_PUDDLES_MODE == RAIN_PUDDLES_MODE_EVERYWHERE
-    // Puddles do not depend on weather in this mode
-#else
-    puddle *= wetness * biome_may_rain;
+#if RAIN_PUDDLES_MODE == RAIN_PUDDLES_OFF
+    return 0.0;
 #endif
+
+    float puddle = texture(noisetex, world_pos.xz * puddle_frequency).w;
+    float weather_factor = 1.0;
+#if RAIN_PUDDLES_MODE == RAIN_PUDDLES_RAIN
+    weather_factor = biome_may_rain;
+#endif
+    puddle = linear_step(0.45, 0.55, puddle) * wetness * weather_factor
+        * step(0.99, flat_normal.y);
 
     // Prevent puddles from appearing indoors
     puddle *= (1.0 - cube(light_levels.x))
         * linear_step(14.0 / 15.0, 1.0, light_levels.y);
 
-    return puddle * RAIN_PUDDLES_INTENSITY;
+    return puddle;
 }
 
 bool get_rain_puddles(
@@ -36,7 +61,7 @@ bool get_rain_puddles(
     inout float roughness,
     inout float ssr_multiplier
 ) {
-#if RAIN_PUDDLES_MODE == RAIN_PUDDLES_MODE_OFF
+#ifndef RAIN_PUDDLES
     return false;
 #endif
 
@@ -45,15 +70,10 @@ bool get_rain_puddles(
     const float puddle_darkening_factor = 0.33;
     const float puddle_darkening_factor_porous = 0.67;
 
-    if (material_mask == MATERIAL_LEAVES) {
+    if (wetness < 0.0 || biome_may_rain < 0.0
+        || material_mask == MATERIAL_LEAVES) {
         return false;
     }
-
-#if RAIN_PUDDLES_MODE != RAIN_PUDDLES_MODE_EVERYWHERE
-    if (wetness < 0.0 || biome_may_rain < 0.0) {
-        return false;
-    }
-#endif
 
     float puddle = get_puddle_noise(world_pos, flat_normal, light_levels);
 
@@ -71,7 +91,25 @@ bool get_rain_puddles(
     roughness = puddle_roughness;
     ssr_multiplier = max(ssr_multiplier, puddle);
 
+    // Ripple animation
+    const float h = 0.1;
+    float ripple0 = get_ripple_height(world_pos.xz);
+    float ripple1 = get_ripple_height(world_pos.xz + vec2(h, 0.0));
+    float ripple2 = get_ripple_height(world_pos.xz + vec2(0.0, h));
+
+    vec3 ripple_normal = vec3(ripple1 - ripple0, ripple2 - ripple0, h);
+    ripple_normal.xy
+        *= 0.05
+        * smoothstep(
+               0.0,
+               0.1,
+               abs(dot(flat_normal, normalize(world_pos - cameraPosition)))
+        );
+    ripple_normal = normalize(ripple_normal);
+    ripple_normal = ripple_normal.xzy; // convert to world space
+
     normal = mix(normal, flat_normal, puddle);
+    normal = mix(normal, ripple_normal, puddle * rainStrength);
     normal = normalize_safe(normal);
 
     return true;

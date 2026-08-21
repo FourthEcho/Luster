@@ -38,8 +38,7 @@ mat2x3 raymarch_air_fog(
     vec3 world_end_pos,
     bool sky,
     float skylight,
-    float dither,
-    vec3 ambient_color
+    float dither
 ) {
     vec3 world_dir = world_end_pos - world_start_pos;
 
@@ -121,12 +120,21 @@ mat2x3 raymarch_air_fog(
             shadow_screen_pos.xy * shadowMapResolution * MC_SHADOW_QUALITY
         );
 
+#ifdef AIR_FOG_COLORED_LIGHT_SHAFTS
+        float depth0 = texelFetch(shadowtex0, shadow_texel, 0).x;
         float depth1 = texelFetch(shadowtex1, shadow_texel, 0).x;
-        float shadow = step(
-            float(clamp01(shadow_screen_pos) == shadow_screen_pos)
-                * shadow_screen_pos.z,
-            depth1
-        );
+        vec3 color
+            = clamp01(texelFetch(shadowcolor0, shadow_texel, 0).rgb * 4.0);
+        float color_weight
+            = step(depth0, shadow_screen_pos.z) * step(eps, max_of(color));
+
+        color = color * color_weight + (1.0 - color_weight);
+        color = mix(vec3(1.0), color, AIR_FOG_COLORED_LIGHT_SHAFTS_INTENSITY);
+
+        vec3 shadow = step(shadow_screen_pos.z, depth1) * color;
+        shadow = (clamp01(shadow_screen_pos) == shadow_screen_pos)
+            ? shadow
+            : vec3(1.0);
 #else
         float depth1 = texelFetch(shadowtex1, shadow_texel, 0).x;
         float shadow = step(
@@ -184,9 +192,9 @@ mat2x3 raymarch_air_fog(
     float scatter_amount = 1.0;
     float anisotropy = 1.0;
 
-    // ambient_color is supplied as a function parameter for both the
-    // legacy flat texelFetch lookup (when IBL is off) and per-pixel IBL
-    // irradiance (when IBL is on, computed in c0_vl.fsh).
+#if defined PROGRAM_DEFERRED0
+    vec3 ambient_color = ambient_color_fog;
+#endif
 
     scattering += 2.0 * light_sky * vec2(isotropic_phase) * ambient_color;
 
@@ -212,5 +220,9 @@ mat2x3 raymarch_air_fog(
 
     return mat2x3(scattering, transmittance);
 }
+
+#ifdef shadow
+#undef shadow
+#endif
 
 #endif // INCLUDE_FOG_AIR_FOG_VL

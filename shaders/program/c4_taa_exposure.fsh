@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Luster Shaders
+  Photon Shader by SixthSurge
 
   program/c4_taa_exposure:
   TAA and auto exposure
@@ -13,6 +13,7 @@
 
 layout(location = 0) out vec3 bloom_input;
 layout(location = 1) out vec4 result;
+
 /* RENDERTARGETS: 0,5 */
 
 in vec2 uv;
@@ -56,7 +57,6 @@ uniform float far;
 uniform vec2 view_res;
 uniform vec2 view_pixel_size;
 uniform vec2 taa_offset;
-uniform int frameCounter;
 
 #define TEMPORAL_REPROJECTION
 
@@ -65,6 +65,9 @@ uniform int frameCounter;
 #include "/include/utility/color.glsl"
 #include "/include/utility/space_conversion.glsl"
 
+#define TAA_VARIANCE_CLIPPING // More aggressive neighborhood clipping method
+                              // which further reduces ghosting but can
+                              // introduce flickering artifacts
 #define TAA_OFFCENTER_REJECTION \
     0.25 // Reduces blur when moving quickly. Too much offcenter rejection
          // results in aliasing and jittering in motion
@@ -90,9 +93,14 @@ vec3 max_of(vec3 a, vec3 b, vec3 c, vec3 d, vec3 f) {
     return max(a, max(b, max(c, max(d, f))));
 }
 
+// Invertible tonemapping operator (Reinhard) applied before blending the
+// current and previous frames Improves the appearance of emissive objects
 vec3 reinhard(vec3 rgb) { return rgb / (rgb + 1.0); }
+
 vec3 reinhard_inverse(vec3 rgb) { return rgb / (1.0 - rgb); }
 
+// Estimates the closest fragment in a 5x5 radius with 5 samples in a cross
+// pattern Improves reprojection for objects in motion
 vec3 get_closest_fragment(sampler2D depth_sampler, ivec2 texel0) {
     ivec2 texel1 = texel0 + ivec2(-2, -2);
     ivec2 texel2 = texel0 + ivec2(2, -2);
@@ -116,6 +124,7 @@ vec3 get_closest_fragment(sampler2D depth_sampler, ivec2 texel0) {
     );
 }
 
+// AABB clipping from "Temporal Reprojection Anti-Aliasing in INSIDE"
 vec3 clip_aabb(
     vec3 history_color,
     vec3 min_color,
@@ -139,6 +148,8 @@ vec3 clip_aabb(vec3 history_color, vec3 min_color, vec3 max_color) {
     return clip_aabb(history_color, min_color, max_color, history_clipped);
 }
 
+// Flicker reduction using the "distance to clamp" method from "High Quality
+// Temporal Supersampling" by Brian Karis. Only used for TAAU
 float get_flicker_reduction(
     vec3 history_color,
     vec3 min_color,
@@ -162,6 +173,10 @@ vec3 neighborhood_clipping(
 ) {
     vec3 min_color, max_color;
 
+    // Fetch 3x3 neighborhood
+    // a b c
+    // d e f
+    // g h i
     vec3 a = texelFetch(colortex0, texel + ivec2(-1, 1), 0).rgb;
     vec3 b = texelFetch(colortex0, texel + ivec2(0, 1), 0).rgb;
     vec3 c = texelFetch(colortex0, texel + ivec2(1, 1), 0).rgb;
@@ -172,6 +187,11 @@ vec3 neighborhood_clipping(
     vec3 h = texelFetch(colortex0, texel + ivec2(0, -1), 0).rgb;
     vec3 i = texelFetch(colortex0, texel + ivec2(1, -1), 0).rgb;
 
+    // Convert to YCoCg
+    // Clipping in a luminance-chrominance color space is superior because the
+    // eyes are more sensitive to luminance than chrominance so an AABB where
+    // luminance is one of the axes will result in less visible ghosting than
+    // one which is not aligned to the luminance
     a = rgb_to_ycocg(reinhard(a));
     b = rgb_to_ycocg(reinhard(b));
     c = rgb_to_ycocg(reinhard(c));
@@ -182,6 +202,10 @@ vec3 neighborhood_clipping(
     h = rgb_to_ycocg(reinhard(h));
     i = rgb_to_ycocg(reinhard(i));
 
+    // Soft minimum and maximum ("Hybrid Reconstruction Antialiasing")
+    //        b         a b c
+    // (min d e f + min d e f) / 2
+    //        h         g h i
     min_color = min_of(b, d, e, f, h);
     min_color += min_of(min_color, a, c, g, i);
     min_color *= 0.5;
@@ -191,14 +215,16 @@ vec3 neighborhood_clipping(
     max_color *= 0.5;
 
 #ifdef TAA_VARIANCE_CLIPPING
+    // Variance clipping ("An Excursion in Temporal Supersampling")
     mat2x3 moments;
     moments[0] = (1.0 / 9.0) * (a + b + c + d + e + f + g + h + i);
     moments[1] = (1.0 / 9.0)
         * (a * a + b * b + c * c + d * d + e * e + f * f + g * g + h * h
            + i * i);
 
+    // Strictness parameter, higher gamma => more temporally stable but more
+    // ghosting
     float gamma = mix(0.75, 1.25, linear_step(0.25, 1.0, distance_factor));
-    gamma *= 1.0 + (0.75 - TAA_VARIANCE_CLIPPING) * 0.5;
 
     vec3 mu = moments[0];
     vec3 sigma = sqrt(moments[1] - moments[0] * moments[0]);
@@ -207,6 +233,9 @@ vec3 neighborhood_clipping(
     max_color = min(max_color, mu + gamma * sigma);
 #endif
 
+    // Perform AABB clipping in YCoCg space, which results in a tighter AABB
+    // because luminance (Y) is separated from chrominance (CoCg) as its own
+    // axis
     history_color = rgb_to_ycocg(history_color);
     history_color = clip_aabb(history_color, min_color, max_color);
     history_color = ycocg_to_rgb(history_color);
@@ -245,11 +274,14 @@ void main() {
 #ifdef TAA
 #ifndef LOD_MOD_ACTIVE
     vec3 closest = get_closest_fragment(depthtex0, texel);
+
     const bool is_lod = false;
 #else
     vec3 closest = get_closest_fragment(depthtex0, texel);
     vec3 closest_lod = get_closest_fragment(lod_depth_tex, texel);
+
     bool is_lod = is_lod_terrain(closest.z, closest_lod.z);
+
     closest = is_lod ? closest_lod : closest;
 #endif
 
@@ -264,19 +296,28 @@ void main() {
 
     vec3 history_color
         = catmull_rom_filter_fast_rgb(colortex5, previous_uv, 0.6);
-    history_color = max0(history_color);
+    history_color = max0(history_color); // Eliminate NaNs in the history
 
     float pixel_age = texelFetch(colortex5, ivec2(previous_uv * view_res), 0).a;
     pixel_age
         = max0(pixel_age * float(clamp01(previous_uv) == previous_uv) + 1.0);
 
+    // Distance factor to favour responsiveness closer to the camera and image
+    // stability further away
     float distance_factor = 1.0 - exp2(-0.025 * length(closest_view));
+
+    // Dynamic blend weight lending equal weight to all frames in the history,
+    // drastically reducing time taken to converge when upscaling
     float blend_weight = mix(0.35, 0.10, distance_factor);
     float alpha = max(1.0 / pixel_age, blend_weight);
 
 #ifndef TAAU
+    // Native resolution TAA
     vec3 current_color = texelFetch(colortex0, texel, 0).rgb;
 
+    // "Tonemapping" before applying TAA in order to perform the AA in SDR
+    // This improves the result because the differences between the luminances
+    // are closer to how they will be in the final output
     current_color = reinhard(current_color);
     history_color = reinhard(history_color);
 
@@ -287,28 +328,31 @@ void main() {
         distance_factor
     );
 #else
+    // Temporal upscaling
     vec2 pos = clamp01(uv + 0.5 * taa_offset * rcp(taau_render_scale))
         * taau_render_scale;
 
-    float confidence;
+    float confidence; // Confidence-of-quality factor, see "A Survey of Temporal
+                      // Antialiasing Techniques" section 5.1
     vec3 current_color = catmull_rom_filter(colortex0, pos, confidence).rgb;
 
     if (min_of(current_color) < 0.0) {
+        // Fix negatives arising around very dark objects
         current_color = texture(colortex0, pos).rgb;
     }
 
     current_color = reinhard(current_color);
     history_color = reinhard(history_color);
 
+    // Interpolate AABB bounds across pixels
     vec3 min_color = texture(colortex1, pos).rgb * 2.0 - 1.0;
     vec3 max_color = texture(colortex2, pos).rgb * 2.0 - 1.0;
-    float flicker_reduction;
 
     bool history_clipped;
     history_color = rgb_to_ycocg(history_color);
     history_color
         = clip_aabb(history_color, min_color, max_color, history_clipped);
-    flicker_reduction = history_clipped
+    float flicker_reduction = history_clipped
         ? 0.0
         : get_flicker_reduction(history_color, min_color, max_color);
     history_color = ycocg_to_rgb(history_color);
@@ -317,6 +361,8 @@ void main() {
     alpha *= 1.0 - TAAU_FLICKER_REDUCTION * flicker_reduction;
 #endif
 
+    // Offcenter rejection from Jessie, which is originally by Zombye
+    // Reduces blur in motion
     vec2 pixel_offset = 1.0 - abs(2.0 * fract(view_res * previous_uv) - 1.0);
     float offcenter_rejection
         = sqrt(pixel_offset.x * pixel_offset.y) * TAA_OFFCENTER_REJECTION
@@ -330,10 +376,12 @@ void main() {
     current_color = reinhard_inverse(current_color);
 
     result = vec4(current_color, pixel_age * offcenter_rejection);
-#else
+#else // TAA disabled
     result = texelFetch(colortex0, texel, 0);
 #endif
 
+    // Store exposure in the alpha component of the bottom left texel of the
+    // history buffer
     if (texel == ivec2(0)) {
         result.a = exposure;
     }

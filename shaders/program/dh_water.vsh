@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Luster Shaders
+  Photon Shader by SixthSurge
 
   program/dh_water:
   Translucent Distant Horizons terrain
@@ -10,6 +10,7 @@
 */
 
 #include "/include/global.glsl"
+#include "/include/lighting/ibl/ibl.glsl"
 
 out vec2 light_levels;
 out vec3 scene_pos;
@@ -19,29 +20,6 @@ out vec4 tint;
 flat out uint is_water;
 flat out vec3 light_color;
 flat out vec3 ambient_color;
-
-// ------------
-//   Distant Horizons built-ins
-// ------------
-// Iris injects `dhMaterialId` as a vertex attribute when Distant Horizons
-// is active. Keep the declaration local so the source remains self-contained when
-// the DH injection path is not present. At runtime Iris's own declaration
-// takes precedence (declarations are idempotent). `flat` is not
-// allowed on vertex inputs (per-vertex attributes don't interpolate), so
-// the plain `in` qualifier.
-in int dhMaterialId;
-
-// DH material-ID enum. Iris defines these when support is enabled; the
-// provide fallbacks so the file compiles in their absence.
-#ifndef DH_BLOCK_AIR
-#define DH_BLOCK_AIR 0
-#endif
-#ifndef DH_BLOCK_WATER
-#define DH_BLOCK_WATER 11
-#endif
-#ifndef DH_BLOCK_GRASS
-#define DH_BLOCK_GRASS 13
-#endif
 
 #if defined WORLD_OVERWORLD
 #include "/include/fog/overworld/parameters.glsl"
@@ -121,7 +99,12 @@ void main() {
         * (mat3(gl_ModelViewMatrix) * gl_Normal);
 
     light_color = texelFetch(colortex4, ivec2(191, 0), 0).rgb;
-    ambient_color = texelFetch(colortex4, ivec2(191, 1), 0).rgb;
+    // Replace the retired SH skylight with directional IBL irradiance.
+    ambient_color = get_ibl_sky_irradiance(
+        normalize(normal),
+        vec2(0.23, 0.61),
+        4
+    ) * clamp01(light_levels.y);
 
     is_water = uint(dhMaterialId == DH_BLOCK_WATER);
 
@@ -144,7 +127,7 @@ void main() {
 #endif
 
 #if defined WORLD_OVERWORLD
-    fog_params = get_fog_parameters(get_weather(cameraPosition));
+    fog_params = get_fog_parameters(get_weather());
 #endif
 
     gl_Position = clip_pos;

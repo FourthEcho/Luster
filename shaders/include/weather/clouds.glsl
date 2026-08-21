@@ -121,20 +121,8 @@ CloudsParameters get_clouds_parameters(Weather weather) {
 
     // Volumetric layer 0 - cumulus/stratocumulus/stratus
     params.l0_cumulus_stratus_blend = clouds_l0_cumulus_stratus_blend(weather);
-
-    // Compute congestus blend before any function is allowed to consume it.
-    // Initialize the cloud blend parameters before use.
-    params.cumulus_congestus_blend = clouds_cumulus_congestus_blend(
-        weather,
-        vec2(0.5, 0.5)
-    );
-
     params.l0_coverage
         = clouds_l0_coverage(weather, params.cumulus_congestus_blend);
-
-    // Re-evaluate the layer contribution after the final layer coverage is available.
-    params.cumulus_congestus_blend
-        = clouds_cumulus_congestus_blend(weather, params.l0_coverage);
     params.l0_detail_weights
         = clouds_l0_detail_weights(weather, params.l0_cumulus_stratus_blend);
     params.l0_edge_sharpening
@@ -147,13 +135,13 @@ CloudsParameters get_clouds_parameters(Weather weather) {
     params.l1_coverage
         = clouds_l1_coverage(weather, params.l1_cumulus_stratus_blend);
 
-    params.convection = weather.convection;
-    params.storm_intensity = weather.storm;
-
     // Planar clouds
     params.cirrus_amount = clouds_cirrus_amount(weather);
     params.cirrocumulus_amount = clouds_cirrocumulus_amount(weather);
     params.noctilucent_amount = clouds_noctilucent_amount();
+
+    params.cumulus_congestus_blend
+        = clouds_cumulus_congestus_blend(weather, params.l0_coverage);
 
     // Lighting parameters
 
@@ -164,9 +152,7 @@ CloudsParameters get_clouds_parameters(Weather weather) {
               dot(params.l1_coverage, vec2(0.25, 0.75))
                   * (1.0 + params.l1_cumulus_stratus_blend)
           )
-        // Stage-local daylight factor. weather/core.glsl is shared by vertex
-        // stages, so it must not reference the cloud-only day_factor uniform.
-        * dampen(clamp01(0.5 + 0.5 * sun_dir.y));
+        * dampen(day_factor);
     params.l0_extinction_coeff
         = mix(0.05, 0.1, smoothstep(0.0, 0.3, abs(sun_dir.y)))
         * (1.0 - 0.33 * rainStrength) * (1.0 - 0.6 * params.l0_shadow)

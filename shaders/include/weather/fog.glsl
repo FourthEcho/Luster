@@ -12,55 +12,55 @@ OverworldFogParameters get_fog_parameters(Weather weather) {
 
     // Rayleigh coefficient
 
-    vec3 rayleigh_normal
-        = from_native(
+    const vec3 rayleigh_normal
+        = from_srgb(
               vec3(AIR_FOG_RAYLEIGH_R, AIR_FOG_RAYLEIGH_G, AIR_FOG_RAYLEIGH_B)
           )
         * AIR_FOG_RAYLEIGH_DENSITY;
-    vec3 rayleigh_rain
-        = from_native(vec3(
+    const vec3 rayleigh_rain
+        = from_srgb(vec3(
               AIR_FOG_RAYLEIGH_R_RAIN,
               AIR_FOG_RAYLEIGH_G_RAIN,
               AIR_FOG_RAYLEIGH_B_RAIN
           ))
         * AIR_FOG_RAYLEIGH_DENSITY_RAIN;
-    vec3 rayleigh_arid
-        = from_native(vec3(
+    const vec3 rayleigh_arid
+        = from_srgb(vec3(
               AIR_FOG_RAYLEIGH_R_ARID,
               AIR_FOG_RAYLEIGH_G_ARID,
               AIR_FOG_RAYLEIGH_B_ARID
           ))
         * AIR_FOG_RAYLEIGH_DENSITY_ARID;
-    vec3 rayleigh_snowy
-        = from_native(vec3(
+    const vec3 rayleigh_snowy
+        = from_srgb(vec3(
               AIR_FOG_RAYLEIGH_R_SNOWY,
               AIR_FOG_RAYLEIGH_G_SNOWY,
               AIR_FOG_RAYLEIGH_B_SNOWY
           ))
         * AIR_FOG_RAYLEIGH_DENSITY_SNOWY;
-    vec3 rayleigh_taiga
-        = from_native(vec3(
+    const vec3 rayleigh_taiga
+        = from_srgb(vec3(
               AIR_FOG_RAYLEIGH_R_TAIGA,
               AIR_FOG_RAYLEIGH_G_TAIGA,
               AIR_FOG_RAYLEIGH_B_TAIGA
           ))
         * AIR_FOG_RAYLEIGH_DENSITY_TAIGA;
-    vec3 rayleigh_jungle
-        = from_native(vec3(
+    const vec3 rayleigh_jungle
+        = from_srgb(vec3(
               AIR_FOG_RAYLEIGH_R_JUNGLE,
               AIR_FOG_RAYLEIGH_G_JUNGLE,
               AIR_FOG_RAYLEIGH_B_JUNGLE
           ))
         * AIR_FOG_RAYLEIGH_DENSITY_JUNGLE;
-    vec3 rayleigh_swamp
-        = from_native(vec3(
+    const vec3 rayleigh_swamp
+        = from_srgb(vec3(
               AIR_FOG_RAYLEIGH_R_SWAMP,
               AIR_FOG_RAYLEIGH_G_SWAMP,
               AIR_FOG_RAYLEIGH_B_SWAMP
           ))
         * AIR_FOG_RAYLEIGH_DENSITY_SWAMP;
-    vec3 rayleigh_pale_garden
-        = from_native(vec3(
+    const vec3 rayleigh_pale_garden
+        = from_srgb(vec3(
               AIR_FOG_RAYLEIGH_R_PALE_GARDEN,
               AIR_FOG_RAYLEIGH_G_PALE_GARDEN,
               AIR_FOG_RAYLEIGH_B_PALE_GARDEN
@@ -109,7 +109,7 @@ OverworldFogParameters get_fog_parameters(Weather weather) {
     params.mie_extinction_coeff = vec3(mie);
 
 #ifdef DESERT_SANDSTORM
-    const float desert_sandstorm_density = 0.2 * DESERT_SANDSTORM_INTENSITY;
+    const float desert_sandstorm_density = 0.2;
     const float desert_sandstorm_scattering = desert_sandstorm_density * 0.5;
     const vec3 desert_sandstorm_extinction
         = desert_sandstorm_density * vec3(0.2, 0.27, 0.45);

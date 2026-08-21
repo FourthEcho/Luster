@@ -32,6 +32,10 @@ float pow4(float x) { return sqr(sqr(x)); }
 
 float pow5(float x) { return pow4(x) * x; }
 
+float pow6(float x) { return sqr(cube(x)); }
+
+float pow7(float x) { return pow6(x) * x; }
+
 float pow8(float x) { return sqr(pow4(x)); }
 
 float pow12(float x) { return cube(pow4(x)); }
@@ -45,6 +49,27 @@ float pow16(float x) {
 }
 
 float pow32(float x) {
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    return x;
+}
+
+float pow64(float x) {
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    return x;
+}
+
+float pow128(float x) {
+    x *= x;
+    x *= x;
     x *= x;
     x *= x;
     x *= x;
@@ -95,7 +120,7 @@ vec3 clamp_length(vec3 v, float min_len, float max_len) {
 }
 
 // Compute the length of a vector, knowing its direction
-// Alternative implementation retained for benchmark comparison.
+// I don't know if this is really faster
 float length_knowing_direction(vec3 v, vec3 v_norm) {
     if (v_norm.x != 0.0) {
         return abs(v.x / v_norm.x);

@@ -10,24 +10,24 @@
 
   Usage:
 
-  // Initialize text rendering and select the fragment scale.
+  // Call begin_text to initialize the text renderer. You can scale the fragment
 position to adjust the size of the text begin_text(ivec2(gl_FragCoord.xy),
 ivec2(0, viewHeight)); ^ fragment position     ^ text box position (upper left
 corner)
 
-  // Text rendering supports the standard scalar and vector types.
+  // You can print various data types
   print_bool(false);
   print_float(sqrt(-1.0)); // Prints "NaN"
   print_int(42);
-  print_float(sky_color.x);
+  print_vec3(sky_color);
 
   // ...or arbitrarily long strings
   print((_H, _e, _l, _l, _o, _comma, _space, _w, _o, _r, _l, _d));
 
-  // Use the newline helper to advance the text cursor.
+  // To start a new line, use
   print_line();
 
-  // Text color may be updated between draw calls.
+  // You can also configure the text color on the fly
   text.fg_col = vec4(1.0, 0.0, 0.0, 1.0);
   text.bg_col = vec4(0.0, 0.0, 0.0, 1.0);
 
@@ -118,7 +118,7 @@ const uint _minus = 0x0000e000u;
 const uint _comma = 0x00000220u;
 const uint _colon = 0x02000020u;
 
-// Additional glyphs supplied by WoMspace.
+// Additional characters added by WoMspace <3
 const uint _underscore = 0x000007Cu; // _
 const uint _quote = 0x52800000u; // "
 const uint _bang = 0x21084010u; // !
@@ -270,6 +270,13 @@ void print_unsigned_int(uint value) {
     print_unsigned_int(value, len);
 }
 
+void print_int(int value) {
+    if (value < 0) {
+        print_char(_minus);
+    }
+    print_unsigned_int(uint(abs(value)));
+}
+
 void print_float(float value) {
     if (value < 0.0) {
         print_char(_minus);
@@ -290,6 +297,134 @@ void print_float(float value) {
         print_char(_dot);
         print_unsigned_int(fractional_part, text.fp_precision);
     }
+}
+
+void print_bool(bool value) {
+    if (value) {
+        print((_t, _r, _u, _e));
+    } else {
+        print((_f, _a, _l, _s, _e));
+    }
+}
+
+void print_vec2(vec2 value) {
+    print_float(value.x);
+    print((_comma, _space));
+    print_float(value.y);
+}
+
+void print_vec3(vec3 value) {
+    print_float(value.x);
+    print((_comma, _space));
+    print_float(value.y);
+    print((_comma, _space));
+    print_float(value.z);
+}
+
+void print_vec4(vec4 value) {
+    print_float(value.x);
+    print((_comma, _space));
+    print_float(value.y);
+    print((_comma, _space));
+    print_float(value.z);
+    print((_comma, _space));
+    print_float(value.w);
+}
+
+void print_ivec2(ivec2 value) {
+    print_int(value.x);
+    print((_comma, _space));
+    print_int(value.y);
+}
+
+void print_ivec3(ivec3 value) {
+    print_int(value.x);
+    print((_comma, _space));
+    print_int(value.y);
+    print((_comma, _space));
+    print_int(value.z);
+}
+
+void print_ivec4(ivec4 value) {
+    print_int(value.x);
+    print((_comma, _space));
+    print_int(value.y);
+    print((_comma, _space));
+    print_int(value.z);
+    print((_comma, _space));
+    print_int(value.w);
+}
+
+void print_uvec2(uvec2 value) {
+    print_unsigned_int(value.x);
+    print((_comma, _space));
+    print_unsigned_int(value.y);
+}
+
+void print_uvec3(uvec3 value) {
+    print_unsigned_int(value.x);
+    print((_comma, _space));
+    print_unsigned_int(value.y);
+    print((_comma, _space));
+    print_unsigned_int(value.z);
+}
+
+void print_uvec4(uvec4 value) {
+    print_unsigned_int(value.x);
+    print((_comma, _space));
+    print_unsigned_int(value.y);
+    print((_comma, _space));
+    print_unsigned_int(value.z);
+    print((_comma, _space));
+    print_unsigned_int(value.w);
+}
+
+void print_bvec2(bvec2 value) {
+    print_bool(value.x);
+    print((_comma, _space));
+    print_bool(value.y);
+}
+
+void print_bvec3(bvec3 value) {
+    print_bool(value.x);
+    print((_comma, _space));
+    print_bool(value.y);
+    print((_comma, _space));
+    print_bool(value.z);
+}
+
+void print_bvec4(bvec4 value) {
+    print_bool(value.x);
+    print((_comma, _space));
+    print_bool(value.y);
+    print((_comma, _space));
+    print_bool(value.z);
+    print((_comma, _space));
+    print_bool(value.w);
+}
+
+void print_mat2(mat2 m) {
+    print_vec2(m[0]);
+    print_line();
+    print_vec2(m[1]);
+}
+
+void print_mat3(mat3 m) {
+    print_vec3(m[0]);
+    print_line();
+    print_vec3(m[1]);
+    print_line();
+    print_vec3(m[2]);
+}
+
+void print_mat4(mat4 m) {
+    print_vec4(m[0]);
+    print_line();
+    print_vec4(m[1]);
+    print_line();
+    print_vec4(m[2]);
+    print_line();
+    print_vec4(m[3]);
 }
 
 #endif // INCLUDE_UTILITY_TEXT_RENDERING

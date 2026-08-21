@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Luster Shaders
+  Photon Shader by SixthSurge
 
   program/dh_water:
   Translucent Distant Horizons terrain
@@ -54,9 +54,11 @@ uniform sampler2D colortex8; // Cloud shadow map
 #endif
 
 uniform sampler2D depthtex0;
-uniform sampler2D depthtex1;  // back-face depth, used by SSRT raytracer via combined_depth_tex
 
-
+#ifdef COLORED_LIGHTS
+uniform sampler3D light_sampler_a;
+uniform sampler3D light_sampler_b;
+#endif
 
 #ifdef SHADOW
 #ifdef WORLD_OVERWORLD
@@ -91,9 +93,8 @@ uniform float far;
 
 uniform float frameTimeCounter;
 uniform float sunAngle;
+uniform float rainStrength;
 uniform float wetness;
-// rainStrength is declared in /include/sky/atmosphere.glsl, included
-// (WORLD_OVERWORLD only) via specular_lighting.glsl
 
 uniform int worldTime;
 uniform int moonPhase;
@@ -148,6 +149,9 @@ uniform vec4 entityColor;
 #endif
 
 #include "/include/fog/simple_fog.glsl"
+#ifdef INDIRECT_LIGHTING
+#undef INDIRECT_LIGHTING
+#endif
 #include "/include/lighting/diffuse_lighting.glsl"
 #include "/include/lighting/shadows/pcss.glsl"
 #include "/include/lighting/specular_lighting.glsl"
@@ -249,10 +253,6 @@ void main() {
         adjusted_light_levels
     );
 
-    // Wet porosity: porous DH terrain gets smoother when wet, matching the
-    // behavior of the close-range path in d4_deferred_shading.fsh.
-    apply_wet_porosity_roughness(material, wetness);
-
     // Shadows
 
 #ifndef NO_NORMAL
@@ -298,7 +298,7 @@ void main() {
 
     // Apply fog
 
-    vec4 fog = common_fog(length(scene_pos), false);
+    vec4 fog = common_fog(length(scene_pos), false, scene_pos);
     fragment_color.rgb = fragment_color.rgb * fog.a + fog.rgb;
 
     fragment_color.a *= border_fog(scene_pos, world_dir);

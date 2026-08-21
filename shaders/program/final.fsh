@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Luster Shaders
+  Photon Shader by SixthSurge
 
   program/program/final.glsl:
   CAS, dithering, debug views
@@ -28,7 +28,9 @@ uniform sampler2D DEBUG_SAMPLER;
 uniform float viewHeight;
 uniform float frameTimeCounter;
 
-
+#ifdef COLORED_LIGHTS
+uniform sampler2D shadowtex0;
+#endif
 
 #include "/include/utility/bicubic.glsl"
 #include "/include/utility/color.glsl"
@@ -70,10 +72,6 @@ vec3 max_of(vec3 a, vec3 b, vec3 c, vec3 d, vec3 f) {
 
 // FidelityFX contrast-adaptive sharpening filter
 // https://github.com/GPUOpen-Effects/FidelityFX-CAS
-// colortex0 arrives here already converted to the selected display
-// primaries (sRGB / Rec.2020 / Display P3) by working_to_display_color in
-// program/c19_color_grading.fsh. Only the transfer function (display_eotf)
-// is applied at this final stage.
 vec3 cas_filter(sampler2D sampler, ivec2 texel, const float sharpness) {
 #ifndef CAS
     return display_eotf(texelFetch(sampler, texel, 0).rgb);
@@ -82,6 +80,7 @@ vec3 cas_filter(sampler2D sampler, ivec2 texel, const float sharpness) {
     // Fetch 3x3 neighborhood
     // a b c
     // d e f
+    // g h i
     vec3 a = texelFetch(sampler, texel + ivec2(-1, -1), 0).rgb;
     vec3 b = texelFetch(sampler, texel + ivec2(0, -1), 0).rgb;
     vec3 c = texelFetch(sampler, texel + ivec2(1, -1), 0).rgb;
@@ -269,7 +268,10 @@ void draw_iris_required_error_message() {
 }
 
 void main() {
-
+#if defined COLORED_LIGHTS && !defined IS_IRIS
+    draw_iris_required_error_message();
+    return;
+#endif
 
     ivec2 texel = ivec2(gl_FragCoord.xy);
 
@@ -328,7 +330,12 @@ void main() {
         : vec3(clamp01(dist * rcp(DISTANCE_VIEW_MAX_DISTANCE)));
 #endif
 
-
+#if defined COLORED_LIGHTS && (defined WORLD_NETHER || !defined SHADOW)
+    // Must sample shadowtex0 so that the shadow map is rendered
+    if (uv.x < 0.0) {
+        fragment_color = texture(shadowtex0, uv).rgb;
+    }
+#endif
 }
 
 #include "/include/buffers.glsl"

@@ -81,12 +81,6 @@ const mat3 rec709_to_ap0 = rec709_to_xyz * d65_to_d60 * xyz_to_ap0;
 const mat3 ap0_to_rec709 = ap0_to_xyz * d60_to_d65 * xyz_to_rec709;
 const mat3 rec709_to_ap1 = rec709_to_xyz * d65_to_d60 * xyz_to_ap1;
 const mat3 ap1_to_rec709 = ap1_to_xyz * d60_to_d65 * xyz_to_rec709;
-const mat3 working_to_ap0 = WORKING_TO_XYZ * d65_to_d60 * xyz_to_ap0;
-const mat3 ap0_to_working = ap0_to_xyz * d60_to_d65 * XYZ_TO_WORKING;
-const mat3 working_to_ap1 = WORKING_TO_XYZ * d65_to_d60 * xyz_to_ap1;
-const mat3 ap1_to_working = ap1_to_xyz * d60_to_d65 * XYZ_TO_WORKING;
-
-// Backward-compatible names for code paths that explicitly need Rec.2020.
 const mat3 rec2020_to_ap0 = rec2020_to_xyz * d65_to_d60 * xyz_to_ap0;
 const mat3 ap0_to_rec2020 = ap0_to_xyz * d60_to_d65 * xyz_to_rec2020;
 const mat3 rec2020_to_ap1 = rec2020_to_xyz * d65_to_d60 * xyz_to_ap1;
@@ -95,7 +89,6 @@ const mat3 ap1_to_rec2020 = ap1_to_xyz * d60_to_d65 * xyz_to_rec2020;
 // Used for quantities that are multiplied by an illuminant, like the diffuse
 // albedo. These take the white point of the light source
 const mat3 rec709_to_ap1_unlit = rec709_to_xyz * xyz_to_ap1;
-const mat3 working_to_ap1_unlit = WORKING_TO_XYZ * xyz_to_ap1;
 const mat3 rec2020_to_ap1_unlit = rec2020_to_xyz * xyz_to_ap1;
 
 #endif // INCLUDE_ACES_MATRICES

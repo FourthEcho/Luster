@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Luster Shaders
+  Photon Shader by SixthSurge
 
   program/gbuffers_basic:
   Handle lines
@@ -17,7 +17,7 @@ in vec4 vaColor;
 
 #ifdef PROGRAM_GBUFFERS_LINE
 // gbuffers_line seems to break in Iris 1.6 when the compatibility profile is
-// the core qualifier is required by the active shader profile
+// used, so we must use the core spec
 in vec3 vaPosition;
 in vec3 vaNormal;
 in ivec2 vaUV2;

@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Luster Shaders
+  Photon Shader by SixthSurge
 
   program/gbuffers_all_solid:
   Handle terrain, entities, the hand, beacon beams and spider eyes
@@ -10,7 +10,6 @@
 */
 
 #include "/include/global.glsl"
-#include "/include/misc/clrwl_compat.glsl"
 
 layout(
     location = 0
@@ -55,6 +54,10 @@ in float vanilla_ao;
 
 #if defined PROGRAM_GBUFFERS_ENTITIES || defined PROGRAM_GBUFFERS_HAND
 in vec2 uv_local;
+#endif
+
+#if defined PROGRAM_GBUFFERS_VOXELS
+in vec3 block_normal;
 #endif
 
 // ------------
@@ -118,12 +121,59 @@ uniform vec4 entityColor;
 #include "/include/utility/fast_math.glsl"
 #include "/include/utility/random.glsl"
 #include "/include/utility/space_conversion.glsl"
-#include "/include/utility/anisotropic_filter.glsl"
+
+#if defined PROGRAM_GBUFFERS_VOXELS
+#endif
 
 #if defined PROGRAM_GBUFFERS_TERRAIN && defined POM
-#define read_tex(x) luster_texture_grad_anisotropic(x, parallax_uv, uv_gradient[0], uv_gradient[1])
+#define read_tex(x) textureGrad(x, parallax_uv, uv_gradient[0], uv_gradient[1])
 #else
-#define read_tex(x) luster_texture_anisotropic(x, uv, dFdx(uv), dFdy(uv), lod_bias)
+#if ANISOTROPIC_FILTERING_MODE != ANISOTROPIC_FILTERING_OFF
+#if ANISOTROPIC_FILTERING_MODE == ANISOTROPIC_FILTERING_2
+  #define ANISOTROPIC_FILTERING_SAMPLES 2
+#elif ANISOTROPIC_FILTERING_MODE == ANISOTROPIC_FILTERING_4
+  #define ANISOTROPIC_FILTERING_SAMPLES 4
+#elif ANISOTROPIC_FILTERING_MODE == ANISOTROPIC_FILTERING_8
+  #define ANISOTROPIC_FILTERING_SAMPLES 8
+#else
+  #define ANISOTROPIC_FILTERING_SAMPLES 16
+#endif
+
+// Emulates anisotropic filtering by taking several elongated samples along
+// the dominant screen-space texture-coordinate gradient (the axis a surface
+// is foreshortened along, e.g. a floor viewed at a grazing angle) and
+// averaging them, rather than relying on a single isotropic mip sample.
+vec4 read_tex_anisotropic(sampler2D samp, vec2 texcoord) {
+    vec2 dx = dFdx(texcoord);
+    vec2 dy = dFdy(texcoord);
+
+    float len_x = length(dx);
+    float len_y = length(dy);
+
+    bool x_is_major = len_x > len_y;
+
+    vec2 major_axis = x_is_major ? dx : dy;
+    vec2 minor_axis = x_is_major ? dy : dx;
+
+    float major_len = max(len_x, len_y);
+    float minor_len = max(min(len_x, len_y), 1e-6);
+
+    float aniso_ratio = clamp(major_len / minor_len, 1.0, float(ANISOTROPIC_FILTERING_SAMPLES));
+    int sample_count = int(aniso_ratio + 0.5);
+
+    vec4 result = vec4(0.0);
+    for (int i = 0; i < sample_count; ++i) {
+        float t = (float(i) + 0.5) / float(sample_count) - 0.5;
+        vec2 sample_uv = texcoord + major_axis * t;
+        result += textureGrad(samp, sample_uv, minor_axis, minor_axis);
+    }
+
+    return result / float(sample_count);
+}
+#define read_tex(x) read_tex_anisotropic(x, uv)
+#else
+#define read_tex(x) texture(x, uv, lod_bias)
+#endif
 #endif
 
 #if TEXTURE_FORMAT == TEXTURE_FORMAT_LAB
@@ -242,9 +292,10 @@ void main() {
     }
 #endif
 
-    float parallax_shadow = 0.0;
+    bool parallax_shadow = false;
     float dither = interleaved_gradient_noise(gl_FragCoord.xy, frameCounter);
 
+#ifndef PROGRAM_GBUFFERS_VOXELS
 #if defined PROGRAM_GBUFFERS_TERRAIN && defined POM
     float view_distance = length(tangent_pos);
 
@@ -280,12 +331,12 @@ void main() {
                 dither
             );
         } else {
-            parallax_shadow = 0.0;
+            parallax_shadow = false;
         }
 #endif
     } else {
         parallax_uv = uv;
-        parallax_shadow = 0.0;
+        parallax_shadow = false;
     }
 #endif
 
@@ -314,6 +365,51 @@ void main() {
 #ifdef SPECULAR_MAPPING
     vec4 specular_map = read_tex(specular);
 #endif
+#else
+    vec3 screen_pos = vec3(
+        gl_FragCoord.xy * view_pixel_size * rcp(taau_render_scale),
+        gl_FragCoord.z
+    );
+
+    vec3 view_pos = screen_to_view_space(screen_pos, true);
+    vec3 scene_pos = view_to_scene_space(view_pos);
+
+    vec3 world_pos = scene_pos + cameraPosition;
+    vec3 world_dir = normalize(scene_pos - gbufferModelViewInverse[3].xyz);
+
+    RayJob ray = RayJob(
+        world_pos - world_offset - 0.001f * block_normal, // Ray origin
+        world_dir, // Ray direction
+        vec3(0),
+        vec3(0),
+        vec3(0),
+        false
+    );
+
+    ray_constraint = ivec3(ray.origin);
+    trace_ray(ray);
+
+    if (!ray.result_hit) {
+        discard;
+    }
+    if (ray.result_normal == vec3(0.0)) {
+        ray.result_normal = block_normal;
+    }
+
+    scene_pos = ray.result_position + world_offset - cameraPosition;
+    view_pos = scene_to_view_space(scene_pos);
+    screen_pos = view_to_screen_space(gbufferProjection, view_pos, true);
+
+    gl_FragDepth = screen_pos.z;
+
+    vec4 base_color = vec4(ray.result_color, 1.0f);
+    vec3 ph_normal = ray.result_normal;
+
+#if defined SPECULAR_MAPPING
+    vec4 specular_map = vec4(0.0f);
+#endif
+#endif
+
 #if defined PROGRAM_GBUFFERS_ENTITIES
     if (material_mask == MATERIAL_LIGHTNING_BOLT) {
         base_color = vec4(1.0);
@@ -387,7 +483,7 @@ void main() {
 
     vec2 adjusted_light_levels = light_levels;
 
-#if defined NORMAL_MAPPING
+#if defined NORMAL_MAPPING && !defined PROGRAM_GBUFFERS_VOXELS
     vec3 normal;
     float material_ao;
     decode_normal_map(normal_map, normal, material_ao);
@@ -401,7 +497,10 @@ void main() {
 #endif
 #endif
 
-#if defined NO_NORMAL
+#if defined PROGRAM_GBUFFERS_VOXELS
+#define flat_normal ph_normal
+#define detailed_normal ph_normal
+#elif defined NO_NORMAL
     // No normal vector => make one from screen-space partial derivatives
     vec3 particle_normal = normalize(cross(dFdx(scene_pos), dFdy(scene_pos)));
 #define flat_normal particle_normal

@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Luster Shaders
+  Photon Shader by SixthSurge
 
   program/gbuffers_skytextured:
   Handle vanilla sun and moon and custom skies
@@ -31,9 +31,8 @@ attribute vec2 mc_midTexCoord;
 // ------------
 
 uniform float sunAngle;
+uniform float rainStrength;
 uniform int moonPhase;
-// rainStrength is declared in /include/sky/atmosphere.glsl, included below
-// via light_color.glsl
 
 uniform vec2 taa_offset;
 

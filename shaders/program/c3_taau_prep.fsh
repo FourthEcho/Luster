@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Luster Shaders
+  Photon Shader by SixthSurge
 
   program/c3_taau_prep:
   Calculate neighborhood limits for TAAU
@@ -20,8 +20,6 @@ in vec2 uv;
 
 uniform sampler2D colortex0;
 
-uniform int frameCounter;
-
 #include "/include/utility/color.glsl"
 
 vec3 min_of(vec3 a, vec3 b, vec3 c, vec3 d, vec3 f) {
@@ -33,7 +31,7 @@ vec3 max_of(vec3 a, vec3 b, vec3 c, vec3 d, vec3 f) {
 }
 
 // Invertible tonemapping operator (Reinhard) applied before blending the
-// Compare current and previous frames to stabilize emissive objects.
+// current and previous frames Improves the appearance of emissive objects
 vec3 reinhard(vec3 rgb) { return rgb / (rgb + 1.0); }
 
 void main() {
@@ -42,6 +40,7 @@ void main() {
     // Fetch 3x3 neighborhood
     // a b c
     // d e f
+    // g h i
     vec3 a = texelFetch(colortex0, texel + ivec2(-1, 1), 0).rgb;
     vec3 b = texelFetch(colortex0, texel + ivec2(0, 1), 0).rgb;
     vec3 c = texelFetch(colortex0, texel + ivec2(1, 1), 0).rgb;
@@ -66,6 +65,7 @@ void main() {
     // Soft minimum and maximum ("Hybrid Reconstruction Antialiasing")
     //        b         a b c
     // (min d e f + min d e f) / 2
+    //        h         g h i
     min_color = min_of(b, d, e, f, h);
     min_color += min_of(min_color, a, c, g, i);
     min_color *= 0.5;
@@ -77,4 +77,6 @@ void main() {
     min_color = min_color * 0.5 + 0.5;
     max_color = max_color * 0.5 + 0.5;
 }
+
+#endif
 //----------------------------------------------------------------------------//

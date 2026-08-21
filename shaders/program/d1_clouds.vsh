@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Luster Shaders
+  Photon Shader by SixthSurge
 
   program/d1_clouds:
   Render clouds and aurora
@@ -41,15 +41,14 @@ uniform float frameTimeCounter;
 
 uniform int isEyeInWater;
 uniform float eyeAltitude;
+uniform float rainStrength;
 uniform float wetness;
-// rainStrength is declared in /include/sky/atmosphere.glsl, included below
 
 uniform vec3 light_dir;
 uniform vec3 sun_dir;
 uniform vec3 moon_dir;
 
 uniform float world_age;
-uniform vec3 cameraPosition;
 
 uniform float time_sunrise;
 uniform float time_noon;
@@ -109,7 +108,7 @@ void main() {
     aurora_amount = get_aurora_amount();
     aurora_colors = get_aurora_colors();
 
-    clouds_params = get_clouds_parameters(get_weather(cameraPosition));
+    clouds_params = get_clouds_parameters(get_weather());
 
     sky_color += aurora_amount * AURORA_CLOUD_LIGHTING
         * mix(aurora_colors[0], aurora_colors[1], 0.25);

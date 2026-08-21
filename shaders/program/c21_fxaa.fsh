@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Luster Shaders
+  Photon Shader by SixthSurge
 
   program/post/fxaa.fsh
   FXAA v3.11 from
@@ -22,12 +22,9 @@ uniform sampler2D colortex0;
 
 uniform vec2 view_pixel_size;
 
-const int max_iterations = FXAA_QUALITY;
-const float[30] quality = float[30](
-    1.0, 1.0, 1.0, 1.0, 1.0, 1.5, 2.0, 2.0, 2.0, 2.0,
-    4.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 12.0, 12.0,
-    12.0, 12.0, 12.0, 12.0, 16.0, 16.0, 16.0, 24.0, 24.0, 32.0
-);
+const int max_iterations = 12;
+const float[12] quality
+    = float[12](1.0, 1.0, 1.0, 1.0, 1.0, 1.5, 2.0, 2.0, 2.0, 2.0, 4.0, 8.0);
 
 const float edge_threshold_min = 0.0312;
 const float edge_threshold_max = 0.125;
@@ -54,6 +51,7 @@ void main() {
     // Fetch 3x3 neighborhood
     // a b c
     // d e f
+    // g h i
     vec3 a = texelFetch(colortex0, texel + ivec2(-1, 1), 0).rgb;
     vec3 b = texelFetch(colortex0, texel + ivec2(0, 1), 0).rgb;
     vec3 c = texelFetch(colortex0, texel + ivec2(1, 1), 0).rgb;
@@ -175,12 +173,12 @@ void main() {
     luma_end_2 -= luma_local_average;
 
     // If the luma deltas at the current extremities are larger than the local
-    // The local gradient identifies the current edge boundary.
+    // gradient, we have reached the side of the edge
     bool reached1 = abs(luma_end_1) >= gradient_scaled;
     bool reached2 = abs(luma_end_2) >= gradient_scaled;
     bool reached_both = reached1 && reached2;
 
-    // Continue the directional search until the edge boundary is reached or the search limit is exceeded.
+    // If the side is not reached, we continue to explore in this direction
     if (!reached1) {
         uv1 -= offset;
     }
@@ -205,7 +203,7 @@ void main() {
             }
 
             // If the luma deltas at the current extremities is larger than the
-            // local The local gradient identifies the current edge boundary.
+            // local gradient, we have reached the side of the edge
             reached1 = abs(luma_end_1) >= gradient_scaled;
             reached2 = abs(luma_end_2) >= gradient_scaled;
             reached_both = reached1 && reached2;

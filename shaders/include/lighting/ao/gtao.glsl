@@ -5,31 +5,7 @@
 #include "/include/utility/fast_math.glsl"
 #include "/include/utility/space_conversion.glsl"
 
-#define GTAO_FALLOFF_START 0.70
-// Internal tuning constants for the GTAO sampling path.
-// These parameters are internal to the GTAO sampling algorithm.
-// tuning values that don't have meaningful user-facing trade-offs: changing
-// them tends to produce visibly broken AO (either over-darkened corners or
-// light-leaking geometry) rather than a useful strength/quality dial.
-//   GTAO_SLICES      : number of directions to sample around the
-//                      hemisphere (Asano 1998 convergence is O(1/slices²)).
-//                      3 is the canonical value used by the original GTA-O
-//                      paper (Jimenez et al. 2016) and matches the
-//                      dithering pattern used in the loop below.
-//   GTAO_SAMPLE_POWER: exponent of the importance-sampling curve that
-//                      biases samples toward the horizon (where most of
-//                      the AO signal lives). 1.35 is the value published
-//                      by Jimenez et al.; values <1 spread samples evenly
-//                      (noisier), >1.5 cluster at horizon (smoother but
-//                      misses interior occlusion).
-//   GTAO_THICKNESS   : depth-rejection threshold — fragments more than
-//                      this many view-space units away from the receiver
-//                      are treated as occluders. 1.10 is a tuned default
-//                      that prevents thin-geometry self-occlusion while
-//                      still catching real occluders within ~1m.
-#define GTAO_SLICES       3
-#define GTAO_SAMPLE_POWER 1.35
-#define GTAO_THICKNESS    1.10
+#define GTAO_FALLOFF_START 0.75
 
 float integrate_arc(vec2 h, float n, float cos_n) {
     vec2 tmp = cos_n + 2.0 * h * sin(n) - cos(2.0 * h - n);
@@ -45,7 +21,7 @@ float compute_maximum_horizon_angle(
     float dither,
     bool is_lod
 ) {
-    float step_size = (GTAO_RADIUS * rcp(float(GTAO_STEPS))) * radius;
+    float step_size = (GTAO_RADIUS * rcp(float(GTAO_HORIZON_STEPS))) * radius;
 
     float max_cos_theta = -1.0;
 
@@ -57,11 +33,12 @@ float compute_maximum_horizon_angle(
            )
            - screen_pos)
               .xy;
-    for (int i = 0; i < GTAO_STEPS; ++i) {
-        float sample_u = (float(i) + 0.5 + dither) * rcp(float(GTAO_STEPS));
-        float sample_scale = pow(clamp01(sample_u), GTAO_SAMPLE_POWER) * float(GTAO_STEPS);
-        vec2 ray_pos = screen_pos.xy + ray_step * sample_scale;
-        ivec2 texel = ivec2(clamp01(ray_pos) * view_res * taau_render_scale - 0.5);
+    vec2 ray_pos = screen_pos.xy
+        + ray_step * (dither + max_of(view_pixel_size) * rcp_length(ray_step));
+
+    for (int i = 0; i < GTAO_HORIZON_STEPS; ++i, ray_pos += ray_step) {
+        ivec2 texel
+            = ivec2(clamp01(ray_pos) * view_res * taau_render_scale - 0.5);
         float depth = texelFetch(combined_depth_tex, texel, 0).x;
 
         if (depth == 1.0 || depth < hand_depth || depth == screen_pos.z) {
@@ -72,10 +49,11 @@ float compute_maximum_horizon_angle(
                           combined_projection_matrix_inverse,
                           vec3(ray_pos, depth),
                           true
-                      ) - view_pos;
+                      )
+            - view_pos;
 
         float len_sq = length_squared(offset);
-        float norm = inversesqrt(max(len_sq, 1e-6));
+        float norm = inversesqrt(len_sq);
 
         float distance_falloff = linear_step(
             GTAO_FALLOFF_START * GTAO_RADIUS,
@@ -85,8 +63,6 @@ float compute_maximum_horizon_angle(
 
         float cos_theta = dot(viewer_dir, offset) * norm;
         cos_theta = mix(cos_theta, -1.0, distance_falloff);
-        cos_theta = max(cos_theta, -0.999);
-        cos_theta = mix(cos_theta, -1.0, clamp01((abs(depth - screen_pos.z) * GTAO_THICKNESS) * 32.0));
 
         max_cos_theta = max(cos_theta, max_cos_theta);
     }

@@ -16,10 +16,6 @@
 #include "/include/fog/overworld/analytic.glsl"
 #endif
 
-#if defined WORLD_OVERWORLD && defined PROGRAM_DEFERRED4 && defined IBL
-#include "/include/lighting/ibl.glsl"
-#endif
-
 // ----------------------
 //   Specular Highlight
 // ----------------------
@@ -93,17 +89,12 @@ vec3 get_specular_highlight(
     float light_radius
         = (sunAngle < 0.5) ? sun_angular_radius : moon_angular_radius;
 
-#ifdef MOON_PHASE_REFLECTIONS
-    // Suppress specular highlights on the new moon.
-    float moon_phase_attenuation = (sunAngle > 0.5 && moonPhase == 4)
-        ? 1.0 - MOON_PHASE_REFLECTIONS_STRENGTH
-        : 1.0;
-#else
-    const float moon_phase_attenuation = 1.0;
-#endif
+    // No specular highlight on a new moon
+    if (sunAngle > 0.5 && moonPhase == 4) {
+        return vec3(0.0);
+    }
 #else
     const float light_radius = SUN_ANGULAR_RADIUS * degree;
-    const float moon_phase_attenuation = 1.0;
 #endif
 
     vec3 fresnel;
@@ -131,22 +122,7 @@ vec3 get_specular_highlight(
     float d = distribution_ggx(NoH_squared, alpha_squared);
     float v = v2_smith_ggx(max(NoL, 1e-2), max(NoV, 1e-2), alpha_squared);
 
-    // Single-scatter GGX specular.
-    vec3 single_scatter = (NoL * d * v) * fresnel * albedo_tint;
-
-    // Kulla-Conty multi-bounce energy compensation.
-    // Adds back the energy lost to inter-microfacet bounces that the single-
-    // scatter BRDF doesn't model. Most visible at high roughness, where GGX
-    // otherwise darkens surfaces noticeably. See bsdf.glsl for the math.
-    vec3 multi_scatter = kulla_conty_residual(
-        max(NoL, 0.0),
-        max(NoV, 1e-2),
-        material.roughness,
-        fresnel
-    ) * albedo_tint;
-
-    return min(single_scatter + multi_scatter, vec3(specular_max_value))
-        * moon_phase_attenuation;
+    return min((NoL * d * v) * fresnel * albedo_tint, vec3(specular_max_value));
 }
 
 // ------------------------
@@ -325,49 +301,6 @@ vec3 get_specular_reflections(
     float skylight,
     bool is_water
 ) {
-#if defined WORLD_OVERWORLD && defined PROGRAM_DEFERRED4 \
-    && defined IBL && !defined ENVIRONMENT_REFLECTIONS
-    // ------------------------------------------------------------------
-    //  Specular IBL path — used when Screen-Space Reflections are
-    //  disabled.  Replaces the entire SSR pipeline below with a pure
-    //  VNDF importance-sampled GGX integral against the live sky map.
-    //  Uses IBL_SPECULAR_SAMPLES rays (vs. SSR_RAY_COUNT in the SSR
-    //  path) and adds a mirror fast-path with the analytical Narkowicz
-    //  BRDF LUT for near-perfect reflectors.  See include/lighting/ibl.glsl
-    //  for the full implementation and references.
-    //
-    //  Active whenever the IBL master toggle is on (no separate
-    //  IBL_SPECULAR toggle exists anymore).  When IBL is off, falls
-    //  through to the existing single-tap sky reflection below.
-    //
-    //  world_dir is camera-to-fragment (the convention used throughout
-    //  get_specular_reflections); get_ibl_specular accepts the same
-    //  world_dir and computes NoV = dot(normal, -world_dir) internally.
-    // ------------------------------------------------------------------
-    vec3 ibl_specular = get_ibl_specular(
-        material,
-        normal,
-        world_dir,
-        skylight
-    );
-
-    ibl_specular *= IBL_SPECULAR_INTENSITY * material.ssr_multiplier;
-
-    if (any(isnan(ibl_specular))) {
-        ibl_specular = vec3(0.0); // don't reflect NaNs
-    }
-
-    return ibl_specular;
-#else
-    // ------------------------------------------------------------------
-    //  SSR path — Screen-Space Reflections raymarch against the depth
-    //  buffer, falling back to a sky tap on miss.  When SSR is enabled
-    //  this is also the specular IBL path: each VNDF-sampled ray that
-    //  misses the depth buffer samples the sky map, so the SSR pipeline
-    //  is itself an unbiased VNDF estimator of the specular IBL integral.
-    //  (Skipping get_ibl_specular here avoids double-counting energy.)
-    // ------------------------------------------------------------------
-
     vec3 albedo_tint
         = material.is_hardcoded_metal ? material.albedo : vec3(1.0);
 
@@ -494,7 +427,6 @@ vec3 get_specular_reflections(
     }
 
     return reflection * material.ssr_multiplier;
-#endif // defined IBL && !defined ENVIRONMENT_REFLECTIONS
 }
 
 #endif // INCLUDE_LIGHTING_SPECULAR_LIGHTING

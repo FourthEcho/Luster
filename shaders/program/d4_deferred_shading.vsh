@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Luster Shaders
+  Photon Shader by SixthSurge
 
   program/d4_deferred_shading:
   Shade terrain and entities, draw sky
@@ -23,6 +23,7 @@ flat out vec3 moon_color;
 #include "/include/fog/overworld/parameters.glsl"
 flat out OverworldFogParameters fog_params;
 
+
 flat out float rainbow_amount;
 #endif
 
@@ -32,15 +33,14 @@ flat out float rainbow_amount;
 
 uniform sampler3D depthtex0; // Atmosphere scattering LUT
 
-uniform sampler2D colortex4; // Sky map, lighting colors
+uniform sampler2D colortex4; // Sky map and lighting colors
 
 uniform int worldTime;
 uniform int worldDay;
 uniform int moonPhase;
 uniform float sunAngle;
+uniform float rainStrength;
 uniform float wetness;
-// rainStrength is declared in /include/sky/atmosphere.glsl, included below
-// (WORLD_OVERWORLD only)
 
 uniform int frameCounter;
 uniform float frameTimeCounter;
@@ -68,7 +68,6 @@ uniform float biome_humidity;
 uniform float desert_sandstorm;
 
 uniform float world_age;
-uniform vec3 cameraPosition;
 uniform float time_sunrise;
 uniform float time_noon;
 uniform float time_sunset;
@@ -99,11 +98,12 @@ void main() {
     ambient_color = texelFetch(colortex4, ivec2(191, 1), 0).rgb;
 
 #if defined WORLD_OVERWORLD
-    Weather weather = get_weather(cameraPosition);
+    Weather weather = get_weather();
 
     sun_color = get_sun_exposure() * get_sun_tint();
     moon_color = get_moon_exposure() * get_moon_tint();
     fog_params = get_fog_parameters(weather);
+
 
     rainbow_amount = get_rainbow_amount(weather);
 #endif

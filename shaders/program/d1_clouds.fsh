@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Luster Shaders
+  Photon Shader by SixthSurge
 
   program/d1_clouds:
   Render clouds and aurora
@@ -38,7 +38,15 @@ uniform sampler3D colortex6; // 3D bubbly worley noise
 #define SAMPLER_WORLEY_BUBBLY colortex6
 uniform sampler3D colortex7; // 3D swirley worley noise
 #define SAMPLER_WORLEY_SWIRLEY colortex7
-// curl_noise_3d is declared by /include/sky/clouds/common.glsl and bound in shaders.properties.
+
+// 3D noise textures for cloud rendering (bound as custom-named samplers in
+// shaders.properties — they don't consume any colortex slot).
+//   perlin_3d     — multi-octave Perlin noise (3 channels at freq 1/2/4)
+//   curl_3d       — divergence-free 3D velocity field for advection
+//   blue_noise_3d — 3D blue noise for raymarch dithering
+uniform sampler3D perlin_3d;
+uniform sampler3D curl_3d;
+uniform sampler3D blue_noise_3d;
 
 uniform sampler2D colortex8; // cloud shadow map
 
@@ -46,7 +54,6 @@ uniform sampler3D depthtex0; // atmospheric scattering LUT
 uniform sampler2D depthtex1;
 
 uniform sampler2D noisetex;
-uniform sampler3D blue_noise_3d;
 
 uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
@@ -71,9 +78,8 @@ uniform float frameTimeCounter;
 
 uniform int isEyeInWater;
 uniform float eyeAltitude;
+uniform float rainStrength;
 uniform float wetness;
-// rainStrength is declared in /include/sky/atmosphere.glsl, included below
-// (WORLD_OVERWORLD only)
 
 uniform vec3 light_dir;
 uniform vec3 sun_dir;
@@ -175,7 +181,8 @@ void main() {
 
     // LoD terrain support
 #ifdef LOD_MOD_ACTIVE
-    float depth_lod = depth_max_4x4(lod_depth_tex, lod_depth_tex_scale);
+    float depth_lod
+        = depth_max_4x4(lod_depth_tex_shading, lod_depth_tex_scale);
     bool is_lod = is_lod_terrain(depth_max, depth_lod);
 
     if (is_lod) {
@@ -208,15 +215,14 @@ void main() {
         /* use_klein_nishina_phase */ false
     );
 
-    float dither = texelFetch(noisetex, ivec2(checkerboard_pos & 511), 0).b;
-    dither = r1(frameCounter / checkerboard_area, dither);
-
-    vec3 blue_noise_coord = vec3(
-        fract((vec2(checkerboard_pos) + 0.5) / vec2(view_res)),
-        fract(float(frameCounter) * 0.61803398875 + taa_offset.x + taa_offset.y)
-    );
-    float blue_dither = texture(blue_noise_3d, blue_noise_coord).r;
-    dither = mix(dither, blue_dither, 0.72);
+    // 3D blue-noise dither: combines the 2D screen-space noisetex dither with
+    // a 3D blue-noise sample along the ray direction. The 3D blue noise varies
+    // per-ray-step (because ray_pos changes) which reduces visible banding in
+    // cloud silhouettes that the 2D-only dither can't fix.
+    float dither_2d = texelFetch(noisetex, ivec2(checkerboard_pos & 511), 0).b;
+    dither_2d = r1(frameCounter / checkerboard_area, dither_2d);
+    float dither_3d = texture(blue_noise_3d, ray_origin * 0.001 + vec3(0.0, 0.0, frameTimeCounter * 0.05)).r;
+    float dither = fract(dither_2d * 0.5 + dither_3d * 0.5);
 
 #ifndef BLOCKY_CLOUDS
     CloudsResult result = draw_clouds(

@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Luster Shaders
+  Photon Shader by SixthSurge
 
   program/program/c22_copy_ao.fsh:
   manally copies colortex6 alt to main to fix ao on intel

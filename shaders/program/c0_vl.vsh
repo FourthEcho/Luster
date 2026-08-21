@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Luster Shaders
+  Photon Shader by SixthSurge
 
   program/c0_vl:
   Calculate volumetric fog
@@ -25,7 +25,7 @@ flat out OverworldFogParameters fog_params;
 //   Uniforms
 // ------------
 
-uniform sampler2D colortex4; // Sky map, lighting color palette, sky SH
+uniform sampler2D colortex4; // Sky map and lighting color palette
 
 uniform float rainStrength;
 uniform float sunAngle;
@@ -51,7 +51,6 @@ uniform float biome_temperature;
 uniform float biome_humidity;
 
 uniform float world_age;
-uniform vec3 cameraPosition;
 uniform float time_sunrise;
 uniform float time_noon;
 uniform float time_sunset;
@@ -71,7 +70,7 @@ void main() {
     ambient_color = texelFetch(colortex4, ivec2(191, 1), 0).rgb;
 
 #if defined WORLD_OVERWORLD
-    fog_params = get_fog_parameters(get_weather(cameraPosition));
+    fog_params = get_fog_parameters(get_weather());
 #endif
 
     vec2 vertex_pos = gl_Vertex.xy;

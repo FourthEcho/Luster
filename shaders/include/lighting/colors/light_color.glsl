@@ -6,14 +6,6 @@
 
 uniform float moon_phase_brightness;
 
-// Earthshine amount in [0, 1], precomputed from moonPhase in
-// shaders.properties. 0 at full moon (pure user tint), 1 at new moon
-// (full earthshine tint). The value uses a float uniform to avoid
-// to redeclare `uniform int moonPhase;` here — that would clash with
-// the local declarations in many .vsh/.fsh programs that include this
-// file and trigger a redeclaration error.
-uniform float moon_earthshine_amount;
-
 // Magic brightness adjustment so that auto exposure isn't needed
 float get_sun_exposure() {
     const float base_scale = 7.0 * SUN_I;
@@ -43,9 +35,9 @@ vec3 get_sun_tint() {
 
     // User tint
 
-    vec3 tint_morning = from_native(vec3(SUN_MR, SUN_MG, SUN_MB));
-    vec3 tint_noon = from_native(vec3(SUN_NR, SUN_NG, SUN_NB));
-    vec3 tint_evening = from_native(vec3(SUN_ER, SUN_EG, SUN_EB));
+    const vec3 tint_morning = from_srgb(vec3(SUN_MR, SUN_MG, SUN_MB));
+    const vec3 tint_noon = from_srgb(vec3(SUN_NR, SUN_NG, SUN_NB));
+    const vec3 tint_evening = from_srgb(vec3(SUN_ER, SUN_EG, SUN_EB));
 
     vec3 user_tint = mix(tint_noon, tint_morning, time_sunrise);
     user_tint = mix(user_tint, tint_evening, time_sunset);
@@ -58,27 +50,13 @@ float get_moon_exposure() {
 
     float time_boost = 1.0 + 0.33 * rcp(clamp01(1.25 * max(-sun_dir.y, 0.1)));
 
-#ifdef MOON_PHASE_NIGHT_LIGHTING
-    float phase_scale = mix(1.0, moon_phase_brightness, MOON_PHASE_LIGHTING_STRENGTH);
-#else
-    float phase_scale = 1.0;
-#endif
-
-    return base_scale * phase_scale * time_boost;
+    return base_scale * moon_phase_brightness * time_boost;
 }
 
 vec3 get_moon_tint() {
-    vec3 base_tint = from_native(vec3(MOON_R, MOON_G, MOON_B));
+    const vec3 base_tint = from_srgb(vec3(MOON_R, MOON_G, MOON_B));
 
-    // Earthshine — the warm glow produced when sunlight reflected off Earth
-    // illuminates the dark portion of the moon using the canonical
-    // earthshine RGB (1.15, 0.85, 0.65) at 15% peak brightness.
-    vec3 earthshine_tint = from_native(vec3(1.15, 0.85, 0.65)) * 0.15;
-
-    // moon_earthshine_amount is precomputed in shaders.properties from
-    // moonPhase: 0 at full moon (pure user tint), 1 at new moon (full
-    // earthshine), smoothly interpolating through crescent phases.
-    return mix(base_tint, earthshine_tint, moon_earthshine_amount);
+    return base_tint;
 }
 
 vec3 get_light_color() {
@@ -96,6 +74,12 @@ vec3 get_light_color() {
     light_color *= 1.0 - 0.25 * pulse(abs(light_dir.y), 0.15, 0.11);
 
     return light_color;
+}
+
+float get_skylight_boost() {
+    float early_night
+        = linear_step(0.05, 1.0, exp(-25.0 * sqr(sun_dir.y + 0.3)));
+    return 1.0 + 0.5 * early_night;
 }
 
 #endif // INCLUDE_LIGHTING_COLORS_LIGHT_COLOR

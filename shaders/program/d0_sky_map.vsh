@@ -1,10 +1,10 @@
 /*
 --------------------------------------------------------------------------------
 
-  Luster Shaders
+  Photon Shader by SixthSurge
 
   program/d0_sky_map:
-  Render omnidirectional sky map for reflections and SH lighting
+  Render omnidirectional sky map for reflections and environment irradiance
 
 --------------------------------------------------------------------------------
 */
@@ -41,9 +41,8 @@ uniform sampler3D depthtex0; // atmospheric scattering LUT
 
 uniform float blindness;
 uniform float eyeAltitude;
+uniform float rainStrength;
 uniform float wetness;
-// rainStrength is declared in /include/sky/atmosphere.glsl, included below
-// via light_color.glsl and weather_color.glsl
 
 uniform int worldTime;
 uniform int worldDay;
@@ -62,7 +61,6 @@ uniform vec3 sun_dir;
 uniform vec3 moon_dir;
 
 uniform float world_age;
-uniform vec3 cameraPosition;
 uniform float eye_skylight;
 
 uniform float time_sunrise;
@@ -141,7 +139,7 @@ void main() {
     aurora_amount = get_aurora_amount();
     aurora_colors = get_aurora_colors();
 
-    Weather weather = get_weather(cameraPosition);
+    Weather weather = get_weather();
     rainbow_amount = get_rainbow_amount(weather);
     clouds_params = get_clouds_parameters(weather);
     fog_params = get_fog_parameters(weather);
@@ -150,8 +148,7 @@ void main() {
     vec3 aurora_lighting
         = mix(aurora_colors[0], aurora_colors[1], 0.25) * aurora_amount;
     sky_color += AURORA_CLOUD_LIGHTING * aurora_lighting;
-    // Aurora ground influence — tints the ground/skylight ambient
-    ambient_color += AURORA_GROUND_LIGHTING * aurora_lighting;
+    ambient_color += AURORA_CLOUD_LIGHTING * aurora_lighting;
 #endif
 
     gl_Position = vec4(gl_Vertex.xy * 2.0 - 1.0, 0.0, 1.0);

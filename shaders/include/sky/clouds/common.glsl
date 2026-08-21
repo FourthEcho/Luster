@@ -12,20 +12,6 @@
 
 uniform float day_factor;
 
-// 3D curl vector field loaded from shaders/image/curl_3d.dat.
-// The raw RGB8 values are encoded from [-1, 1] into [0, 1].
-uniform sampler3D curl_noise_3d;
-uniform sampler3D perlin_noise_3d;
-
-vec3 sample_curl_noise_3d(vec3 coord) {
-    return texture(curl_noise_3d, fract(coord)).xyz * 2.0 - 1.0;
-}
-
-float sample_perlin_noise_3d(vec3 coord) {
-    // Precomputed tileable 4-octave 3D improved-Perlin field, normalized to [0, 1].
-    return texture(perlin_noise_3d, fract(coord)).r;
-}
-
 // ----
 
 struct CloudsResult {
@@ -66,77 +52,6 @@ vec2 perlin_gradient(vec2 coord) {
 vec2 curl2D(vec2 coord) {
     vec2 gradient = perlin_gradient(coord);
     return vec2(gradient.y, -gradient.x);
-}
-
-float clouds_ground_ambient_weight(float altitude_fraction) {
-    return mix(1.30, 0.28, smoothstep(0.0, 1.0, altitude_fraction));
-}
-
-float clouds_sky_ambient_weight(float altitude_fraction) {
-    return mix(0.48, 1.18, smoothstep(0.0, 1.0, altitude_fraction));
-}
-
-float clouds_core_light_attenuation(
-    float density,
-    float light_optical_depth,
-    float altitude_fraction
-) {
-    float core = smoothstep(0.18, 0.85, density);
-    float vertical = mix(1.0, 0.72, smoothstep(0.35, 1.0, altitude_fraction));
-    return exp(-0.42 * light_optical_depth * core * vertical);
-}
-
-float clouds_internal_bounce_light(
-    float direct_light,
-    float density,
-    float light_optical_depth,
-    float altitude_fraction,
-    float cos_theta
-) {
-    // Bounce 0 is direct sunlight. Each enabled bounce carries the previous
-    // bounce through a density-dependent feedback term. Height and angular
-    // response deliberately vary per bounce so the result does not collapse
-    // into the same multiplier repeated N times.
-    float bounce_light = direct_light;
-    float accumulated = 0.0;
-
-    float height = clamp01(altitude_fraction);
-    float forward = clamp01(cos_theta * 0.5 + 0.5);
-    float edge = 1.0 - smoothstep(0.16, 0.68, density);
-    float density_feedback = mix(0.08, 0.52, smoothstep(0.02, 0.75, density));
-
-    for (int i = 0; i < CLOUDS_LIGHTING_BOUNCES; ++i) {
-        float bounce = float(i + 1);
-        float height_gain = mix(1.04 - 0.05 * bounce,
-                                0.70 - 0.025 * bounce,
-                                height);
-        float angle_gain = mix(0.62 + 0.04 * bounce,
-                                1.18 + 0.06 * bounce,
-                                forward);
-        float edge_gain = 1.0 + 0.35 * edge * forward;
-        float attenuation = exp(
-            -light_optical_depth
-                * mix(0.58 + 0.05 * bounce, 0.82 + 0.08 * bounce, height)
-                * (0.55 + 0.45 * clamp01(density))
-        );
-
-        bounce_light *= attenuation * density_feedback
-            * height_gain * angle_gain * edge_gain;
-
-        // Later bounces are increasingly diffuse and weaker.
-        bounce_light *= mix(0.94, 0.68, clamp01(0.20 * bounce));
-        accumulated += bounce_light;
-
-        density_feedback *= mix(0.90, 0.68, height);
-    }
-
-    return accumulated;
-}
-
-float clouds_silver_lining(float density, float cos_theta) {
-    float edge = 1.0 - smoothstep(0.12, 0.58, density);
-    float facing = smoothstep(0.20, 0.92, cos_theta * 0.5 + 0.5);
-    return 1.0 + 0.42 * edge * facing;
 }
 
 float clouds_phase_single(float cos_theta) { // Single scattering phase function

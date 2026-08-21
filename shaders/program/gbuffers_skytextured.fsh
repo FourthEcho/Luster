@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Luster Shaders
+  Photon Shader by SixthSurge
 
   program/gbuffers_skytextured:
   Handle vanilla sun and moon and custom skies
@@ -31,6 +31,7 @@ flat in vec3 moon_color;
 // ------------
 
 uniform sampler2D gtexture;
+uniform sampler2D noisetex;
 
 uniform int moonPhase;
 uniform int renderStage;
@@ -58,16 +59,14 @@ void main() {
     } else if (dot(view_pos, view_sun_dir) > 0.0) {
         // Sun
 
-        // Avoid renderStage here; stage labels can vary across Iris/Minecraft versions.
-
-        // Compute the sky-texture offset before the alpha discard so texture coordinates remain consistent for all surviving fragments.
-        // after, which meant the discard used an uninitialized variable.
-        offset = uv * 2.0 - 1.0;
+        // NB: not using renderStage to distinguish sun and moon because it's
+        // broken in Iris for Minecraft 1.21.4
 
         // Cut out the sun itself (discard the halo around it)
         if (max_of(abs(offset)) > 0.25) {
             discard;
         }
+        offset = uv * 2.0 - 1.0;
 
 #ifdef VANILLA_SUN
         frag_color = texture(gtexture, new_uv).rgb;

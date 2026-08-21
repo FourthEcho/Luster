@@ -7,18 +7,8 @@
 #include "/include/surface/material.glsl"
 #include "/include/utility/fast_math.glsl"
 #include "/include/utility/phase_functions.glsl"
-#if defined WORLD_OVERWORLD && defined PROGRAM_DEFERRED4
-#ifdef IBL
-#include "/include/lighting/ibl.glsl"
-#endif
-// This lighting path does not consume a composite SSGI or multi-bounce irradiance buffer.
-// shadowed areas are lit by skylight/blocklight/cave lighting here in
-// the gbuffer pass.
-#endif
-
-
 #ifdef COLORED_LIGHTS
-#include "/include/lighting/colored_blocklight.glsl"
+#include "/include/lighting/lpv/blocklight.glsl"
 #endif
 
 #ifdef HANDHELD_LIGHTING
@@ -81,36 +71,29 @@ vec3 sss_approx(
     float LoV,
     float shadow
 ) {
-    if (sss_amount < eps) return vec3(0.0);
+    // Transmittance-based SSS
+    if (sss_amount < eps) {
+        return vec3(0.0);
+    }
 
-    float depth = max(sss_depth, 0.0);
-    float sigma = max(0.02, 0.35 + 2.2 * sss_amount);
-    float r = depth / sigma;
-    float burley = exp(-r) * (1.0 + r) / (8.0 * pi * sigma * sigma);
-    burley *= (1.0 - 0.35 * rcp(1.0 + 3.0 * sss_amount));
+    vec3 coeff = albedo * inversesqrt(dot(albedo, luminance_weights) + eps);
+    coeff = 0.75 * clamp01(coeff);
+    coeff = (1.0 - coeff) * sss_density / sss_amount;
 
-    float phase_front = henyey_greenstein_phase(LoV, 0.35);
-    float phase_back  = henyey_greenstein_phase(-LoV, 0.65);
-    float transmission = mix(phase_front, phase_back, clamp01(0.65 + 0.35 * (1.0 - shadow)));
+    float phase
+        = mix(isotropic_phase, henyey_greenstein_phase(-LoV, 0.7), 0.33);
 
-    vec3 diffuse_color = albedo * burley * (0.65 + 0.35 * transmission);
-    vec3 wrap = albedo * pow(clamp01(0.5 + 0.5 * LoV), 1.5) * (0.25 + 0.75 * sss_amount);
-    vec3 sss = (diffuse_color + wrap) * (1.6 * SSS_INTENSITY) * sss_amount;
+    vec3 sss = sss_scale * phase * exp2(-coeff * sss_depth) * dampen(sss_amount)
+        * pi;
 
 #ifdef SSS_SHEEN
-    float grazing = pow5(clamp01(1.0 - abs(LoV)));
-    float sheen_lobe = mix(
-        henyey_greenstein_phase(-LoV, 0.5),
-        pow(max(0.0, 1.0 - abs(LoV)), 1.6),
-        0.55
-    );
-    vec3 sheen_tint = normalize(max(albedo, vec3(0.02))) * 0.8 + vec3(0.2);
-    vec3 sheen = sheen_tint * sheen_lobe * grazing * sheen_amount
-        * SSS_SHEEN_INTENSITY * (0.35 + 0.65 * sss_amount);
-    sss += sheen;
+    vec3 sheen = (0.8 * SSS_INTENSITY) * rcp(albedo + eps)
+        * exp2(-1.0 * coeff * sss_depth) * henyey_greenstein_phase(-LoV, 0.5)
+        * linear_step(-0.8, -0.2, -LoV);
+    sss += sheen * sheen_amount;
 #endif
 
-    return max(sss * shadow, vec3(0.0));
+    return sss;
 }
 #else
 vec3 sss_approx(
@@ -136,19 +119,21 @@ vec3 get_block_lighting(
     vec2 light_levels,
     float ao,
     float directional_lighting
-#ifdef COLORED_LIGHTS
-    , uint material_mask
-#endif
 ) {
     vec3 lighting = vec3(0.0f);
 
     float blocklight_falloff
         = get_blocklight_falloff(light_levels.x, light_levels.y, ao);
     vec3 mc_blocklight = (blocklight_falloff * directional_lighting)
-        * (blocklight_scale * get_blocklight_color());
+        * (blocklight_scale * blocklight_color);
 
 #ifdef COLORED_LIGHTS
-    lighting += get_colored_blocklight(mc_blocklight, material_mask, blocklight_falloff);
+    lighting += get_lpv_blocklight(
+        scene_pos,
+        flat_normal,
+        mc_blocklight,
+        ao * directional_lighting
+    );
 #else
     lighting += mc_blocklight;
 #endif
@@ -168,39 +153,23 @@ vec3 get_sky_lighting(
     float ambient_sss,
     float directional_lighting
 ) {
-    vec3 lighting = vec3(0.0f);
+    vec3 lighting = vec3(0.0);
 
-#if defined WORLD_OVERWORLD && defined PROGRAM_DEFERRED4
-#ifdef IBL
-    // Skip the IBL diffuse integration (16-32 sky-map taps per pixel via
-    // get_ibl_irradiance) for pixels with negligible skylight — the result
-    // is multiplied by get_skylight_falloff(light_levels.y) = sqr(skylight)
-    // below, so for light_levels.y < 0.02 the contribution is < 0.0004 and
-    // invisible.  This is a meaningful win in cave/indoor-heavy scenes where
-    // most of the screen has light_levels.y ≈ 0.
-    vec3 skylight = light_levels.y < 0.02
-        ? vec3(0.0)
-        : IBL_INTENSITY * get_ibl_irradiance(bent_normal, ao);
-    vec3 skylight_up = ambient_color;
-#else
+    // Skylight is sourced from Luster's ambient_color. The indirect-lighting
+    // path now runs as a separate deferred pass chain (program/gi/*) and is
+    // sampled in d4_deferred_shading, so it does not need to be injected here.
     vec3 skylight = ambient_color * ao;
     vec3 skylight_up = skylight;
-#endif
-#else
-    vec3 skylight = ambient_color * ao;
-    vec3 skylight_up = skylight;
-#endif
 
-    // Skylight SSS
     skylight = mix(skylight, 0.5 * skylight_up * ao, material.sss_amount);
+    skylight += ambient_sss * skylight_up * material.sss_amount * 2.0;
 
 #if defined WORLD_NETHER
-    // Brighten + desaturate nether ambient
     skylight = 16.0 * directional_lighting
-        * mix(skylight, vec3(dot(skylight, luminance_weights)), 0.5);
+        * mix(skylight, vec3(dot(skylight, luminance_weights_rec2020)), 0.5);
 #endif
 
-    lighting += skylight * SKYLIGHT_I * get_skylight_falloff(light_levels.y);
+    lighting += skylight * get_skylight_falloff(light_levels.y);
 
     return lighting;
 }
@@ -237,7 +206,8 @@ vec3 get_diffuse_lighting(
 
     // Arbitrary directional shading to make faces easier to distinguish
     float directional_lighting
-        = (0.9 + 0.1 * normal.x) * (0.8 + 0.2 * abs(flat_normal.y));
+        = (0.9 + 0.1 * normal.x) * (0.8 + 0.2 * abs(flat_normal.y))
+        + 2.0 * ambient_sss * material.sss_amount;
 
     // Negative SSS depth => SSS blocked by occluder (SSRT SSS)
     bool sss_blocked = sss_depth < 0.0 || light_levels.y < 0.1;
@@ -253,10 +223,14 @@ vec3 get_diffuse_lighting(
         * (1.0 - 0.5 * material.sss_amount)
     );
 
-    // This lighting stage does not consume a composite SSGI or multi-bounce irradiance buffer.
-    // Shadowed pixels rely on skylight, blocklight and cave lighting only.
+#define DO_BOUNCED_LIGHTING true
 
-#ifdef SUB_SURFACE_SCATTERING
+    vec3 bounced = vec3(0.0);
+    if (DO_BOUNCED_LIGHTING) {
+        bounced = 0.033 * (1.0 - shadows) * (1.0 - 0.1 * max0(normal.y))
+            * pow1d5(ao + eps) * pow4(light_levels.y) * BOUNCED_LIGHT_I;
+    }
+
     vec3 sss = sss_approx(
                    material.albedo,
                    material.sss_amount,
@@ -270,12 +244,9 @@ vec3 get_diffuse_lighting(
     // Adjust SSS outside of shadow distance
     sss *= mix(
         1.0,
-        ao * (clamp01(NoL) * 0.8 + 0.2),
+        (ao + pi * ambient_sss) * (clamp01(NoL) * 0.8 + 0.2),
         clamp01(shadow_distance_fade)
     );
-#else
-    const vec3 sss = vec3(0.0);
-#endif
 
 #ifdef AO_IN_SUNLIGHT
     diffuse *= sqr(ao);
@@ -283,26 +254,17 @@ vec3 get_diffuse_lighting(
 
 #ifdef SHADOW_VPS
     // Add SSS and diffuse
-    lighting += diffuse * shadows + sss;
+    lighting += diffuse * shadows + bounced + sss;
 #else
     // Blend SSS and diffuse
-    lighting += mix(diffuse, sss, material.sss_amount) * shadows;
+    lighting += mix(diffuse, sss, material.sss_amount) * shadows + bounced;
 #endif
 #else
     // Simple shading for when shadows are disabled
-#ifdef SUB_SURFACE_SCATTERING
-#ifdef SSS_SHEEN
     vec3 sss = 0.08 * sss_scale * pi
-        + SSS_SHEEN_INTENSITY * 0.5 * material.sheen_amount
-            * rcp(material.albedo + eps)
+        + 0.5 * material.sheen_amount * rcp(material.albedo + eps)
             * henyey_greenstein_phase(-LoV, 0.5)
             * linear_step(-0.8, -0.2, -LoV);
-#else
-    vec3 sss = 0.08 * sss_scale * pi;
-#endif
-#else
-    const vec3 sss = vec3(0.0);
-#endif
 
     vec3 diffuse
         = vec3(lift(max0(NoL), 0.5 * rcp(SHADING_STRENGTH)) * 0.6 + 0.4)
@@ -332,6 +294,8 @@ vec3 get_diffuse_lighting(
         directional_lighting
     );
 
+// IBL is wired in from program/d4_deferred_shading.fsh where view_dir is in scope.
+
     // Blocklight
 
     lighting += get_block_lighting(
@@ -340,9 +304,6 @@ vec3 get_diffuse_lighting(
         light_levels,
         ao,
         directional_lighting
-    #ifdef COLORED_LIGHTS
-        , material.material_mask
-    #endif
     );
 
     lighting += material.emission * emission_scale;
@@ -351,7 +312,7 @@ vec3 get_diffuse_lighting(
     // Cave lighting
 
     lighting += 0.15 * CAVE_LIGHTING_I * directional_lighting * ao
-        * (1.0 - pow(light_levels.y, CAVE_LIGHTING_FALLOFF))
+        * (1.0 - light_levels.y * light_levels.y)
         * (1.0 - 0.7 * darknessFactor);
     lighting += nightVision * night_vision_scale * directional_lighting * ao;
 #endif

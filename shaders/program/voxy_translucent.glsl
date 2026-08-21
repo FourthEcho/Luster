@@ -13,15 +13,26 @@
 #undef SHADOW_SSRT
 #endif
 
-
+#ifdef COLORED_LIGHTS
+#undef COLORED_LIGHTS
+#endif
 
 vec3 ambient_color;
 vec3 light_color;
 
+#ifdef WORLD_OVERWORLD
+// Unused
+OverworldFogParameters fog_params;
+#endif
+
 #define TEMPORAL_REPROJECTION
 
 #include "/include/fog/simple_fog.glsl"
+#ifdef INDIRECT_LIGHTING
+#undef INDIRECT_LIGHTING
+#endif
 #include "/include/lighting/diffuse_lighting.glsl"
+#include "/include/lighting/ibl/ibl.glsl"
 #include "/include/lighting/shadows/pcss.glsl"
 #include "/include/lighting/specular_lighting.glsl"
 #include "/include/misc/lod_mod_support.glsl"
@@ -78,7 +89,6 @@ Material get_water_material(
 #if WATER_TEXTURE == WATER_TEXTURE_HIGHLIGHT_UNDERGROUND
     texture_highlight *= 1.0 - cube(linear_step(0.0, 0.5, light_levels.y));
 #endif
-    texture_highlight *= WATER_TEXTURE_INTENSITY;
 
     sampled_color *= tint;
     material.albedo
@@ -110,7 +120,7 @@ Material get_water_material(
 
     material.albedo += 0.1 * edge_highlight
         / mix(1.0,
-              max(dot(ambient_color, luminance_weights), 0.5),
+              max(dot(ambient_color, luminance_weights_rec2020), 0.5),
               light_levels.y);
     material.albedo = clamp01(material.albedo);
     alpha += edge_highlight;
@@ -135,22 +145,30 @@ void voxy_emitFragment(VoxyFragmentParameters parameters) {
     float lod_depth_behind
         = texelFetch(vxDepthTexOpaque, ivec2(gl_FragCoord.xy), 0).x;
 
-    // Get light colors
-
+    // Get direct light color. The old SH skylight slot is retired;
+    // surface ambient is rebuilt from the live IBL environment below.
     light_color = texelFetch(colortex4, ivec2(191, 0), 0).rgb;
-    ambient_color = texelFetch(colortex4, ivec2(191, 1), 0).rgb;
 
     // Get base properties
 
     vec4 base_color = parameters.sampledColour * parameters.tinting;
 
-    // Apply the Voxy fragment color and material data.
+    // from Cortex
     vec3 normal = vec3(
                       uint((parameters.face >> 1) == 2),
                       uint((parameters.face >> 1) == 0),
                       uint((parameters.face >> 1) == 1)
                   )
         * (float(int(parameters.face) & 1) * 2.0 - 1.0);
+
+    // Replace the retired SH skylight with directional IBL irradiance.
+    // A small fixed sample set keeps this path inexpensive while preserving
+    // the sky directionality that the old SH representation supplied.
+    ambient_color = get_ibl_sky_irradiance(
+        normal,
+        vec2(0.37, 0.73),
+        4
+    ) * clamp01(parameters.lightMap.y);
 
     uint material_mask = max(parameters.customId - 10000u, 0u);
 
@@ -184,12 +202,13 @@ void voxy_emitFragment(VoxyFragmentParameters parameters) {
             alpha
         );
     } else {
+        vec2 unused = parameters.lightMap;
         material = material_from(
             base_color.rgb,
             material_mask,
             pos_scene + cameraPosition,
             normal,
-            parameters.lightMap
+            unused
         );
         alpha = base_color.a;
     }
@@ -254,6 +273,6 @@ void voxy_emitFragment(VoxyFragmentParameters parameters) {
 
     // Apply fog
 
-    vec4 fog = common_fog(length(pos_scene), false);
+    vec4 fog = common_fog(length(pos_scene), false, pos_scene);
     fragment_color.rgb = fragment_color.rgb * fog.a + fog.rgb;
 }

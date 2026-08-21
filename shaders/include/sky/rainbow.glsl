@@ -49,7 +49,7 @@ vec3 draw_single_rainbow(float view_angle, float start_angle, float end_angle) {
 
     vec3 rainbow_color_lab
         = mix(rainbow_colors_lab[int(i)], rainbow_colors_lab[int(i + 1)], f);
-    vec3 rainbow_color = max0(lab_to_xyz(rainbow_color_lab) * XYZ_TO_WORKING);
+    vec3 rainbow_color = max0(lab_to_xyz(rainbow_color_lab) * xyz_to_rec2020);
     float rainbow_intensity
         = rainbow_progress - rainbow_progress * dampen(rainbow_progress);
 
@@ -96,7 +96,7 @@ vec3 draw_rainbows(
         * smoothstep(0.0, 0.05, direction_world.y);
     ;
 
-    return fragment_color + rainbow_color * (RAINBOW_INTENSITY * rainbow_fade);
+    return fragment_color + rainbow_color * rainbow_fade;
 }
 
 #endif // INCLUDE_SKY_RAINBOW

@@ -11,8 +11,6 @@
 #include "/include/utility/rotation.glsl"
 #include "/include/utility/sampling.glsl"
 
-// Hardware PCF uses the core sampler2DShadow comparison path; no vendor-specific extension is required.
-
 const ivec2[9] blur_kernel_offsets_3x3 = ivec2[9](
     ivec2(-1, -1),
     ivec2(0, -1),
@@ -63,34 +61,32 @@ vec2 blocker_search(vec3 scene_pos, float dither, bool has_sss) {
     return vec2(blocker_depth, sss_depth);
 }
 
-vec3 shadow_unfiltered(vec3 shadow_screen_pos) {
-    ivec2 texel = ivec2(clamp(
-        shadow_screen_pos.xy * shadow_map_res,
-        vec2(0.0),
-        vec2(float(shadow_map_res - 1))
-    ));
-    float depth = texelFetch(shadowtex0, texel, 0).x;
-    float shadow = step(shadow_screen_pos.z, depth);
+vec3 shadow_basic(vec3 shadow_screen_pos) {
+    float shadow = texture(shadowtex1, shadow_screen_pos);
 
 #ifdef SHADOW_COLOR
+    ivec2 texel = ivec2(shadow_screen_pos.xy * shadow_map_res);
+
+    float depth = texelFetch(shadowtex0, texel, 0).x;
     vec3 color = texelFetch(shadowcolor0, texel, 0).rgb * 4.0;
+    float weight = step(depth, shadow_screen_pos.z);
+
     vec3 averageColor = vec3(0.0);
     for (int i = 0; i < 9; ++i) {
-        averageColor += texelFetch(
-            shadowcolor0,
-            clamp(texel + blur_kernel_offsets_3x3[i], ivec2(0), ivec2(shadow_map_res - 1)),
-            0
-        ).rgb;
+        averageColor
+            += texelFetch(shadowcolor0, texel + blur_kernel_offsets_3x3[i], 0)
+                   .rgb;
     }
-    shadow *= step(eps, max_of(averageColor));
-    color = color * shadow + (1.0 - shadow);
-    return color;
+    // hide sunlight seams between colored shadow and opaque shadows
+    weight *= step(eps, max_of(averageColor));
+
+    color = color * weight + (1.0 - weight);
+
+    return shadow * color;
 #else
     return vec3(shadow);
 #endif
 }
-
-
 
 vec3 shadow_pcf(
     vec3 shadow_screen_pos,
@@ -111,9 +107,8 @@ vec3 shadow_pcf(
     float filter_scale = sqr(filter_radius / min_filter_radius);
 
     int step_count
-        = int(LUSTER_PCF_STEPS_MIN + SHADOW_PCF_STEPS_SCALE
-            * SHADOW_PCF_SAMPLE_SCALE * filter_scale);
-    step_count = min(step_count, LUSTER_PCF_STEPS_MAX);
+        = int(SHADOW_PCF_STEPS_MIN + SHADOW_PCF_STEPS_SCALE * filter_scale);
+    step_count = min(step_count, SHADOW_PCF_STEPS_MAX);
 
     float shadow = 0.0;
 
@@ -129,13 +124,7 @@ vec3 shadow_pcf(
         uv /= get_distortion_factor(uv);
         uv = uv * 0.5 + 0.5;
 
-        ivec2 texel = ivec2(clamp(
-            uv * shadow_map_res,
-            vec2(0.0),
-            vec2(float(shadow_map_res - 1))
-        ));
-        float depth = texelFetch(shadowtex0, texel, 0).x;
-        shadow += step(shadow_screen_pos.z, depth);
+        shadow += texture(shadowtex1, vec3(uv, shadow_screen_pos.z));
 
 #ifdef SHADOW_COLOR
         // sample shadow color
@@ -179,13 +168,7 @@ vec3 shadow_pcf(
         uv /= get_distortion_factor(uv);
         uv = uv * 0.5 + 0.5;
 
-        ivec2 texel = ivec2(clamp(
-            uv * shadow_map_res,
-            vec2(0.0),
-            vec2(float(shadow_map_res - 1))
-        ));
-        float depth = texelFetch(shadowtex0, texel, 0).x;
-        shadow += step(shadow_screen_pos.z, depth);
+        shadow += texture(shadowtex1, vec3(uv, shadow_screen_pos.z));
     }
 
     float rcp_steps = rcp(float(step_count));
@@ -246,14 +229,14 @@ vec3 get_filtered_shadows(
     float dither = texelFetch(noisetex, ivec2(gl_FragCoord.xy) & 511, 0).b;
     dither = r1(frameCounter, dither);
 
-#if defined SHADOW_PCF && defined SHADOW_VPS
+#ifdef SHADOW_VPS
     vec2 blocker_search_result
         = blocker_search(scene_pos, dither, sss_amount > eps);
 
     sss_depth = blocker_search_result.y;
 
     if (NoL < 1e-3) {
-        return vec3(0.0); // Exit early for subsurface-scattering blocks when the material path does not require shadow evaluation.
+        return vec3(0.0); // now we can exit early for SSS blocks
     }
     if (blocker_search_result.x < eps) {
         return vec3(1.0); // blocker search empty handed => no occluders
@@ -271,13 +254,13 @@ vec3 get_filtered_shadows(
     float penumbra_size
         = sqrt(0.5) * shadow_map_pixel_size * SHADOW_PENUMBRA_SCALE;
 
-    // Increase blur radius to approximate subsurface scattering.
+    // Increase blur radius to approximate subsurface scattering
     penumbra_size *= 1.0 + 7.0 * sss_amount;
 #endif
 
 #ifdef SHADOW_COLOR
-    // Reconstruct the shadow position before translucent light-leak suppression so colored shadow transmittance remains stable.
-    // Translucent shadow light-leak suppression is omitted because it introduces visible artifacts on colored transmitters.
+    // Calculate position without light leaking fix applied, for colored shadow
+    // Applying light leaking fix to translucent shadows causes artifacts on
     // water caustics
     vec3 shadow_view_pos_translucent
         = transform(shadowModelView, scene_pos + bias);
@@ -299,7 +282,7 @@ vec3 get_filtered_shadows(
         dither
     );
 #else
-    vec3 shadow = shadow_unfiltered(shadow_screen_pos);
+    vec3 shadow = shadow_basic(shadow_screen_pos);
 #endif
 
     return shadow;

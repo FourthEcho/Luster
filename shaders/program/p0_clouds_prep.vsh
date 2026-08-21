@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Luster Shaders
+  Photon Shader by SixthSurge
 
   world0/prepare.vsh:
   Create cloud base coverage map and cloud shadow map
@@ -29,10 +29,9 @@ flat out vec3 light_dir_fixed;
 uniform int worldTime;
 uniform int worldDay;
 
+uniform float rainStrength;
 uniform float wetness;
 uniform float sunAngle;
-// rainStrength is declared in /include/sky/atmosphere.glsl, included below
-// via weather/clouds.glsl -> sky/clouds/constants.glsl
 
 uniform int frameCounter;
 uniform float frameTimeCounter;
@@ -44,7 +43,6 @@ uniform vec3 sun_dir;
 uniform vec3 moon_dir;
 
 uniform float world_age;
-uniform vec3 cameraPosition;
 uniform float eye_skylight;
 
 uniform float time_sunrise;
@@ -69,7 +67,7 @@ uniform float desert_sandstorm;
 #include "/include/weather/clouds.glsl"
 
 #ifndef IS_IRIS
-// Normalize the sun-position convention used by this pass.
+// `sunPosition` fix by Builderb0y
 vec3 calculate_sun_direction() {
     const vec2 sun_rotation_data = vec2(
         cos(sunPathRotation * 0.01745329251994),
@@ -87,7 +85,7 @@ vec3 calculate_sun_direction() {
 void main() {
     uv = gl_MultiTexCoord0.xy;
 
-    Weather weather = get_weather(cameraPosition);
+    Weather weather = get_weather();
     clouds_params = get_clouds_parameters(weather);
 
 #ifndef IS_IRIS

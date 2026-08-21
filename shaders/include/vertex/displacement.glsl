@@ -82,10 +82,8 @@ vec3 get_wind_displacement(
     float wind_strength,
     bool is_tall_plant_top_vertex
 ) {
-    // Daily wind direction derived from world time.
-    // Picked from worldDay so it stays stable for a full Minecraft day, then
-    // Change direction at each Minecraft day boundary.
-    vec2 wind_dir = weather_wind_direction();
+    const float wind_angle = 30.0 * degree;
+    const vec2 wind_dir = vec2(cos(wind_angle), sin(wind_angle));
 
 #if defined WORLD_OVERWORLD
     // Adjust wind strength based on weather windiness

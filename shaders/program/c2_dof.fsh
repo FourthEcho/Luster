@@ -1,10 +1,10 @@
 /*
 --------------------------------------------------------------------------------
 
-  Luster Shaders
+  Photon Shader by SixthSurge
 
   program/c2_dof
-  Depth-of-field and distance-blur reconstruction
+  Calculate depth of field
 
 --------------------------------------------------------------------------------
 */
@@ -12,6 +12,7 @@
 #include "/include/global.glsl"
 
 layout(location = 0) out vec3 scene_color;
+
 /* RENDERTARGETS: 0 */
 
 in vec2 uv;
@@ -26,10 +27,10 @@ uniform sampler2D colortex0;
 
 uniform sampler2D depthtex0;
 
+uniform mat4 gbufferModelView;
+uniform mat4 gbufferModelViewInverse;
 uniform mat4 gbufferProjection;
 uniform mat4 gbufferProjectionInverse;
-
-uniform vec2 taa_offset;
 
 uniform float near, far;
 
@@ -39,6 +40,7 @@ uniform float centerDepthSmooth;
 uniform int frameCounter;
 
 uniform vec2 view_pixel_size;
+uniform vec2 taa_offset;
 
 #include "/include/misc/lod_mod_support.glsl"
 #include "/include/utility/random.glsl"
@@ -49,8 +51,6 @@ void main() {
     ivec2 texel = ivec2(gl_FragCoord.xy);
 
     float depth = texelFetch(depthtex0, texel, 0).x;
-
-    vec3 pre_dof_color = texelFetch(colortex0, texel, 0).rgb;
 
 #ifdef LOD_MOD_ACTIVE
     float depth_lod = texelFetch(lod_depth_tex, texel, 0).x;
@@ -64,33 +64,21 @@ void main() {
 #endif
 
     if (depth < hand_depth) {
-        scene_color = pre_dof_color;
+        scene_color = texelFetch(colortex0, texel, 0).rgb;
         return;
     };
 
-#if DOF_MODE != DOF_MODE_OFF
     // Calculate vogel disk rotation
     float theta = texelFetch(noisetex, texel & 511, 0).b;
     theta = r1(frameCounter, theta);
     theta *= tau;
 
     // Calculate circle of confusion
-  #if DOF_MODE == DOF_MODE_DOF
     float focus = DOF_FOCUS < 0.0
         ? centerDepthSmooth
         : view_to_screen_space_depth(gbufferProjection, DOF_FOCUS);
-    float coc_scale = min(abs(depth - focus), 0.1) * (DOF_INTENSITY * 0.2 / 1.37);
-  #else
-    // Distance blur: CoC grows linearly with view-space depth beyond
-    // DISTANCE_BLUR_START (blocks), reaching full strength at the far plane
-    float view_depth = screen_to_view_space_depth(gbufferProjectionInverse, depth);
-    coc_scale = clamp(
-        (view_depth - DISTANCE_BLUR_START) * rcp(max(far - DISTANCE_BLUR_START, 1.0)),
-        0.0,
-        0.1
-    ) * DISTANT_BLUR_INTENSITY;
-  #endif
-    vec2 CoC = coc_scale * vec2(1.0, aspectRatio) * gbufferProjection[1][1];
+    vec2 CoC = min(abs(depth - focus), 0.1) * (DOF_INTENSITY * 0.2 / 1.37)
+        * vec2(1.0, aspectRatio) * gbufferProjection[1][1];
 
     scene_color = vec3(0.0);
 
@@ -112,7 +100,8 @@ void main() {
     }
 
     scene_color *= rcp(DOF_SAMPLES);
-#else
-    scene_color = pre_dof_color;
-#endif
 }
+
+#ifndef DOF
+#error "This program should be disabled if Depth of Field is disabled"
+#endif
