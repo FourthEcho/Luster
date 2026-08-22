@@ -43,10 +43,8 @@ uniform sampler3D colortex7; // 3D swirley worley noise
 // shaders.properties — they don't consume any colortex slot).
 //   perlin_3d     — multi-octave Perlin noise (3 channels at freq 1/2/4)
 //   curl_3d       — divergence-free 3D velocity field for advection
-//   blue_noise_3d — 3D blue noise for raymarch dithering
 uniform sampler3D perlin_3d;
 uniform sampler3D curl_3d;
-uniform sampler3D blue_noise_3d;
 
 uniform sampler2D colortex8; // cloud shadow map
 
@@ -215,10 +213,6 @@ void main() {
         /* use_klein_nishina_phase */ false
     );
 
-    // 3D blue-noise dither: combines the 2D screen-space noisetex dither with
-    // a 3D blue-noise sample along the ray direction. The 3D blue noise varies
-    // per-ray-step (because ray_pos changes) which reduces visible banding in
-    // cloud silhouettes that the 2D-only dither can't fix.
     // Do not key the ray start directly from the checkerboard phase. That
     // creates a subtle repeating stripe/grid when temporal samples are
     // reconstructed. Use a decorrelated screen-space sequence instead.
@@ -226,12 +220,7 @@ void main() {
         + ivec2(frameCounter, frameCounter * 3)) & 511;
     float dither_2d = texelFetch(noisetex, noise_pos, 0).b;
     dither_2d = r1(frameCounter / checkerboard_area, dither_2d);
-    float dither_3d = texture(
-        blue_noise_3d,
-        ray_origin * 0.001
-            + vec3(0.0, 0.0, frameTimeCounter * 0.05)
-    ).r;
-    float dither = fract(0.35 * dither_2d + 0.65 * dither_3d);
+    float dither = dither_2d;
 
 #ifndef BLOCKY_CLOUDS
     CloudsResult result = draw_clouds(
