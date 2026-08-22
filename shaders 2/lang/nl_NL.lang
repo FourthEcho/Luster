@@ -19,7 +19,6 @@ screen.misc                            = Overig
 screen.weather                         = Weer
 screen.colored_lights                  = Gekleurde Lichten
 screen.colored_lights_settings         = Gekleurde Lichten Instellingen
-screen.colored_fog                     = Gekleurde Mist
 screen.purkinje_shift                 = Purkinje Verschuiving
 screen.rp_settings                     = Bronpakket-instellingen
 screen.reflections                     = Reflecties
@@ -123,8 +122,6 @@ option.WEATHER_WIND_VARIATION_SPEED.comment = Controls windiness variation speed
 
 option.COLORED_LIGHTS                  = Gekleurde Lichtbronnen
 option.COLORED_LIGHTS.comment          = Gekleurd bloklicht door gebruik te maken van het 'Iris Floodfill-algoritme'. Werkt niet bij Iris versies onder de 1.6.
-option.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION = Vanilla Lichtmap-bijdrage
-option.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION.comment = Gebruikt de vanilla lichtmap samen met de om sommige bugs met gekleurde lichtbronnen te voorkomen, zoals onnodig donkere omgevingsocclusie.
 option.HANDHELD_LIGHTING               = Vastgehouden Belichting
 option.HANDHELD_LIGHTING.comment       = Voorwerpen die je vasthoud werpen licht op de omgeving. Dit heeft kleur als Gekleurde Lichtbronnen aanstaat.
 option.HANDHELD_LIGHTING_INTENSITY     = Vastgehouden Belichting Felheid
@@ -994,10 +991,6 @@ option.RAIN_OPACITY.comment            = Adjust the opacity of rain particles
 option.SSS_INTENSITY                   = SSS Intensity
 option.VANILLA_AO_INTENSITY            = Vanilla AO Intensity
 option.VANILLA_AO_INTENSITY.comment    = Adjusts the intensity of minecraft's built in ambient occlusion
-option.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF         = Contribution Falloff
-option.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF.comment = Changes the vanilla lightmap's contribution falloff.\nSquared: Lighting is brighter at the source and diminishes quickly.\nLinear: Lighting is soft and travels further from the source
-value.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF_SQUARED = Squared
-value.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF_LINEAR  = Linear
 option.ATMOSPHERE_RAIN_DESATURATION                   = Atmosphere Rain Desaturation
 option.ATMOSPHERE_RAIN_DESATURATION.comment           = Desaturates the atmosphere during rain, making for colder looking rain
 option.ATMOSPHERE_RAIN_DESATURATION_INTENSITY         = Desaturation Intensity
@@ -1221,3 +1214,10 @@ value.DEBUG_SAMPLER.shadowcolor1=shadowcolor1
 Replaces flat nether fog with drifting, patchy volumetric smoke
 Controls nether smoke intensity.
 Controls the strength of the color tinting applied to light shafts
+
+option.COLORED_LIGHTS_FALLOFF = Falloff Mode
+option.COLORED_LIGHTS_FALLOFF.comment = Controls the automatic colored-light fallback falloff.
+value.COLORED_LIGHTS_FALLOFF.COLORED_LIGHTS_FALLOFF_SQUARED = Squared
+value.COLORED_LIGHTS_FALLOFF.COLORED_LIGHTS_FALLOFF_LINEAR = Linear
+option.IMAGE_SHARPENING_INTENSITY = Image Sharpening
+option.IMAGE_SHARPENING_INTENSITY.comment = Controls final edge-aware image sharpening strength.

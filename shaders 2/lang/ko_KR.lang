@@ -19,7 +19,6 @@ screen.misc                            = 기타
 screen.weather                         = 날씨
 screen.colored_lights                  = 유색 조명
 screen.colored_lights_settings         = 유색 조명 설정
-screen.colored_fog                     = 유색 안개
 screen.purkinje_shift                 = 푸르키네 이동
 screen.rp_settings                     = 리소스팩 설정
 screen.reflections                     = 반사
@@ -123,8 +122,6 @@ option.WEATHER_WIND_VARIATION_SPEED.comment = Controls windiness variation speed
 
 option.COLORED_LIGHTS                  = 유색 조명
 option.COLORED_LIGHTS.comment          = 플러드 필 알고리즘을 사용한 가변 색상 블록 조명. Iris 1.6 이상이 필요합니다
-option.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION = 바닐라 라이트맵 기여도
-option.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION.comment = Toggles vanilla lightmap contribution.
 option.HANDHELD_LIGHTING               = 손에 든 조명
 option.HANDHELD_LIGHTING.comment       = 손에 든 아이템이 월드에 빛을 비춥니다. 유색 조명이 활성화되어 있으면 손에 든 조명도 해당 광원의 색상으로 표시됩니다
 option.HANDHELD_LIGHTING_INTENSITY     = 손에 든 조명 강도
@@ -1013,10 +1010,6 @@ screen.indirect_lighting              = Indirect Lighting
 option.RAIN_OPACITY.comment            = Adjust the opacity of rain particles
 option.VANILLA_AO_INTENSITY            = Vanilla AO Intensity
 option.VANILLA_AO_INTENSITY.comment    = Adjusts the intensity of minecraft's built in ambient occlusion
-option.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF         = Contribution Falloff
-option.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF.comment = Changes the vanilla lightmap's contribution falloff.\nSquared: Lighting is brighter at the source and diminishes quickly.\nLinear: Lighting is soft and travels further from the source
-value.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF_SQUARED = Squared
-value.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF.COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF_LINEAR  = Linear
 option.ATMOSPHERE_RAIN_DESATURATION                   = Atmosphere Rain Desaturation
 option.ATMOSPHERE_RAIN_DESATURATION.comment           = Desaturates the atmosphere during rain, making for colder looking rain
 option.ATMOSPHERE_RAIN_DESATURATION_INTENSITY         = Desaturation Intensity
@@ -1210,3 +1203,10 @@ value.DEBUG_SAMPLER.shadowcolor1=shadowcolor1
 Replaces flat nether fog with drifting, patchy volumetric smoke
 Controls nether smoke intensity.
 Controls the strength of the color tinting applied to light shafts
+
+option.COLORED_LIGHTS_FALLOFF = Falloff Mode
+option.COLORED_LIGHTS_FALLOFF.comment = Controls the automatic colored-light fallback falloff.
+value.COLORED_LIGHTS_FALLOFF.COLORED_LIGHTS_FALLOFF_SQUARED = Squared
+value.COLORED_LIGHTS_FALLOFF.COLORED_LIGHTS_FALLOFF_LINEAR = Linear
+option.IMAGE_SHARPENING_INTENSITY = Image Sharpening
+option.IMAGE_SHARPENING_INTENSITY.comment = Controls final edge-aware image sharpening strength.

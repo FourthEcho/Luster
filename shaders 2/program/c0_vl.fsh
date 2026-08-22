@@ -113,13 +113,13 @@ uniform float time_midnight;
 #endif
 
 #include "/include/fog/water_fog_vl.glsl"
-#include "/include/fog/nether_smoke_vl.glsl"
+#include "/include/fog/nether_fog_vl.glsl"
 #include "/include/misc/lod_mod_support.glsl"
 #include "/include/utility/encoding.glsl"
 #include "/include/utility/random.glsl"
 #include "/include/utility/space_conversion.glsl"
 
-#if defined LPV_VL && defined COLORED_LIGHTS
+#if defined LPV_VL && defined COLORED_LIGHTS && defined LPV_VL
 uniform sampler3D light_sampler_a;
 uniform sampler3D light_sampler_b;
 
@@ -191,15 +191,12 @@ void main() {
                 dither
             );
 #elif defined WORLD_NETHER
-#ifdef NETHER_SMOKE
-            mat2x3 fog = raymarch_nether_smoke(
+            mat2x3 fog = raymarch_nether_fog(
                 world_start_pos,
                 world_end_pos,
+                depth0 == 1.0,
                 dither
             );
-#else
-            mat2x3 fog = mat2x3(vec3(0.0), vec3(1.0));
-#endif
 #elif defined WORLD_END
             mat2x3 fog = raymarch_end_fog(
                 world_start_pos,
@@ -242,7 +239,7 @@ void main() {
     fog_transmittance = vec3(1.0);
 #endif
 
-#if defined LPV_VL && defined COLORED_LIGHTS
+#if defined LPV_VL && defined COLORED_LIGHTS && defined LPV_VL
     fog_scattering
         += get_lpv_fog_scattering(world_start_pos, world_end_pos, dither);
 #endif

@@ -504,8 +504,8 @@ void main() {
     bloomy_fog
         = spherical_fog(
               view_distance,
-              nether_fog_start,
-              nether_bloomy_fog_density
+              0.0,
+              0.0025 * nether_fog_density(front_position_world)
           ) * 0.33
         + 0.67;
 #elif defined WORLD_END

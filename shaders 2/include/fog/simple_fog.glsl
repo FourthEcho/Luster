@@ -21,50 +21,32 @@ const float cave_fog_start = 1.0;
 const float cave_fog_density = 0.0033;
 const vec3 cave_fog_color = vec3(0.033);
 
-const float nether_fog_start = 0.0;
-#ifdef NETHER_SMOKE
-const float nether_fog_density = 0.01 * NETHER_SMOKE_INTENSITY;
-#else
-const float nether_fog_density = 0.01;
-#endif
-
 const float blindness_fog_start = 2.0;
 const float blindness_fog_density = 1.0;
 
 const float darkness_fog_start = 8.0;
 const float darkness_fog_density = 2.0;
 
-const float nether_bloomy_fog_density = 0.25 * nether_fog_density;
 
-#ifdef NETHER_SMOKE
-uniform sampler3D perlin_3d;
-
-float nether_smoke_density(vec3 world_pos) {
-    float altitude = world_pos.y;
-    float smoke_fade = sqr(1.0 - linear_step(128.0, 256.0, altitude));
-    smoke_fade *= exp(-max(altitude - 32.0, 0.0) * 0.015) * 0.6 + 0.4;
-
-    if (smoke_fade <= 1e-6) return 0.0;
-
-    vec3 wind = frameTimeCounter * 0.6 * vec3(1.0, -0.9, 0.1);
-    vec3 p = world_pos * 0.03;
-
-    vec3 a = texture(perlin_3d, p * 4.0 + wind * 0.5).rgb;
-    p += (a.r * 0.55 + a.g * 0.30 + a.b * 0.15 - 0.5) * 1.5;
-    p += texture(perlin_3d, p * 8.0 - wind).r - 0.5;
-    p.x *= 0.7;
-
-    float noise = texture(perlin_3d, p * 4.0 + wind).r;
-    noise += texture(perlin_3d, p * 8.0 + wind * 2.0 + vec3(noise * 0.5)).g * 0.5;
-    noise *= 0.6666666667;
-
-    float smoke = max(smoke_fade - noise, 0.0);
-    smoke = smoothstep(0.0, 1.0, smoke);
-    smoke = smoke * smoke * smoke * (smoke_fade * 0.5 + 0.5);
-
-    return smoke;
+float nether_fog_density(vec3 world_pos) {
+    const float falloff_start = 64.0;
+    const float falloff_half_life = 7.0;
+    const float mul = -rcp(falloff_half_life);
+    const float add = -mul * falloff_start;
+    float density = exp2(min(world_pos.y * mul + add, 0.0));
+    density *= linear_step(0.0, 64.0, world_pos.y);
+    return density;
 }
+
+vec3 get_nether_fog_color() {
+#ifdef NETHER_USE_BIOME_COLOR
+    vec3 color = srgb_eotf_inv(clamp(fogColor, 0.0, 1.0)) * rec709_to_working_color;
+    color /= max(dot(color, luminance_weights_rec2020), eps);
+    return mix(vec3(1.0), color, NETHER_S);
+#else
+    return from_srgb(vec3(NETHER_R, NETHER_G, NETHER_B));
 #endif
+}
 
 float spherical_fog(
     float view_dist,
@@ -151,18 +133,13 @@ vec4 common_fog(float view_dist, const bool sky, vec3 scene_pos) {
 #endif
 
 #if defined WORLD_NETHER && !defined VL
-    // Fallback Nether fog is only used when volumetric fog is disabled.
-#ifdef NETHER_SMOKE
-    float smoke_factor = nether_smoke_density(scene_pos + cameraPosition);
-    float nether_fog_local_density = nether_fog_density * mix(0.35, 1.75, smoke_factor);
-    vec3 nether_fog_color = mix(ambient_color, ambient_color * vec3(0.75, 0.68, 0.62), smoke_factor);
-#else
-    float nether_fog_local_density = nether_fog_density;
-    vec3 nether_fog_color = ambient_color;
-#endif
-    float nether_fog
-        = spherical_fog(view_dist, nether_fog_start, nether_fog_local_density);
-    fog.rgb += nether_fog_color - nether_fog_color * nether_fog;
+    float nether_fog = spherical_fog(
+        view_dist,
+        0.0,
+        0.01 * nether_fog_density(scene_pos + cameraPosition)
+    );
+    vec3 nether_color = get_nether_fog_color() * NETHER_I;
+    fog.rgb += nether_color - nether_color * nether_fog;
     fog.a *= nether_fog;
 #endif
 
@@ -204,14 +181,12 @@ float common_fog_alpha(float view_dist, bool sky, vec3 scene_pos) {
 #endif
 
 #if defined WORLD_NETHER && !defined VL
-    // Fallback Nether fog is only used when volumetric fog is disabled.
-#ifdef NETHER_SMOKE
-    float smoke_factor_a = nether_smoke_density(scene_pos + cameraPosition);
-    float nether_fog_local_density_a = nether_fog_density * mix(0.35, 1.75, smoke_factor_a);
-#else
-    float nether_fog_local_density_a = nether_fog_density;
-#endif
-    fog *= spherical_fog(view_dist, nether_fog_start, nether_fog_local_density_a);
+    // Match the volumetric Nether fog density in the analytic path.
+    fog *= spherical_fog(
+        view_dist,
+        0.0,
+        0.01 * nether_fog_density(scene_pos + cameraPosition)
+    );
 #endif
 
     return fog;
