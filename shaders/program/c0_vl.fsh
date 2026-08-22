@@ -42,13 +42,11 @@ uniform sampler2D colortex8; // cloud shadow map
 uniform sampler2D depthtex0;
 uniform sampler2D depthtex1;
 
-#ifndef WORLD_NETHER
 #ifdef SHADOW
 uniform sampler2D shadowtex0;
 uniform sampler2D shadowtex1;
 #ifdef SHADOW_COLOR
 uniform sampler2D shadowcolor0;
-#endif
 #endif
 #endif
 

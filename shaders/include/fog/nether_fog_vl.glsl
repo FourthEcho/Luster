@@ -80,7 +80,7 @@ mat2x3 raymarch_nether_fog(
     const float density_scale = 0.01;
     vec3 absorption_coeff = exp2(-nether_color) * density_scale;
     const vec3 scattering_coeff = vec3(1.0) * density_scale;
-    const vec3 extinction_coeff = absorption_coeff + scattering_coeff;
+    vec3 extinction_coeff = absorption_coeff + scattering_coeff;
 
     const uint multiple_scattering_iterations = 4;
 
