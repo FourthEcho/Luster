@@ -49,7 +49,6 @@ uniform sampler3D colortex7; // 3D swirley worley noise
 uniform sampler3D perlin_3d;
 uniform sampler3D curl_3d;
 
-
 #if defined WORLD_OVERWORLD && defined GALAXY
 uniform sampler2D colortex13;
 #define galaxy_sampler colortex13

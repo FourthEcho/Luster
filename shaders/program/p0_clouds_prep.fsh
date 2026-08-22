@@ -31,8 +31,6 @@ flat in CloudsParameters clouds_params;
 
 uniform sampler2D noisetex;
 
-uniform sampler3D perlin_3d;
-uniform sampler3D curl_3d;
 
 
 uniform mat4 gbufferModelView;

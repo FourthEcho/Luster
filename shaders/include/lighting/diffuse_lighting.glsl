@@ -223,14 +223,6 @@ vec3 get_diffuse_lighting(
         * (1.0 - 0.5 * material.sss_amount)
     );
 
-#define DO_BOUNCED_LIGHTING true
-
-    vec3 bounced = vec3(0.0);
-    if (DO_BOUNCED_LIGHTING) {
-        bounced = 0.033 * (1.0 - shadows) * (1.0 - 0.1 * max0(normal.y))
-            * pow1d5(ao + eps) * pow4(light_levels.y) * BOUNCED_LIGHT_I;
-    }
-
     vec3 sss = sss_approx(
                    material.albedo,
                    material.sss_amount,
@@ -254,10 +246,10 @@ vec3 get_diffuse_lighting(
 
 #ifdef SHADOW_VPS
     // Add SSS and diffuse
-    lighting += diffuse * shadows + bounced + sss;
+    lighting += diffuse * shadows + sss;
 #else
     // Blend SSS and diffuse
-    lighting += mix(diffuse, sss, material.sss_amount) * shadows + bounced;
+    lighting += mix(diffuse, sss, material.sss_amount) * shadows;
 #endif
 #else
     // Simple shading for when shadows are disabled
