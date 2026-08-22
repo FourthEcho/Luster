@@ -72,29 +72,6 @@ vec3 max_of(vec3 a, vec3 b, vec3 c, vec3 d, vec3 f) {
 
 // FidelityFX contrast-adaptive sharpening filter
 // https://github.com/GPUOpen-Effects/FidelityFX-CAS
-// Edge-aware final image sharpening, independent from CAS.
-vec3 image_sharpen_filter(
-    sampler2D sampler,
-    ivec2 texel,
-    vec3 center,
-    float amount
-) {
-    if (amount <= 0.0) return center;
-
-    vec3 left  = display_eotf(texelFetch(sampler, texel + ivec2(-1, 0), 0).rgb);
-    vec3 right = display_eotf(texelFetch(sampler, texel + ivec2( 1, 0), 0).rgb);
-    vec3 up    = display_eotf(texelFetch(sampler, texel + ivec2(0, -1), 0).rgb);
-    vec3 down  = display_eotf(texelFetch(sampler, texel + ivec2(0,  1), 0).rgb);
-
-    vec3 neighborhood = 0.25 * (left + right + up + down);
-    vec3 detail = center - neighborhood;
-    vec3 sharpened = center + detail * (0.9 * amount);
-
-    vec3 lo = min(min(left, right), min(up, down));
-    vec3 hi = max(max(left, right), max(up, down));
-    return clamp(sharpened, lo, hi);
-}
-
 vec3 cas_filter(sampler2D sampler, ivec2 texel, const float sharpness) {
 #ifndef CAS
     return display_eotf(texelFetch(sampler, texel, 0).rgb);
@@ -305,13 +282,6 @@ void main() {
         fragment_color = catmull_rom_filter_fast_rgb(colortex0, uv, 0.6);
         fragment_color = display_eotf(fragment_color);
     }
-
-    fragment_color = image_sharpen_filter(
-        colortex0,
-        texel,
-        fragment_color,
-        IMAGE_SHARPENING_INTENSITY
-    );
 
     fragment_color = dither_8bit(fragment_color, bayer16(vec2(texel)));
 

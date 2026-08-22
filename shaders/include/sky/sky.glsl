@@ -114,7 +114,8 @@ vec3 draw_galaxy(vec3 ray_dir, out float galaxy_luminance) {
 
     galaxy = srgb_eotf_inv(galaxy) * rec709_to_working_color;
 
-    galaxy *= galaxy_intensity * galaxy_tint;
+    // GALAXY_SIZE scales the overall galaxy luminance contribution
+    galaxy *= galaxy_intensity * galaxy_tint * GALAXY_SIZE;
 
     galaxy_luminance = dot(galaxy, luminance_weights_rec709);
 
@@ -353,7 +354,7 @@ vec3 draw_sky(vec3 ray_dir) {
     // Sun
 
 #ifdef END_SUN_EFFECT
-    sky += draw_sun(ray_dir);
+    sky += draw_sun(ray_dir) * END_SUN_EFFECT_INTENSITY;
 #endif
 
     // Stars

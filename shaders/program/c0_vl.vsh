@@ -25,7 +25,7 @@ flat out OverworldFogParameters fog_params;
 //   Uniforms
 // ------------
 
-uniform sampler2D colortex4; // Sky map and lighting color palette
+uniform sampler2D colortex4; // Sky map, lighting color palette, sky SH
 
 uniform float rainStrength;
 uniform float sunAngle;
@@ -67,7 +67,11 @@ void main() {
     uv = gl_MultiTexCoord0.xy;
 
     light_color = texelFetch(colortex4, ivec2(191, 0), 0).rgb;
+#if defined WORLD_OVERWORLD && defined SH_SKYLIGHT
+    ambient_color = texelFetch(colortex4, ivec2(191, 11), 0).rgb;
+#else
     ambient_color = texelFetch(colortex4, ivec2(191, 1), 0).rgb;
+#endif
 
 #if defined WORLD_OVERWORLD
     fog_params = get_fog_parameters(get_weather());

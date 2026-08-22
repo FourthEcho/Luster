@@ -7,6 +7,11 @@
 #include "/include/surface/material.glsl"
 #include "/include/utility/fast_math.glsl"
 #include "/include/utility/phase_functions.glsl"
+#ifdef MC_GL_RENDERER_INTEL
+#include "/include/utility/spherical_harmonics_fallback.glsl"
+#else
+#include "/include/utility/spherical_harmonics.glsl"
+#endif
 #ifdef COLORED_LIGHTS
 #include "/include/lighting/lpv/blocklight.glsl"
 #endif
@@ -19,11 +24,21 @@
 #undef CLOUD_SHADOWS
 #endif
 
+#if defined PHOTONICS_DIFFUSE
+#include "/photonics/ph_samplers.glsl"
+
+#ifndef PHOTONICS_RESTIR_COMBINED_GI
+uniform sampler2D radiosity_indirect;
+#endif
+
+#endif
+
 const float sss_density = 14.0;
 const float sss_scale = 5.0 * SSS_INTENSITY;
 const float night_vision_scale = 1.5;
 const float metal_diffuse_amount
-    = 0.5; // Legacy SSR fallback for metallic surfaces; retained for compatibility.
+    = 0.5; // Scales diffuse lighting on metals, ideally this would be zero but
+           // purely specular metals don't play well with SSR
 
 float get_blocklight_falloff(float blocklight, float skylight, float ao) {
     float falloff = pow8(blocklight) + 0.18 * sqr(blocklight)
@@ -86,7 +101,7 @@ vec3 sss_approx(
         * pi;
 
 #ifdef SSS_SHEEN
-    vec3 sheen = (0.8 * SSS_INTENSITY) * rcp(albedo + eps)
+    vec3 sheen = (0.8 * SSS_INTENSITY * SSS_SHEEN_INTENSITY) * rcp(albedo + eps)
         * exp2(-1.0 * coeff * sss_depth) * henyey_greenstein_phase(-LoV, 0.5)
         * linear_step(-0.8, -0.2, -LoV);
     sss += sheen * sheen_amount;
@@ -105,7 +120,7 @@ vec3 sss_approx(
 ) {
     // Blur-based SSS
     float sss = 0.06 * sss_scale * pi;
-    vec3 sheen = 0.8 * rcp(albedo + eps) * henyey_greenstein_phase(-LoV, 0.5)
+    vec3 sheen = (0.8 * SSS_SHEEN_INTENSITY) * rcp(albedo + eps) * henyey_greenstein_phase(-LoV, 0.5)
         * linear_step(-0.8, -0.2, -LoV) * shadow;
 
     return sss + sheen * sheen_amount;
@@ -152,18 +167,34 @@ vec3 get_sky_lighting(
     float ambient_sss,
     float directional_lighting
 ) {
-    vec3 lighting = vec3(0.0);
+    vec3 lighting = vec3(0.0f);
 
-    // Skylight is sourced from Luster's ambient_color. The indirect-lighting
-    // path now runs as a separate deferred pass chain (program/gi/*) and is
-    // sampled in d4_deferred_shading, so it does not need to be injected here.
+#if defined WORLD_OVERWORLD && defined PROGRAM_DEFERRED4 && defined SH_SKYLIGHT
+#ifdef MC_GL_RENDERER_INTEL
+    sh3 sky_sh_compat;
+    for (uint band = 0u; band < 3u; ++band) {
+        sky_sh_compat.f1[band] = sky_sh[band];
+        sky_sh_compat.f2[band] = sky_sh[band + 3u];
+        sky_sh_compat.f3[band] = sky_sh[band + 6u];
+    }
+    vec3 skylight = sh_evaluate_irradiance(sky_sh_compat, bent_normal, ao);
+#else
+    vec3 skylight = sh_evaluate_irradiance(sky_sh, bent_normal, ao);
+#endif
+    skylight = mix(skylight_up, skylight, sqr(light_levels.y));
+    // Apply user-controlled SH skylight intensity scaling
+    skylight *= SH_SKYLIGHT_INTENSITY;
+#else
     vec3 skylight = ambient_color * ao;
     vec3 skylight_up = skylight;
+#endif
 
+    // Skylight SSS
     skylight = mix(skylight, 0.5 * skylight_up * ao, material.sss_amount);
     skylight += ambient_sss * skylight_up * material.sss_amount * 2.0;
 
 #if defined WORLD_NETHER
+    // Brighten + desaturate nether ambient
     skylight = 16.0 * directional_lighting
         * mix(skylight, vec3(dot(skylight, luminance_weights_rec2020)), 0.5);
 #endif
@@ -188,6 +219,9 @@ vec3 get_diffuse_lighting(
     float cloud_shadows,
 #endif
     float shadow_distance_fade,
+#ifdef PHOTONICS_DIFFUSE
+    bool is_lod,
+#endif
     float NoL,
     float NoV,
     float NoH,
@@ -203,10 +237,10 @@ vec3 get_diffuse_lighting(
 
     vec3 lighting = vec3(0.0);
 
-    // Non-directional lighting sources (blocklight/IBL/ambient) must not depend
-    // on surface orientation. Direct celestial lighting is evaluated separately
-    // from NoL and the shadow term below.
-    float directional_lighting = 1.0;
+    // Arbitrary directional shading to make faces easier to distinguish
+    float directional_lighting
+        = (0.9 + 0.1 * normal.x) * (0.8 + 0.2 * abs(flat_normal.y))
+        + 2.0 * ambient_sss * material.sss_amount;
 
     // Negative SSS depth => SSS blocked by occluder (SSRT SSS)
     bool sss_blocked = sss_depth < 0.0 || light_levels.y < 0.1;
@@ -221,6 +255,19 @@ vec3 get_diffuse_lighting(
         lift(max0(NoL), 0.25 * rcp(SHADING_STRENGTH))
         * (1.0 - 0.5 * material.sss_amount)
     );
+
+// Disable bounced lighting with Photonics
+#if defined PHOTONICS_DIFFUSE
+#define DO_BOUNCED_LIGHTING is_lod
+#else
+#define DO_BOUNCED_LIGHTING true
+#endif
+
+    vec3 bounced = vec3(0.0);
+    if (DO_BOUNCED_LIGHTING) {
+        bounced = 0.033 * (1.0 - shadows) * (1.0 - 0.1 * max0(normal.y))
+            * pow1d5(ao + eps) * pow4(light_levels.y) * BOUNCED_LIGHT_I;
+    }
 
     vec3 sss = sss_approx(
                    material.albedo,
@@ -245,10 +292,10 @@ vec3 get_diffuse_lighting(
 
 #ifdef SHADOW_VPS
     // Add SSS and diffuse
-    lighting += diffuse * shadows + sss;
+    lighting += diffuse * shadows + bounced + sss;
 #else
     // Blend SSS and diffuse
-    lighting += mix(diffuse, sss, material.sss_amount) * shadows;
+    lighting += mix(diffuse, sss, material.sss_amount) * shadows + bounced;
 #endif
 #else
     // Simple shading for when shadows are disabled
@@ -261,6 +308,7 @@ vec3 get_diffuse_lighting(
         = vec3(lift(max0(NoL), 0.5 * rcp(SHADING_STRENGTH)) * 0.6 + 0.4)
         * (shadows * 0.8 + 0.2);
     diffuse = diffuse + max0(sss * lift(material.sss_amount, 5.0));
+    diffuse *= 1.0 * (0.9 + 0.1 * normal.x) * (0.8 + 0.2 * abs(flat_normal.y));
     diffuse *= ao * pow4(light_levels.y) * (dampen(light_dir.y) * 0.5 + 0.5);
 
     lighting += diffuse;
@@ -275,6 +323,25 @@ vec3 get_diffuse_lighting(
 
     // Skylight
 
+#if defined PHOTONICS_DIFFUSE
+    if (is_lod) {
+        lighting += get_sky_lighting(
+            material,
+            bent_normal,
+            light_levels,
+            ao,
+            ambient_sss,
+            directional_lighting
+        );
+    } else {
+// When combined gi is enabled
+// Photonics includes gi in the result of sample_photonics_direct
+#ifndef PHOTONICS_RESTIR_COMBINED_GI
+        lighting += texture2D(radiosity_indirect, uv).xyz * SKYLIGHT_I;
+#endif
+    }
+
+#else
     lighting += get_sky_lighting(
         material,
         bent_normal,
@@ -283,11 +350,32 @@ vec3 get_diffuse_lighting(
         ambient_sss,
         directional_lighting
     );
-
-// IBL is wired in from program/d4_deferred_shading.fsh where view_dir is in scope.
+#endif
 
     // Blocklight
 
+#if defined PHOTONICS_DIFFUSE
+    if (!is_lod) {
+        vec3 blocklight = vec3(0.0f);
+
+        blocklight += sample_photonics_direct(uv);
+
+#ifdef HANDHELD_LIGHTING
+        blocklight += sample_photonics_handheld(uv);
+#endif
+
+        // BLOCKLIGHT_I is applied in /photonics/modifiers/modify_lights.glsl
+        lighting += blocklight * blocklight_scale;
+    } else {
+        lighting += get_block_lighting(
+            scene_pos,
+            flat_normal,
+            light_levels,
+            ao,
+            directional_lighting
+        );
+    }
+#else
     lighting += get_block_lighting(
         scene_pos,
         flat_normal,
@@ -295,10 +383,16 @@ vec3 get_diffuse_lighting(
         ao,
         directional_lighting
     );
+#endif
 
     lighting += material.emission * emission_scale;
 
 #if defined WORLD_OVERWORLD
+    // Cave lighting
+
+    lighting += 0.15 * CAVE_LIGHTING_I * directional_lighting * ao
+        * (1.0 - light_levels.y * light_levels.y)
+        * (1.0 - 0.7 * darknessFactor);
     lighting += nightVision * night_vision_scale * directional_lighting * ao;
 #endif
 

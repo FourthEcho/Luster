@@ -33,7 +33,6 @@ flat in OverworldFogParameters fog_params;
 uniform sampler2D noisetex;
 
 uniform sampler3D colortex0; // 3D worley noise
-uniform sampler3D perlin_3d; // existing 3D Perlin volume used by Nether smoke
 uniform sampler2D colortex1; // gbuffer data
 uniform sampler2D colortex3; // translucent color
 uniform sampler2D colortex4; // sky map
@@ -42,11 +41,13 @@ uniform sampler2D colortex8; // cloud shadow map
 uniform sampler2D depthtex0;
 uniform sampler2D depthtex1;
 
+#ifndef WORLD_NETHER
 #ifdef SHADOW
 uniform sampler2D shadowtex0;
 uniform sampler2D shadowtex1;
 #ifdef SHADOW_COLOR
 uniform sampler2D shadowcolor0;
+#endif
 #endif
 #endif
 
@@ -61,7 +62,6 @@ uniform mat4 shadowProjection;
 uniform mat4 shadowProjectionInverse;
 
 uniform vec3 cameraPosition;
-uniform vec3 fogColor;
 
 uniform float near;
 uniform float far;
@@ -111,13 +111,12 @@ uniform float time_midnight;
 #endif
 
 #include "/include/fog/water_fog_vl.glsl"
-#include "/include/fog/nether_fog_vl.glsl"
 #include "/include/misc/lod_mod_support.glsl"
 #include "/include/utility/encoding.glsl"
 #include "/include/utility/random.glsl"
 #include "/include/utility/space_conversion.glsl"
 
-#if defined LPV_VL && defined COLORED_LIGHTS && defined LPV_VL
+#if defined LPV_VL && defined COLORED_LIGHTS
 uniform sampler3D light_sampler_a;
 uniform sampler3D light_sampler_b;
 
@@ -189,12 +188,7 @@ void main() {
                 dither
             );
 #elif defined WORLD_NETHER
-            mat2x3 fog = raymarch_nether_fog(
-                world_start_pos,
-                world_end_pos,
-                depth0 == 1.0,
-                dither
-            );
+            mat2x3 fog = mat2x3(vec3(0.0), vec3(1.0));
 #elif defined WORLD_END
             mat2x3 fog = raymarch_end_fog(
                 world_start_pos,
@@ -237,7 +231,7 @@ void main() {
     fog_transmittance = vec3(1.0);
 #endif
 
-#if defined LPV_VL && defined COLORED_LIGHTS && defined LPV_VL
+#if defined LPV_VL && defined COLORED_LIGHTS
     fog_scattering
         += get_lpv_fog_scattering(world_start_pos, world_end_pos, dither);
 #endif

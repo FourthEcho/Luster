@@ -39,13 +39,6 @@ uniform sampler3D colortex6; // 3D bubbly worley noise
 uniform sampler3D colortex7; // 3D swirley worley noise
 #define SAMPLER_WORLEY_SWIRLEY colortex7
 
-// 3D noise textures for cloud rendering (bound as custom-named samplers in
-// shaders.properties — they don't consume any colortex slot).
-//   perlin_3d     — multi-octave Perlin noise (3 channels at freq 1/2/4)
-//   curl_3d       — divergence-free 3D velocity field for advection
-uniform sampler3D perlin_3d;
-uniform sampler3D curl_3d;
-
 uniform sampler2D colortex8; // cloud shadow map
 
 uniform sampler3D depthtex0; // atmospheric scattering LUT
@@ -213,14 +206,8 @@ void main() {
         /* use_klein_nishina_phase */ false
     );
 
-    // Do not key the ray start directly from the checkerboard phase. That
-    // creates a subtle repeating stripe/grid when temporal samples are
-    // reconstructed. Use a decorrelated screen-space sequence instead.
-    ivec2 noise_pos = (texel * ivec2(5, 7)
-        + ivec2(frameCounter, frameCounter * 3)) & 511;
-    float dither_2d = texelFetch(noisetex, noise_pos, 0).b;
-    dither_2d = r1(frameCounter / checkerboard_area, dither_2d);
-    float dither = dither_2d;
+    float dither = texelFetch(noisetex, ivec2(checkerboard_pos & 511), 0).b;
+    dither = r1(frameCounter / checkerboard_area, dither);
 
 #ifndef BLOCKY_CLOUDS
     CloudsResult result = draw_clouds(

@@ -149,9 +149,6 @@ uniform vec4 entityColor;
 #endif
 
 #include "/include/fog/simple_fog.glsl"
-#ifdef INDIRECT_LIGHTING
-#undef INDIRECT_LIGHTING
-#endif
 #include "/include/lighting/diffuse_lighting.glsl"
 #include "/include/lighting/shadows/pcss.glsl"
 #include "/include/lighting/specular_lighting.glsl"
@@ -298,7 +295,7 @@ void main() {
 
     // Apply fog
 
-    vec4 fog = common_fog(length(scene_pos), false, scene_pos);
+    vec4 fog = common_fog(length(scene_pos), false);
     fragment_color.rgb = fragment_color.rgb * fog.a + fog.rgb;
 
     fragment_color.a *= border_fog(scene_pos, world_dir);

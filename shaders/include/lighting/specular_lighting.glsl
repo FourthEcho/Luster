@@ -2,7 +2,6 @@
 #define INCLUDE_LIGHTING_SPECULAR_LIGHTING
 
 #include "/include/lighting/bsdf.glsl"
-#include "/include/lighting/colors/moon_phase_influence.glsl"
 #include "/include/misc/lod_mod_support.glsl"
 #include "/include/misc/raytracer.glsl"
 #include "/include/sky/projection.glsl"
@@ -123,7 +122,18 @@ vec3 get_specular_highlight(
     float d = distribution_ggx(NoH_squared, alpha_squared);
     float v = v2_smith_ggx(max(NoL, 1e-2), max(NoV, 1e-2), alpha_squared);
 
-    return min((NoL * d * v) * fresnel * albedo_tint, vec3(specular_max_value));
+    vec3 specular_highlight = min((NoL * d * v) * fresnel * albedo_tint, vec3(specular_max_value));
+
+#ifdef MOON_PHASE_REFLECTIONS
+    // Moon phase reflections: scale moon specular highlight at night based on moon phase.
+    // Full moon gives strong specular reflections; new moon gives weak/no specular.
+    if (sunAngle > 0.5) {
+        float full_moon_factor = 1.0 - abs(float(moonPhase) - 4.0) / 4.0;
+        specular_highlight *= mix(1.0, full_moon_factor, MOON_PHASE_REFLECTIONS_INTENSITY);
+    }
+#endif
+
+    return specular_highlight;
 }
 
 // ------------------------
@@ -191,25 +201,11 @@ vec3 get_sky_reflection(vec3 ray_dir, float skylight, vec3 hit_pos) {
         = false; // clamp01(hit_pos.xy) == hit_pos.xy && hit_pos.z >= 1.0;
     float skylight_falloff
         = hit_sky ? 1.0 : pow12(linear_step(0.0, 0.75, skylight));
-    vec3 reflection = bicubic_filter(colortex4, project_sky(ray_dir)).rgb
+    return bicubic_filter(colortex4, project_sky(ray_dir)).rgb
         * skylight_falloff;
 #else
-    vec3 reflection = texture(colortex4, project_sky(ray_dir)).rgb;
+    return texture(colortex4, project_sky(ray_dir)).rgb;
 #endif
-
-#ifdef MOON_PHASE_REFLECTIONS
-    // Only shape the reflected sky's moon contribution at night
-    if (sunAngle > 0.5) {
-        reflection = apply_moon_phase_influence(
-            reflection,
-            MOON_PHASE_REFLECTIONS_INTENSITY,
-            MOON_PHASE_REFLECTIONS_CONTRAST,
-            MOON_PHASE_REFLECTIONS_SATURATION
-        );
-    }
-#endif
-
-    return reflection;
 }
 
 vec3 trace_specular_ray(

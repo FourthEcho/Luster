@@ -30,17 +30,23 @@ float get_ripple_height(vec2 coord) {
 float get_puddle_noise(vec3 world_pos, vec3 flat_normal, vec2 light_levels) {
     const float puddle_frequency = 0.025;
 
-#if RAIN_PUDDLES_MODE == RAIN_PUDDLES_OFF
-    return 0.0;
-#endif
-
     float puddle = texture(noisetex, world_pos.xz * puddle_frequency).w;
-    float weather_factor = 1.0;
-#if RAIN_PUDDLES_MODE == RAIN_PUDDLES_RAIN
-    weather_factor = biome_may_rain;
-#endif
-    puddle = linear_step(0.45, 0.55, puddle) * wetness * weather_factor
+    puddle = linear_step(0.45, 0.55, puddle) * wetness * biome_may_rain
         * step(0.99, flat_normal.y);
+
+    // Prevent puddles from appearing indoors
+    puddle *= (1.0 - cube(light_levels.x))
+        * linear_step(14.0 / 15.0, 1.0, light_levels.y);
+
+    return puddle;
+}
+
+// "Everywhere" mode: cover every upward-facing surface that is exposed to sky
+// while it is raining. Skip the noise-based distribution so puddles form on
+// every applicable surface, not just where the puddle noise exceeds the
+// threshold.
+float get_puddle_everywhere(vec3 flat_normal, vec2 light_levels) {
+    float puddle = step(0.99, flat_normal.y) * wetness;
 
     // Prevent puddles from appearing indoors
     puddle *= (1.0 - cube(light_levels.x))
@@ -70,12 +76,26 @@ bool get_rain_puddles(
     const float puddle_darkening_factor = 0.33;
     const float puddle_darkening_factor_porous = 0.67;
 
-    if (wetness < 0.0 || biome_may_rain < 0.0
-        || material_mask == MATERIAL_LEAVES) {
+    if (wetness < 0.0 || material_mask == MATERIAL_LEAVES) {
         return false;
     }
 
-    float puddle = get_puddle_noise(world_pos, flat_normal, light_levels);
+#ifndef RAIN_PUDDLES_EVERYWHERE
+    // In normal Rain Puddles mode, skip biomes that cannot rain
+    if (biome_may_rain < 0.0) {
+        return false;
+    }
+#endif
+
+    float puddle;
+#ifdef RAIN_PUDDLES_EVERYWHERE
+    puddle = get_puddle_everywhere(flat_normal, light_levels);
+#else
+    puddle = get_puddle_noise(world_pos, flat_normal, light_levels);
+#endif
+
+    // Apply user-controlled intensity
+    puddle *= RAIN_PUDDLES_INTENSITY;
 
     if (puddle < eps) {
         return false;

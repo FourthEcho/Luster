@@ -2,7 +2,6 @@
 #define INCLUDE_MISC_TONEMAP_OPERATORS
 
 #include "/include/post_processing/aces/aces.glsl"
-#include "/include/post_processing/agx/agx.glsl"
 #include "/include/utility/color.glsl"
 
 // ACES RRT and ODT

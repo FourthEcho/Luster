@@ -80,6 +80,12 @@ void decode_specular_map(vec4 specular_map, inout Material material) {
             64.0 / 255.0,
             max0(specular_map.b - specular_map.b * has_sss)
         );
+#ifdef POROSITY
+        // Apply user-controlled porosity intensity scaling
+        material.porosity *= POROSITY_INTENSITY;
+#else
+        material.porosity = 0.0;
+#endif
     } else if (specular_map.g < 237.5 / 255.0) {
         // Hardcoded metals
         uint metal_id = clamp(uint(255.0 * specular_map.g) - 230u, 0u, 7u);
@@ -115,6 +121,20 @@ void decode_specular_map(vec4 specular_map, inout Material material) {
     ); // based on Kneemund's method
 }
 #endif
+
+void decode_specular_map(
+    vec4 specular_map,
+    inout Material material,
+    out bool parallax_shadow
+) {
+#if defined POM && defined POM_SHADOW
+    // Specular map alpha >= 0.5 => parallax shadow
+    parallax_shadow = specular_map.a >= 0.5;
+    specular_map.a = fract(specular_map.a * 2.0);
+#endif
+
+    decode_specular_map(specular_map, material);
+}
 
 Material material_from(
     vec3 albedo_srgb,

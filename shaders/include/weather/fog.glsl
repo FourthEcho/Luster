@@ -110,9 +110,9 @@ OverworldFogParameters get_fog_parameters(Weather weather) {
 
 #ifdef DESERT_SANDSTORM
     const float desert_sandstorm_density = 0.2;
-    const float desert_sandstorm_scattering = desert_sandstorm_density * 0.5;
+    const float desert_sandstorm_scattering = desert_sandstorm_density * 0.5 * DESERT_SANDSTORM_INTENSITY;
     const vec3 desert_sandstorm_extinction
-        = desert_sandstorm_density * vec3(0.2, 0.27, 0.45);
+        = desert_sandstorm_density * vec3(0.2, 0.27, 0.45) * DESERT_SANDSTORM_INTENSITY;
 
     params.mie_scattering_coeff
         += desert_sandstorm * desert_sandstorm_scattering;

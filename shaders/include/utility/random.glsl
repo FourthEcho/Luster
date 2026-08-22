@@ -56,6 +56,14 @@ uint lowbias32(uint x) {
     return x;
 }
 
+uint lowbias32_inverse(uint x) {
+    x ^= x >> 16;
+    x *= 0x43021123u;
+    x ^= x >> 15 ^ x >> 30;
+    x *= 0x1d69e2a5u;
+    x ^= x >> 16;
+    return x;
+}
 
 float rand_next_float(inout uint state) {
     state = lowbias32(state);

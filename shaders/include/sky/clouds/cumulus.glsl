@@ -81,29 +81,9 @@ float clouds_cumulus_density(vec3 pos) {
         = texture(SAMPLER_WORLEY_BUBBLY, (pos + 0.2 * wind) * 0.0009).x;
     float worley_1
         = texture(SAMPLER_WORLEY_SWIRLEY, (pos + 0.4 * wind) * 0.005).x;
-
-    // 3D curl noise — advects the sample position with a divergence-free
-    // velocity field. This makes the cloud volume look like it's tumbling /
-    // rolling rather than just translating with the wind. The advection
-    // magnitude scales with altitude so the cloud tops deform more than
-    // the flat bottoms.
-    vec3 curl_offset = texture(curl_3d, pos * 0.0015).rgb * 2.0 - 1.0;
-    pos += 25.0 * curl_offset * smoothstep(0.3, 1.0, altitude_fraction);
-
-    // 3D Perlin noise — three channels at frequencies 1/2/4 provide
-    // multi-octave detail. Channel R (low freq) shapes the cloud body
-    // to break up the too-uniform worley pattern. Channels G/B add
-    // higher-frequency wisps at higher altitudes.
-    vec3 perlin_detail = texture(perlin_3d, pos * 0.0008).rgb;
-    float perlin_low  = perlin_detail.r * 2.0 - 1.0;
-    float perlin_mid  = perlin_detail.g * 2.0 - 1.0;
-    float perlin_high = perlin_detail.b * 2.0 - 1.0;
 #else
     const float worley_0 = 0.5;
     const float worley_1 = 0.5;
-    const float perlin_low = 0.0;
-    const float perlin_mid = 0.0;
-    const float perlin_high = 0.0;
 #endif
 
     float detail_fade = 0.20 * smoothstep(0.85, 1.0, 1.0 - altitude_fraction)
@@ -113,13 +93,6 @@ float clouds_cumulus_density(vec3 pos) {
         * dampen(clamp01(1.0 - density));
     density -= clouds_params.l0_detail_weights.y * sqr(worley_1)
         * dampen(clamp01(1.0 - density)) * detail_fade;
-
-    // Add Perlin octaves on top of the worley base. Low-freq modulates the
-    // cloud body shape (breaks up the uniform worley pattern); mid/high
-    // frequencies add wispy detail at higher altitudes.
-    density += 0.15 * perlin_low * dampen(clamp01(1.0 - density));
-    density += 0.08 * perlin_mid * dampen(clamp01(1.0 - density)) * detail_fade;
-    density += 0.04 * perlin_high * dampen(clamp01(1.0 - density)) * sqr(detail_fade);
 
     // Adjust density so that the clouds are wispy at the bottom and hard at the
     // top
@@ -166,7 +139,7 @@ vec2 clouds_cumulus_scattering(
     float ground_optical_depth,
     float step_transmittance,
     float cos_theta,
-    vec2 bounced_light
+    float bounced_light
 ) {
     vec2 scattering = vec2(0.0);
 
@@ -192,13 +165,13 @@ vec2 clouds_cumulus_scattering(
         scattering.x += scatter_amount
             * exp(-extinct_amount * light_optical_depth) * phase
             * (1.0 - 0.5 * clouds_params.l0_shadow);
-        // Direct ground bounce is carried by the celestial-light channel;
-        // sky bounce is carried by the environment channel. Both are true
-        // indirect radiance terms and are attenuated before reaching the cloud.
         scattering.x += scatter_amount
-            * isotropic_phase * bounced_light.x;
-        scattering.y += scatter_amount
-            * isotropic_phase * bounced_light.y;
+            * exp(-extinct_amount * ground_optical_depth) * isotropic_phase
+            * bounced_light;
+        scattering.x += scatter_amount
+            * exp(-extinct_amount * sky_optical_depth) * isotropic_phase
+            * clouds_params.l0_shadow
+            * 0.5; // fake bounced lighting from the layer above
         scattering.y += scatter_amount
             * exp(-extinct_amount * sky_optical_depth) * isotropic_phase;
 
@@ -298,6 +271,7 @@ CloudsResult draw_cumulus_clouds(
     bool moonlit = sun_dir.y < -0.04;
     vec3 light_dir = moonlit ? moon_dir : sun_dir;
     float cos_theta = dot(ray_dir, light_dir);
+    float bounced_light = planet_albedo * light_dir.y * rcp_pi;
 
     // --------------------
     //   Raymarching Loop
@@ -360,17 +334,6 @@ CloudsResult draw_cumulus_clouds(
         float ground_optical_depth
             = mix(density, 1.0, clamp01(altitude_fraction * 2.0 - 1.0))
             * altitude_fraction * clouds_cumulus_thickness;
-
-        vec2 bounced_light = clouds_multiple_scattering_bounce(
-            clouds_params.l0_extinction_coeff,
-            clouds_params.l0_scattering_coeff,
-            light_optical_depth,
-            sky_optical_depth,
-            ground_optical_depth,
-            altitude_fraction,
-            light_dir,
-            planet_albedo
-        );
 
         scattering
             += clouds_cumulus_scattering(

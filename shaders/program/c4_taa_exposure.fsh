@@ -308,7 +308,7 @@ void main() {
 
     // Dynamic blend weight lending equal weight to all frames in the history,
     // drastically reducing time taken to converge when upscaling
-    float blend_weight = mix(0.35, 0.10, distance_factor);
+    float blend_weight = mix(0.35, 0.10, distance_factor) * TAA_BLEND;
     float alpha = max(1.0 / pixel_age, blend_weight);
 
 #ifndef TAAU

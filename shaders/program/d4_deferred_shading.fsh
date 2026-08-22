@@ -13,22 +13,12 @@
 
 layout(location = 0) out vec3 fragment_color;
 
-#ifdef IBL_TEMPORAL_ACCUMULATION
-#ifdef USE_SEPARATE_ENTITY_DRAWS
-layout(location = 1) out vec4 ibl_history_out;
-/* RENDERTARGETS: 0,20 */
-#else
-layout(location = 1) out vec4 colortex3_clear;
-layout(location = 2) out vec4 ibl_history_out;
-/* RENDERTARGETS: 0,3,20 */
-#endif
-#else
 #ifdef USE_SEPARATE_ENTITY_DRAWS
 /* RENDERTARGETS: 0 */
 #else
 layout(location = 1) out vec4 colortex3_clear;
+
 /* RENDERTARGETS: 0,3 */
-#endif
 #endif
 
 in vec2 uv;
@@ -43,6 +33,10 @@ flat in vec3 moon_color;
 #include "/include/fog/overworld/parameters.glsl"
 flat in OverworldFogParameters fog_params;
 
+#if defined SH_SKYLIGHT
+flat in vec3 sky_sh[9];
+flat in vec3 skylight_up;
+#endif
 
 flat in float rainbow_amount;
 #endif
@@ -64,21 +58,12 @@ uniform sampler2D colortex11; // clouds history
 uniform sampler2D colortex12; // clouds data
 uniform sampler2D colortex14; // ambient lighting history data
 
-#ifdef INDIRECT_LIGHTING
-uniform sampler2D colortex18; // filtered indirect-lighting output (quarter res)
-#endif
-
-#ifdef IBL_TEMPORAL_ACCUMULATION
-uniform sampler2D colortex20; // IBL diffuse history (quarter res, persistent)
-#endif
-
 #ifndef USE_SEPARATE_ENTITY_DRAWS
 uniform sampler2D colortex3; // OF damage overlay, armor glint
 #endif
 
 #if defined WORLD_OVERWORLD && defined GALAXY
 uniform sampler2D colortex13;
-uniform sampler2D colortex15;
 #define galaxy_sampler colortex13
 #endif
 
@@ -175,8 +160,11 @@ const bool colortex11MipmapEnabled = true;
 #define ATMOSPHERE_SCATTERING_LUT depthtex0
 #define TEMPORAL_REPROJECTION
 
+#ifdef PHOTONICS_IN_USE
+#define PHOTONICS_DIFFUSE
+#endif
+
 #include "/include/fog/simple_fog.glsl"
-#include "/include/lighting/ibl/ibl.glsl"
 #include "/include/lighting/diffuse_lighting.glsl"
 #include "/include/lighting/shadows/common.glsl"
 #include "/include/lighting/shadows/pcss.glsl"
@@ -192,10 +180,6 @@ const bool colortex11MipmapEnabled = true;
 #include "/include/utility/color.glsl"
 #include "/include/utility/encoding.glsl"
 #include "/include/utility/space_conversion.glsl"
-
-#ifdef INDIRECT_LIGHTING
-#include "/program/gi/upsample.glsl"
-#endif
 
 #if defined WORLD_OVERWORLD
 #include "/include/sky/clouds/sampling.glsl"
@@ -253,12 +237,6 @@ void main() {
     vec3 direction_world
         = normalize(position_scene - gbufferModelViewInverse[3].xyz);
 
-    // Shared stochastic offset used by cloud lighting.
-    // (The indirect-lighting path now runs as a separate deferred pass chain
-    // in program/gi/* and does its own dithering inside the bounce shaders.)
-    float dither = texelFetch(noisetex, texel & 511, 0).b;
-    dither = r1(frameCounter, dither);
-
 #if defined WORLD_OVERWORLD
     // Atmosphere
 
@@ -282,6 +260,9 @@ void main() {
 #ifdef BLOCKY_CLOUDS
     vec3 world_start_pos = gbufferModelViewInverse[3].xyz + cameraPosition;
     vec3 world_end_pos = position_world;
+
+    float dither = texelFetch(noisetex, texel & 511, 0).b;
+    dither = r1(frameCounter, dither);
 
     vec4 blocky_clouds = raymarch_blocky_clouds(
         world_start_pos,
@@ -329,7 +310,7 @@ void main() {
 #endif
 
         // Apply common fog
-        vec4 fog = common_fog(far, true, direction_world * far);
+        vec4 fog = common_fog(far, true);
         fragment_color = mix(fog.rgb, fragment_color.rgb, fog.a);
 
         // Apply purkinje shift
@@ -389,6 +370,7 @@ void main() {
         );
 
         vec3 normal = flat_normal;
+        bool parallax_shadow = false;
 
 #ifdef LOD_MOD_ACTIVE
         if (!is_lod) {
@@ -403,7 +385,9 @@ void main() {
                 unpack_unorm_2x8(gbuffer_data_1.z),
                 unpack_unorm_2x8(gbuffer_data_1.w)
             );
-            decode_specular_map(specular_map, material);
+            decode_specular_map(specular_map, material, parallax_shadow);
+#elif defined NORMAL_MAPPING
+        parallax_shadow = gbuffer_data_1.z >= 0.5;
 #endif
 
 #ifdef LOD_MOD_ACTIVE
@@ -413,8 +397,7 @@ void main() {
         // Rain puddles
 
 #if defined WORLD_OVERWORLD && defined RAIN_PUDDLES
-#if RAIN_PUDDLES_MODE != RAIN_PUDDLES_OFF
-        if (wetness > eps && (RAIN_PUDDLES_MODE == RAIN_PUDDLES_EVERYWHERE || biome_may_rain > eps)) {
+        if (wetness > eps && biome_may_rain > eps) {
             bool puddle = get_rain_puddles(
                 position_world,
                 flat_normal,
@@ -428,7 +411,6 @@ void main() {
                 material.ssr_multiplier
             );
         }
-#endif
 #endif
 
         // Upscale ambient occlusion
@@ -561,6 +543,11 @@ void main() {
                 clamp01(shadow_distance_fade)
             );
 
+            // Apply parallax shadow
+#if defined POM && defined POM_SHADOW \
+    && (defined SPECULAR_MAPPING || defined NORMAL_MAPPING)
+            shadows *= float(!parallax_shadow);
+#endif
         }
 #else
         const vec3 shadows = vec3(1.0);
@@ -597,58 +584,6 @@ void main() {
             NoH,
             LoV
         );
-
-#ifdef IBL
-        // Dynamic environment lighting. The sky map is already generated at
-        // frame resolution for the current atmosphere/cloud state, so IBL is
-        // evaluated directly from it rather than using a stale offline map.
-        //
-        // IBL_TEMPORAL_ACCUMULATION: when on, we keep a persistent full-res
-        // history buffer (colortex20) and EMA-blend the current diffuse
-        // irradiance with reprojected history. This is the user-requested
-        // "persistent temporal buffer for IBL" — reuses existing colortex
-        // infrastructure without degrading quality (full res, RGBA16F).
-        // When disabled, dither is static per-pixel so raw noise is visible.
-#ifdef IBL_TEMPORAL_ACCUMULATION
-        vec2 ibl_dither = hash2(vec3(vec2(texel), float(frameCounter)));
-#else
-        vec2 ibl_dither = hash2(vec3(vec2(texel), 0.0));
-#endif
-        vec3 ibl_current = get_image_based_lighting(
-            material,
-            normal,
-            -direction_world,
-            bent_normal,
-            clamp01(light_levels.y),
-            ibl_dither
-        );
-#ifdef IBL_TEMPORAL_ACCUMULATION
-        // Persistent history — sample previous frame at same UV (full-res)
-        // and EMA-blend. Disocclusion: sky/hand or first frames -> no history.
-        vec3 ibl_history = texture(colortex20, uv).rgb;
-        float ibl_history_weight = (depth >= 1.0 || depth < hand_depth || frameCounter < 3) ? 0.0 : 0.85;
-        vec3 ibl_final = mix(ibl_current, ibl_history, ibl_history_weight);
-        fragment_color += ibl_final;
-        ibl_history_out = vec4(ibl_final, 1.0);
-#else
-        fragment_color += ibl_current;
-#endif
-#endif
-
-#ifdef INDIRECT_LIGHTING
-        // Multi-bounce indirect diffuse — read the quarter-res filtered GI
-        // buffer (colortex18, written by program/gi/filter.fsh after the
-        // bounce/accumulate chain) and bilaterally upsample to full res.
-        // The helper applies albedo, AO, skylight gating, and the
-        // INDIRECT_LIGHTING_INTENSITY slider internally.
-        fragment_color += sample_gi_bilateral(
-            uv,
-            depth,
-            material.albedo,
-            ao,
-            clamp01(light_levels.y)
-        );
-#endif
 
         // Specular highlight
 
@@ -723,7 +658,7 @@ void main() {
         fragment_color = mix(border_fog_color, fragment_color, border_fog);
 #endif
 
-        vec4 fog = common_fog(view_distance, false, position_scene);
+        vec4 fog = common_fog(view_distance, false);
         fragment_color = fragment_color * fog.a + fog.rgb;
 
 #if defined WORLD_OVERWORLD
