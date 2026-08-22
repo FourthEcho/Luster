@@ -202,6 +202,18 @@ vec3 get_ibl_sky_irradiance(
     );
 }
 
+// Shared directional environment irradiance entry point used by GI, water,
+// Voxy, and translucent geometry so they all sample the same estimator.
+vec3 get_ibl_sky_irradiance_shared(vec3 normal, vec2 dither) {
+#ifdef IBL
+    int samples = IBL_DIFFUSE_SAMPLES;
+#else
+    // Keep the fallback cheap when standalone IBL is disabled.
+    const int samples = 4;
+#endif
+    return get_ibl_sky_irradiance(normal, dither, samples);
+}
+
 // -----------------------------------------------------------------------------
 // Diffuse IBL
 // -----------------------------------------------------------------------------

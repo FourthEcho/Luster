@@ -523,12 +523,15 @@ vec3 atmosphere_transmittance(float mu, float r) {
         return vec3(0.0);
     }
 
-    // Rayleigh and mie density at r
-    const vec2 rcp_scale_heights = rcp(air_scale_heights);
-    const vec2 scaled_planet_radius = planet_radius * rcp_scale_heights;
-    vec2 density = exp(r * -rcp_scale_heights + scaled_planet_radius);
+    // Rayleigh and mie density at r. Keep this path consistent with the
+    // precomputed-atmosphere density model used elsewhere in the file.
+    vec3 density3 = atmosphere_density(r);
+    vec2 density = density3.xy;
 
-    // Estimate airmass along ray using chapman function approximation
+    // Estimate airmass along ray using chapman function approximation.
+    // Keep the inverse scale heights local to this function so all call sites
+    // see the same atmospheric density model without relying on globals.
+    const vec2 rcp_scale_heights = rcp(air_scale_heights);
     vec2 airmass = air_scale_heights * density;
     airmass.x *= chapman_function_approx(r * rcp_scale_heights.x, mu);
     airmass.y *= chapman_function_approx(r * rcp_scale_heights.y, mu);

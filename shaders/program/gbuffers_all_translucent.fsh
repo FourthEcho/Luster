@@ -412,10 +412,9 @@ void main() {
     vec3 normal_tangent = vec3(0.0, 0.0, 1.0);
 
     // Resolve the former SH skylight input from the live IBL environment.
-    ambient_color = get_ibl_sky_irradiance(
+    ambient_color = get_ibl_sky_irradiance_shared(
         normalize(normal),
-        vec2(0.41, 0.67),
-        4
+        vec2(0.41, 0.67)
     ) * clamp01(light_levels.y);
 
     bool is_water = material_mask == MATERIAL_WATER;
@@ -586,10 +585,9 @@ void main() {
     }
 
     // Replace the retired SH skylight with directional IBL irradiance.
-    ambient_color = get_ibl_sky_irradiance(
+    ambient_color = get_ibl_sky_irradiance_shared(
         normalize(normal),
-        vec2(0.41, 0.67),
-        4
+        vec2(0.41, 0.67)
     ) * clamp01(adjusted_light_levels.y);
 
     // Shadows

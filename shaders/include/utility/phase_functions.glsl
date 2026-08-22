@@ -49,12 +49,6 @@ float klein_nishina_phase_area(float nu, float e, float radius) {
     return e / (tau * (e - e * mu + 1.0) * log(2.0 * e + 1.0));
 }
 
-float nvidia_phase(float nu, float g, float a) {
-    float gg = g * g;
-    return ((1 - gg) * (1 + a * nu * nu))
-        / (pi * pow1d5(1 + gg - (2 * g * nu)) * 4.0
-           * (1 + (a * (1 + 2 * gg)) / 3.0));
-}
 
 float nvidia_phase_area(float nu, float g, float a, float radius) {
     float radius_eff = max(radius, eps); // Prevent divide by 0

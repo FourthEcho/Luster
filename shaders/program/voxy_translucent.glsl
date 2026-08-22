@@ -164,10 +164,9 @@ void voxy_emitFragment(VoxyFragmentParameters parameters) {
     // Replace the retired SH skylight with directional IBL irradiance.
     // A small fixed sample set keeps this path inexpensive while preserving
     // the sky directionality that the old SH representation supplied.
-    ambient_color = get_ibl_sky_irradiance(
+    ambient_color = get_ibl_sky_irradiance_shared(
         normal,
-        vec2(0.37, 0.73),
-        4
+        vec2(0.37, 0.73)
     ) * clamp01(parameters.lightMap.y);
 
     uint material_mask = max(parameters.customId - 10000u, 0u);

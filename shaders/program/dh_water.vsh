@@ -100,10 +100,9 @@ void main() {
 
     light_color = texelFetch(colortex4, ivec2(191, 0), 0).rgb;
     // Replace the retired SH skylight with directional IBL irradiance.
-    ambient_color = get_ibl_sky_irradiance(
+    ambient_color = get_ibl_sky_irradiance_shared(
         normalize(normal),
-        vec2(0.23, 0.61),
-        4
+        vec2(0.23, 0.61)
     ) * clamp01(light_levels.y);
 
     is_water = uint(dhMaterialId == DH_BLOCK_WATER);

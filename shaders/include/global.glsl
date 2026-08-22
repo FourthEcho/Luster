@@ -211,12 +211,6 @@ float pulse(float x, float center, float width, const float period) {
     return pulse(x, 0.0, width);
 }
 
-// Exponential impulse function, for when a signal rises quickly then gradually
-// falls.
-float impulse(float x, float peak) {
-    float h = peak * x;
-    return h * exp(1.0 - h);
-}
 
 // Euclidian distance is defined as sqrt(a^2 + b^2 + ...). This function instead
 // does cbrt(|a|^3 + |b|^3 + ...). This results in smaller distances along the

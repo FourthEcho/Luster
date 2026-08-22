@@ -132,7 +132,7 @@ in vec2 uv;
 // Cosine-weighted sample of the sky map at the given world direction,
 // gated by skylight so enclosed pixels don't get free sky light.
 vec3 gi_sample_sky(vec3 world_dir, float skylight) {
-    vec3 sky = get_ibl_sky_irradiance(world_dir, hash2(vec3(uv * 255.0, frameCounter)), 4);
+    vec3 sky = get_ibl_sky_irradiance_shared(world_dir, hash2(vec3(uv * 255.0, frameCounter)));
     return sky * skylight;
 }
 

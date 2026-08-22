@@ -666,39 +666,6 @@ const float wetnessHalflife         = 70.0;
   #define A_SVGF_RADIUS 4 // [2 3 4 5 6 8]
   #define A_SVGF_STRICTNESS 1.00 // [0.25 0.50 0.75 1.00 1.50 2.00 3.00]
 
-// ---- Indirect Lighting: derived enable macros for shaders.properties ----
-// Iris's `program.<pass>.enabled = MACRO` directive accepts a single macro
-// name. We synthesize one per "this bounce should run" / "this filter pass
-// should run" condition so the BOUNCES and A_SVGF_PASSES sliders can cleanly
-// enable/disable passes without runtime branching in the GLSL.
-#ifdef INDIRECT_LIGHTING
-  #define INDIRECT_LIGHTING_BOUNCES_1_ENABLED
-  #if INDIRECT_LIGHTING_BOUNCES >= 2
-    #define INDIRECT_LIGHTING_BOUNCES_2_ENABLED
-  #endif
-  #if INDIRECT_LIGHTING_BOUNCES >= 3
-    #define INDIRECT_LIGHTING_BOUNCES_3_ENABLED
-  #endif
-  #if INDIRECT_LIGHTING_BOUNCES >= 4
-    #define INDIRECT_LIGHTING_BOUNCES_4_ENABLED
-  #endif
-  #ifdef A_SVGF
-    #define INDIRECT_LIGHTING_FILTER_1_ENABLED
-    #if A_SVGF_PASSES >= 2
-      #define INDIRECT_LIGHTING_FILTER_2_ENABLED
-    #endif
-    #if A_SVGF_PASSES >= 3
-      #define INDIRECT_LIGHTING_FILTER_3_ENABLED
-    #endif
-    #if A_SVGF_PASSES >= 4
-      #define INDIRECT_LIGHTING_FILTER_4_ENABLED
-    #endif
-    #if A_SVGF_PASSES >= 5
-      #define INDIRECT_LIGHTING_FILTER_5_ENABLED
-    #endif
-  #endif
-#endif
-
 // ---- Image Based Lighting (IBL) ----
 //#define IBL
 #define IBL_TEMPORAL_ACCUMULATION

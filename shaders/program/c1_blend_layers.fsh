@@ -17,6 +17,10 @@
 
 #include "/include/global.glsl"
 
+#ifdef FOG_SMOOTHING
+#include "/include/fog/smoothing.glsl"
+#endif
+
 layout(location = 0) out vec3 fragment_color;
 
 /* RENDERTARGETS: 0 */
@@ -218,6 +222,18 @@ void main() {
 #if defined VL || defined LPV_VL
     vec3 fog_transmittance = smooth_filter(colortex6, uv).rgb;
     vec3 fog_scattering = smooth_filter(colortex7, uv).rgb;
+#ifdef FOG_SMOOTHING
+    // Denoise the fog buffers themselves. Do not use scene/TAA history as a
+    // substitute for volumetric radiance.
+    fog_transmittance = fog_spatial_filter(
+        colortex6, uv, vec2(view_pixel_size.x, view_pixel_size.y),
+        max(FOG_SMOOTHING_RADIUS, 1)
+    );
+    fog_scattering = fog_spatial_filter(
+        colortex7, uv, vec2(view_pixel_size.x, view_pixel_size.y),
+        max(FOG_SMOOTHING_RADIUS, 1)
+    );
+#endif
 #endif
 
     // LoD mod support
