@@ -233,10 +233,6 @@ option.MOON_I                          = Moonlight Intensity
 option.MOON_I.comment = Toggles moonlight intensity.
 option.SKYLIGHT_I                      = Skylight Intensity
 option.SKYLIGHT_I.comment = Controls skylight intensity.
-option.BOUNCED_LIGHT_I                 = Bounced Sunlight Intensity
-option.BOUNCED_LIGHT_I.comment = Controls bounced sunlight intensity.
-option.CAVE_LIGHTING_I                 = Cave Brightness
-option.CAVE_LIGHTING_I.comment = Controls cave brightness.
 option.LIGHTNING_FLASH                 = Lightning Flash
 option.LIGHTNING_FLASH.comment = Controls lightning flash.
 option.NETHER_USE_BIOME_COLOR          = Use Biome Color
@@ -1079,8 +1075,6 @@ option.INDIRECT_LIGHTING_RAY_STEPS=Ray Steps
 option.INDIRECT_LIGHTING_RAY_STEPS.comment=Number of steps the depth-buffer raymarcher takes per bounce. Lower = faster but more missed intersections; higher = better at grazing angles.
 option.INDIRECT_LIGHTING_REFINEMENT_STEPS=Refinement Steps
 option.INDIRECT_LIGHTING_REFINEMENT_STEPS.comment=Binary-search refinement steps after the raymarcher finds a hit. 0 = no refinement (cheap, slightly noisy), 2-3 = clean hit positions.
-option.INDIRECT_LIGHTING_BIAS=Indirect Lighting Bias
-option.INDIRECT_LIGHTING_BIAS.comment=Scales the final indirect contribution. 0.5 = half-strength indirect light, useful when GI is too strong and washing out direct lighting.
 option.INDIRECT_LIGHTING_HISTORY=History Length
 option.INDIRECT_LIGHTING_HISTORY.comment=Maximum number of frames to accumulate. Higher = smoother but laggier; lower = noisier but more responsive to lighting changes.
 option.A_SVGF=A-SVGF Filter

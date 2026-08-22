@@ -166,7 +166,7 @@ vec2 clouds_cumulus_scattering(
     float ground_optical_depth,
     float step_transmittance,
     float cos_theta,
-    float bounced_light
+    vec2 bounced_light
 ) {
     vec2 scattering = vec2(0.0);
 
@@ -192,13 +192,13 @@ vec2 clouds_cumulus_scattering(
         scattering.x += scatter_amount
             * exp(-extinct_amount * light_optical_depth) * phase
             * (1.0 - 0.5 * clouds_params.l0_shadow);
+        // Direct ground bounce is carried by the celestial-light channel;
+        // sky bounce is carried by the environment channel. Both are true
+        // indirect radiance terms and are attenuated before reaching the cloud.
         scattering.x += scatter_amount
-            * exp(-extinct_amount * ground_optical_depth) * isotropic_phase
-            * bounced_light;
-        scattering.x += scatter_amount
-            * exp(-extinct_amount * sky_optical_depth) * isotropic_phase
-            * clouds_params.l0_shadow
-            * 0.5; // fake bounced lighting from the layer above
+            * isotropic_phase * bounced_light.x;
+        scattering.y += scatter_amount
+            * isotropic_phase * bounced_light.y;
         scattering.y += scatter_amount
             * exp(-extinct_amount * sky_optical_depth) * isotropic_phase;
 
@@ -298,7 +298,17 @@ CloudsResult draw_cumulus_clouds(
     bool moonlit = sun_dir.y < -0.04;
     vec3 light_dir = moonlit ? moon_dir : sun_dir;
     float cos_theta = dot(ray_dir, light_dir);
-    float bounced_light = planet_albedo * light_dir.y * rcp_pi;
+
+    // Cloud multiple scattering source. Order 0 is direct celestial + sky
+    // illumination. Each configured bounce re-distributes the incoming energy
+    // between the ground-facing and sky-facing hemispheres according to cloud
+    // altitude and attenuates it by the cloud's single-scattering albedo.
+    // This replaces the old fixed 0.5 upper-layer hack.
+    float cloud_single_scatter_albedo = clamp01(
+        clouds_params.l0_scattering_coeff
+        * rcp(max(clouds_params.l0_extinction_coeff, eps))
+    );
+    float cloud_bounce_gain = 0.55 * cloud_single_scatter_albedo;
 
     // --------------------
     //   Raymarching Loop
@@ -361,6 +371,35 @@ CloudsResult draw_cumulus_clouds(
         float ground_optical_depth
             = mix(density, 1.0, clamp01(altitude_fraction * 2.0 - 1.0))
             * altitude_fraction * clouds_cumulus_thickness;
+
+        vec2 bounced_light = vec2(0.0);
+#if CLOUD_LIGHTING_BOUNCES > 0
+        // Sun/moon energy reaching the ground beneath this cloud sample, then
+        // returning through the cloud, includes both the celestial path to the
+        // surface and the ground-to-cloud optical depth.
+        float celestial_to_ground = exp(
+            -clouds_params.l0_extinction_coeff
+            * (light_optical_depth + ground_optical_depth)
+        );
+        float ground_source = max(light_dir.y, 0.0)
+            * planet_albedo * celestial_to_ground;
+
+        // The dynamic sky environment is the second true source. Its luminance
+        // is attenuated by the cloud-to-sky optical depth before being scattered
+        // back into the local cloud volume.
+        float sky_source = dot(sky_color, luminance_weights)
+            * exp(-clouds_params.l0_extinction_coeff * sky_optical_depth);
+
+        float order_energy = ground_source + sky_source;
+        float ground_share = 1.0 - clamp01(altitude_fraction);
+        float sky_share = 1.0 - ground_share;
+
+        for (int bounce = 0; bounce < 4; ++bounce) {
+            if (bounce >= CLOUD_LIGHTING_BOUNCES) break;
+            bounced_light += order_energy * vec2(ground_share, sky_share);
+            order_energy *= cloud_bounce_gain;
+        }
+#endif
 
         scattering
             += clouds_cumulus_scattering(

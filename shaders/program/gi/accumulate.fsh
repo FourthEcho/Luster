@@ -10,8 +10,7 @@
 //  Reads:
 //    colortex17 — latest bounce output (this frame)
 //    colortex18 — previous accumulated radiance (reprojected)
-//    colortex5  — TAA history (used as a disocclusion fallback)
-//
+////
 //  Writes:
 //    colortex18 — new accumulated radiance (+ pixel age in alpha)
 //    colortex19 — variance + mean luma (only when A_SVGF is on)
@@ -25,7 +24,6 @@
 // ----------------------------------------------------------------------------
 
 uniform sampler2D colortex1;  // gbuffer data 0 (normals, lightmaps)
-uniform sampler2D colortex5;  // TAA scene history
 uniform sampler2D colortex17; // this frame's bounce output
 uniform sampler2D colortex18; // previous accumulated
 #ifdef A_SVGF
@@ -92,35 +90,29 @@ void main() {
 
     bool hand = depth < hand_depth;
     vec3 prev_uv = gi_reproject(scene_pos, hand);
+    bool off_screen = clamp01(prev_uv.xy) != prev_uv.xy;
 
     // Default to the current sample if we can't reproject cleanly.
     vec3 accumulated = current;
     float age = 1.0;
 
-    // Off-screen / out-of-frustum reproject — fall back to TAA's history
-    // so disoccluded pixels get a reasonable color estimate instead of
-    // zero. This is the "use TAA history" trick: the same reprojected
-    // sample that TAA uses for its color history, we use for our GI
-    // history, which means disocclusions in GI and TAA are aligned.
-    bool off_screen = clamp01(prev_uv.xy) != prev_uv.xy;
-
+    // Temporal GI history is always enabled when indirect lighting is enabled.
+    // The history source is the dedicated GI buffer (colortex18), never the
+    // composited TAA color history, so direct lighting/fog/reflections cannot
+    // contaminate indirect radiance.
+#ifdef INDIRECT_LIGHTING_USE_TAA_HISTORY
     if (!off_screen) {
-        // 4-tap bilinear sample of the previous accumulated radiance,
-        // gated by depth to reject disoccluded history.
         ivec2 rep_pixel = ivec2(floor(prev_uv.xy * view_res * gi_render_scale - 0.5));
         vec2 subpix = fract(prev_uv.xy * view_res * gi_render_scale - 0.5 - rep_pixel);
 
         const ivec2 offsets[4] = ivec2[4](
-            ivec2(0, 0),
-            ivec2(1, 0),
-            ivec2(0, 1),
-            ivec2(1, 1)
+            ivec2(0, 0), ivec2(1, 0), ivec2(0, 1), ivec2(1, 1)
         );
         float weights[4] = float[4](
             (1.0 - subpix.x) * (1.0 - subpix.y),
-            subpix.x         * (1.0 - subpix.y),
+            subpix.x * (1.0 - subpix.y),
             (1.0 - subpix.x) * subpix.y,
-            subpix.x         * subpix.y
+            subpix.x * subpix.y
         );
 
         vec3 prev_radiance = vec3(0.0);
@@ -129,8 +121,9 @@ void main() {
 
         for (int i = 0; i < 4; ++i) {
             ivec2 p = rep_pixel + offsets[i];
-            if (p.x < 0 || p.y < 0 || p.x >= int(view_res.x * 0.5) || p.y >= int(view_res.y * 0.5))
-                continue;
+            if (p.x < 0 || p.y < 0
+                || p.x >= int(view_res.x * gi_render_scale)
+                || p.y >= int(view_res.y * gi_render_scale)) continue;
             vec4 h = texelFetch(colortex18, p, 0);
             prev_radiance += h.rgb * weights[i];
             prev_age += h.a * weights[i];
@@ -141,14 +134,9 @@ void main() {
             prev_radiance /= sum_weight;
             prev_age /= sum_weight;
 
-            // EMA blend — alpha goes to ~1/N over N frames, with a small
-            // floor so transient noise doesn't get stuck.
             float new_age = min(prev_age + 1.0, float(INDIRECT_LIGHTING_HISTORY));
             float alpha = max(1.0 / new_age, 1.0 / float(INDIRECT_LIGHTING_HISTORY));
 
-            // Firefly clamp — limit the history's per-channel contribution
-            // to a multiple of the current sample's luminance so a single
-            // bright pixel can't poison the history for many frames.
             float current_luma = dot(current, luminance_weights);
             float prev_luma = dot(prev_radiance, luminance_weights);
             float clamp_limit = max(current_luma * 4.0 + 0.02, current_luma + 0.05);
@@ -157,16 +145,11 @@ void main() {
             accumulated = mix(prev_radiance, current, alpha);
             age = new_age;
         } else {
-            // Disocclusion — pull from TAA's history as a fallback.
-            vec3 taa_history = max0(texture(colortex5, prev_uv.xy).rgb);
-            accumulated = mix(current, taa_history * 0.25, 0.5);
+            accumulated = current;
             age = 1.0;
         }
-    } else {
-        // Off-screen reproject — fresh pixel, low age.
-        accumulated = current;
-        age = 1.0;
     }
+#endif
 
     history_out = vec4(max0(accumulated), age);
 
@@ -196,9 +179,10 @@ void main() {
         }
     }
 
-    float mean = sum_luma / count;
-    float variance = max0(sum_luma_sq / count - mean * mean);
-    moments_out = vec2(variance, mean);
+    float current_mean = sum_luma / count;
+    float current_variance = max0(sum_luma_sq / count - current_mean * current_mean);
+
+    moments_out = vec2(current_variance, current_mean);
 #endif
 }
 

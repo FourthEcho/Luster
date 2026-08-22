@@ -45,7 +45,6 @@
 uniform sampler2D colortex1;  // gbuffer data 0 (albedo, normals, lightmaps)
 uniform sampler2D colortex2;  // gbuffer data 1 (detailed normal, specular)
 uniform sampler2D colortex4;  // sky map + light colors
-uniform sampler2D colortex5;  // TAA scene history — used for sky-miss fallback
 
 #if defined WORLD_OVERWORLD && defined CLOUD_SHADOWS
 uniform sampler2D colortex8;  // cloud shadow map
@@ -379,16 +378,6 @@ void main() {
         vec3 ray_world = normalize(mat3(gbufferModelViewInverse) * ray_view);
         radiance = gi_sample_sky(ray_world, skylight);
 
-#if BOUNCE_PASS == 1
-        // First bounce: when the ray misses, also blend in the previous
-        // frame's accumulated output so temporal continuity isn't lost on
-        // disocclusion. This is the "use TAA's history" trick — the GI
-        // history buffer reads what TAA already wrote into colortex5.
-        // This avoids a hard pop when the camera moves into a new area.
-        vec3 taa_history = max0(texture(colortex5, hit_uv.xy).rgb);
-        float history_weight = 0.25 * (1.0 - skylight);
-        radiance = mix(radiance, taa_history, history_weight);
-#endif
     }
 
     // Write the bounce radiance. Alpha is unused by subsequent bounces;

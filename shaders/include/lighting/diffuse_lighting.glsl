@@ -301,11 +301,6 @@ vec3 get_diffuse_lighting(
     lighting += material.emission * emission_scale;
 
 #if defined WORLD_OVERWORLD
-    // Cave lighting
-
-    lighting += 0.15 * CAVE_LIGHTING_I * directional_lighting * ao
-        * (1.0 - light_levels.y * light_levels.y)
-        * (1.0 - 0.7 * darknessFactor);
     lighting += nightVision * night_vision_scale * directional_lighting * ao;
 #endif
 
