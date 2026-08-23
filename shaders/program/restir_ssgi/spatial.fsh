@@ -1,4 +1,5 @@
 #version 400 compatibility
+#include "/include/global.glsl"
 #include "/program/restir_ssgi/common.glsl"
 
 uniform sampler2D colortex17;
