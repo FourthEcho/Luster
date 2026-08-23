@@ -30,43 +30,12 @@ vec3 restir_ssgi_bilinear() {
     return wsum > 1e-4 ? sum / wsum : vec3(0.0);
 }
 
-vec3 restir_ssgi_diffuse_wrapper(
-    Material material,
-    vec3 scene_pos,
-    vec3 normal,
-    vec3 flat_normal,
-    vec3 bent_normal,
-    vec3 shadows,
-    vec2 light_levels,
-    float ao,
-    float ambient_sss,
-    float sss_depth,
-#ifdef CLOUD_SHADOWS
-    float cloud_shadows,
-#endif
-    float shadow_distance_fade,
-    float NoL,
-    float NoV,
-    float NoH,
-    float LoV
-) {
-    vec3 base = get_diffuse_lighting(
-        material, scene_pos, normal, flat_normal, bent_normal, shadows, light_levels,
-        ao, ambient_sss, sss_depth,
-#ifdef CLOUD_SHADOWS
-        cloud_shadows,
-#endif
-        shadow_distance_fade, NoL, NoV, NoH, LoV
-    );
-    if (material.is_metal) return base;
-    return base + restir_ssgi_bilinear() * material.albedo * rcp_pi * INDIRECT_LIGHTING_INTENSITY;
+#ifdef INDIRECT_LIGHTING
+#ifdef RESTIR_SSGI
+vec3 restir_ssgi_indirect_contribution(vec3 albedo) {
+    return restir_ssgi_bilinear() * albedo * rcp_pi * INDIRECT_LIGHTING_INTENSITY;
 }
-
-#define GET_DIFFUSE_LIGHTING_RESTIR_SSGI 1
-#ifdef CLOUD_SHADOWS
-#define get_diffuse_lighting(material, scene_pos, normal, flat_normal, bent_normal, shadows, light_levels, ao, ambient_sss, sss_depth, cloud_shadows, shadow_distance_fade, NoL, NoV, NoH, LoV) restir_ssgi_diffuse_wrapper(material, scene_pos, normal, flat_normal, bent_normal, shadows, light_levels, ao, ambient_sss, sss_depth, cloud_shadows, shadow_distance_fade, NoL, NoV, NoH, LoV)
-#else
-#define get_diffuse_lighting(material, scene_pos, normal, flat_normal, bent_normal, shadows, light_levels, ao, ambient_sss, sss_depth, shadow_distance_fade, NoL, NoV, NoH, LoV) restir_ssgi_diffuse_wrapper(material, scene_pos, normal, flat_normal, bent_normal, shadows, light_levels, ao, ambient_sss, sss_depth, shadow_distance_fade, NoL, NoV, NoH, LoV)
+#endif
 #endif
 
 #endif
