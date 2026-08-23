@@ -1,10 +1,6 @@
 #ifndef INCLUDE_PROGRAM_RESTIR_SSGI_COMMON
 #define INCLUDE_PROGRAM_RESTIR_SSGI_COMMON
 
-#include "/include/global.glsl"
-#include "/include/utility/space_conversion.glsl"
-#include "/include/utility/encoding.glsl"
-
 struct RestirSSGIReservoir {
     vec2 hit_uv;
     float w_sum;
