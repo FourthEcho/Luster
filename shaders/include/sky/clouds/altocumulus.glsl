@@ -1,3 +1,4 @@
+#include "/include/sky/clouds/cloud_bounce.glsl"
 #if !defined INCLUDE_SKY_CLOUDS_ALTOCUMULUS
 #define INCLUDE_SKY_CLOUDS_ALTOCUMULUS
 
@@ -148,7 +149,7 @@ vec2 clouds_altocumulus_scattering(
     float scattering_coeff,
     float step_transmittance,
     float cos_theta,
-    float bounced_light
+    vec2 bounced_light
 ) {
     vec2 scattering = vec2(0.0);
 
@@ -170,10 +171,11 @@ vec2 clouds_altocumulus_scattering(
         scattering.x += scatter_amount
             * exp(-extinct_amount * light_optical_depth) * phase;
         scattering.x += scatter_amount
-            * exp(-extinct_amount * ground_optical_depth) * isotropic_phase
-            * bounced_light;
+            * isotropic_phase * bounced_light.x;
         scattering.y += scatter_amount
             * exp(-extinct_amount * sky_optical_depth) * isotropic_phase;
+        scattering.y += scatter_amount
+            * isotropic_phase * bounced_light.y;
 
         scatter_amount *= 0.5
             * mix(lift(clamp01(scattering_coeff / 0.05), 0.33),
@@ -272,8 +274,6 @@ CloudsResult draw_altocumulus_clouds(
     //   Lighting Setup
     // ------------------
 
-    float high_coverage = linear_step(0.5, 0.6, clouds_params.l1_coverage.x);
-
     float extinction_coeff = mix(0.08, 0.16, day_factor)
         * CLOUDS_ALTOCUMULUS_DENSITY
         * (2.0 - 1.0 * clouds_params.l1_cumulus_stratus_blend);
@@ -282,7 +282,6 @@ CloudsResult draw_altocumulus_clouds(
     bool moonlit = sun_dir.y < -0.045;
     vec3 light_dir = moonlit ? moon_dir : sun_dir;
     float cos_theta = dot(ray_dir, light_dir);
-    float bounced_light = planet_albedo * light_dir.y * rcp_pi;
 
     // --------------------
     //   Raymarching Loop
@@ -335,9 +334,20 @@ CloudsResult draw_altocumulus_clouds(
         float ground_optical_depth
             = mix(density, 1.0, clamp01(altitude_fraction * 2.0 - 1.0))
             * altitude_fraction
-            * clouds_altocumulus_thickness; // guess optical depth to the ground
-                                            // using altitude fraction and
-                                            // density from this sample
+            * clouds_altocumulus_thickness;
+
+        vec2 bounced = clouds_multiple_scattering_bounce(
+            extinction_coeff,
+            scattering_coeff,
+            light_optical_depth,
+            sky_optical_depth,
+            ground_optical_depth,
+            altitude_fraction,
+            light_dir,
+            planet_albedo
+        );
+
+        vec2 bounced_light = bounced;
 
         scattering
             += clouds_altocumulus_scattering(
@@ -365,7 +375,6 @@ CloudsResult draw_altocumulus_clouds(
         = sunlight_color * atmosphere_transmittance(ray_origin, light_dir);
     light_color = atmosphere_post_processing(light_color);
     light_color *= moonlit ? moon_color : sun_color;
-    light_color *= 1.0 + 0.4 * high_coverage * dampen(time_noon);
 
     // Remap the transmittance so that min_transmittance is 0
     float clouds_transmittance

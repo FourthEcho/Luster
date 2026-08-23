@@ -49,6 +49,14 @@ uniform float time_midnight;
 void main() {
     sun_color = get_sun_exposure() * get_sun_tint();
     moon_color = get_moon_exposure() * get_moon_tint();
+#ifdef MOON_PHASE_NIGHT_ATMOSPHERE
+    moon_color = apply_moon_phase_influence(
+        moon_color,
+        MOON_PHASE_NIGHT_ATMOSPHERE_INTENSITY,
+        MOON_PHASE_NIGHT_ATMOSPHERE_CONTRAST,
+        MOON_PHASE_NIGHT_ATMOSPHERE_SATURATION
+    );
+#endif
 
     uv = mat2(gl_TextureMatrix[0]) * gl_MultiTexCoord0.xy
         + gl_TextureMatrix[0][3].xy;

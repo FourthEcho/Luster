@@ -3,6 +3,7 @@
 
 #include "/include/sky/atmosphere.glsl"
 #include "/include/utility/color.glsl"
+#include "/include/lighting/colors/moon_phase_influence.glsl"
 
 uniform float moon_phase_brightness;
 
@@ -63,32 +64,25 @@ vec3 get_light_color() {
     vec3 light_color
         = sunlight_color * atmosphere_transmittance(light_dir.y, planet_radius);
     light_color = atmosphere_post_processing(light_color);
+    vec3 moon_light = get_moon_exposure() * get_moon_tint();
+#ifdef MOON_PHASE_NIGHT_LIGHTING
+    moon_light = apply_moon_phase_influence(
+        moon_light,
+        MOON_PHASE_NIGHT_LIGHTING_INTENSITY,
+        MOON_PHASE_NIGHT_LIGHTING_CONTRAST,
+        MOON_PHASE_NIGHT_LIGHTING_SATURATION
+    );
+#endif
+
     light_color *= mix(
         get_sun_exposure() * get_sun_tint(),
-        get_moon_exposure() * get_moon_tint(),
+        moon_light,
         step(0.5, sunAngle)
     );
     light_color *= clamp01(
         rcp(0.02) * light_dir.y
     ); // fade away during day/night transition
     light_color *= 1.0 - 0.25 * pulse(abs(light_dir.y), 0.15, 0.11);
-
-#ifdef MOON_PHASE_AFFECTS_BRIGHTNESS
-    // Moon phase brightness: scale light color based on moon phase.
-    // moon_phase_brightness uniform is automatically provided by Iris based on moonPhase.
-    // We apply user-controlled MOON_PHASE_BRIGHTNESS_INTENSITY to allow fine-tuning.
-    light_color *= mix(1.0, moon_phase_brightness, MOON_PHASE_BRIGHTNESS_INTENSITY);
-#endif
-
-#ifdef MOON_PHASE_NIGHT_LIGHTING
-    // Moon phase night lighting: slightly tint and boost light color at night
-    // based on moon phase. Full moon (phase 0) gives cooler, brighter light;
-    // new moon (phase 4) gives warmer, dimmer light.
-    if (sunAngle > 0.5) {
-        float full_moon_factor = 1.0 - abs(float(moonPhase) - 4.0) / 4.0;
-        light_color *= mix(1.0, 1.0 + 0.5 * full_moon_factor, MOON_PHASE_NIGHT_LIGHTING_INTENSITY);
-    }
-#endif
 
     return light_color;
 }

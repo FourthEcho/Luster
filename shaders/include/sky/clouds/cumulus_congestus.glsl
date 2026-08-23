@@ -1,3 +1,4 @@
+#include "/include/sky/clouds/cloud_bounce.glsl"
 #if !defined INCLUDe_SKY_CLOUDS_CUMULUS_CONGESTUS
 #define INCLUDE_SKY_CLOUDS_CUMULUS_CONGESTUS
 
@@ -151,7 +152,7 @@ vec2 clouds_cumulus_congestus_scattering(
     float ground_optical_depth,
     float step_transmittance,
     float cos_theta,
-    float bounced_light
+    vec2 bounced_light
 ) {
     vec2 scattering = vec2(0.0);
 
@@ -168,12 +169,13 @@ vec2 clouds_cumulus_congestus_scattering(
 
     for (uint i = 0u; i < 8u; ++i) {
         scattering.x += scatter_amount
-            * exp(-extinct_amount * light_optical_depth * 0.33) * phase;
+            * exp(-extinct_amount * light_optical_depth) * phase;
         scattering.x += scatter_amount
-            * exp(-extinct_amount * ground_optical_depth * 0.33)
-            * isotropic_phase * bounced_light;
+            * isotropic_phase * bounced_light.x;
         scattering.y += scatter_amount
-            * exp(-extinct_amount * sky_optical_depth * 0.33) * isotropic_phase;
+            * exp(-extinct_amount * sky_optical_depth) * isotropic_phase;
+        scattering.y += scatter_amount
+            * isotropic_phase * bounced_light.y;
 
         scatter_amount *= 0.55
             * mix(lift(
@@ -268,7 +270,7 @@ CloudsResult draw_cumulus_congestus_clouds(
     bool moonlit = sun_dir.y < -0.04;
     vec3 light_dir = moonlit ? moon_dir : sun_dir;
     float cos_theta = dot(ray_dir, light_dir);
-    float bounced_light = planet_albedo * light_dir.y * rcp_pi;
+    // Full multi-order cloud bounce using the shared cloud medium model.
 
     // --------------------
     //   Raymarching Loop
@@ -318,10 +320,18 @@ CloudsResult draw_cumulus_congestus_clouds(
         float ground_optical_depth
             = mix(density, 1.0, clamp01(altitude_fraction * 2.0 - 1.0))
             * altitude_fraction
-            * clouds_cumulus_congestus_thickness; // guess optical depth to the
-                                                  // ground using altitude
-                                                  // fraction and density from
-                                                  // this sample
+            * clouds_cumulus_congestus_thickness;
+
+        vec2 bounced_light = clouds_multiple_scattering_bounce(
+            clouds_cumulus_congestus_extinction_coeff,
+            clouds_cumulus_congestus_scattering_coeff,
+            light_optical_depth,
+            sky_optical_depth,
+            ground_optical_depth,
+            altitude_fraction,
+            light_dir,
+            planet_albedo
+        );
 
         scattering
             += clouds_cumulus_congestus_scattering(

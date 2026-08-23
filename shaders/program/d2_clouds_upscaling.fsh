@@ -18,6 +18,12 @@ layout(location = 1) out vec3 clouds_data;
 /* RENDERTARGETS: 11,12 */
 
 #ifdef LOD_MOD_ACTIVE
+// When LOD_MOD_ACTIVE is on, this pass also creates a combined depth buffer
+// (vanilla + Distant Horizons LoD depth merged into a single screen-space
+// depth texture) and writes it to colortex15. The combined_depth_tex macro
+// (defined in include/misc/lod_mod_support.glsl) expands to colortex15, and
+// is then sampled by d3_ao, d4_deferred_shading, gtao, ssao, ssrt, and
+// edge_highlight. So this write IS consumed — do NOT remove.
 layout(location = 2) out float combined_depth;
 
 /* RENDERTARGETS: 11,12,15 */
@@ -219,6 +225,11 @@ void main() {
     float depth_linear_dh
         = screen_to_view_space_depth(lod_projection_matrix_inverse, depth_lod);
 
+    // Write the combined depth buffer to colortex15. This IS consumed —
+    // see the comment at the top of this file (the `combined_depth_tex`
+    // macro expands to colortex15 in include/misc/lod_mod_support.glsl
+    // and is sampled by d3_ao, d4_deferred_shading, gtao, ssao, ssrt,
+    // edge_highlight).
     combined_depth = is_lod
         ? view_to_screen_space_depth(
               combined_projection_matrix,

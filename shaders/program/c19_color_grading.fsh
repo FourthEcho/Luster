@@ -41,6 +41,7 @@ uniform float eye_skylight;
 uniform vec2 view_pixel_size;
 
 #include "/include/post_processing/tonemap_operators.glsl"
+#include "/include/post_processing/agx/agx.glsl"
 #include "/include/utility/bicubic.glsl"
 #include "/include/utility/color.glsl"
 

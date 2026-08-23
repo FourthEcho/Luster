@@ -21,16 +21,32 @@ const float cave_fog_start = 1.0;
 const float cave_fog_density = 0.0033;
 const vec3 cave_fog_color = vec3(0.033);
 
-const float nether_fog_start = 0.0;
-const float nether_fog_density = 0.01 * NETHER_FOG_INTENSITY;
-
 const float blindness_fog_start = 2.0;
 const float blindness_fog_density = 1.0;
 
 const float darkness_fog_start = 8.0;
 const float darkness_fog_density = 2.0;
 
-const float nether_bloomy_fog_density = 0.25 * nether_fog_density;
+
+float nether_fog_density(vec3 world_pos) {
+    const float falloff_start = 64.0;
+    const float falloff_half_life = 7.0;
+    const float mul = -rcp(falloff_half_life);
+    const float add = -mul * falloff_start;
+    float density = exp2(min(world_pos.y * mul + add, 0.0));
+    density *= linear_step(0.0, 64.0, world_pos.y);
+    return density;
+}
+
+vec3 get_nether_fog_color() {
+#ifdef NETHER_USE_BIOME_COLOR
+    vec3 color = srgb_eotf_inv(clamp(fogColor, 0.0, 1.0)) * rec709_to_working_color;
+    color /= max(dot(color, luminance_weights_rec2020), eps);
+    return mix(vec3(1.0), color, NETHER_S);
+#else
+    return from_srgb(vec3(NETHER_R, NETHER_G, NETHER_B));
+#endif
+}
 
 float spherical_fog(
     float view_dist,
@@ -59,15 +75,10 @@ float border_fog(vec3 scene_pos, vec3 world_dir) {
     fog *= vertical_cutoff;
 #endif
 
-    // BORDER_FOG_INTENSITY controls how strongly the border fog transitions to
-    // the sky color at the edge of the render distance.
-    //  1.0 = default behavior
-    //  0.0 = border fog disabled (full scene retained at edges)
-    //  >1.0 = stronger / earlier transition
-    return mix(1.0, fog, BORDER_FOG_INTENSITY);
+    return fog;
 }
 
-vec4 common_fog(float view_dist, const bool sky) {
+vec4 common_fog(float view_dist, const bool sky, vec3 scene_pos) {
     vec4 fog = vec4(vec3(0.0), 1.0);
 
     // Lava fog
@@ -115,17 +126,20 @@ vec4 common_fog(float view_dist, const bool sky) {
     float cave_fog = spherical_fog(
         view_dist,
         cave_fog_start,
-        cave_fog_density * biome_cave * float(!sky) * CAVE_FOG_INTENSITY
+        cave_fog_density * biome_cave * float(!sky)
     );
     fog.rgb += cave_fog_color - cave_fog_color * cave_fog;
     fog.a *= cave_fog;
 #endif
 
-#if defined WORLD_NETHER
-    // Nether fog
-    float nether_fog
-        = spherical_fog(view_dist, nether_fog_start, nether_fog_density);
-    fog.rgb += ambient_color - ambient_color * nether_fog;
+#if defined WORLD_NETHER && !defined VL
+    float nether_fog = spherical_fog(
+        view_dist,
+        0.0,
+        0.01 * nether_fog_density(scene_pos + cameraPosition)
+    );
+    vec3 nether_color = get_nether_fog_color() * NETHER_I;
+    fog.rgb += nether_color - nether_color * nether_fog;
     fog.a *= nether_fog;
 #endif
 
@@ -133,7 +147,7 @@ vec4 common_fog(float view_dist, const bool sky) {
 }
 
 // Calculates the alpha component only
-float common_fog_alpha(float view_dist, bool sky) {
+float common_fog_alpha(float view_dist, bool sky, vec3 scene_pos) {
     float fog = 1.0;
 
     // Lava fog
@@ -162,13 +176,17 @@ float common_fog_alpha(float view_dist, bool sky) {
     fog *= spherical_fog(
         view_dist,
         cave_fog_start,
-        cave_fog_density * biome_cave * float(!sky) * CAVE_FOG_INTENSITY
+        cave_fog_density * biome_cave * float(!sky)
     ); // Cave fog
 #endif
 
-#if defined WORLD_NETHER
-    // Nether fog
-    fog *= spherical_fog(view_dist, nether_fog_start, nether_fog_density);
+#if defined WORLD_NETHER && !defined VL
+    // Match the volumetric Nether fog density in the analytic path.
+    fog *= spherical_fog(
+        view_dist,
+        0.0,
+        0.01 * nether_fog_density(scene_pos + cameraPosition)
+    );
 #endif
 
     return fog;
@@ -182,7 +200,7 @@ const vec3 water_absorption_coeff
 
 vec3 biome_water_coeff(vec3 biome_water_color) {
     const float density_scale = 0.15;
-    const float biome_color_contribution = BIOME_WATER_COLOR_INTENSITY;
+    const float biome_color_contribution = 0.33;
 
     const vec3 base_absorption_coeff
         = vec3(WATER_ABSORPTION_R, WATER_ABSORPTION_G, WATER_ABSORPTION_B)

@@ -23,10 +23,6 @@ flat out vec3 moon_color;
 #include "/include/fog/overworld/parameters.glsl"
 flat out OverworldFogParameters fog_params;
 
-#if defined SH_SKYLIGHT
-flat out vec3 sky_sh[9];
-flat out vec3 skylight_up;
-#endif
 
 flat out float rainbow_amount;
 #endif
@@ -37,7 +33,7 @@ flat out float rainbow_amount;
 
 uniform sampler3D depthtex0; // Atmosphere scattering LUT
 
-uniform sampler2D colortex4; // Sky map, lighting colors, sky SH
+uniform sampler2D colortex4; // Sky map and lighting colors
 
 uniform int worldTime;
 uniform int worldDay;
@@ -94,7 +90,6 @@ uniform float time_midnight;
 
 #include "/include/utility/random.glsl"
 #include "/include/utility/sampling.glsl"
-#include "/include/utility/spherical_harmonics.glsl"
 
 void main() {
     uv = gl_MultiTexCoord0.xy;
@@ -107,21 +102,16 @@ void main() {
 
     sun_color = get_sun_exposure() * get_sun_tint();
     moon_color = get_moon_exposure() * get_moon_tint();
+#ifdef MOON_PHASE_NIGHT_ATMOSPHERE
+    moon_color = apply_moon_phase_influence(
+        moon_color,
+        MOON_PHASE_NIGHT_ATMOSPHERE_INTENSITY,
+        MOON_PHASE_NIGHT_ATMOSPHERE_CONTRAST,
+        MOON_PHASE_NIGHT_ATMOSPHERE_SATURATION
+    );
+#endif
     fog_params = get_fog_parameters(weather);
 
-#ifdef SH_SKYLIGHT
-    // Sample sky SH
-    sky_sh[0] = texelFetch(colortex4, ivec2(191, 2), 0).rgb;
-    sky_sh[1] = texelFetch(colortex4, ivec2(191, 3), 0).rgb;
-    sky_sh[2] = texelFetch(colortex4, ivec2(191, 4), 0).rgb;
-    sky_sh[3] = texelFetch(colortex4, ivec2(191, 5), 0).rgb;
-    sky_sh[4] = texelFetch(colortex4, ivec2(191, 6), 0).rgb;
-    sky_sh[5] = texelFetch(colortex4, ivec2(191, 7), 0).rgb;
-    sky_sh[6] = texelFetch(colortex4, ivec2(191, 8), 0).rgb;
-    sky_sh[7] = texelFetch(colortex4, ivec2(191, 9), 0).rgb;
-    sky_sh[8] = texelFetch(colortex4, ivec2(191, 10), 0).rgb;
-    skylight_up = texelFetch(colortex4, ivec2(191, 11), 0).rgb;
-#endif
 
     rainbow_amount = get_rainbow_amount(weather);
 #endif

@@ -151,4 +151,11 @@ mat2x3 raymarch_water_fog(
     return mat2x3(scattering, transmittance);
 }
 
+#ifdef shadow
+#undef shadow
+#endif
+#ifdef distance_traveled
+#undef distance_traveled
+#endif
+
 #endif // INCLUDE_FOG_WATER_FOG_VL

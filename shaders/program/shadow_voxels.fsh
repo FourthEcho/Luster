@@ -23,8 +23,6 @@ layout(location = 0) out vec3 shadowcolor0_out;
 
 #include "/include/lighting/shadows/distortion.glsl"
 #include "/include/utility/color.glsl"
-#include "/photonics/photonics.glsl"
-
 void main() {
 #if defined WORLD_NETHER
     discard;

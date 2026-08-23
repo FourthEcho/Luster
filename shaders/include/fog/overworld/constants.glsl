@@ -10,13 +10,6 @@ const vec2 air_fog_falloff_start
     = vec2(AIR_FOG_RAYLEIGH_FALLOFF_START, AIR_FOG_MIE_FALLOFF_START)
     + SEA_LEVEL;
 const vec2 air_fog_falloff_half_life
-    = vec2(AIR_FOG_RAYLEIGH_FALLOFF_HALF_LIFE, AIR_FOG_MIE_FALLOFF_HALF_LIFE)
-#ifdef FOG_SMOOTHING
-    // Fog smoothing: enlarge the falloff half-life by the user-controlled
-    // radius, which softens the altitude-based density gradient and reduces
-    // harsh fog edges. A larger radius yields a smoother, more gradual fog.
-    + vec2(FOG_SMOOTHING_RADIUS)
-#endif
-    ;
+    = vec2(AIR_FOG_RAYLEIGH_FALLOFF_HALF_LIFE, AIR_FOG_MIE_FALLOFF_HALF_LIFE);
 
 #endif // INCLUDE_FOG_OVERWORLD_CONSTANTS

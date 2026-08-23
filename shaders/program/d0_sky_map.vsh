@@ -4,7 +4,7 @@
   Photon Shader by SixthSurge
 
   program/d0_sky_map:
-  Render omnidirectional sky map for reflections and SH lighting
+  Render omnidirectional sky map for reflections and environment irradiance
 
 --------------------------------------------------------------------------------
 */

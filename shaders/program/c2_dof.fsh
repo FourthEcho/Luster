@@ -68,11 +68,6 @@ void main() {
         return;
     };
 
-#ifndef DOF
-    // DOF disabled - pass through unchanged
-    scene_color = texelFetch(colortex0, texel, 0).rgb;
-    return;
-#else
     // Calculate vogel disk rotation
     float theta = texelFetch(noisetex, texel & 511, 0).b;
     theta = r1(frameCounter, theta);
@@ -105,5 +100,8 @@ void main() {
     }
 
     scene_color *= rcp(DOF_SAMPLES);
-#endif
 }
+
+#ifndef DOF
+#error "This program should be disabled if Depth of Field is disabled"
+#endif

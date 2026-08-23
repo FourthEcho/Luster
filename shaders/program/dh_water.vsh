@@ -10,6 +10,7 @@
 */
 
 #include "/include/global.glsl"
+#include "/include/lighting/ibl/ibl.glsl"
 
 out vec2 light_levels;
 out vec3 scene_pos;
@@ -98,11 +99,11 @@ void main() {
         * (mat3(gl_ModelViewMatrix) * gl_Normal);
 
     light_color = texelFetch(colortex4, ivec2(191, 0), 0).rgb;
-#if defined WORLD_OVERWORLD && defined SH_SKYLIGHT
-    ambient_color = texelFetch(colortex4, ivec2(191, 11), 0).rgb;
-#else
-    ambient_color = texelFetch(colortex4, ivec2(191, 1), 0).rgb;
-#endif
+    // Replace the retired SH skylight with directional IBL irradiance.
+    ambient_color = get_ibl_sky_irradiance_shared(
+        normalize(normal),
+        vec2(0.23, 0.61)
+    ) * clamp01(light_levels.y);
 
     is_water = uint(dhMaterialId == DH_BLOCK_WATER);
 

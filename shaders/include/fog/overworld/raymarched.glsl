@@ -128,8 +128,8 @@ mat2x3 raymarch_air_fog(
         float color_weight
             = step(depth0, shadow_screen_pos.z) * step(eps, max_of(color));
 
-        // Blend the translucent color in based on the user-controlled intensity
-        color = mix(vec3(1.0), color, color_weight * AIR_FOG_COLORED_LIGHT_SHAFTS_INTENSITY);
+        color = color * color_weight + (1.0 - color_weight);
+        color = mix(vec3(1.0), color, AIR_FOG_COLORED_LIGHT_SHAFTS_INTENSITY);
 
         vec3 shadow = step(shadow_screen_pos.z, depth1) * color;
         shadow = (clamp01(shadow_screen_pos) == shadow_screen_pos)
@@ -220,5 +220,9 @@ mat2x3 raymarch_air_fog(
 
     return mat2x3(scattering, transmittance);
 }
+
+#ifdef shadow
+#undef shadow
+#endif
 
 #endif // INCLUDE_FOG_AIR_FOG_VL

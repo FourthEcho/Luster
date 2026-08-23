@@ -39,22 +39,17 @@ vec3 get_lpv_blocklight(
 
         lpv_blocklight *= 1.25 * BLOCKLIGHT_I;
 
-        // Apply user-controlled colored lights intensity scaling
-        lpv_blocklight *= COLORED_LIGHTS_INTENSITY;
-
-#ifdef COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION
-        float vanilla_lightmap_contribution
+#ifdef COLORED_LIGHTS
+        // Restore only block-light channels that the colored LPV has not
+        // supplied. When colored lighting is disabled, the normal LPV path
+        // remains unchanged.
+        vec3 missing_blocklight = max(mc_blocklight - lpv_blocklight, vec3(0.0));
+        float fallback_weight
             = exp2(-4.0 * dot(lpv_blocklight, luminance_weights_rec2020));
-#if COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF \
-    == COLORED_LIGHTS_VANILLA_LIGHTMAP_CONTRIBUTION_FALLOFF_SQUARED
-        lpv_blocklight
-            += mix(vec3(dot(mc_blocklight, luminance_weights_rec2020)),
-                   mc_blocklight,
-                   0.5)
-            * mc_blocklight * 0.5 * vanilla_lightmap_contribution;
-#else
-        lpv_blocklight += mc_blocklight * vanilla_lightmap_contribution;
+#if COLORED_LIGHTS_FALLOFF == COLORED_LIGHTS_FALLOFF_SQUARED
+        fallback_weight *= fallback_weight;
 #endif
+        lpv_blocklight += missing_blocklight * fallback_weight;
 #endif
 
         // Darkness effect

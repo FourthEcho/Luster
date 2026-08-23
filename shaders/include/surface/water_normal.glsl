@@ -161,7 +161,7 @@ vec3 get_water_normal(
     normal_influence *= WATER_WAVE_STRENGTH;
 
     vec3 normal = vec3(wave1 - wave0, wave2 - wave0, h);
-    normal.xy *= normal_influence * WATER_NORMAL_SCALE;
+    normal.xy *= normal_influence;
 
     return normalize(normal);
 }

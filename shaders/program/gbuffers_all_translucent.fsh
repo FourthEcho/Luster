@@ -167,7 +167,11 @@ vec3 light_color, ambient_color;
 #endif
 
 #include "/include/fog/simple_fog.glsl"
+#ifdef INDIRECT_LIGHTING
+#undef INDIRECT_LIGHTING
+#endif
 #include "/include/lighting/diffuse_lighting.glsl"
+#include "/include/lighting/ibl/ibl.glsl"
 #include "/include/lighting/shadows/pcss.glsl"
 #include "/include/lighting/specular_lighting.glsl"
 #include "/include/misc/lod_mod_support.glsl"
@@ -217,7 +221,7 @@ Material get_water_material(
     vec4 base_color = texture(gtexture, uv, lod_bias);
     float texture_highlight = dampen(
         0.5 * sqr(linear_step(0.63, 1.0, base_color.r)) + 0.03 * base_color.r
-    ) * WATER_TEXTURE_INTENSITY;
+    );
 #if WATER_TEXTURE == WATER_TEXTURE_HIGHLIGHT_UNDERGROUND
     texture_highlight *= 1.0 - cube(linear_step(0.0, 0.5, light_levels.y));
 #endif
@@ -229,7 +233,7 @@ Material get_water_material(
 #elif WATER_TEXTURE == WATER_TEXTURE_VANILLA
     vec4 base_color = texture(gtexture, uv, lod_bias) * tint;
     material.albedo = srgb_eotf_inv(base_color.rgb * base_color.a)
-        * rec709_to_working_color * WATER_TEXTURE_INTENSITY;
+        * rec709_to_working_color;
     alpha = base_color.a;
 #endif
 
@@ -372,11 +376,6 @@ void main() {
     // Get light colors
 
     light_color = texelFetch(colortex4, ivec2(191, 0), 0).rgb;
-#if defined WORLD_OVERWORLD && defined SH_SKYLIGHT
-    ambient_color = texelFetch(colortex4, ivec2(191, 11), 0).rgb;
-#else
-    ambient_color = texelFetch(colortex4, ivec2(191, 1), 0).rgb;
-#endif
 
     // Space conversions
 
@@ -411,6 +410,12 @@ void main() {
     Material material;
     vec3 normal = tbn[2];
     vec3 normal_tangent = vec3(0.0, 0.0, 1.0);
+
+    // Resolve the former SH skylight input from the live IBL environment.
+    ambient_color = get_ibl_sky_irradiance_shared(
+        normalize(normal),
+        vec2(0.41, 0.67)
+    ) * clamp01(light_levels.y);
 
     bool is_water = material_mask == MATERIAL_WATER;
     bool is_nether_portal = material_mask == MATERIAL_NETHER_PORTAL;
@@ -579,6 +584,12 @@ void main() {
 #endif
     }
 
+    // Replace the retired SH skylight with directional IBL irradiance.
+    ambient_color = get_ibl_sky_irradiance_shared(
+        normalize(normal),
+        vec2(0.41, 0.67)
+    ) * clamp01(adjusted_light_levels.y);
+
     // Shadows
 
 #ifndef NO_NORMAL
@@ -694,7 +705,7 @@ void main() {
             fragment_color.a = mix(
                 fragment_color.a,
                 1.0,
-                fresnel_dielectric_n(NoV, air_n / water_n).x * SNELLS_WINDOW_INTENSITY
+                fresnel_dielectric_n(NoV, air_n / water_n).x
             );
         }
 #endif
@@ -703,7 +714,7 @@ void main() {
 
     // Fog
 
-    vec4 fog = common_fog(length(position_scene), false);
+    vec4 fog = common_fog(length(position_scene), false, position_scene);
     fragment_color.rgb = fragment_color.rgb * fog.a + fog.rgb;
 
     // Purkinje shift

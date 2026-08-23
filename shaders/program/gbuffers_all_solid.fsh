@@ -123,13 +123,57 @@ uniform vec4 entityColor;
 #include "/include/utility/space_conversion.glsl"
 
 #if defined PROGRAM_GBUFFERS_VOXELS
-#include "/photonics/photonics.glsl"
 #endif
 
 #if defined PROGRAM_GBUFFERS_TERRAIN && defined POM
 #define read_tex(x) textureGrad(x, parallax_uv, uv_gradient[0], uv_gradient[1])
 #else
+#if ANISOTROPIC_FILTERING_MODE != ANISOTROPIC_FILTERING_OFF
+#if ANISOTROPIC_FILTERING_MODE == ANISOTROPIC_FILTERING_2
+  #define ANISOTROPIC_FILTERING_SAMPLES 2
+#elif ANISOTROPIC_FILTERING_MODE == ANISOTROPIC_FILTERING_4
+  #define ANISOTROPIC_FILTERING_SAMPLES 4
+#elif ANISOTROPIC_FILTERING_MODE == ANISOTROPIC_FILTERING_8
+  #define ANISOTROPIC_FILTERING_SAMPLES 8
+#else
+  #define ANISOTROPIC_FILTERING_SAMPLES 16
+#endif
+
+// Emulates anisotropic filtering by taking several elongated samples along
+// the dominant screen-space texture-coordinate gradient (the axis a surface
+// is foreshortened along, e.g. a floor viewed at a grazing angle) and
+// averaging them, rather than relying on a single isotropic mip sample.
+vec4 read_tex_anisotropic(sampler2D samp, vec2 texcoord) {
+    vec2 dx = dFdx(texcoord);
+    vec2 dy = dFdy(texcoord);
+
+    float len_x = length(dx);
+    float len_y = length(dy);
+
+    bool x_is_major = len_x > len_y;
+
+    vec2 major_axis = x_is_major ? dx : dy;
+    vec2 minor_axis = x_is_major ? dy : dx;
+
+    float major_len = max(len_x, len_y);
+    float minor_len = max(min(len_x, len_y), 1e-6);
+
+    float aniso_ratio = clamp(major_len / minor_len, 1.0, float(ANISOTROPIC_FILTERING_SAMPLES));
+    int sample_count = int(aniso_ratio + 0.5);
+
+    vec4 result = vec4(0.0);
+    for (int i = 0; i < sample_count; ++i) {
+        float t = (float(i) + 0.5) / float(sample_count) - 0.5;
+        vec2 sample_uv = texcoord + major_axis * t;
+        result += textureGrad(samp, sample_uv, minor_axis, minor_axis);
+    }
+
+    return result / float(sample_count);
+}
+#define read_tex(x) read_tex_anisotropic(x, uv)
+#else
 #define read_tex(x) texture(x, uv, lod_bias)
+#endif
 #endif
 
 #if TEXTURE_FORMAT == TEXTURE_FORMAT_LAB
@@ -248,7 +292,6 @@ void main() {
     }
 #endif
 
-    bool parallax_shadow = false;
     float dither = interleaved_gradient_noise(gl_FragCoord.xy, frameCounter);
 
 #ifndef PROGRAM_GBUFFERS_VOXELS
@@ -268,31 +311,18 @@ void main() {
 
     if (has_pom) {
         float pom_depth;
-        vec3 shadow_trace_pos;
+        vec3 pom_trace_pos;
 
         parallax_uv = get_parallax_uv(
             tangent_dir,
             uv_gradient,
             view_distance,
             dither,
-            shadow_trace_pos,
+            pom_trace_pos,
             pom_depth
         );
-#ifdef POM_SHADOW
-        if (dot(tbn[2], light_dir) >= eps) {
-            parallax_shadow = get_parallax_shadow(
-                shadow_trace_pos,
-                uv_gradient,
-                view_distance,
-                dither
-            );
-        } else {
-            parallax_shadow = false;
-        }
-#endif
     } else {
         parallax_uv = uv;
-        parallax_shadow = false;
     }
 #endif
 
@@ -485,20 +515,10 @@ void main() {
 #endif
 
 #ifdef SPECULAR_MAPPING
-#if defined POM && defined POM_SHADOW
-    // Pack parallax shadow in alpha component of specular map
-    // Specular map alpha >= 0.5 => parallax shadow
-    specular_map.a *= step(specular_map.a, 0.999);
-    specular_map.a
-        = clamp01(specular_map.a * 0.5 + 0.5 * float(parallax_shadow));
-#endif
 
     gbuffer_data_1.z = pack_unorm_2x8(specular_map.xy);
     gbuffer_data_1.w = pack_unorm_2x8(specular_map.zw);
 #else
-#if defined POM && defined POM_SHADOW
-    gbuffer_data_1.z = float(parallax_shadow);
-#endif
 #endif
 
 #if defined PROGRAM_GBUFFERS_PARTICLES
