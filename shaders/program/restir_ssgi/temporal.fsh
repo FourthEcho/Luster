@@ -1,4 +1,5 @@
 #version 400 compatibility
+#include "/include/global.glsl"
 #include "/program/restir_ssgi/common.glsl"
 
 uniform sampler2D colortex17;
@@ -20,11 +21,12 @@ void main() {
     }
 
     RestirSSGIReservoir r = restir_ssgi_unpack(current);
-    vec2 prev_uv = uv;
-    vec4 history = texture(colortex18, prev_uv);
+    vec4 history = texture(colortex18, uv);
     RestirSSGIReservoir h = restir_ssgi_unpack(history);
 
-    bool compatible = restir_ssgi_valid(h) && abs(h.hit_uv.x - r.hit_uv.x) < 0.35 && abs(h.hit_uv.y - r.hit_uv.y) < 0.35;
+    bool compatible = restir_ssgi_valid(h)
+        && abs(h.hit_uv.x - r.hit_uv.x) < 0.35
+        && abs(h.hit_uv.y - r.hit_uv.y) < 0.35;
     if (compatible) {
         float rand_value = restir_ssgi_hash(vec2(px) + 0.37, float(frameCounter));
         float history_weight = min(h.w_sum, 32.0);
