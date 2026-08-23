@@ -1,9 +1,5 @@
 #version 400 compatibility
 #define WORLD_OVERWORLD
-
-// Indirect lighting bounce 4 — see program/gi/bounce.fsh
-// (this is a thin world-specific wrapper so Iris picks up the right file
-//  and applies the dimension-specific #defines before the include).
-
-#define BOUNCE_PASS 4
-#include "/program/gi/bounce.fsh"
+#define PROGRAM_DEFERRED8
+#define fsh
+#include "/program/d8_rsm_gi_spatial_reuse.fsh"

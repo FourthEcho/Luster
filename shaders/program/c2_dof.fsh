@@ -60,6 +60,11 @@ uniform vec2 taa_offset;
 void main() {
     ivec2 texel = ivec2(gl_FragCoord.xy);
 
+#if DOF_MODE == DOF_MODE_OFF
+    scene_color = texelFetch(colortex0, texel, 0).rgb;
+    return;
+#endif
+
     float depth = texelFetch(depthtex0, texel, 0).x;
 
 #ifdef LOD_MOD_ACTIVE
@@ -146,6 +151,3 @@ void main() {
     scene_color *= rcp(DOF_SAMPLES);
 }
 
-#if !defined DOF && !defined DISTANCE_BLUR
-#error "This program should be disabled if neither DOF nor DISTANCE_BLUR is active"
-#endif

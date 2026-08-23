@@ -149,9 +149,6 @@ uniform vec4 entityColor;
 #endif
 
 #include "/include/fog/simple_fog.glsl"
-#ifdef INDIRECT_LIGHTING
-#undef INDIRECT_LIGHTING
-#endif
 #include "/include/lighting/diffuse_lighting.glsl"
 #include "/include/lighting/shadows/pcss.glsl"
 #include "/include/lighting/specular_lighting.glsl"

@@ -978,7 +978,6 @@ value.ANISOTROPIC_FILTERING_16=16x
 # English fallback labels for UI completeness
 screen.mods                            = Mod Options
 screen.moon_phase_influence             = Moon Phase Influence
-screen.indirect_lighting              = Indirect Lighting
 option.RAIN_OPACITY.comment            = Adjust the opacity of rain particles
 option.SHADOW_SSRT                     = SSRT Distant Shadows
 option.SHADOW_SSRT.comment = Toggles ssrt distant shadows.
@@ -1059,20 +1058,6 @@ option.MOON_PHASE_REFLECTIONS_CONTRAST=Reflections Contrast
 option.MOON_PHASE_REFLECTIONS_CONTRAST.comment = Toggles reflections contrast.
 option.MOON_PHASE_REFLECTIONS_SATURATION=Reflections Saturation
 option.MOON_PHASE_REFLECTIONS_SATURATION.comment = Toggles reflections saturation.
-option.INDIRECT_LIGHTING=Indirect Lighting
-option.INDIRECT_LIGHTING.comment = Enable ReSTIR GI — a simpler, Mac-compatible reservoir-based path tracer. Casts a few primary rays per pixel and reuses their results temporally and spatially (ReSTIR). Not a full path tracer but gives believable bounced light.
-option.INDIRECT_LIGHTING_INTENSITY=Indirect Lighting Intensity
-option.INDIRECT_LIGHTING_INTENSITY.comment = Brightness multiplier for the indirect (bounced) lighting contribution.
-option.A_SVGF=A-SVGF
-option.A_SVGF.comment = Selects the a-svgf mode or method.
-option.A_SVGF_RADIUS=A-SVGF Radius
-option.A_SVGF_RADIUS.comment = Selects the a-svgf radius mode or method.
-option.A_SVGF_VARIANCE_THRESHOLD=A-SVGF Variance Threshold
-option.A_SVGF_VARIANCE_THRESHOLD.comment = Selects the a-svgf variance threshold mode or method.
-option.INDIRECT_LIGHTING_RADIUS=Indirect Lighting Radius
-option.INDIRECT_LIGHTING_RADIUS.comment = Controls indirect lighting radius.
-option.INDIRECT_LIGHTING_SMOOTHNESS=Indirect Lighting Smoothness
-option.INDIRECT_LIGHTING_SMOOTHNESS.comment = Controls indirect lighting smoothness.
 option.IBL=Image Based Lighting
 option.IBL_TEMPORAL_ACCUMULATION=IBL Temporal Accumulation
 option.IBL_TEMPORAL_ACCUMULATION.comment=Accumulate diffuse irradiance samples over multiple frames using reprojected history instead of resampling from scratch each frame. Greatly reduces noise with no loss of sky detail, at the cost of brief lag when lighting changes suddenly or on disocclusion.
@@ -1208,3 +1193,26 @@ value.COLORED_LIGHTS_FALLOFF.COLORED_LIGHTS_FALLOFF_SQUARED = Squared
 value.COLORED_LIGHTS_FALLOFF.COLORED_LIGHTS_FALLOFF_LINEAR = Linear
 option.IMAGE_SHARPENING_INTENSITY = Image Sharpening
 option.IMAGE_SHARPENING_INTENSITY.comment = Controls final edge-aware image sharpening strength.
+
+# ---- RSM GI (reflective shadow maps) ----
+
+screen.indirect_lighting                    = Indirect Lighting
+option.RSM_GI                            = Indirect Lighting
+option.RSM_GI.comment                    = Master switch for the RSM indirect-lighting pipeline. It gates sunlight bounce GI and all of its temporal, denoising, and spatial-reuse stages. Requires shadows.
+option.RSM_GI_SAMPLES                    = GI Samples
+option.RSM_GI_SAMPLES.comment            = Virtual point light samples gathered per pixel each frame. Higher = less noise but slower. Quality is dominated by history length, so keep this modest.
+option.RSM_GI_RADIUS                     = GI Radius
+option.RSM_GI_RADIUS.comment             = Radius of the VPL sample disk around the receiver, in blocks. Larger = wider bounce spread but more light leaking through walls. Keep it modest indoors.
+option.RSM_GI_INTENSITY                  = GI Intensity
+option.RSM_GI_INTENSITY.comment          = Brightness multiplier for the bounce lighting.
+option.RSM_GI_MIN_DISTANCE               = GI Min Distance
+option.RSM_GI_MIN_DISTANCE.comment       = Clamps the 1/d^4 falloff so that virtual point lights very close to a receiver do not blow up. Raise it if you see hot spots.
+option.RSM_GI_HISTORY                    = GI History Length
+option.RSM_GI_HISTORY.comment            = Number of frames the temporal accumulation blends over. Longer = cleaner and nearly free, but reacts more slowly to lighting changes.
+
+option.RSM_GI_TEMPORAL_ACCUMULATION         = Temporal Accumulation
+option.RSM_GI_TEMPORAL_ACCUMULATION.comment   = Reprojects the quarter-resolution RSM GI into persistent history and blends frames to reduce sampling noise. Disable for raw per-frame GI.
+option.RSM_GI_DENOISING                     = GI Denoise
+option.RSM_GI_DENOISING.comment             = Runs the depth/normal-aware bilateral GI filter after temporal accumulation (or directly on raw GI when temporal accumulation is disabled).
+option.RSM_GI_SPATIAL_REUSE                 = Spatial Reuse
+option.RSM_GI_SPATIAL_REUSE.comment         = Uses four binary spatial-reuse kernels to perform four depth/normal/luminance-aware reuse stages in one quarter-resolution pass.

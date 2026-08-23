@@ -28,9 +28,6 @@ OverworldFogParameters fog_params;
 #define TEMPORAL_REPROJECTION
 
 #include "/include/fog/simple_fog.glsl"
-#ifdef INDIRECT_LIGHTING
-#undef INDIRECT_LIGHTING
-#endif
 #include "/include/lighting/diffuse_lighting.glsl"
 #include "/include/lighting/ibl/ibl.glsl"
 #include "/include/lighting/shadows/pcss.glsl"

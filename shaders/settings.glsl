@@ -666,36 +666,25 @@ const float wetnessHalflife         = 70.0;
 
 
 
-// ---- Indirect Lighting (multi-bounce deferred GI) ----
-#define INDIRECT_LIGHTING
-  #define INDIRECT_LIGHTING_INTENSITY 1.00 // [0.00 0.05 0.10 0.15 0.20 0.25 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.20 1.50 2.00]
-  #define INDIRECT_LIGHTING_BOUNCES 2 // [1 2 3 4]
-  #define INDIRECT_LIGHTING_RAY_STEPS 12 // [4 6 8 10 12 16 20 24 32]
-  #define INDIRECT_LIGHTING_SAMPLES 8 // [1 2 4 8 16]
-  #define INDIRECT_LIGHTING_RADIUS 32.0 // [8.0 12.0 16.0 24.0 32.0 48.0 64.0 96.0]
-  #define INDIRECT_LIGHTING_REFINEMENT_STEPS 2 // [0 1 2 3 4]
-  #define INDIRECT_LIGHTING_HISTORY 16 // [1 2 4 8 16 32 64]
-  #define INDIRECT_LIGHTING_USE_TAA_HISTORY // Always on with indirect lighting; uses the GI temporal history buffer.
-#define A_SVGF
-  #define A_SVGF_PASSES 3 // [1 2 3 4 5]
-  #define A_SVGF_RADIUS 4 // [2 3 4 5 6 8]
-  #define A_SVGF_STRICTNESS 1.00 // [0.25 0.50 0.75 1.00 1.50 2.00 3.00]
+// ---- Indirect Lighting ----
+// Single-bounce diffuse GI via reflective shadow maps (Dachsbacher &
+// Stamminger 2005). Every texel of the sun shadow map is treated as a
+// virtual point light (VPL); the bounce is gathered at quarter resolution,
+// accumulated temporally, denoised with one bilateral pass and composited
+// in c1_blend_layers. VPL data (albedo + world normal) is captured by the
+// existing shadow pass into shadowcolor1, so no extra scene pass is needed.
+// Replaces the removed screen-space multi-bounce GI
+// (bounce/accumulate/A-Trous SVGF filter).
 
-// Derived "at least N passes" defines consumed by shaders.properties to
-// schedule the appropriate number of A-Trous SVGF filter passes. The
-// filter pipeline has three program slots (deferred10/11/12); when the
-// user requests fewer passes, the later programs are skipped so the
-// remaining passes are no-ops and the chain still passes colortex18
-// through. Pass 1 always runs when A_SVGF is enabled.
-#if A_SVGF_PASSES >= 2
-  #define A_SVGF_PASSES_GE_2
-#endif
-#if A_SVGF_PASSES >= 3
-  #define A_SVGF_PASSES_GE_3
-#endif
-// For pass counts beyond 3 (4 or 5) we have no extra program slots, so
-// A_SVGF_PASSES simply boosts per-pass kernel aggressiveness inside
-// filter.fsh — see the svgf_pass_strength multiplier there.
+  #define RSM_GI
+  #define RSM_GI_SAMPLES 16 // [8 10 12 14 16 18 20 22 24]
+  #define RSM_GI_RADIUS 6.0 // [1.0 2.0 3.0 4.0 5.0 6.0 8.0 10.0 12.0 16.0 20.0 24.0 32.0]
+  #define RSM_GI_INTENSITY 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.20 1.50 2.00]
+  #define RSM_GI_MIN_DISTANCE 0.25 // [0.05 0.10 0.15 0.20 0.25 0.30 0.50 0.75 1.00 1.50 2.00 3.00]
+  #define RSM_GI_HISTORY 24 // [4 6 8 12 16 20 24 32 48 64]
+  #define RSM_GI_TEMPORAL_ACCUMULATION
+  #define RSM_GI_DENOISING
+  //#define RSM_GI_SPATIAL_REUSE // Uses four binary spatial-reuse kernels in one quarter-resolution pass.
 
 // ---- Image Based Lighting (IBL) ----
 //#define IBL
@@ -820,12 +809,6 @@ const float wetnessHalflife         = 70.0;
 // ---- Decoy #ifdefs so the OptiFine parser detects the toggles ----
 
 #ifdef COLORED_LIGHTS
-#endif
-
-#ifdef INDIRECT_LIGHTING
-#endif
-
-#ifdef A_SVGF
 #endif
 
 #ifdef IBL

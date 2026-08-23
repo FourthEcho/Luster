@@ -29,7 +29,6 @@ screen.moon_phase_influence             = Moon Phase Influence
 screen.colored_lights                  = Colored Lights
 screen.colored_lights_settings         = Colored Lights Settings
 screen.purkinje_shift                 = Purkinje Shift
-screen.indirect_lighting              = Indirect Lighting
 screen.rp_settings                     = Resource Pack Settings
 screen.reflections                     = Reflections
 screen.refraction                      = Refraction
@@ -1050,30 +1049,6 @@ option.MOON_PHASE_REFLECTIONS_SATURATION=Reflections Saturation
 option.MOON_PHASE_REFLECTIONS_SATURATION.comment = Toggles reflections saturation.
 
 
-option.INDIRECT_LIGHTING=Indirect Lighting
-option.INDIRECT_LIGHTING.comment=Enable the multi-bounce deferred indirect-lighting pipeline. Traces multiple cosine-weighted rays per quarter-resolution pixel per bounce, accumulates temporally with disocclusion rejection, and (optionally) denoises with A-Trous SVGF. No compute shaders — runs entirely in fragment passes, Mac-compatible.
-option.INDIRECT_LIGHTING_INTENSITY=Indirect Lighting Intensity
-option.INDIRECT_LIGHTING_INTENSITY.comment=Brightness multiplier for the indirect (bounced) lighting contribution.
-option.INDIRECT_LIGHTING_BOUNCES=Indirect Bounces
-option.INDIRECT_LIGHTING_BOUNCES.comment=Number of light bounces per frame. Each bounce adds one quarter-res fragment pass. 1 = direct sky/ambient only, 2 = one bounce off surfaces, 3+ = light propagates further (good for torch-lit caves).
-option.INDIRECT_LIGHTING_RAY_STEPS=Ray Steps
-option.INDIRECT_LIGHTING_RAY_STEPS.comment=Number of steps the depth-buffer raymarcher takes per bounce. Lower = faster but more missed intersections; higher = better at grazing angles.
-option.INDIRECT_LIGHTING_SAMPLES=Indirect Lighting Samples
-option.INDIRECT_LIGHTING_SAMPLES.comment=Number of cosine-weighted GI rays traced per quarter-resolution pixel. More samples reduce directional misses and make surface-to-surface color bleeding converge faster.
-option.INDIRECT_LIGHTING_RADIUS=Indirect Lighting Radius
-option.INDIRECT_LIGHTING_RADIUS.comment=Maximum path radius used by indirect lighting distance attenuation. Longer bounce paths lose more energy.
-option.INDIRECT_LIGHTING_REFINEMENT_STEPS=Refinement Steps
-option.INDIRECT_LIGHTING_REFINEMENT_STEPS.comment=Binary-search refinement steps after the raymarcher finds a hit. 0 = no refinement (cheap, slightly noisy), 2-3 = clean hit positions.
-option.INDIRECT_LIGHTING_HISTORY=History Length
-option.INDIRECT_LIGHTING_HISTORY.comment=Maximum number of frames to accumulate. Higher = smoother but laggier; lower = noisier but more responsive to lighting changes.
-option.A_SVGF=A-SVGF Filter
-option.A_SVGF.comment=Enable the A-Trous SVGF edge-stopping denoiser. Significantly reduces bounce noise at the cost of 1-3 extra quarter-res fragment passes. Disable for raw accumulated GI (faster, noisier).
-option.A_SVGF_PASSES=Filter Passes
-option.A_SVGF_PASSES.comment=Number of A-Trous filter passes. Each pass widens the kernel by 2x. 3 is the sweet spot — covers a 17-pixel neighborhood at quarter res. Lower = faster but more residual noise.
-option.A_SVGF_RADIUS=Filter Radius
-option.A_SVGF_RADIUS.comment=A-Trous kernel radius (5x5 footprint by default). Larger kernels blur more aggressively but cost more bandwidth.
-option.A_SVGF_STRICTNESS=Filter Strictness
-option.A_SVGF_STRICTNESS.comment=How aggressively the filter rejects taps that differ from the center. 1.0 = balanced; higher = sharper but more residual noise; lower = smoother but more light bleeding across edges.
 
 option.IBL=Image Based Lighting
 option.IBL_TEMPORAL_ACCUMULATION=IBL Temporal Accumulation
@@ -1261,3 +1236,26 @@ value.COLORED_LIGHTS_FALLOFF.COLORED_LIGHTS_FALLOFF_SQUARED = Squared
 value.COLORED_LIGHTS_FALLOFF.COLORED_LIGHTS_FALLOFF_LINEAR = Linear
 option.IMAGE_SHARPENING_INTENSITY = Image Sharpening
 option.IMAGE_SHARPENING_INTENSITY.comment = Controls final edge-aware image sharpening strength.
+
+# ---- RSM GI (reflective shadow maps) ----
+
+screen.indirect_lighting                    = Indirect Lighting
+option.RSM_GI                            = Indirect Lighting
+option.RSM_GI.comment                    = Master switch for the RSM indirect-lighting pipeline. It gates sunlight bounce GI and all of its temporal, denoising, and spatial-reuse stages. Requires shadows.
+option.RSM_GI_SAMPLES                    = GI Samples
+option.RSM_GI_SAMPLES.comment            = Virtual point light samples gathered per pixel each frame. Higher = less noise but slower. Quality is dominated by history length, so keep this modest.
+option.RSM_GI_RADIUS                     = GI Radius
+option.RSM_GI_RADIUS.comment             = Radius of the VPL sample disk around the receiver, in blocks. Larger = wider bounce spread but more light leaking through walls. Keep it modest indoors.
+option.RSM_GI_INTENSITY                  = GI Intensity
+option.RSM_GI_INTENSITY.comment          = Brightness multiplier for the bounce lighting.
+option.RSM_GI_MIN_DISTANCE               = GI Min Distance
+option.RSM_GI_MIN_DISTANCE.comment       = Clamps the 1/d^4 falloff so that virtual point lights very close to a receiver do not blow up. Raise it if you see hot spots.
+option.RSM_GI_HISTORY                    = GI History Length
+option.RSM_GI_HISTORY.comment            = Number of frames the temporal accumulation blends over. Longer = cleaner and nearly free, but reacts more slowly to lighting changes.
+
+option.RSM_GI_TEMPORAL_ACCUMULATION         = Temporal Accumulation
+option.RSM_GI_TEMPORAL_ACCUMULATION.comment   = Reprojects the quarter-resolution RSM GI into persistent history and blends frames to reduce sampling noise. Disable for raw per-frame GI.
+option.RSM_GI_DENOISING                     = GI Denoise
+option.RSM_GI_DENOISING.comment             = Runs the depth/normal-aware bilateral GI filter after temporal accumulation (or directly on raw GI when temporal accumulation is disabled).
+option.RSM_GI_SPATIAL_REUSE                 = Spatial Reuse
+option.RSM_GI_SPATIAL_REUSE.comment         = Uses four binary spatial-reuse kernels to perform four depth/normal/luminance-aware reuse stages in one quarter-resolution pass.

@@ -1,11 +1,5 @@
 #version 400 compatibility
 #define WORLD_OVERWORLD
-
-#include "/include/global.glsl"
-
-out vec2 uv;
-
-void main() {
-    uv = gl_MultiTexCoord0.xy;
-    gl_Position = vec4(gl_Vertex.xy * 2.0 - 1.0, 0.0, 1.0);
-}
+#define PROGRAM_DEFERRED5
+#define vsh
+#include "/program/d5_rsm_gi_gather.vsh"

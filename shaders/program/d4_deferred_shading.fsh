@@ -64,9 +64,6 @@ uniform sampler2D colortex11; // clouds history
 uniform sampler2D colortex12; // clouds data
 uniform sampler2D colortex14; // ambient lighting history data
 
-#ifdef INDIRECT_LIGHTING
-#endif
-
 #ifdef IBL_TEMPORAL_ACCUMULATION
 uniform sampler2D colortex20; // IBL diffuse history (quarter res, persistent)
 #endif
@@ -191,10 +188,6 @@ const bool colortex11MipmapEnabled = true;
 #include "/include/utility/color.glsl"
 #include "/include/utility/encoding.glsl"
 #include "/include/utility/space_conversion.glsl"
-
-#ifdef INDIRECT_LIGHTING
-#include "/program/gi/upsample.glsl"
-#endif
 
 #if defined WORLD_OVERWORLD
 #include "/include/sky/clouds/sampling.glsl"

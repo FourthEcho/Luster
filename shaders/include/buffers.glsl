@@ -47,49 +47,31 @@ const bool colortex16Clear = true;
 const vec4 colortex16ClearColor = vec4(0.0, 0.0, 0.0, 0.0);
 #endif
 
-#ifdef INDIRECT_LIGHTING
-// ---------------------------------------------------------------------------
-//   Indirect-lighting (multi-bounce GI) chain
-//
-//   Three dedicated quarter-res buffers, allocated only when
-//   INDIRECT_LIGHTING is on. They sit above colortex15 (and above
-//   colortex16 when Voxy is also active), so they never collide with
-//   existing Luster allocations.
-//
-//   Pass flow (see program/gi/*):
-//     bounce1   reads colortex0 (direct-lit scene) writes colortex17 (bounce)
-//     bounce2-4 ping-pong on colortex17 (flip)     writes colortex17 (flip)
-//     accumulate reads colortex17 + colortex18      writes colortex18 (flip)
-//                and (if A_SVGF) reads colortex19  writes colortex19 (flip)
-//     filter1-3  read colortex18 + colortex19       writes colortex18 (flip)
-//     d4         reads colortex18 (final filtered output)
-//
-//   colortex19 is only allocated when A_SVGF is also enabled; without
-//   the SVGF filter there is no consumer of variance, so we skip it.
-//
-//   rgb channels = scene-referred indirect radiance (albedo-modulated)
-//   alpha of colortex18 = sample count / pixel age (used by accumulate)
-//   colortex19.r = variance, .g = mean luma (used by A-Trous weights)
-// ---------------------------------------------------------------------------
+// RSM (reflective shadow map) single-bounce GI, quarter resolution.
+// colortex17 is written twice per frame: raw gather output (deferred5 ->
+// deferred6), then reused for the denoised result (deferred7 -> composite1).
+// colortex18/19 are persistent temporal history buffers (flipped in
+// deferred6, see shaders.properties).
+#ifdef RSM_GI
+const int colortex17Format = RGBA16F; // quarter res | RSM GI: raw gather (d5 -> d6), denoised GI (d7 -> c1); .a = receiver depth
+const int colortex18Format = RGBA16F; // quarter res | RSM GI: temporally accumulated irradiance + receiver depth (persistent)
+const int colortex19Format = RG16F;   // quarter res | RSM GI history data: 1 - depth, pixel age (persistent)
 
-// Bounce in-flight ping-pong buffer (cleared every frame so the first
-// bounce write is always clean even after the bounce count changes).
-const int colortex17Format = RGBA16F;
-const bool colortex17Clear  = true;
-const vec4 colortex17ClearColor = vec4(0.0, 0.0, 0.0, 0.0);
+const bool colortex17Clear = false;
+const bool colortex18Clear = false;
+const bool colortex19Clear = false;
 
-// Persistent history buffer. NOT cleared between frames; only the
-// accumulate and filter passes write to it. Holds the temporal EMA result.
-const int colortex18Format = RGBA16F;
-const bool colortex18Clear  = false;
+// Spatial reuse uses four binary kernel textures and a single quarter-resolution
+// deferred pass. colortex21 is the scratch/output target; colortex17 remains the
+// denoised RSM GI input so there is no sampler/render-target feedback loop.
+const int colortex21Format = RGBA16F; // quarter res | spatial-reuse output
+const bool colortex21Clear = false;
 
-#ifdef A_SVGF
-// Pre-computed moment buffer for the A-Trous SVGF filter. Updated once
-// per frame by accumulate, read by every filter pass.
-const int colortex19Format = RG16F;
-const bool colortex19Clear  = false;
-#endif
-
+// VPL data captured by the shadow pass (MRT with shadowcolor0):
+//   .rgb = unscaled linear surface albedo
+//   .a   = pack_unorm_2x8(encode_unit_vector(world-space normal))
+const int shadowcolor1Format = RGBA16;
+const vec4 shadowcolor1ClearColor = vec4(0.0, 0.0, 0.0, 0.0);
 #endif
 
 #ifdef IBL_TEMPORAL_ACCUMULATION

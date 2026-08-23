@@ -158,9 +158,7 @@ vec3 get_sky_lighting(
 ) {
     vec3 lighting = vec3(0.0);
 
-    // Skylight is sourced from Luster's ambient_color. The indirect-lighting
-    // path now runs as a separate deferred pass chain (program/gi/*) and is
-    // sampled in d4_deferred_shading, so it does not need to be injected here.
+    // Skylight is sourced from Luster's ambient_color.
     vec3 skylight = ambient_color * ao;
     vec3 skylight_up = skylight;
 

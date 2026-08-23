@@ -176,9 +176,6 @@ vec3 light_color, ambient_color;
 #endif
 
 #include "/include/fog/simple_fog.glsl"
-#ifdef INDIRECT_LIGHTING
-#undef INDIRECT_LIGHTING
-#endif
 #include "/include/lighting/diffuse_lighting.glsl"
 #include "/include/lighting/ibl/ibl.glsl"
 #include "/include/lighting/shadows/pcss.glsl"
