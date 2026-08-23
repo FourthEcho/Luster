@@ -1,4 +1,5 @@
 #version 400 compatibility
+#include "/include/global.glsl"
 #include "/program/restir_ssgi/common.glsl"
 
 uniform sampler2D colortex17;
@@ -28,7 +29,5 @@ void main() {
         return;
     }
 
-    // Store scene-referred indirect diffuse. The deferred shading path applies
-    // the receiver albedo once when injecting this buffer.
     restir_resolve_out = vec4(max(indirect, vec3(0.0)), 1.0);
 }
