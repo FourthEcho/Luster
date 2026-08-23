@@ -684,7 +684,10 @@ const float wetnessHalflife         = 70.0;
   #define RSM_GI_HISTORY 24 // [4 6 8 12 16 20 24 32 48 64]
   #define RSM_GI_TEMPORAL_ACCUMULATION
   #define RSM_GI_DENOISING
-  //#define RSM_GI_SPATIAL_REUSE // Uses four binary spatial-reuse kernels in one quarter-resolution pass.
+  #define RSM_GI_SPATIAL_REUSE // Uses four precomputed spatial-reuse maps with live weighted reservoirs.
+#ifdef RSM_GI_SPATIAL_REUSE
+  // Iris boolean-option recognition: this option must be tested at least once.
+#endif
 
 // ---- Image Based Lighting (IBL) ----
 //#define IBL

@@ -61,10 +61,10 @@ const bool colortex17Clear = false;
 const bool colortex18Clear = false;
 const bool colortex19Clear = false;
 
-// Spatial reuse uses four binary kernel textures and a single quarter-resolution
+// Spatial reuse uses live GLSL reservoirs in a single quarter-resolution
 // deferred pass. colortex21 is the scratch/output target; colortex17 remains the
 // denoised RSM GI input so there is no sampler/render-target feedback loop.
-const int colortex21Format = RGBA16F; // quarter res | spatial-reuse output
+const int colortex21Format = RGBA16F; // quarter res | reservoir-selected spatial-reuse output
 const bool colortex21Clear = false;
 
 // VPL data captured by the shadow pass (MRT with shadowcolor0):

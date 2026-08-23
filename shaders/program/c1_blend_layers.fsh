@@ -60,7 +60,7 @@ uniform sampler2D colortex13; // rendered translucent layer
 #if defined RSM_GI && defined SHADOW && defined WORLD_OVERWORLD
 uniform sampler2D colortex1; // gbuffer 0 (albedo)
 #if defined RSM_GI_SPATIAL_REUSE
-uniform sampler2D colortex21; // binary-kernel spatial reuse output + receiver depth
+uniform sampler2D colortex21; // reservoir-based spatial reuse output + receiver depth
 #else
 uniform sampler2D colortex17; // denoised RSM GI + receiver depth (quarter res)
 #endif

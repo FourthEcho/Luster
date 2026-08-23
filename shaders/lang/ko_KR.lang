@@ -1205,4 +1205,4 @@ option.RSM_GI_TEMPORAL_ACCUMULATION.comment   = Reprojects the quarter-resolutio
 option.RSM_GI_DENOISING                     = GI Denoise
 option.RSM_GI_DENOISING.comment             = Runs the depth/normal-aware bilateral GI filter after temporal accumulation (or directly on raw GI when temporal accumulation is disabled).
 option.RSM_GI_SPATIAL_REUSE                 = Spatial Reuse
-option.RSM_GI_SPATIAL_REUSE.comment         = Uses four binary spatial-reuse kernels to perform four depth/normal/luminance-aware reuse stages in one quarter-resolution pass.
+option.RSM_GI_SPATIAL_REUSE.comment         = Uses precomputed spatial-reuse maps to select nearby reservoirs, then combines them with live weighted reservoir reuse.
