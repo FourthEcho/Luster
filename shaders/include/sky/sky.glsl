@@ -353,7 +353,10 @@ vec3 draw_sky(vec3 ray_dir) {
     // Sun
 
 #ifdef END_SUN_EFFECT
-    sky += draw_sun(ray_dir);
+    // END_SUN_EFFECT_INTENSITY scales the brightness of the End sun disk
+    // and its surrounding flare. At 1.0 it matches the previous default;
+    // at 0 the End sun is invisible (toggle would still draw stars etc.).
+    sky += draw_sun(ray_dir) * END_SUN_EFFECT_INTENSITY;
 #endif
 
     // Stars

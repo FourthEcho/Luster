@@ -12,7 +12,16 @@
 
 #include "/include/global.glsl"
 
-#ifdef PROGRAM_GBUFFERS_WATER
+// Refraction data is written when:
+//   - This is the water program (always — water always refracts in
+//     REFRACTION_ALL and REFRACTION_WATER_ONLY modes), OR
+//   - REFRACTION_ALL is enabled and we are a non-water translucent
+//     program (so stained glass, ice, slime, honey, beacon beams etc.
+//     also refract the background behind them).
+// REFRACTION_WATER_ONLY mode only writes refraction_data from the water
+// program — non-water translucents skip the write so they pass through
+// unrefracted. REFRACTION_OFF skips the write entirely.
+#if defined PROGRAM_GBUFFERS_WATER || REFRACTION == REFRACTION_ALL
 layout(location = 0) out vec4 refraction_data;
 layout(location = 1) out vec4 fragment_color;
 
@@ -179,6 +188,7 @@ vec3 light_color, ambient_color;
 #include "/include/misc/purkinje_shift.glsl"
 #include "/include/surface/material.glsl"
 #include "/include/surface/water_normal.glsl"
+#include "/include/utility/anisotropic_filtering.glsl"
 #include "/include/utility/color.glsl"
 #include "/include/utility/encoding.glsl"
 #include "/include/utility/fast_math.glsl"
@@ -189,6 +199,24 @@ vec3 light_color, ambient_color;
 #endif
 
 const float lod_bias = log2(taau_render_scale);
+
+// Pick the right texture sampler for translucent surfaces.
+//
+// The translucent shader samples gtexture / normals / specular directly
+// (no POM path here), so we just need to decide between software
+// anisotropic, hardware anisotropic (host-managed) and plain isotropic.
+#if ANISOTROPIC_FILTERING_MODE != ANISOTROPIC_FILTERING_OFF \
+    && !defined ANISOTROPIC_FILTERING_HARDWARE
+  // Software anisotropic — aniso_sample() is provided by the helper.
+  #define read_tex_anisotropic_or_plain(samp, texcoord) \
+      aniso_sample(samp, texcoord)
+#else
+  // Hardware anisotropic available (host-managed sampler state) OR
+  // filtering disabled — plain texture() does the right thing in both
+  // cases.
+  #define read_tex_anisotropic_or_plain(samp, texcoord) \
+      texture(samp, texcoord, lod_bias)
+#endif
 
 #if TEXTURE_FORMAT == TEXTURE_FORMAT_LAB
 void decode_normal_map(vec3 normal_map, out vec3 normal, out float ao) {
@@ -218,10 +246,13 @@ Material get_water_material(
 
 #if WATER_TEXTURE == WATER_TEXTURE_HIGHLIGHT \
     || WATER_TEXTURE == WATER_TEXTURE_HIGHLIGHT_UNDERGROUND
-    vec4 base_color = texture(gtexture, uv, lod_bias);
+    vec4 base_color = read_tex_anisotropic_or_plain(gtexture, uv);
+    // WATER_TEXTURE_INTENSITY scales the contribution of the vanilla water
+    // texture (the bright "noise" pattern on the surface). At 0 the texture
+    // is invisible; at 1 it matches the previous default brightness.
     float texture_highlight = dampen(
         0.5 * sqr(linear_step(0.63, 1.0, base_color.r)) + 0.03 * base_color.r
-    );
+    ) * WATER_TEXTURE_INTENSITY;
 #if WATER_TEXTURE == WATER_TEXTURE_HIGHLIGHT_UNDERGROUND
     texture_highlight *= 1.0 - cube(linear_step(0.0, 0.5, light_levels.y));
 #endif
@@ -231,7 +262,7 @@ Material get_water_material(
     material.roughness += 0.3 * texture_highlight;
     alpha += texture_highlight;
 #elif WATER_TEXTURE == WATER_TEXTURE_VANILLA
-    vec4 base_color = texture(gtexture, uv, lod_bias) * tint;
+    vec4 base_color = read_tex_anisotropic_or_plain(gtexture, uv) * tint;
     material.albedo = srgb_eotf_inv(base_color.rgb * base_color.a)
         * rec709_to_working_color;
     alpha = base_color.a;
@@ -272,7 +303,19 @@ vec4 water_absorption_approx(
     float NoV,
     float cloud_shadows
 ) {
+    // BIOME_WATER_COLOR_INTENSITY scales how strongly the per-biome water
+    // tint (swamp brown, moat blue, etc.) drives the underwater absorption
+    // coefficients. At 0 the absorption falls back to a neutral grey
+    // baseline; at 1 it matches the previous behaviour (full biome tint).
+    // We blend the biome tint toward neutral grey (0.5) by the inverse of
+    // the slider — this preserves luminance while letting the slider dial
+    // the colour saturation up or down without affecting overall density.
     vec3 biome_water_color = srgb_eotf_inv(tint.rgb) * rec709_to_working_color;
+    biome_water_color = mix(
+        vec3(dot(biome_water_color, luminance_weights_rec2020)),
+        biome_water_color,
+        BIOME_WATER_COLOR_INTENSITY
+    );
     vec3 absorption_coeff = biome_water_coeff(biome_water_color);
     float dist = layer_dist * float(isEyeInWater != 1 || NoV >= 0.0);
 
@@ -501,7 +544,7 @@ void main() {
         // Sample textures
 
 #if defined COLORWHEEL
-        fragment_color = texture(gtexture, uv, lod_bias);
+        fragment_color = read_tex_anisotropic_or_plain(gtexture, uv);
 
         float ao;
         vec4 overlayColor;
@@ -511,14 +554,14 @@ void main() {
 
         adjusted_light_levels = light_levels;
 #else
-        fragment_color = texture(gtexture, uv, lod_bias) * tint;
+        fragment_color = read_tex_anisotropic_or_plain(gtexture, uv) * tint;
 #endif
 
 #ifdef NORMAL_MAPPING
-        vec3 normal_map = texture(normals, uv, lod_bias).xyz;
+        vec3 normal_map = read_tex_anisotropic_or_plain(normals, uv).xyz;
 #endif
 #ifdef SPECULAR_MAPPING
-        vec4 specular_map = texture(specular, uv, lod_bias);
+        vec4 specular_map = read_tex_anisotropic_or_plain(specular, uv);
 #endif
 
 #ifdef FANCY_NETHER_PORTAL
@@ -702,10 +745,15 @@ void main() {
 
 #ifdef SNELLS_WINDOW
         if (isEyeInWater == 1) {
+            // SNELLS_WINDOW_INTENSITY scales how aggressively the Snell's
+            // window effect pushes fragment alpha toward opaque. At 1.0
+            // the window is fully opaque at grazing angles (matches the
+            // previous hardcoded behaviour); at 0 the window is invisible.
+            float snell_factor = fresnel_dielectric_n(NoV, air_n / water_n).x;
             fragment_color.a = mix(
                 fragment_color.a,
                 1.0,
-                fresnel_dielectric_n(NoV, air_n / water_n).x
+                snell_factor * SNELLS_WINDOW_INTENSITY
             );
         }
 #endif
@@ -722,9 +770,12 @@ void main() {
     fragment_color.rgb
         = purkinje_shift(fragment_color.rgb, adjusted_light_levels);
 
-    // Refraction data
-
-#if defined PROGRAM_GBUFFERS_WATER
+    // Refraction data — written whenever the output is declared above.
+    // For water this is always the case; for non-water translucents it's
+    // only written in REFRACTION_ALL mode (so stained glass / ice / etc.
+    // also refract the background). The encoding is the same for both —
+    // the surface normal tangent in [-1, 1] mapped to [0, 1].
+#if defined PROGRAM_GBUFFERS_WATER || REFRACTION == REFRACTION_ALL
     refraction_data.xy = split_2x8(normal_tangent.x * 0.5 + 0.5);
     refraction_data.zw = split_2x8(normal_tangent.y * 0.5 + 0.5);
 #endif

@@ -109,7 +109,10 @@ OverworldFogParameters get_fog_parameters(Weather weather) {
     params.mie_extinction_coeff = vec3(mie);
 
 #ifdef DESERT_SANDSTORM
-    const float desert_sandstorm_density = 0.2;
+    // DESERT_SANDSTORM_INTENSITY scales the sandstorm fog density and
+    // extinction coefficients. Default 1.0 matches the previous constant
+    // of 0.2; higher values produce thicker, more opaque sandstorms.
+    const float desert_sandstorm_density = 0.2 * DESERT_SANDSTORM_INTENSITY;
     const float desert_sandstorm_scattering = desert_sandstorm_density * 0.5;
     const vec3 desert_sandstorm_extinction
         = desert_sandstorm_density * vec3(0.2, 0.27, 0.45);

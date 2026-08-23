@@ -202,7 +202,7 @@ vec3 get_sky_reflection(vec3 ray_dir, float skylight, vec3 hit_pos) {
     if (sunAngle > 0.5) {
         reflection = apply_moon_phase_influence(
             reflection,
-            MOON_PHASE_REFLECTIONS_INTENSITY,
+            MOON_PHASE_REFLECTIONS_INTENSITY * MOON_PHASE_INFLUENCE_INTENSITY,
             MOON_PHASE_REFLECTIONS_CONTRAST,
             MOON_PHASE_REFLECTIONS_SATURATION
         );

@@ -307,8 +307,16 @@ void main() {
     float distance_factor = 1.0 - exp2(-0.025 * length(closest_view));
 
     // Dynamic blend weight lending equal weight to all frames in the history,
-    // drastically reducing time taken to converge when upscaling
-    float blend_weight = mix(0.35, 0.10, distance_factor);
+    // drastically reducing time taken to converge when upscaling.
+    //
+    // TAA_INTENSITY scales how aggressively the temporal blend rejects the
+    // current frame in favour of the history buffer:
+    //   1.0  -> default (blend_weight 0.35 near, 0.10 far)
+    //   >1.0 -> more temporal accumulation, smoother but more ghosting
+    //   <1.0 -> less temporal accumulation, sharper but more aliased
+    // We divide by TAA_INTENSITY so a higher value reduces the current
+    // frame's contribution (i.e. increases the relative weight of history).
+    float blend_weight = mix(0.35, 0.10, distance_factor) * rcp(TAA_INTENSITY);
     float alpha = max(1.0 / pixel_age, blend_weight);
 
 #ifndef TAAU

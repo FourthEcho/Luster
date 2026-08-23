@@ -86,7 +86,7 @@ vec3 draw_rainbows(
     vec3 transmittance_approx
         = mix(vec3(1.0, 0.75, 0.5), vec3(1.0), dampen(max0(direction_world.y)));
 
-    vec3 rainbow_color = light_color * 0.1
+    vec3 rainbow_color = light_color * (0.1 * RAINBOWS_INTENSITY)
         * (3.0 * first_rainbow + 0.5 * second_rainbow)
         * sqr(transmittance_approx);
     float rainbow_fade = rainbow_amount

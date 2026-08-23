@@ -94,7 +94,18 @@ void main() {
                            * max(center_mean, 0.05)
                            + 0.25);
     float max_delta = mix(half_pi, tau, clamp01(age / 32.0));
-    float normal_exp = mix(2.0, 8.0, clamp01(age / 8.0)) * 1.0;
+    // A_SVGF_PASSES scales per-pass filter aggressiveness to compensate
+    // for pass counts beyond the 3 program slots we actually run. Default
+    // 3 maps to 1.0x (no extra strength). Higher values (4-5) push the
+    // normal exponent up so each pass rejects more aggressively, giving
+    // an effective "more passes" feel within the existing pipeline.
+    float svgf_pass_strength = clamp(A_SVGF_PASSES / 3.0, 0.5, 2.0);
+    float normal_exp = mix(2.0, 8.0, clamp01(age / 8.0)) * svgf_pass_strength;
+
+    // A_SVGF_RADIUS scales the kernel stride. Default 4 maps to 1.0x
+    // (preserves original SVGF_SIZE behaviour); higher values produce a
+    // wider effective filter footprint per pass.
+    float svgf_radius_scale = float(A_SVGF_RADIUS) / 4.0;
 
     vec3 total = center.rgb;
     float total_weight = 1.0;
@@ -107,7 +118,7 @@ void main() {
             if (x == 0 && y == 0) continue;
             if (abs(x) == 2 && abs(y) == 2) continue;  // skip corners
 
-            ivec2 p = texel + ivec2(x, y) * SVGF_SIZE;
+            ivec2 p = texel + ivec2(vec2(x, y) * float(SVGF_SIZE) * svgf_radius_scale);
             if (p.x < 0 || p.y < 0
                 || p.x >= int(view_res.x * 0.5)
                 || p.y >= int(view_res.y * 0.5)) continue;

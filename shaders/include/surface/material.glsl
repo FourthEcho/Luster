@@ -61,25 +61,68 @@ void decode_specular_map(vec4 specular_map, inout Material material) {
     );
 
     material.roughness = sqr(1.0 - specular_map.r);
-    material.emission = max(
+
+    // ---- Emission ----
+    // labPBR encodes emission strength in the specular alpha channel.
+    // Convention used by resource packs:
+    //   alpha == 1.0  -> this texel has no labPBR emission data
+    //                    (fall back to whatever the hardcoded mask set)
+    //   alpha <  1.0  -> emission multiplier, brightness = albedo * alpha
+    // When the texel declares an emission multiplier it overrides the
+    // hardcoded emission rather than combining with it, so a resource pack
+    // can fully describe its own emissive surfaces. EMISSION_STRENGTH has
+    // already been applied to the hardcoded emission inside material_from,
+    // so we apply it to the map emission too here.
+    float has_emission_map = step(specular_map.a, 254.5 / 255.0);
+    vec3 map_emission = material.albedo * specular_map.a * EMISSION_STRENGTH;
+    material.emission = mix(
         material.emission,
-        material.albedo * specular_map.a * float(specular_map.a != 1.0)
+        map_emission,
+        has_emission_map
     );
 
     if (specular_map.g < 229.5 / 255.0) {
         // Dielectrics
         material.f0 = max(material.f0, specular_map.g);
 
+        // ---- SSS (Subsurface Scattering) ----
+        // labPBR stores SSS in the upper half of specular.b (> 64/255).
+        // We only read it when the SSS master toggle is on — when SSS is
+        // off, no map searching and no hardcoded values are used, so
+        // sss_amount stays at 0 and no SSS rendering happens.
+#ifdef SSS
         float has_sss = step(64.5 / 255.0, specular_map.b);
         material.sss_amount = max(
             material.sss_amount,
             linear_step(64.0 / 255.0, 1.0, specular_map.b * has_sss)
         );
-        material.porosity = linear_step(
+#else
+        // SSS off: has_sss is always 0 so the porosity calculation below
+        // uses the full specular.b range (no SSS region to subtract).
+        const float has_sss = 0.0;
+#endif
+
+        // ---- Porosity ----
+        // labPBR stores porosity in the lower half of specular.b
+        // (0..64/255). When a non-zero B channel is present at this texel
+        // we trust the pack and let it fully override the hardcoded mask
+        // porosity. POROSITY_STRENGTH is applied to the map value so the
+        // user can globally tame the effect.
+#ifdef POROSITY
+        float map_porosity = linear_step(
             0.0,
             64.0 / 255.0,
             max0(specular_map.b - specular_map.b * has_sss)
         );
+        // Detect "this texel actually carries labPBR data" (B != 0)
+        // vs "vanilla texture with B == 0" (fall back to hardcoded).
+        float has_porosity_data = step(0.5 / 255.0, specular_map.b);
+        material.porosity = mix(
+            material.porosity,
+            map_porosity * POROSITY_STRENGTH,
+            has_porosity_data
+        );
+#endif
     } else if (specular_map.g < 237.5 / 255.0) {
         // Hardcoded metals
         uint metal_id = clamp(uint(255.0 * specular_map.g) - 230u, 0u, 7u);
@@ -105,8 +148,18 @@ void decode_specular_map(vec4 specular_map, inout Material material) {
     material.roughness = sqr(1.0 - specular_map.r);
     material.is_metal = specular_map.g > 0.5;
     material.f0 = material.is_metal ? material.albedo : material.f0;
-    material.emission
-        = max(material.emission, material.albedo * specular_map.b);
+
+    // Old format encodes emission directly in specular.b. Same override
+    // semantics as labPBR: a non-zero emission value from the pack wins
+    // over the hardcoded mask emission. EMISSION_STRENGTH has already
+    // been applied to the hardcoded emission inside material_from.
+    float has_emission_map = step(0.5 / 255.0, specular_map.b);
+    vec3 map_emission = material.albedo * specular_map.b * EMISSION_STRENGTH;
+    material.emission = mix(
+        material.emission,
+        map_emission,
+        has_emission_map
+    );
 
     material.ssr_multiplier = step(
         0.01,
@@ -160,6 +213,11 @@ Material material_from(
                             material.roughness = sqr(1.0 - smoothness);
                             material.f0 = vec3(0.02);
 #endif
+#ifdef POROSITY
+                            // Stone-like default: slightly porous so rain
+                            // can darken it a touch.
+                            material.porosity = 0.15;
+#endif
                         } else { // 3
                             // Water
                         }
@@ -202,6 +260,13 @@ Material material_from(
                         }
                     } else { // 6-8
                         if (material_mask == 6u) { // 6
+#ifdef POROSITY
+                            // Ground / dirt-like (coarse dirt, podzol,
+                            // rooted dirt, etc.). Noticeably porous so rain
+                            // puddles here darken heavily and the surface
+                            // stays wet longer.
+                            material.porosity = 0.6;
+#endif
                         } else { // 7
 // Sand
 #ifdef HARDCODED_SPECULAR
@@ -209,6 +274,12 @@ Material material_from(
                                 = 0.8 * linear_step(0.81, 0.96, hsl.z);
                             material.roughness = sqr(1.0 - smoothness);
                             material.f0 = vec3(0.02);
+#endif
+#ifdef POROSITY
+                            // Sand & sandstone are very porous — water
+                            // percolates through them easily. Puddles will
+                            // hardly form, instead the surface darkens.
+                            material.porosity = 0.85;
 #endif
                         }
                     }
@@ -238,6 +309,11 @@ Material material_from(
                             material.roughness = sqr(1.0 - smoothness);
                             material.f0 = vec3(0.02);
 #endif
+#ifdef POROSITY
+                            // Red sand is highly porous; birch planks are
+                            // only slightly porous. We pick a middle ground.
+                            material.porosity = 0.45;
+#endif
                         }
                     } else { // 10-12
                         if (material_mask == 10u) { // 10
@@ -247,6 +323,10 @@ Material material_from(
                                 = 0.5 * linear_step(0.4, 0.8, hsl.z);
                             material.roughness = sqr(1.0 - smoothness);
                             material.f0 = vec3(0.02);
+#endif
+#ifdef POROSITY
+                            // Planks and soft stone — moderately porous.
+                            material.porosity = 0.35;
 #endif
                         } else { // 11
 // Obsidian, nether bricks
@@ -288,10 +368,19 @@ Material material_from(
                             // Strong SSS
                             material.sss_amount = 0.6;
 #endif
+#ifdef POROSITY
+                            // Snow, sponges and other strong-SSS organic
+                            // blocks are typically very porous.
+                            material.porosity = 0.7;
+#endif
                         } else { // 15
 #ifdef HARDCODED_SSS
                             // Weak SSS
                             material.sss_amount = 0.1;
+#endif
+#ifdef POROSITY
+                            // Weak-SSS organic: mildly porous.
+                            material.porosity = 0.3;
 #endif
                         }
                     }
@@ -506,6 +595,11 @@ Material material_from(
                                 = max(sqr(1.0 - smoothness), 0.4);
                             material.f0 = vec3(0.03);
 #endif
+#ifdef POROSITY
+                            // Wood is moderately porous along the grain,
+                            // but we use a flat value for simplicity.
+                            material.porosity = 0.3;
+#endif
                         }
                     } else { // 30-32
                         if (material_mask == 30u) { // 30
@@ -515,6 +609,11 @@ Material material_from(
                             material.roughness
                                 = max(sqr(1.0 - smoothness), 0.4);
                             material.f0 = vec3(0.03);
+#endif
+#ifdef POROSITY
+                            // Wood-derived (signs etc.) — same porosity
+                            // family as logs.
+                            material.porosity = 0.3;
 #endif
                         } else { // 31
                         }
@@ -822,7 +921,33 @@ Material material_from(
 #ifdef HARDCODED_SSS
         material.sss_amount = 0.5;
 #endif
+
+#ifdef POROSITY
+        // Honey and slime are technically porous in the sense that they
+        // absorb water, but for visual puddle purposes they shouldn't
+        // darken — leave porosity at 0 for these.
+#endif
     }
+
+    // ---- Apply global multipliers to the hardcoded values ----
+    // EMISSION_STRENGTH scales the hardcoded mask emission (so the user
+    // can globally tame or boost emissive blocks even when no resource
+    // pack specular map is bound). When a labPBR specular map is later
+    // decoded by decode_specular_map(), the map value will fully override
+    // this scaled hardcoded value where the pack declares an emissive
+    // texel.
+    material.emission *= EMISSION_STRENGTH;
+
+#ifdef POROSITY
+    // POROSITY_STRENGTH scales the hardcoded porosity. Same override
+    // semantics as above: when a labPBR map declares porosity for a texel
+    // it wins over the hardcoded value.
+    material.porosity *= POROSITY_STRENGTH;
+#else
+    // If the user disables the POROSITY define, no wetness modulation
+    // should happen at all — nuke it to zero.
+    material.porosity = 0.0;
+#endif
 
     return material;
 }

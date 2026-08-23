@@ -252,6 +252,13 @@ vec3 atmosphere_scattering(
 #ifndef SKY_GROUND
     float horizon_mu = mix(-0.01, 0.03, smoothstep(-0.05, 0.1, mu_s));
     mu = max(mu, horizon_mu);
+#else
+    // SKY_GROUND is on: blend between the clamped (no ground) and
+    // unclamped (full ground) mu based on SKY_GROUND_INTENSITY. At 0 the
+    // horizon is clamped just like the default path; at 1 the full
+    // ground-level scattering is sampled.
+    float horizon_mu = mix(-0.01, 0.03, smoothstep(-0.05, 0.1, mu_s));
+    mu = mix(max(mu, horizon_mu), mu, clamp01(SKY_GROUND_INTENSITY));
 #endif
 
     vec3 uv = atmosphere_scattering_uv(nu, mu, mu_s);
@@ -310,6 +317,15 @@ vec3 atmosphere_scattering(
         clamp01(smoothstep(-0.05, 0.1, mu_sun) + smoothstep(0.05, 0.1, mu_moon))
     );
     mu = max(mu, horizon_mu);
+#else
+    // SKY_GROUND is on: blend between clamped and unclamped mu based on
+    // SKY_GROUND_INTENSITY. At 0 horizon is clamped; at 1 full ground.
+    float horizon_mu = mix(
+        -0.01,
+        0.03,
+        clamp01(smoothstep(-0.05, 0.1, mu_sun) + smoothstep(0.05, 0.1, mu_moon))
+    );
+    mu = mix(max(mu, horizon_mu), mu, clamp01(SKY_GROUND_INTENSITY));
 #endif
 
     // Improved mapping for nu from Spectrum by Zombye

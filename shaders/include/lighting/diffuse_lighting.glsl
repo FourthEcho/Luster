@@ -103,9 +103,13 @@ vec3 sss_approx(
     float LoV,
     float shadow
 ) {
-    // Blur-based SSS
+    // Blur-based SSS (used when SHADOW_VPS is off). The sheen term was
+    // previously hardcoded to 0.8, ignoring SSS_SHEEN_INTENSITY — the VPS
+    // path above scales it by 0.8 * SSS_INTENSITY, so we mirror that here
+    // to keep the two paths visually consistent.
     float sss = 0.06 * sss_scale * pi;
-    vec3 sheen = 0.8 * rcp(albedo + eps) * henyey_greenstein_phase(-LoV, 0.5)
+    vec3 sheen = (0.8 * SSS_SHEEN_INTENSITY) * rcp(albedo + eps)
+        * henyey_greenstein_phase(-LoV, 0.5)
         * linear_step(-0.8, -0.2, -LoV) * shadow;
 
     return sss + sheen * sheen_amount;
@@ -252,8 +256,15 @@ vec3 get_diffuse_lighting(
 #endif
 #else
     // Simple shading for when shadows are disabled
+    // The SSS contribution here was previously a fixed 0.08 multiplier
+    // that didn't track sss_scale (= 5.0 * SSS_INTENSITY) or
+    // SSS_SHEEN_INTENSITY, leaving this fallback path inconsistent with
+    // the shadow-enabled path above. We now scale it by SSS_INTENSITY
+    // (via sss_scale) and apply SSS_SHEEN_INTENSITY to the sheen term
+    // so both paths respond to the same user-facing sliders.
     vec3 sss = 0.08 * sss_scale * pi
-        + 0.5 * material.sheen_amount * rcp(material.albedo + eps)
+        + 0.5 * SSS_SHEEN_INTENSITY * material.sheen_amount
+            * rcp(material.albedo + eps)
             * henyey_greenstein_phase(-LoV, 0.5)
             * linear_step(-0.8, -0.2, -LoV);
 

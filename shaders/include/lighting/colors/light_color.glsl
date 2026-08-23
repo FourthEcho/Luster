@@ -68,7 +68,7 @@ vec3 get_light_color() {
 #ifdef MOON_PHASE_NIGHT_LIGHTING
     moon_light = apply_moon_phase_influence(
         moon_light,
-        MOON_PHASE_NIGHT_LIGHTING_INTENSITY,
+        MOON_PHASE_NIGHT_LIGHTING_INTENSITY * MOON_PHASE_INFLUENCE_INTENSITY,
         MOON_PHASE_NIGHT_LIGHTING_CONTRAST,
         MOON_PHASE_NIGHT_LIGHTING_SATURATION
     );

@@ -57,7 +57,11 @@ float get_water_height(vec2 coord, vec2 wave_dir, mat2 wave_rot, float t) {
 
     // Noise
     const float noise_frequency = 0.007;
-    const float noise_strength = 2.0;
+    // WATER_WAVES_NOISE_STRENGTH scales the per-wave noise offset that
+    // perturbs each Gerstner wave's phase. Higher values produce more
+    // chaotic, choppy water; lower values produce calmer, more regular
+    // swell. The default of 2.0 matches the previous hardcoded constant.
+    const float noise_strength = 2.0 * WATER_WAVES_NOISE_STRENGTH;
 
     // Height variation
     const float height_variation_frequency = 0.001;

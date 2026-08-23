@@ -28,7 +28,13 @@ const float[12] quality
 
 const float edge_threshold_min = 0.0312;
 const float edge_threshold_max = 0.125;
-const float subpixel_quality = 0.75;
+// FXAA_INTENSITY scales the subpixel aliasing reduction. The default
+// subpixel_quality of 0.75 is multiplied by the slider value:
+//   1.0 -> default FXAA behaviour (subpixel_quality = 0.75)
+//   >1.0 -> more aggressive edge smoothing (softer but can blur)
+//   <1.0 -> less smoothing (sharper, more aliased)
+//   0.0  -> FXAA effectively disabled (no subpixel correction)
+const float subpixel_quality = 0.75 * FXAA_INTENSITY;
 
 float get_luma(vec3 rgb) {
     const vec3 luminance_weights_r_709 = vec3(0.2126, 0.7152, 0.0722);

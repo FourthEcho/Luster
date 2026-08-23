@@ -128,50 +128,21 @@ uniform vec4 entityColor;
 #if defined PROGRAM_GBUFFERS_TERRAIN && defined POM
 #define read_tex(x) textureGrad(x, parallax_uv, uv_gradient[0], uv_gradient[1])
 #else
-#if ANISOTROPIC_FILTERING_MODE != ANISOTROPIC_FILTERING_OFF
-#if ANISOTROPIC_FILTERING_MODE == ANISOTROPIC_FILTERING_2
-  #define ANISOTROPIC_FILTERING_SAMPLES 2
-#elif ANISOTROPIC_FILTERING_MODE == ANISOTROPIC_FILTERING_4
-  #define ANISOTROPIC_FILTERING_SAMPLES 4
-#elif ANISOTROPIC_FILTERING_MODE == ANISOTROPIC_FILTERING_8
-  #define ANISOTROPIC_FILTERING_SAMPLES 8
-#else
-  #define ANISOTROPIC_FILTERING_SAMPLES 16
-#endif
-
-// Emulates anisotropic filtering by taking several elongated samples along
-// the dominant screen-space texture-coordinate gradient (the axis a surface
-// is foreshortened along, e.g. a floor viewed at a grazing angle) and
-// averaging them, rather than relying on a single isotropic mip sample.
-vec4 read_tex_anisotropic(sampler2D samp, vec2 texcoord) {
-    vec2 dx = dFdx(texcoord);
-    vec2 dy = dFdy(texcoord);
-
-    float len_x = length(dx);
-    float len_y = length(dy);
-
-    bool x_is_major = len_x > len_y;
-
-    vec2 major_axis = x_is_major ? dx : dy;
-    vec2 minor_axis = x_is_major ? dy : dx;
-
-    float major_len = max(len_x, len_y);
-    float minor_len = max(min(len_x, len_y), 1e-6);
-
-    float aniso_ratio = clamp(major_len / minor_len, 1.0, float(ANISOTROPIC_FILTERING_SAMPLES));
-    int sample_count = int(aniso_ratio + 0.5);
-
-    vec4 result = vec4(0.0);
-    for (int i = 0; i < sample_count; ++i) {
-        float t = (float(i) + 0.5) / float(sample_count) - 0.5;
-        vec2 sample_uv = texcoord + major_axis * t;
-        result += textureGrad(samp, sample_uv, minor_axis, minor_axis);
-    }
-
-    return result / float(sample_count);
-}
+// Anisotropic filtering: if the host exposes GL_ARB_texture_filter_anisotropic
+// (or the legacy EXT variant), the hardware sampler does the work and we
+// just call texture(). Otherwise we fall back to a full software
+// implementation that takes N elongated samples along the dominant
+// screen-space gradient. The helper file detects the extension and
+// exposes aniso_sample() / read_tex_anisotropic() only when the software
+// path is actually needed.
+#include "/include/utility/anisotropic_filtering.glsl"
+#if ANISOTROPIC_FILTERING_MODE != ANISOTROPIC_FILTERING_OFF \
+    && !defined ANISOTROPIC_FILTERING_HARDWARE
 #define read_tex(x) read_tex_anisotropic(x, uv)
 #else
+// Hardware anisotropic available (host-managed sampler state) OR
+// filtering disabled — plain texture() does the right thing in both
+// cases.
 #define read_tex(x) texture(x, uv, lod_bias)
 #endif
 #endif

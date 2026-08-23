@@ -4,7 +4,17 @@
   Photon Shader by SixthSurge
 
   program/c2_dof
-  Calculate depth of field
+  Calculate depth of field OR distance blur, depending on DOF_MODE.
+
+  - DOF_MODE_OFF            : program disabled (no blur applied)
+  - DOF_MODE_DOF            : focus-based depth of field. CoC is derived
+                              from |depth - focus|, with focus either set
+                              explicitly by DOF_FOCUS or auto-tracked by
+                              centerDepthSmooth.
+  - DOF_MODE_DISTANCE_BLUR  : far-field blur only. CoC grows linearly with
+                              view distance beyond DISTANCE_BLUR_START, and
+                              is zero up close. Uses DISTANCE_BLUR_INTENSITY
+                              instead of DOF_INTENSITY.
 
 --------------------------------------------------------------------------------
 */
@@ -73,12 +83,46 @@ void main() {
     theta = r1(frameCounter, theta);
     theta *= tau;
 
-    // Calculate circle of confusion
+    // ---- Compute the circle of confusion (CoC) radius ----
+    // The CoC is a screen-space 2D vector we use to offset each vogel
+    // sample. Two regimes:
+    //
+    //   DOF_MODE_DOF — focus-based: |depth - focus| drives the CoC. Things
+    //     at the focus plane stay sharp; things in front or behind blur.
+    //     Intensity comes from DOF_INTENSITY.
+    //
+    //   DOF_MODE_DISTANCE_BLUR — far-field blur: the CoC grows linearly
+    //     with view-space distance beyond DISTANCE_BLUR_START. Things up
+    //     close stay perfectly sharp. Intensity comes from
+    //     DISTANCE_BLUR_INTENSITY. (DOF_FOCUS is ignored in this mode.)
+    vec2 CoC;
+
+#if defined DOF
     float focus = DOF_FOCUS < 0.0
         ? centerDepthSmooth
         : view_to_screen_space_depth(gbufferProjection, DOF_FOCUS);
-    vec2 CoC = min(abs(depth - focus), 0.1) * (DOF_INTENSITY * 0.2 / 1.37)
+    CoC = min(abs(depth - focus), 0.1)
+        * (DOF_INTENSITY * 0.2 / 1.37)
         * vec2(1.0, aspectRatio) * gbufferProjection[1][1];
+
+#elif defined DISTANCE_BLUR
+    // Recover view-space distance (magnitudes) from screen depth. We
+    // convert depthtex0 (NDC depth) to a view-space distance along the
+    // camera's forward axis. This is what we compare against
+    // DISTANCE_BLUR_START.
+    vec3 screen_pos = vec3(uv, depth);
+    vec3 view_pos = screen_to_view_space(screen_pos, true);
+    float view_dist = length(view_pos);
+
+    // No blur up close, then a smooth ramp past DISTANCE_BLUR_START, then
+    // capped to 0.1 (in screen-depth units equivalent) so we never
+    // sample wildly outside the screen.
+    float blur_amount
+        = linear_step(DISTANCE_BLUR_START, DISTANCE_BLUR_START + 32.0, view_dist);
+    CoC = vec2(blur_amount) * (DISTANCE_BLUR_INTENSITY * 0.2 / 1.37)
+        * vec2(1.0, aspectRatio) * gbufferProjection[1][1];
+    CoC = min(CoC, vec2(0.1));
+#endif
 
     scene_color = vec3(0.0);
 
@@ -102,6 +146,6 @@ void main() {
     scene_color *= rcp(DOF_SAMPLES);
 }
 
-#ifndef DOF
-#error "This program should be disabled if Depth of Field is disabled"
+#if !defined DOF && !defined DISTANCE_BLUR
+#error "This program should be disabled if neither DOF nor DISTANCE_BLUR is active"
 #endif

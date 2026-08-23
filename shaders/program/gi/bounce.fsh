@@ -266,7 +266,7 @@ vec3 gi_celestial_source_radiance() {
 #ifdef MOON_PHASE_NIGHT_LIGHTING
     moon_radiance = apply_moon_phase_influence(
         moon_radiance,
-        MOON_PHASE_NIGHT_LIGHTING_INTENSITY,
+        MOON_PHASE_NIGHT_LIGHTING_INTENSITY * MOON_PHASE_INFLUENCE_INTENSITY,
         MOON_PHASE_NIGHT_LIGHTING_CONTRAST,
         MOON_PHASE_NIGHT_LIGHTING_SATURATION
     );
