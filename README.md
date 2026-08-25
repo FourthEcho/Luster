@@ -1,104 +1,334 @@
-<br><br>
+<br>
 
-<h1 align = "center">Luster</h1>
+<h1 align="center">Luster</h1>
 
-<p align = "center">A gameplay-focused shader pack for Minecraft, forked from <a href="https://github.com/sixthsurge/photon">Photon</a> by SixthSurge — rebuilt for Iris on macOS/OpenGL 4.1 core profile</p>
+<p align="center">
+  A cinematic, gameplay-focused shader pack for Minecraft with a strong emphasis on atmosphere, lighting, clouds, water, and image quality.<br>
+  Designed with macOS / Apple Silicon and Iris compatibility in mind.
+</p>
 
-![Screenshot](docs/images/rainbow.png)
+<p align="center">
+  <a href="https://irisshaders.dev/">Iris</a> ·
+  <a href="https://github.com/shashankpgowda/Luster">Source</a> ·
+  <a href="https://github.com/shashankpgowda/Luster/issues">Issues</a>
+</p>
 
-## About this fork
+<p align="center">
+  <img src="docs/images/rainbow.png" alt="Luster shader pack screenshot">
+</p>
 
-Luster is a credited fork of Photon Shaders, rebuilt to run well under Apple's OpenGL 4.1 compatibility profile. The sections below detail specific systems in this fork, verified directly against the shader source.
+About
 
-## Mac compatibility
+Luster is a heavily reworked shader pack based on the Photon codebase by SixthSurge. It focuses on a polished Minecraft presentation while retaining a large amount of user control through Iris' shader settings system.
 
-Luster targets Apple's OpenGL 4.1 core profile specifically — the last OpenGL version macOS supports. This profile has no compute shaders and a hard 16-texture-unit sampler budget per shader stage, both meaningfully more restrictive than the OpenGL 4.3+/4.6 environments most shaderpacks (including upstream Photon) assume. Where upstream Photon logic would exceed the sampler budget or lean on compute-shader-only features, this fork reworks the pass to fit within Apple's constraints while preserving the visual result as closely as possible. This is the core reason this fork exists, distinct from any single feature listed below.
+The pack is built around modular rendering systems rather than a single visual gimmick: dynamic atmosphere and weather, layered volumetric clouds, configurable lighting and reflections, detailed water, material support, temporal reconstruction, and a broad post-processing stack.
 
-## Ambient occlusion (RTAO)
+Luster also includes a dedicated Mac Compatible profile for systems using Iris on macOS.
 
-`SHADER_AO` in the settings menu selects between three ambient occlusion methods: `SHADER_AO_SSAO`, `SHADER_AO_GTAO`, and `SHADER_AO_RTAO`. RTAO is a screen-space ray-marched implementation — the ray-marching logic lives in `include/misc/raytracer.glsl` (function `raymarch_depth_buffer`), which intersects view-space rays against the depth buffer with a dither offset, a depth-tolerance check (credited to DrDesten), and a binary-search refinement pass. `RTAO_STEPS` (1–16) and `RTAO_RADIUS` (0.5–10.0) control ray count and reach.
+Highlights
 
-## Image-based lighting (IBL)
+Lighting
 
-`IBL` is a toggleable option with `IBL_SAMPLES` (4–32) controlling sample count and `IBL_INTENSITY` (0.00–2.00) controlling strength. This sits alongside direct sun/moon/block lighting as an ambient contribution term, feeding indirect diffuse lighting from the sky.
+Configurable sun, moon, block-light, Nether, End, and handheld lighting
 
-## Colored handheld lighting
+Optional colored lighting with a voxel-based light volume
 
-`HANDHELD_LIGHTING_MODE` has three states: `HANDHELD_LIGHTING_OFF`, `HANDHELD_LIGHTING_NORMAL`, and `HANDHELD_LIGHTING_COLORED`. The colored mode extends held-item light sources (torches, lanterns, etc.) beyond a flat white/warm light to carry actual item-tinted color, with `HANDHELD_LIGHTING_INTENSITY` (0.00–2.00) controlling brightness.
+Image-Based Lighting (IBL) for diffuse and specular environment illumination
 
-## Moon phase influence
+Temporal accumulation for IBL
 
-Moon phase affects lighting, atmosphere, and reflections independently, each with its own toggle and strength slider:
+Configurable cloud lighting and volumetric light propagation
 
-* `MOON_PHASE_NIGHT_LIGHTING` + `MOON_PHASE_LIGHTING_STRENGTH` — scales night-time direct lighting contribution by moon phase
-* `MOON_PHASE_NIGHT_ATMOSPHERE` + `MOON_PHASE_ATMOSPHERE_STRENGTH` — scales atmospheric/sky brightness by moon phase
-* `MOON_PHASE_REFLECTIONS` + `MOON_PHASE_REFLECTIONS_STRENGTH` — scales moonlight's contribution to specular reflections by moon phase
+Multiple shadow paths, including PCF and screen-space shadow tracing
 
-Splitting these three into independently toggleable systems (rather than one blanket moon-phase multiplier) means, for example, moon-phase-driven reflections can be tuned or disabled without affecting ambient night lighting.
+Pixelated shadow controls, entity shadows, block-entity shadows, and cloud shadows
 
-## Distant blur
+SSAO and GTAO ambient occlusion
 
-One of two Depth of Field modes, selected via `DOF_MODE`: `DOF_MODE_OFF`, `DOF_MODE_DOF` (true depth of field), or `DOF_MODE_DISTANCE_BLUR`. Distance blur softens geometry past a threshold distance rather than focusing around a focal plane — controlled by `DISTANT_BLUR_INTENSITY` (0.00–1.00) and `DISTANCE_BLUR_START` (1–256 blocks), useful as a cheaper, less DOF-like distance-fade effect.
+Independent moon-phase influence for night lighting, atmosphere, and reflections
 
-## Fog smoothing
+Sky & Atmosphere
 
-`FOG_SMOOTHING` with `FOG_SMOOTHING_RADIUS` (0.5–10.0) — smooths transitions in fog density/color, reducing banding or hard edges where fog volume boundaries would otherwise be visually abrupt.
+Dynamic atmospheric scattering with configurable Rayleigh and Mie parameters
 
-## Everywhere Rain Puddles mode
+Biome/weather-aware atmospheric color controls
 
-When it rains rain puddles everywhere not actually a "puddle"
+Dynamic weather variation
 
-## GUI / settings organization
+Aurora effects
 
-The settings menu is organized into topic-grouped screens (Materials, Reflections, Lighting, Clouds, Rain, IBL, etc.) rather than one flat option list — this groups the options documented above (RTAO, IBL, handheld lighting, moon phase, DOF/distance blur, fog smoothing) under their relevant categories so they're discoverable without scrolling a single long list. *(Note: exact screen names/groupings are best confirmed in-game via Iris's shader options menu — I've verified the underlying settings exist and are extensive, but haven't independently audited the menu's screen-by-screen layout.)*
+Sun and moon rendering controls, including angular radius
 
-## Installation
+Stars and galaxy controls
 
-* Luster is built for [Iris](https://irisshaders.dev/download); OptiFine is not the target platform for this fork
-* Once Iris is installed, place the downloaded zip file in your `.minecraft/shaderpacks` folder
+Rainbows and End-specific sun effects
 
-### Downloads
-* [Latest commit](https://github.com/shashankpgowda/Luster/archive/refs/heads/main.zip)
+Crepuscular / god-ray lighting
 
-## Compatibility
+Clouds
 
-### GPU vendors
-* Nvidia
-* AMD
-* Intel
-* **Apple Metal (macOS)** — primary target platform for this fork, running through Iris on the OpenGL 4.1 compatibility profile
+Multiple cloud families can be mixed and tuned independently:
 
-### Shader loaders
-* Iris - version 1.5 and above
-* OptiFine is not actively supported by this fork
+Cumulus
 
-### Special mod support
-* [Distant Horizons](https://www.curseforge.com/minecraft/mc-mods/distant-horizons)
-* [Voxy](https://modrinth.com/mod/voxy)
+AltoCumulus
 
-## Acknowledgments
+Cumulus Congestus
 
-Luster is built on top of Photon Shaders by SixthSurge. All of Photon's original acknowledgments apply to the shared codebase:
+Cirrus / Cirrocumulus
 
-* Menu translations:
-  * [NakiriRuri](https://github.com/NakiriRuri) and [OrzMiku](https://github.com/Orzmiku) - Chinese Simplified (China; Mandarin)
-  * [ChunghwaMC](https://github.com/ChunghwaMC) - Chinese Traditional (Taiwan; Mandarin)
-  * [Jmayk](https://github.com/Jmayk-dev) - Italian
-  * [Timtaran](https://github.com/Timtaran) - Russian
-  * [shihyeon](https://github.com/shihyeon) - Korean
-  * [DVRKHz](https://github.com/DVRKHz) - Spanish
-  * [Patatagod69](https://github.com/PatataNL) - Dutch
-  * sincerity - Estonian
-* [Emin](https://github.com/EminGT) - Shadow bias method from [Complementary Reimagined](https://www.complementary.dev/shaders/)
-* [DrDesten](https://github.com/DrDesten) - Depth tolerance calculation for SSR/RTAO (credited inline in `raytracer.glsl`)
-* [Jessie](https://github.com/Jessie-LC) - f0 and f82 values for labPBR hardcoded metals
-* [Sledgehammer Games](https://www.sledgehammergames.com/) - Bloom downsampling method used in Call of Duty Advanced Warfare
-* http://momentsingrapics.de/ - Blue noise texture
-* [NASA Scientific Visualization Studio](https://svs.gsfc.nasa.gov/4851) - Galaxy image
+Noctilucent clouds
 
-## Community
+Optional Minecraft-style Blocky Clouds
 
-This is a personal fork maintained by [shashankpgowda](https://github.com/shashankpgowda). For questions or issues specific to this fork, please open an issue on this repository.
+Cloud rendering includes per-layer density, coverage, altitude, thickness, detail, wind, lighting, ambient steps, and other controls. Cloud rendering also has temporal upscaling up to 16× plus aerial-perspective and cloud-lighting controls.
 
-For the original Photon Shaders project, see [sixthsurge/photon](https://github.com/sixthsurge/photon) and their [Discord server](https://discord.gg/ngEW66HScd).
+Water & Materials
 
+Physically-inspired water absorption and scattering controls
+
+Water waves with configurable procedural displacement
+
+Water parallax options
+
+Water caustics
+
+Edge highlights
+
+Snell's window
+
+Biome-colored water
+
+Refraction
+
+Rain puddles, including an Everywhere mode
+
+Directional lightmaps
+
+Parallax Occlusion Mapping (POM)
+
+Subsurface scattering and sheen controls
+
+Porosity controls
+
+labPBR material support
+
+Anisotropic filtering options
+
+Reflections
+
+Environment reflections
+
+Sky reflections
+
+Screen-space reflections with configurable ray count and intersection/refinement steps
+
+Roughness-aware reflection support
+
+Separate reflection controls for water and other materials
+
+Fog & Volumetrics
+
+Overworld atmospheric fog
+
+Rayleigh and Mie scattering controls
+
+Rain, arid, snowy, taiga, jungle, and swamp atmospheric variants
+
+Fog smoothing
+
+Border and cave fog
+
+Bloomy fog
+
+Colored light shafts through air fog
+
+Water, Nether, and End volumetric fog paths
+
+Configurable volumetric light propagation
+
+Post-Processing
+
+TAA
+
+FXAA
+
+CAS sharpening
+
+Temporal upscaling (TAAU)
+
+Bloom
+
+Depth of field
+
+Distance blur
+
+Motion blur
+
+Vignette
+
+Purkinje shift
+
+Manual, simple, and histogram exposure modes
+
+Color grading controls for brightness, contrast, saturation, white balance, and color-channel adjustments
+
+Multiple tone-mapping operators, including ACES and AgX variants
+
+Optional dithered translucency fallback
+
+Profiles
+
+Luster includes five quality profiles:
+
+Profile
+
+Focus
+
+Low
+
+Reduced-cost rendering for lower-end hardware
+
+Medium
+
+Balanced quality and performance
+
+High
+
+Higher-quality shadows, reflections, clouds, AO, and lighting
+
+Ultra
+
+Maximum available quality and sampling
+
+Mac Compatible
+
+Conservative feature set intended for macOS / Apple Silicon
+
+The Mac Compatible profile intentionally disables some of the more hardware-intensive or platform-sensitive features while keeping the main lighting, atmosphere, water, reflection, shadow, cloud, and post-processing pipeline available.
+
+Compatibility
+
+Shader loader
+
+Iris — supported and recommended
+
+OptiFine — not supported by Luster
+
+Platforms
+
+Nvidia
+
+AMD
+
+Intel
+
+Apple Silicon / macOS through Iris' OpenGL compatibility path
+
+Mod support
+
+Distant Horizons
+
+Voxy
+
+Some features are conditional on the shader loader, Minecraft version, GPU, or selected profile. The in-game settings menu is the authoritative source for features available in a given configuration.
+
+Installation
+
+Install Iris for your Minecraft version.
+
+Download the latest Luster shader pack archive.
+
+Place the .zip in your .minecraft/shaderpacks folder.
+
+In Minecraft, open Video Settings → Shader Packs and select Luster.
+
+Start with the Mac Compatible, Medium, or High profile depending on your hardware and adjust individual settings from there.
+
+Latest download
+
+Download the latest Luster source archive
+
+Rendering notes
+
+Luster is intentionally modular and exposes many of its systems directly through the shader configuration menu. Several expensive features are optional and are not enabled by every profile.
+
+Notably, Luster does not currently advertise the removed RSM/indirect-lighting and ReSTIR spatial-reuse pipeline as an active feature. The current lighting stack instead centers on direct lighting, voxel-based colored light propagation, IBL, shadows, AO, reflections, and volumetric lighting.
+
+Configuration
+
+The main settings are organized into:
+
+World — weather, moon-phase influence, foliage, rain, snow, and world effects
+
+Lighting — colored lights, IBL, light sources, shadows, and AO
+
+Sky — atmosphere, clouds, stars, aurora, sun/moon, rainbows, and sky effects
+
+Fog — atmospheric scattering, volumetrics, fog smoothing, shafts, and biome variants
+
+Materials — PBR, POM, directional lightmaps, SSS, reflections, and refraction
+
+Water — waves, fog, caustics, refraction, edge effects, and rain puddles
+
+Post-Processing — exposure, AA, upscaling, bloom, DOF, motion blur, vignette, and color grading
+
+Misc — debugging and additional visual controls
+
+Mods — integration settings for supported mods
+
+Development
+
+Luster is actively developed as a shaderpack project. The source tree is organized into reusable modules under shaders/include/, with rendering programs under shaders/program/ and world-specific passes under the world* directories.
+
+Bug reports and implementation issues specific to Luster should be opened in the repository's issue tracker.
+
+Credits & Acknowledgements
+
+Luster contains substantially reworked shader code based on the Photon shader pack by SixthSurge. Original Photon credits and applicable licenses are retained in the project.
+
+Additional acknowledgements include:
+
+NakiriRuri and OrzMiku — Simplified Chinese menu translation
+
+ChunghwaMC — Traditional Chinese menu translation
+
+Jmayk — Italian menu translation
+
+Timtaran — Russian menu translation
+
+shihyeon — Korean menu translation
+
+DVRKHz — Spanish menu translation
+
+Patatagod69 — Dutch menu translation
+
+sincerity — Estonian menu translation
+
+Emin — Shadow bias method from Complementary Reimagined
+
+DrDesten — Depth tolerance calculation for SSR
+
+Jessie — f0 and f82 values for labPBR hardcoded metals
+
+Sledgehammer Games — Bloom downsampling method used in Call of Duty: Advanced Warfare
+
+momentsingraphics.de — Blue noise texture
+
+NASA Scientific Visualization Studio — Galaxy image
+
+Please see the included LICENSE files and in-tree attribution/license documents for applicable licensing information.
+
+Community
+
+Luster is a personal shaderpack project maintained by shashankpgowda.
+
+Luster repository: https://github.com/shashankpgowda/Luster
+
+Issues: https://github.com/shashankpgowda/Luster/issues
+
+Upstream Photon: https://github.com/sixthsurge/photon
+
+Photon Discord: https://discord.gg/ngEW66HScd
+
+<p align="center"><sub>Luster • Minecraft Shader Pack</sub></p>

@@ -57,13 +57,6 @@ uniform sampler2D colortex11; // clouds history
 uniform sampler2D colortex12; // clouds data
 uniform sampler2D colortex13; // rendered translucent layer
 
-#if defined RSM_GI && defined SHADOW && defined WORLD_OVERWORLD
-uniform sampler2D colortex1; // gbuffer 0 (albedo)
-#if defined RSM_GI_SPATIAL_REUSE
-uniform sampler2D colortex21; // reservoir-based spatial reuse output + receiver depth
-#else
-uniform sampler2D colortex17; // denoised RSM GI + receiver depth (quarter res)
-#endif
 #endif
 
 #ifdef SHADOW
@@ -324,85 +317,6 @@ void main() {
 
     fragment_color = texture(colortex0, refracted_uv * taau_render_scale).rgb;
 
-#if defined RSM_GI && defined SHADOW && defined WORLD_OVERWORLD
-    // RSM GI (reflective shadow maps): bilateral upsample from quarter
-    // resolution, then composite. Same insertion point and energy convention
-    // as the removed screen-space GI — irradiance * albedo / pi.
-    if (!is_sky && !back_is_hand) {
-        vec4 gbuffer_data_0 = texelFetch(colortex1, texel, 0);
-
-        mat4x2 gi_data = mat4x2(
-            unpack_unorm_2x8(gbuffer_data_0.x),
-            unpack_unorm_2x8(gbuffer_data_0.y),
-            unpack_unorm_2x8(gbuffer_data_0.z),
-            unpack_unorm_2x8(gbuffer_data_0.w)
-        );
-
-        vec3 albedo = vec3(gi_data[0], gi_data[1].x);
-
-        // Depth-aware 4-tap upsample, same scheme the deferred pass uses
-        // for ambient occlusion
-        const float rsm_gi_render_scale = 0.25;
-
-        vec2 gi_pos = gl_FragCoord.xy
-                * (rsm_gi_render_scale / taau_render_scale)
-            - 0.5;
-
-        ivec2 gi_i = ivec2(gi_pos);
-        vec2 gi_f = fract(gi_pos);
-
-        ivec2 gi_p10 = gi_i + ivec2(1, 0);
-        ivec2 gi_p01 = gi_i + ivec2(0, 1);
-        ivec2 gi_p11 = gi_i + ivec2(1, 1);
-
-#if defined RSM_GI_SPATIAL_REUSE
-        vec4 gi_00 = texelFetch(colortex21, gi_i, 0);
-        vec4 gi_10 = texelFetch(colortex21, gi_p10, 0);
-        vec4 gi_01 = texelFetch(colortex21, gi_p01, 0);
-        vec4 gi_11 = texelFetch(colortex21, gi_p11, 0);
-#else
-        vec4 gi_00 = texelFetch(colortex17, gi_i, 0);
-        vec4 gi_10 = texelFetch(colortex17, gi_p10, 0);
-        vec4 gi_01 = texelFetch(colortex17, gi_p01, 0);
-        vec4 gi_11 = texelFetch(colortex17, gi_p11, 0);
-#endif
-
-        float gi_lin_z = screen_to_view_space_depth(
-            gbufferProjectionInverse,
-            back_depth
-        );
-
-#define gi_depth_weight(gi_texel) \
-    exp2( \
-        -10.0 \
-            * abs( \
-                screen_to_view_space_depth( \
-                    gbufferProjectionInverse, \
-                    gi_texel.a \
-                ) \
-                - gi_lin_z \
-            ) \
-    )
-        float gi_w00 = gi_depth_weight(gi_00) * (1.0 - gi_f.x) * (1.0 - gi_f.y);
-        float gi_w10 = gi_depth_weight(gi_10) * (gi_f.x - gi_f.x * gi_f.y);
-        float gi_w01 = gi_depth_weight(gi_01) * (gi_f.y - gi_f.x * gi_f.y);
-        float gi_w11 = gi_depth_weight(gi_11) * (gi_f.x * gi_f.y);
-#undef gi_depth_weight
-
-        float gi_weight_sum = gi_w00 + gi_w10 + gi_w01 + gi_w11;
-
-        vec3 gi_irradiance;
-        if (abs(gi_weight_sum) > eps) {
-            gi_irradiance = gi_00.rgb * gi_w00 + gi_10.rgb * gi_w10
-                + gi_01.rgb * gi_w01 + gi_11.rgb * gi_w11;
-            gi_irradiance *= rcp(gi_weight_sum);
-        } else {
-            gi_irradiance = gi_00.rgb;
-        }
-
-        fragment_color += gi_irradiance * albedo * rcp(pi) * RSM_GI_INTENSITY;
-    }
-#endif
 
     vec3 original_color = fragment_color;
 

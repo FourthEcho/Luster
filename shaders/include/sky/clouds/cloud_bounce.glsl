@@ -2,7 +2,7 @@
 #define INCLUDE_SKY_CLOUDS_CLOUD_BOUNCE
 
 // Shared cloud multiple-scattering source used by all volumetric cloud layers.
-// Returns x = indirect celestial/ground source and y = indirect sky source.
+// Returns x = bounced celestial/ground source and y = bounced sky source.
 vec2 clouds_multiple_scattering_bounce(
     float extinction_coeff,
     float scattering_coeff,

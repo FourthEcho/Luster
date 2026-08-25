@@ -17,27 +17,14 @@ layout(location = 0) out vec4 shadowcolor0_out;
 layout(location = 0) out vec3 shadowcolor0_out;
 #endif
 
-#if defined RSM_GI && defined WORLD_OVERWORLD && defined SHADOW \
-    && !defined COLORWHEEL
-// RSM GI VPL data: .rgb = unscaled linear surface albedo,
-// .a = octahedrally packed world-space normal (written for opaque geometry
-// only; water is skipped so texels under water keep the terrain's data)
-layout(location = 1) out vec4 shadowcolor1_out;
-
-/* RENDERTARGETS: 0,1 */
-#else
 /* RENDERTARGETS: 0 */
-#endif
 
 in vec2 uv;
 
 flat in uint material_mask;
 flat in vec3 tint;
 
-#if defined RSM_GI && defined WORLD_OVERWORLD && defined SHADOW \
-    && !defined COLORWHEEL
-in vec3 rsm_normal;
-#endif
+
 
 #ifdef WATER_CAUSTICS
 in vec3 scene_pos;
@@ -190,16 +177,6 @@ void main() {
             = 0.25 * srgb_eotf_inv(shadowcolor0_out) * rec709_to_rec2020;
         shadowcolor0_out *= step(base_color.a, 1.0 - rcp(255.0));
 
-#if defined RSM_GI && defined WORLD_OVERWORLD && defined SHADOW \
-    && !defined COLORWHEEL
-        // RSM GI: linear albedo (unscaled, same space the deferred pipeline
-        // uses for albedo) + packed world normal. Fully opaque texels are the
-        // main VPL population, so unlike shadowcolor0 they are not zeroed.
-        shadowcolor1_out = vec4(
-            mix(vec3(1.0), base_color.rgb * tint, base_color.a),
-            pack_unorm_2x8(encode_unit_vector(normalize(rsm_normal)))
-        );
-#endif
     }
 #else
     vec4 base_color = textureLod(tex, uv, 0);

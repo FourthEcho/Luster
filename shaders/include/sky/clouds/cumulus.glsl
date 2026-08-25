@@ -194,7 +194,7 @@ vec2 clouds_cumulus_scattering(
             * (1.0 - 0.5 * clouds_params.l0_shadow);
         // Direct ground bounce is carried by the celestial-light channel;
         // sky bounce is carried by the environment channel. Both are true
-        // indirect radiance terms and are attenuated before reaching the cloud.
+        // bounced radiance terms and are attenuated before reaching the cloud.
         scattering.x += scatter_amount
             * isotropic_phase * bounced_light.x;
         scattering.y += scatter_amount

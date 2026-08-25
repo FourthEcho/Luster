@@ -246,8 +246,6 @@ void main() {
         = normalize(position_scene - gbufferModelViewInverse[3].xyz);
 
     // Shared stochastic offset used by cloud lighting.
-    // (The indirect-lighting path now runs as a separate deferred pass chain
-    // in program/gi/* and does its own dithering inside the bounce shaders.)
     float dither = texelFetch(noisetex, texel & 511, 0).b;
     dither = r1(frameCounter, dither);
 

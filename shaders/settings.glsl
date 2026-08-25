@@ -558,7 +558,7 @@ const float wetnessHalflife         = 70.0;
   #define DEBUG_VIEW_WEATHER   3
 
   #define DEBUG_VIEW DEBUG_VIEW_NONE // [DEBUG_VIEW_NONE DEBUG_VIEW_SAMPLER DEBUG_VIEW_HISTOGRAM DEBUG_VIEW_WEATHER]
-  #define DEBUG_SAMPLER colortex1 // [colortex1 colortex2 colortex3 colortex4 colortex5 colortex6 colortex7 colortex8 colortex9 colortex10 colortex11 colortex12 colortex13 colortex14 colortex15 depthtex0 depthtex1 depthtex2 shadowtex0 shadowtex1 shadowcolor0 shadowcolor1]
+  #define DEBUG_SAMPLER colortex1 // [colortex1 colortex2 colortex3 colortex4 colortex5 colortex6 colortex7 colortex8 colortex9 colortex10 colortex11 colortex12 colortex13 colortex14 colortex15 depthtex0 depthtex1 depthtex2 shadowtex0 shadowtex1 shadowcolor0]
 //#define WHITE_WORLD
 //#define TONEMAP_COMPARISON
   #define tonemap_left tonemap_lottes // [tonemap_aces_fit tonemap_aces_full tonemap_lottes tonemap_hejl_burgess tonemap_tech tonemap_uncharted_2 tonemap_ozius tonemap_reinhard tonemap_reinhard_jodie tonemap_agx tonemap_agx_golden tonemap_agx_punchy]
@@ -666,28 +666,6 @@ const float wetnessHalflife         = 70.0;
 
 
 
-// ---- Indirect Lighting ----
-// Single-bounce diffuse GI via reflective shadow maps (Dachsbacher &
-// Stamminger 2005). Every texel of the sun shadow map is treated as a
-// virtual point light (VPL); the bounce is gathered at quarter resolution,
-// accumulated temporally, denoised with one bilateral pass and composited
-// in c1_blend_layers. VPL data (albedo + world normal) is captured by the
-// existing shadow pass into shadowcolor1, so no extra scene pass is needed.
-// Replaces the removed screen-space multi-bounce GI
-// (bounce/accumulate/A-Trous SVGF filter).
-
-  #define RSM_GI
-  #define RSM_GI_SAMPLES 16 // [8 10 12 14 16 18 20 22 24]
-  #define RSM_GI_RADIUS 6.0 // [1.0 2.0 3.0 4.0 5.0 6.0 8.0 10.0 12.0 16.0 20.0 24.0 32.0]
-  #define RSM_GI_INTENSITY 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.20 1.50 2.00]
-  #define RSM_GI_MIN_DISTANCE 0.25 // [0.05 0.10 0.15 0.20 0.25 0.30 0.50 0.75 1.00 1.50 2.00 3.00]
-  #define RSM_GI_HISTORY 24 // [4 6 8 12 16 20 24 32 48 64]
-  #define RSM_GI_TEMPORAL_ACCUMULATION
-  #define RSM_GI_DENOISING
-  #define RSM_GI_SPATIAL_REUSE // Uses four precomputed spatial-reuse maps with live weighted reservoirs.
-#ifdef RSM_GI_SPATIAL_REUSE
-  // Iris boolean-option recognition: this option must be tested at least once.
-#endif
 
 // ---- Image Based Lighting (IBL) ----
 //#define IBL

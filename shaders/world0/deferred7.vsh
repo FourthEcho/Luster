@@ -1,5 +1,4 @@
 #version 400 compatibility
 #define WORLD_OVERWORLD
-#define PROGRAM_DEFERRED7
-#define vsh
-#include "/program/d7_rsm_gi_denoise.vsh"
+out vec2 uv;
+void main() { uv = gl_MultiTexCoord0.xy; gl_Position = vec4(gl_Vertex.xy * 2.0 - 1.0, 0.0, 1.0); }

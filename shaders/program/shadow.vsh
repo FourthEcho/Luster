@@ -16,13 +16,6 @@ out vec2 uv;
 flat out uint material_mask;
 flat out vec3 tint;
 
-#if defined RSM_GI && defined WORLD_OVERWORLD && defined SHADOW \
-    && !defined COLORWHEEL
-// RSM GI: world-space (scene-space) surface normal for the VPL data
-// captured into shadowcolor1. Same transform as get_tbn_matrix() in
-// gbuffers_all_solid.vsh.
-out vec3 rsm_normal;
-#endif
 
 #ifdef WATER_CAUSTICS
 out vec3 scene_pos;
@@ -94,11 +87,6 @@ void main() {
     material_mask = uint(mc_Entity.x - 10000.0);
     tint = gl_Color.rgb;
 
-#if defined RSM_GI && defined WORLD_OVERWORLD && defined SHADOW \
-    && !defined COLORWHEEL
-    rsm_normal = mat3(gbufferModelViewInverse)
-        * normalize(gl_NormalMatrix * gl_Normal);
-#endif
 
 #if defined COLORED_LIGHTS && !defined PROGRAM_SHADOW_ENTITIES
     update_voxel_map(material_mask);

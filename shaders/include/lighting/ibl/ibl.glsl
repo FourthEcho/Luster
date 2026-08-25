@@ -187,8 +187,8 @@ vec3 ibl_multiple_scatter_ggx(
     return Fms * Ems * irradiance;
 }
 
-// Raw diffuse environment irradiance used by indirect-lighting sky misses.
-// This is deliberately separate from material IBL so the GI path can replace
+// Raw diffuse environment irradiance used by sky misses.
+// This is deliberately separate from material IBL
 // the old SH-skylight input without applying an albedo/BRDF term twice.
 vec3 get_ibl_sky_irradiance(
     vec3 normal,

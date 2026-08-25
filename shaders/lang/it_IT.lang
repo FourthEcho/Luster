@@ -1205,7 +1205,6 @@ value.DEBUG_SAMPLER.depthtex2=depthtex2
 value.DEBUG_SAMPLER.shadowtex0=shadowtex0
 value.DEBUG_SAMPLER.shadowtex1=shadowtex1
 value.DEBUG_SAMPLER.shadowcolor0=shadowcolor0
-value.DEBUG_SAMPLER.shadowcolor1=shadowcolor1
 Replaces flat nether fog with drifting, patchy volumetric smoke
 Controls nether smoke intensity.
 Controls the strength of the color tinting applied to light shafts
@@ -1217,25 +1216,5 @@ value.COLORED_LIGHTS_FALLOFF.COLORED_LIGHTS_FALLOFF_LINEAR = Linear
 option.IMAGE_SHARPENING_INTENSITY = Image Sharpening
 option.IMAGE_SHARPENING_INTENSITY.comment = Controls final edge-aware image sharpening strength.
 
-# ---- RSM GI (reflective shadow maps) ----
 
-screen.indirect_lighting                    = Indirect Lighting
-option.RSM_GI                            = Indirect Lighting
-option.RSM_GI.comment                    = Master switch for the RSM indirect-lighting pipeline. It gates sunlight bounce GI and all of its temporal, denoising, and spatial-reuse stages. Requires shadows.
-option.RSM_GI_SAMPLES                    = GI Samples
-option.RSM_GI_SAMPLES.comment            = Virtual point light samples gathered per pixel each frame. Higher = less noise but slower. Quality is dominated by history length, so keep this modest.
-option.RSM_GI_RADIUS                     = GI Radius
-option.RSM_GI_RADIUS.comment             = Radius of the VPL sample disk around the receiver, in blocks. Larger = wider bounce spread but more light leaking through walls. Keep it modest indoors.
-option.RSM_GI_INTENSITY                  = GI Intensity
-option.RSM_GI_INTENSITY.comment          = Brightness multiplier for the bounce lighting.
-option.RSM_GI_MIN_DISTANCE               = GI Min Distance
-option.RSM_GI_MIN_DISTANCE.comment       = Clamps the 1/d^4 falloff so that virtual point lights very close to a receiver do not blow up. Raise it if you see hot spots.
-option.RSM_GI_HISTORY                    = GI History Length
-option.RSM_GI_HISTORY.comment            = Number of frames the temporal accumulation blends over. Longer = cleaner and nearly free, but reacts more slowly to lighting changes.
 
-option.RSM_GI_TEMPORAL_ACCUMULATION         = Temporal Accumulation
-option.RSM_GI_TEMPORAL_ACCUMULATION.comment   = Reprojects the quarter-resolution RSM GI into persistent history and blends frames to reduce sampling noise. Disable for raw per-frame GI.
-option.RSM_GI_DENOISING                     = GI Denoise
-option.RSM_GI_DENOISING.comment             = Runs the depth/normal-aware bilateral GI filter after temporal accumulation (or directly on raw GI when temporal accumulation is disabled).
-option.RSM_GI_SPATIAL_REUSE                 = Spatial Reuse
-option.RSM_GI_SPATIAL_REUSE.comment         = Uses precomputed spatial-reuse maps to select nearby reservoirs, then combines them with live weighted reservoir reuse.
