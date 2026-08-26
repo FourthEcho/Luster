@@ -172,12 +172,7 @@ vec3 get_sky_lighting(
 
     lighting += skylight * get_skylight_falloff(light_levels.y);
 #elif !defined IBL
-    // Baked ambient_color skylight. When IBL is enabled this is replaced by
-    // get_ibl_diffuse's dynamic sky-map irradiance (wired in from
-    // d4_deferred_shading.fsh) instead of being added on top of it - the two
-    // were previously additive, which is why enabling IBL barely changed the
-    // final image (ambient_color dominated) while still paying for the VNDF
-    // sampling loop and its noise.
+    // Baked ambient_color skylight (IBL off).
     vec3 skylight = ambient_color * ao;
     vec3 skylight_up = skylight;
 
@@ -186,12 +181,18 @@ vec3 get_sky_lighting(
 
     lighting += skylight * get_skylight_falloff(light_levels.y);
 #else
-    // IBL diffuse (get_ibl_diffuse) supplies this surface's sky irradiance
-    // instead. Ambient SSS still needs some contribution here since IBL
-    // doesn't model subsurface scattering - keep a reduced sss-only term.
-    vec3 skylight_up = vec3(dot(ambient_color, luminance_weights)) * ao;
-    lighting += ambient_sss * skylight_up * material.sss_amount * 2.0
-        * get_skylight_falloff(light_levels.y);
+    // IBL is now contributive (additive), not replacive: keep the baked
+    // ambient term and add get_ibl_diffuse/specular from
+    // d4_deferred_shading.fsh:576 on top. Preserves baseline skylight
+    // contrast in caves/shade and avoids washout/flat look from full
+    // replacement; tune IBL_DIFFUSE_INTENSITY/SPECULAR_INTENSITY to balance.
+    vec3 skylight = ambient_color * ao;
+    vec3 skylight_up = skylight;
+
+    skylight = mix(skylight, 0.5 * skylight_up * ao, material.sss_amount);
+    skylight += ambient_sss * skylight_up * material.sss_amount * 2.0;
+
+    lighting += skylight * get_skylight_falloff(light_levels.y);
 #endif
 
     return lighting;
