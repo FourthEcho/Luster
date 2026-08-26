@@ -47,13 +47,4 @@ const bool colortex16Clear = true;
 const vec4 colortex16ClearColor = vec4(0.0, 0.0, 0.0, 0.0);
 #endif
 
-
-#ifdef IBL_TEMPORAL_ACCUMULATION
-// Persistent IBL diffuse history — full-res RGBA16F, not cleared.
-// Stores previous-frame diffuse irradiance to allow temporal EMA
-// without resampling from scratch. Full res so no scaling needed;
-// reuses existing full-res history sampling (like colortex5).
-const int colortex20Format = RGBA16F;
-const bool colortex20Clear  = false;
-#endif
 */
