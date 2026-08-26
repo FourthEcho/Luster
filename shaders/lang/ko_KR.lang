@@ -1049,8 +1049,6 @@ option.MOON_PHASE_REFLECTIONS_CONTRAST.comment = Toggles reflections contrast.
 option.MOON_PHASE_REFLECTIONS_SATURATION=Reflections Saturation
 option.MOON_PHASE_REFLECTIONS_SATURATION.comment = Toggles reflections saturation.
 option.IBL=Image Based Lighting
-option.IBL_TEMPORAL_ACCUMULATION=IBL Temporal Accumulation
-option.IBL_TEMPORAL_ACCUMULATION.comment=Accumulate diffuse irradiance samples over multiple frames using reprojected history instead of resampling from scratch each frame. Greatly reduces noise with no loss of sky detail, at the cost of brief lag when lighting changes suddenly or on disocclusion.
 option.IBL.comment = Enable image-based lighting using a precomputed split-sum approximation. Adds diffuse irradiance and prefiltered specular reflections sampled from the live sky map. Costs ~12ms/frame on M1.
 option.IBL_DIFFUSE_SAMPLES=IBL Diffuse Samples
 option.IBL_DIFFUSE_SAMPLES.comment = Sample count for the diffuse irradiance precompute. Higher = less noise, lower performance.
@@ -1128,9 +1126,6 @@ option.END_SUN_EFFECT_INTENSITY=End Sun Effect Intensity
 option.END_SUN_EFFECT_INTENSITY.comment = Controls end sun effect intensity.
 option.SKY_GROUND_INTENSITY=Sky Ground Intensity
 option.SKY_GROUND_INTENSITY.comment = Controls sky ground intensity.
-value.tonemap_agx=AGX
-value.tonemap_agx_golden=AGX Golden
-value.tonemap_agx_punchy=AGX Punchy
 value.ANISOTROPIC_FILTERING_MODE.ANISOTROPIC_FILTERING_OFF=Off
 value.ANISOTROPIC_FILTERING_MODE.ANISOTROPIC_FILTERING_2=2x
 value.ANISOTROPIC_FILTERING_MODE.ANISOTROPIC_FILTERING_4=4x
@@ -1182,6 +1177,5 @@ value.COLORED_LIGHTS_FALLOFF.COLORED_LIGHTS_FALLOFF_SQUARED = Squared
 value.COLORED_LIGHTS_FALLOFF.COLORED_LIGHTS_FALLOFF_LINEAR = Linear
 option.IMAGE_SHARPENING_INTENSITY = Image Sharpening
 option.IMAGE_SHARPENING_INTENSITY.comment = Controls final edge-aware image sharpening strength.
-
 
 

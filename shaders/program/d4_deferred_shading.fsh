@@ -13,22 +13,11 @@
 
 layout(location = 0) out vec3 fragment_color;
 
-#ifdef IBL_TEMPORAL_ACCUMULATION
-#ifdef USE_SEPARATE_ENTITY_DRAWS
-layout(location = 1) out vec4 ibl_history_out;
-/* RENDERTARGETS: 0,20 */
-#else
-layout(location = 1) out vec4 colortex3_clear;
-layout(location = 2) out vec4 ibl_history_out;
-/* RENDERTARGETS: 0,3,20 */
-#endif
-#else
 #ifdef USE_SEPARATE_ENTITY_DRAWS
 /* RENDERTARGETS: 0 */
 #else
 layout(location = 1) out vec4 colortex3_clear;
 /* RENDERTARGETS: 0,3 */
-#endif
 #endif
 
 in vec2 uv;
@@ -63,10 +52,6 @@ uniform sampler2D colortex7; // previous frame fog scattering
 uniform sampler2D colortex11; // clouds history
 uniform sampler2D colortex12; // clouds data
 uniform sampler2D colortex14; // ambient lighting history data
-
-#ifdef IBL_TEMPORAL_ACCUMULATION
-uniform sampler2D colortex20; // IBL diffuse history (quarter res, persistent)
-#endif
 
 #ifndef USE_SEPARATE_ENTITY_DRAWS
 uniform sampler2D colortex3; // OF damage overlay, armor glint
@@ -592,18 +577,7 @@ void main() {
         // Dynamic environment lighting. The sky map is already generated at
         // frame resolution for the current atmosphere/cloud state, so IBL is
         // evaluated directly from it rather than using a stale offline map.
-        //
-        // IBL_TEMPORAL_ACCUMULATION: when on, we keep a persistent full-res
-        // history buffer (colortex20) and EMA-blend the current diffuse
-        // irradiance with reprojected history. This is the user-requested
-        // "persistent temporal buffer for IBL" — reuses existing colortex
-        // infrastructure without degrading quality (full res, RGBA16F).
-        // When disabled, dither is static per-pixel so raw noise is visible.
-#ifdef IBL_TEMPORAL_ACCUMULATION
-        vec2 ibl_dither = hash2(vec3(vec2(texel), float(frameCounter)));
-#else
         vec2 ibl_dither = hash2(vec3(vec2(texel), 0.0));
-#endif
         vec3 ibl_current = get_image_based_lighting(
             material,
             normal,
@@ -612,17 +586,7 @@ void main() {
             clamp01(light_levels.y),
             ibl_dither
         );
-#ifdef IBL_TEMPORAL_ACCUMULATION
-        // Persistent history — sample previous frame at same UV (full-res)
-        // and EMA-blend. Disocclusion: sky/hand or first frames -> no history.
-        vec3 ibl_history = texture(colortex20, uv).rgb;
-        float ibl_history_weight = (depth >= 1.0 || depth < hand_depth || frameCounter < 3) ? 0.0 : 0.85;
-        vec3 ibl_final = mix(ibl_current, ibl_history, ibl_history_weight);
-        fragment_color += ibl_final;
-        ibl_history_out = vec4(ibl_final, 1.0);
-#else
         fragment_color += ibl_current;
-#endif
 #endif
 
         // Specular highlight
