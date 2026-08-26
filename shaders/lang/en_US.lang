@@ -267,6 +267,8 @@ option.BLOCKLIGHT_B                    = §9▍ §fBlue
 option.BLOCKLIGHT_B.comment = Controls the ▍ blue color channel.
 option.BLOCKLIGHT_I                    = Blocklight Intensity
 option.BLOCKLIGHT_I.comment = Controls blocklight intensity.
+option.CAVE_LIGHTING_I                  = Cave Brightness
+option.CAVE_LIGHTING_I.comment = Controls underground cave ambient brightness.
 
 option.VOXEL_VOLUME_SIZE                                            = Voxel Volume Size
 option.VOXEL_VOLUME_SIZE.comment                                    = Adjusts the size of the volume in which colored lighting is calculated. High performance impact, also affected by shadow distance
@@ -1013,6 +1015,7 @@ option.NOISE_ON_DH_TERRAIN.comment = Controls noise on dh terrain.
 
 
 screen.ibl=Image Based Lighting
+screen.indirect_lighting=Indirect Lighting
 screen.aa=Anti-Aliasing
 screen.motion_blur=Motion Blur
 screen.dof=Depth of field
@@ -1060,6 +1063,15 @@ option.IBL_SPECULAR_SAMPLES=IBL Specular Samples
 option.IBL_SPECULAR_SAMPLES.comment=Sample count for the prefiltered specular panorama. Higher = less noise, lower performance.
 option.IBL_SPECULAR_INTENSITY=IBL Specular Intensity
 option.IBL_SPECULAR_INTENSITY.comment=Brightness multiplier for the specular IBL contribution.
+
+option.RSM_GI=Reflective Shadow Map GI
+option.RSM_GI.comment=Enable single-bounce indirect lighting using a Reflective Shadow Map. Gathers bounced light and color from sunlit surfaces near each shaded pixel, using the existing shadow map as the light source. No compute shaders required.
+option.RSM_GI_SAMPLES=RSM Samples
+option.RSM_GI_SAMPLES.comment=Number of shadow map taps per pixel when gathering bounced light. Higher = smoother, less noisy GI, lower performance.
+option.RSM_GI_RADIUS=RSM Radius
+option.RSM_GI_RADIUS.comment=Maximum gather radius, in blocks, for collecting bounced light around each pixel.
+option.RSM_GI_INTENSITY=RSM Intensity
+option.RSM_GI_INTENSITY.comment=Brightness multiplier for the RSM indirect bounce contribution.
 
 option.FOG_SMOOTHING=Fog Smoothing
 option.FOG_SMOOTHING.comment = Controls fog smoothing.

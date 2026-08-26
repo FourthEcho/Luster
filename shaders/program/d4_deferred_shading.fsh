@@ -87,6 +87,10 @@ uniform sampler2DShadow shadowtex1;
 #ifdef SHADOW_COLOR
 uniform sampler2D shadowcolor0;
 #endif
+
+#ifdef RSM_GI
+uniform sampler2D shadowcolor1;
+#endif
 #endif
 #endif
 
@@ -161,6 +165,9 @@ const bool colortex11MipmapEnabled = true;
 #include "/include/lighting/diffuse_lighting.glsl"
 #include "/include/lighting/shadows/common.glsl"
 #include "/include/lighting/shadows/pcss.glsl"
+#if defined RSM_GI && defined SHADOW && !defined WORLD_NETHER
+#include "/include/lighting/gi/rsm.glsl"
+#endif
 #include "/include/lighting/shadows/ssrt.glsl"
 #include "/include/lighting/specular_lighting.glsl"
 #include "/include/misc/lod_mod_support.glsl"
@@ -587,6 +594,30 @@ void main() {
             ibl_dither
         );
         fragment_color += ibl_current;
+#endif
+
+#if defined RSM_GI && defined SHADOW && !defined WORLD_NETHER
+        {
+            float rsm_dither = texelFetch(noisetex, texel & 511, 0).b;
+            rsm_dither = r1(frameCounter, rsm_dither);
+
+            vec3 rsm_gi = get_rsm_gi(
+                position_scene,
+                normal,
+                clamp01(light_levels.y),
+                rsm_dither
+            );
+
+            rsm_gi *= material.albedo * light_color
+                * (rcp_pi * RSM_GI_INTENSITY * ao)
+                * mix(1.0, metal_diffuse_amount, float(material.is_metal));
+
+#ifdef CLOUD_SHADOWS
+            rsm_gi *= cloud_shadows;
+#endif
+
+            fragment_color += rsm_gi;
+        }
 #endif
 
         // Specular highlight

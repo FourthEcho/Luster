@@ -247,6 +247,16 @@ vec3 get_diffuse_lighting(
         * (1.0 - 0.5 * material.sss_amount)
     );
 
+    // Cheap legacy bounced-light fallback. RSM GI replaces this term when
+    // enabled, so the two indirect-lighting systems never stack.
+    vec3 bounced = vec3(0.0);
+#ifndef RSM_GI
+    bounced = 0.033 * (1.0 - shadows)
+        * (1.0 - 0.1 * max0(normal.y))
+        * pow1d5(ao + eps)
+        * pow4(light_levels.y);
+#endif
+
     vec3 sss = sss_approx(
                    material.albedo,
                    material.sss_amount,
@@ -270,10 +280,10 @@ vec3 get_diffuse_lighting(
 
 #ifdef SHADOW_VPS
     // Add SSS and diffuse
-    lighting += diffuse * shadows + sss;
+    lighting += diffuse * shadows + bounced + sss;
 #else
     // Blend SSS and diffuse
-    lighting += mix(diffuse, sss, material.sss_amount) * shadows;
+    lighting += mix(diffuse, sss, material.sss_amount) * shadows + bounced;
 #endif
 #else
     // Simple shading for when shadows are disabled
@@ -331,6 +341,12 @@ vec3 get_diffuse_lighting(
     lighting += material.emission * emission_scale;
 
 #if defined WORLD_OVERWORLD
+    // Cave lighting: preserve a subtle underground ambient fill even when
+    // skylight is zero. This matches the reference cave-lighting behavior
+    // while remaining independent of RSM and the bounced-light fallback.
+    lighting += 0.15 * CAVE_LIGHTING_I * directional_lighting * ao
+        * (1.0 - light_levels.y * light_levels.y)
+        * (1.0 - 0.7 * darknessFactor);
     lighting += nightVision * night_vision_scale * directional_lighting * ao;
 #endif
 

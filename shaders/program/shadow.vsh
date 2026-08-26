@@ -16,6 +16,9 @@ out vec2 uv;
 flat out uint material_mask;
 flat out vec3 tint;
 
+#ifdef RSM_GI
+flat out vec3 rsm_vpl_normal;
+#endif
 
 #ifdef WATER_CAUSTICS
 out vec3 scene_pos;
@@ -86,6 +89,17 @@ void main() {
     uv = gl_MultiTexCoord0.xy;
     material_mask = uint(mc_Entity.x - 10000.0);
     tint = gl_Color.rgb;
+
+#ifdef RSM_GI
+    // NOTE: must un-project with shadowModelViewInverse here, not
+    // gbufferModelViewInverse -- gl_NormalMatrix in this program is derived
+    // from the shadow-space modelview matrix, so mixing it with the gbuffer
+    // inverse scrambles every VPL normal that isn't axis-aligned with the
+    // camera/light directions (this bit us before, keep it this way).
+    rsm_vpl_normal = normalize(
+        mat3(shadowModelViewInverse) * (gl_NormalMatrix * gl_Normal)
+    );
+#endif
 
 
 #if defined COLORED_LIGHTS && !defined PROGRAM_SHADOW_ENTITIES
