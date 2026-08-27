@@ -150,34 +150,34 @@ option.SSS_INTENSITY.comment           = Adjusts the brightness of subsurface sc
 option.SHADING_STRENGTH                = Shading Strength
 option.SHADING_STRENGTH.comment        = Adjusts the contrast of direct light shading. Reducing this option makes faces facing away from the sun that aren't in shadow brighter; increasing it makes them darker
 
-option.SHADOW                          = Shadow Mapping
-option.SHADOW.comment = Toggles shadow mapping.
-option.SHADOW_PCF                      = Shadow Map Filtering
-option.SHADOW_PCF.comment = Toggles shadow map filtering.
-option.SHADOW_SSRT                     = SSRT Distant Shadows
-option.SHADOW_SSRT.comment = Toggles ssrt distant shadows.
-option.SHADOW_SSRT_STEPS               = SSRT Shadow Steps
-option.SHADOW_SSRT_STEPS.comment = Toggles ssrt shadow steps.
+option.SHADOW                          = Shadows
+option.SHADOW.comment = Enables shadows cast by the sun and moon onto the world. Disable for maximum performance — no shadows will be rendered.
+option.SHADOW_PCF                      = Shadow Smoothing
+option.SHADOW_PCF.comment = Softens shadow edges using percentage-closer filtering. When enabled, shadows look smoother and less pixelated.
+option.SHADOW_SSRT                     = Distant Shadows
+option.SHADOW_SSRT.comment = Extends shadows beyond the shadow map distance using screen-space ray tracing. Fills in far shadows without increasing shadow map size. Moderate performance cost.
+option.SHADOW_SSRT_STEPS               = Distant Shadow Quality
+option.SHADOW_SSRT_STEPS.comment = Adjusts the number of ray steps for screen-space distant shadows. Higher = more accurate, less noisy far shadows at higher GPU cost.
 option.SHADOW_COLOR                    = Colored Shadows
 option.SHADOW_COLOR.comment            = Translucent blocks cast tinted shadows
 option.SHADOW_VPS                      = Variable Penumbra Shadows
 option.SHADOW_VPS.comment              = Shadows grow softer further from their caster
 option.shadowMapResolution             = Shadow Resolution
-option.shadowMapResolution.comment = Controls shadow resolution.
+option.shadowMapResolution.comment = Adjusts the size of the shadow map texture. Higher = sharper, more detailed shadows at higher VRAM and GPU cost.
 option.shadowDistance                  = Shadow Distance
-option.shadowDistance.comment = Selects the shadow distance mode or method.
-option.sunPathRotation                 = Sun Path Rotation
-option.sunPathRotation.comment = Controls sun path rotation.
+option.shadowDistance.comment = Maximum distance shadows are rendered, in blocks. Higher values show shadows farther away but reduce detail per block and increase cost.
+option.sunPathRotation                 = Sun Path Tilt
+option.sunPathRotation.comment = Tilts the sun and moon path across the sky in degrees. Negative values tilt south. Affects time-of-day lighting direction.
 option.SHADOW_PENUMBRA_SCALE           = Shadow Softness
-option.SHADOW_PENUMBRA_SCALE.comment   = Adjust the softness of shadows
+option.SHADOW_PENUMBRA_SCALE.comment   = Scales the overall softness of all shadows. Lower = sharper hard shadows, higher = larger, softer penumbras.
 option.ENTITY_SHADOWS                  = Entity Shadows
-option.ENTITY_SHADOWS.comment          = Whether entities can cast shadows.\nDisable this to improve performance in survival bases with large farms
+option.ENTITY_SHADOWS.comment          = When enabled, living entities and dropped items cast shadows.\nDisable to improve performance in survival bases with large farms.
 option.BLOCK_ENTITY_SHADOWS            = Block Entity Shadows
-option.BLOCK_ENTITY_SHADOWS.comment = Controls block entity shadows.
+option.BLOCK_ENTITY_SHADOWS.comment = When enabled, chests, signs, banners and other block entities cast shadows. Lower cost than full entity shadows.
 option.PIXELATED_SHADOWS               = Pixelated Shadows
-option.PIXELATED_SHADOWS.comment       = Shadows snap to block texels, creating a pixelated look
-option.PIXELATED_SHADOWS_RESOLUTION    = Pixelated Shadows Resolution
-option.PIXELATED_SHADOWS_RESOLUTION.comment = Controls pixelated shadows resolution.
+option.PIXELATED_SHADOWS.comment       = Shadows snap to the block texel grid, creating a retro pixelated look. For stylistic screenshots.
+option.PIXELATED_SHADOWS_RESOLUTION    = Pixel Size
+option.PIXELATED_SHADOWS_RESOLUTION.comment = Adjusts the texel grid size for pixelated shadows. Lower = chunkier, more blocky pixels.
 option.SSS_STEPS                       = SSS Steps 
 option.SSS_STEPS.comment               = Increase to reduce noise on foliage and other materials with SSS, at the cost of performance.
 
@@ -201,74 +201,74 @@ option.GTAO_SLICES.comment             = Controls how noisy the GTAO appears
 option.GTAO_HORIZON_STEPS              = GTAO Horizon Steps
 option.GTAO_HORIZON_STEPS.comment      = Controls the accuracy of GTAO. A higher step count also increase the intensity of the effect
 
-option.SUN_NR                          = §c▍ §fRed
-option.SUN_NR.comment = Toggles ▍ red.
-option.SUN_NG                          = §a▍ §fGreen
-option.SUN_NG.comment = Toggles ▍ green.
-option.SUN_NB                          = §9▍ §fBlue
-option.SUN_NB.comment = Toggles ▍ blue.
-option.SUN_MR                          = §c▍ §fRed
-option.SUN_MR.comment = Toggles ▍ red.
-option.SUN_MG                          = §a▍ §fGreen
-option.SUN_MG.comment = Toggles ▍ green.
-option.SUN_MB                          = §9▍ §fBlue
-option.SUN_MB.comment = Toggles ▍ blue.
-option.SUN_ER                          = §c▍ §fRed
-option.SUN_ER.comment = Toggles ▍ red.
-option.SUN_EG                          = §a▍ §fGreen
-option.SUN_EG.comment = Toggles ▍ green.
-option.SUN_EB                          = §9▍ §fBlue
-option.SUN_EB.comment = Toggles ▍ blue.
+option.SUN_NR                          = §c▍ §fRed — Noon
+option.SUN_NR.comment = Adjusts the red tint of sunlight at noon. Higher = warmer midday sun.
+option.SUN_NG                          = §a▍ §fGreen — Noon
+option.SUN_NG.comment = Adjusts the green tint of sunlight at noon. Higher = less pink, more neutral daylight.
+option.SUN_NB                          = §9▍ §fBlue — Noon
+option.SUN_NB.comment = Adjusts the blue tint of sunlight at noon. Higher = cooler, more bluish midday light.
+option.SUN_MR                          = §c▍ §fRed — Morning
+option.SUN_MR.comment = Adjusts the red tint of sunlight at sunrise. Higher = warmer, redder dawn light.
+option.SUN_MG                          = §a▍ §fGreen — Morning
+option.SUN_MG.comment = Adjusts the green tint of sunlight at sunrise. Affects the balance between orange and yellow dawn.
+option.SUN_MB                          = §9▍ §fBlue — Morning
+option.SUN_MB.comment = Adjusts the blue tint of sunlight at sunrise. Higher = less orange, more neutral morning.
+option.SUN_ER                          = §c▍ §fRed — Evening
+option.SUN_ER.comment = Adjusts the red tint of sunlight at sunset. Higher = warmer, redder dusk light.
+option.SUN_EG                          = §a▍ §fGreen — Evening
+option.SUN_EG.comment = Adjusts the green tint of sunlight at sunset. Affects the balance between orange and yellow dusk.
+option.SUN_EB                          = §9▍ §fBlue — Evening
+option.SUN_EB.comment = Adjusts the blue tint of sunlight at sunset. Higher = cooler, less orange evening light.
 option.SUN_I                           = Sunlight Intensity
-option.SUN_I.comment = Toggles sunlight intensity.
-option.MOON_R                          = §c▍ §fRed
-option.MOON_R.comment = Controls the ▍ red color channel.
-option.MOON_G                          = §a▍ §fGreen
-option.MOON_G.comment = Controls the ▍ green color channel.
-option.MOON_B                          = §9▍ §fBlue
-option.MOON_B.comment = Controls the ▍ blue color channel.
+option.SUN_I.comment = Adjusts the overall brightness of direct sunlight. Higher = brighter sun, stronger highlights and shadows.
+option.MOON_R                          = §c▍ §fRed — Moonlight
+option.MOON_R.comment = Adjusts the red tint of moonlight. Higher = warmer night light.
+option.MOON_G                          = §a▍ §fGreen — Moonlight
+option.MOON_G.comment = Adjusts the green tint of moonlight. Affects the coolness of night lighting.
+option.MOON_B                          = §9▍ §fBlue — Moonlight
+option.MOON_B.comment = Adjusts the blue tint of moonlight. Higher = cooler, more bluish nights.
 option.MOON_I                          = Moonlight Intensity
-option.MOON_I.comment = Toggles moonlight intensity.
+option.MOON_I.comment = Adjusts the overall brightness of moonlight. Higher = brighter nights, more visible shadows at night.
 option.LIGHTNING_FLASH                 = Lightning Flash
 option.LIGHTNING_FLASH.comment = Controls lightning flash.
 option.NETHER_USE_BIOME_COLOR          = Use Biome Color
-option.NETHER_USE_BIOME_COLOR.comment = Controls use biome color.
-option.NETHER_I                        = Ambient Intensity
-option.NETHER_I.comment = Controls ambient intensity.
-option.NETHER_S                        = Ambient Saturation
-option.NETHER_S.comment = Controls ambient saturation.
-option.NETHER_R                        = §c▍ §fRed
-option.NETHER_R.comment = Controls the ▍ red color channel.
-option.NETHER_G                        = §a▍ §fGreen
-option.NETHER_G.comment = Controls the ▍ green color channel.
-option.NETHER_B                        = §9▍ §fBlue
-option.NETHER_B.comment = Controls the ▍ blue color channel.
-option.END_LIGHT_R                     = §c▍ §fRed
-option.END_LIGHT_R.comment = Controls the ▍ red color channel.
-option.END_LIGHT_G                     = §a▍ §fGreen
-option.END_LIGHT_G.comment = Controls the ▍ green color channel.
-option.END_LIGHT_B                     = §9▍ §fBlue
-option.END_LIGHT_B.comment = Controls the ▍ blue color channel.
-option.END_LIGHT_I                     = Light Intensity
-option.END_LIGHT_I.comment = Controls light intensity.
-option.END_AMBIENT_R                   = §c▍ §fRed
-option.END_AMBIENT_R.comment = Controls the ▍ red color channel.
-option.END_AMBIENT_G                   = §a▍ §fGreen
-option.END_AMBIENT_G.comment = Controls the ▍ green color channel.
-option.END_AMBIENT_B                   = §9▍ §fBlue
-option.END_AMBIENT_B.comment = Controls the ▍ blue color channel.
-option.END_AMBIENT_I                   = Ambient Intensity
-option.END_AMBIENT_I.comment = Controls ambient intensity.
-option.BLOCKLIGHT_R                    = §c▍ §fRed
-option.BLOCKLIGHT_R.comment = Controls the ▍ red color channel.
-option.BLOCKLIGHT_G                    = §a▍ §fGreen
-option.BLOCKLIGHT_G.comment = Controls the ▍ green color channel.
-option.BLOCKLIGHT_B                    = §9▍ §fBlue
-option.BLOCKLIGHT_B.comment = Controls the ▍ blue color channel.
-option.BLOCKLIGHT_I                    = Blocklight Intensity
-option.BLOCKLIGHT_I.comment = Controls blocklight intensity.
-option.CAVE_LIGHTING_I                  = Cave Brightness
-option.CAVE_LIGHTING_I.comment = Controls underground cave ambient brightness.
+option.NETHER_USE_BIOME_COLOR.comment = When enabled, Nether fog and ambient color adapts to the current biome. When disabled, uses the static color below.
+option.NETHER_I                        = Nether Fog Intensity
+option.NETHER_I.comment = Adjusts the overall brightness of Nether fog and ambient light. Higher = brighter, more washed-out Nether.
+option.NETHER_S                        = Nether Fog Saturation
+option.NETHER_S.comment = Adjusts the color vividness of Nether fog. Higher = more saturated orange/red, lower = more grey.
+option.NETHER_R                        = §c▍ §fRed — Nether
+option.NETHER_R.comment = Adjusts the red tint of the static Nether ambient color (when Use Biome Color is off).
+option.NETHER_G                        = §a▍ §fGreen — Nether
+option.NETHER_G.comment = Adjusts the green tint of the static Nether ambient color. Affects the orange-to-yellow balance.
+option.NETHER_B                        = §9▍ §fBlue — Nether
+option.NETHER_B.comment = Adjusts the blue tint of the static Nether ambient color. Higher = more purple/cooler Nether.
+option.END_LIGHT_R                     = §c▍ §fRed — End Light
+option.END_LIGHT_R.comment = Adjusts the red tint of direct light in the End (from the central light source).
+option.END_LIGHT_G                     = §a▍ §fGreen — End Light
+option.END_LIGHT_G.comment = Adjusts the green tint of direct light in the End.
+option.END_LIGHT_B                     = §9▍ §fBlue — End Light
+option.END_LIGHT_B.comment = Adjusts the blue tint of direct light in the End. Higher = cooler, more bluish End light.
+option.END_LIGHT_I                     = End Direct Intensity
+option.END_LIGHT_I.comment = Adjusts the brightness of direct light in the End. Higher = stronger highlights from the End light source.
+option.END_AMBIENT_R                   = §c▍ §fRed — End Ambient
+option.END_AMBIENT_R.comment = Adjusts the red tint of ambient skylight in the End.
+option.END_AMBIENT_G                   = §a▍ §fGreen — End Ambient
+option.END_AMBIENT_G.comment = Adjusts the green tint of ambient skylight in the End.
+option.END_AMBIENT_B                   = §9▍ §fBlue — End Ambient
+option.END_AMBIENT_B.comment = Adjusts the blue tint of ambient skylight in the End. Higher = more violet/blue ambient.
+option.END_AMBIENT_I                   = End Ambient Intensity
+option.END_AMBIENT_I.comment = Adjusts the brightness of ambient skylight in the End. Higher = less contrast, more evenly lit.
+option.BLOCKLIGHT_R                    = §c▍ §fRed — Block Light
+option.BLOCKLIGHT_R.comment = Adjusts the red tint of artificial block lights (torches, lanterns, glowstone). Higher = warmer block light.
+option.BLOCKLIGHT_G                    = §a▍ §fGreen — Block Light
+option.BLOCKLIGHT_G.comment = Adjusts the green tint of block lights. Affects the orange-to-yellow balance of torch light.
+option.BLOCKLIGHT_B                    = §9▍ §fBlue — Block Light
+option.BLOCKLIGHT_B.comment = Adjusts the blue tint of block lights. Higher = cooler, whiter light.
+option.BLOCKLIGHT_I                    = Block Light Intensity
+option.BLOCKLIGHT_I.comment = Adjusts the overall brightness of block light sources. Higher = stronger torch and lamp illumination.
+option.CAVE_LIGHTING_I                  = Cave Ambient
+option.CAVE_LIGHTING_I.comment = Adjusts the base brightness of underground ambient light when no direct light is present. Higher = caves appear less pitch-black.
 
 option.VOXEL_VOLUME_SIZE                                            = Voxel Volume Size
 option.VOXEL_VOLUME_SIZE.comment                                    = Adjusts the size of the volume in which colored lighting is calculated. High performance impact, also affected by shadow distance
@@ -307,14 +307,14 @@ value.shadowDistance.4096.0            = 256 chunks
 
 # Sky settings
 
-option.VANILLA_SUN                     = Vanilla Sun
-option.VANILLA_SUN.comment = Toggles vanilla sun.
-option.VANILLA_MOON                    = Vanilla Moon
-option.VANILLA_MOON.comment = Toggles vanilla moon.
-option.SUN_ANGULAR_RADIUS              = Sun Angular Radius
-option.SUN_ANGULAR_RADIUS.comment = Toggles sun angular radius.
-option.MOON_ANGULAR_RADIUS             = Moon Angular Radius
-option.MOON_ANGULAR_RADIUS.comment = Toggles moon angular radius.
+option.VANILLA_SUN                     = Vanilla Sun Texture
+option.VANILLA_SUN.comment = When enabled, shows Minecraft's default sun texture. When disabled, uses the shader's procedural sun disc.
+option.VANILLA_MOON                    = Vanilla Moon Texture
+option.VANILLA_MOON.comment = When enabled, shows Minecraft's default moon texture. When disabled, uses the shader's procedural moon disc.
+option.SUN_ANGULAR_RADIUS              = Sun Size
+option.SUN_ANGULAR_RADIUS.comment = Adjusts the apparent size of the sun disc in the sky. Larger = bigger sun and softer shadows due to larger light source.
+option.MOON_ANGULAR_RADIUS             = Moon Size
+option.MOON_ANGULAR_RADIUS.comment = Adjusts the apparent size of the moon disc at night. Larger = bigger moon and softer moon shadows.
 option.SKY_GROUND                      = Sky Ground
 option.SKY_GROUND.comment              = Visible planet surface below the horizon
 option.STARS                           = Enabled
@@ -327,17 +327,17 @@ option.GALAXY                          = Galaxy
 option.GALAXY.comment                  = Galaxy image in the night sky
 option.GALAXY_INTENSITY                = Galaxy Intensity
 option.GALAXY_INTENSITY.comment        = Controls the brightness of the galaxy in the night sky
-option.CREPUSCULAR_RAYS                = Enabled
-option.CREPUSCULAR_RAYS.comment = Toggles enabled.
-option.CREPUSCULAR_RAYS_INTENSITY      = Intensity
-option.CREPUSCULAR_RAYS_INTENSITY.comment = Toggles intensity.
-option.CREPUSCULAR_RAYS_STEPS_HORIZON  = Step Count - Horizon
-option.CREPUSCULAR_RAYS_STEPS_HORIZON.comment = Toggles step count - horizon.
-option.CREPUSCULAR_RAYS_STEPS_ZENITH   = Step Count - Zenith
-option.CREPUSCULAR_RAYS_STEPS_ZENITH.comment = Toggles step count - zenith.
+option.CREPUSCULAR_RAYS                = Sun Rays
+option.CREPUSCULAR_RAYS.comment = Enables god rays (light shafts) visible when the sun is near the horizon through fog and clouds. Best seen at sunrise/sunset.
+option.CREPUSCULAR_RAYS_INTENSITY      = Ray Intensity
+option.CREPUSCULAR_RAYS_INTENSITY.comment = Adjusts the brightness and contrast of god rays. Higher = more visible light shafts.
+option.CREPUSCULAR_RAYS_STEPS_HORIZON  = Horizon Quality
+option.CREPUSCULAR_RAYS_STEPS_HORIZON.comment = Adjusts ray-marching quality toward the horizon. Higher = smoother, more accurate rays at higher GPU cost.
+option.CREPUSCULAR_RAYS_STEPS_ZENITH   = Zenith Quality
+option.CREPUSCULAR_RAYS_STEPS_ZENITH.comment = Adjusts ray-marching quality toward the zenith (straight up). Higher = smoother rays overhead at higher cost.
 option.LIGHTNING_FLASH                 = Lightning Flash
 option.RAINBOWS                        = Rainbows
-option.RAINBOWS.comment = Toggles rainbows.
+option.RAINBOWS.comment = When enabled, a faint rainbow appears opposite the sun during and just after rain.
 option.END_SUN_EFFECT                  = End Sun Effect
 option.END_SUN_EFFECT.comment = Controls end sun effect.
 option.ATMOSPHERE_SATURATION_BOOST                    = Atmosphere Saturation Boost
@@ -351,7 +351,7 @@ option.ATMOSPHERE_RAIN_DESATURATION_INTENSITY.comment = Adjust the intensity of 
 
 # Clouds
 option.CLOUDS_CUMULUS                       = Cumulus Clouds
-option.CLOUDS_CUMULUS.comment               = Low-altitude volumetric clouds made to resemble cumulus clouds
+option.CLOUDS_CUMULUS.comment               = Low-altitude volumetric clouds designed to resemble cumulus clouds. Adds depth and atmosphere to the sky. Performance impact varies with cloud density.
 option.CLOUDS_CUMULUS_PRIMARY_STEPS_H       = Primary Steps - Horizon
 option.CLOUDS_CUMULUS_PRIMARY_STEPS_H.comment = Controls primary steps - horizon.
 option.CLOUDS_CUMULUS_PRIMARY_STEPS_Z       = Primary Steps - Zenith
@@ -383,7 +383,7 @@ option.CLOUDS_CUMULUS_PRECOMPUTE_LOCAL_COVERAGE         = Precompute Local Cover
 option.CLOUDS_CUMULUS_PRECOMPUTE_LOCAL_COVERAGE.comment = Aggressive optimization for cumulus clouds. Reduces the maximum distance clouds can be drawn and can cause some artifacts with cloud shapes morphing when the camera moves. Disable for taking screenshots above the clouds
 
 option.CLOUDS_ALTOCUMULUS                       = Altocumulus Clouds
-option.CLOUDS_ALTOCUMULUS.comment               = Mid-altitude volumetric clouds made to resemble altocumulus clouds
+option.CLOUDS_ALTOCUMULUS.comment               = Mid-altitude volumetric clouds designed to resemble altocumulus clouds. Creates a layered sky appearance with moderate performance impact.
 option.CLOUDS_ALTOCUMULUS_PRIMARY_STEPS_H       = Primary Steps - Horizon
 option.CLOUDS_ALTOCUMULUS_PRIMARY_STEPS_H.comment = Controls primary steps - horizon.
 option.CLOUDS_ALTOCUMULUS_PRIMARY_STEPS_Z       =  Primary Steps - Zenith
@@ -413,7 +413,7 @@ option.CLOUDS_ALTOCUMULUS_WIND_ANGLE.comment = Controls wind angle.
 suffix.CLOUDS_ALTOCUMULUS_WIND_ANGLE            = °
 
 option.CLOUDS_CUMULUS_CONGESTUS                       = Cumulus Congestus Clouds
-option.CLOUDS_CUMULUS_CONGESTUS.comment               = Massive, distant volumetric clouds
+option.CLOUDS_CUMULUS_CONGESTUS.comment               = Massive, distant volumetric storm clouds. Creates dramatic sky visuals with heavy performance impact due to high geometric complexity.
 option.CLOUDS_CUMULUS_CONGESTUS_PRIMARY_STEPS_H       = Primary Steps - Horizon
 option.CLOUDS_CUMULUS_CONGESTUS_PRIMARY_STEPS_H.comment = Controls primary steps - horizon.
 option.CLOUDS_CUMULUS_CONGESTUS_PRIMARY_STEPS_Z       = Primary Steps - Zenith
@@ -443,7 +443,7 @@ option.CLOUDS_CUMULUS_CONGESTUS_WIND_ANGLE.comment = Controls wind angle.
 suffix.CLOUDS_CUMULUS_CONGESTUS_WIND_ANGLE            = °
 
 option.CLOUDS_NOCTILUCENT               = Noctilucent Clouds
-option.CLOUDS_NOCTILUCENT.comment = Controls noctilucent clouds.
+option.CLOUDS_NOCTILUCENT.comment             = Controls noctilucent (night-shining) clouds. High-altitude clouds that glow in darkness, creating a beautiful night-time atmospheric effect.
 
 option.BLOCKY_CLOUDS                     = Blocky Clouds
 option.BLOCKY_CLOUDS.comment             = Vanilla-styled volumetric clouds. Enabling this option disables all other cloud types
@@ -533,22 +533,22 @@ option.CLOUDS_CIRROCUMULUS_CURL_STRENGTH   = Cirrocumulus Curl Strength
 option.CLOUDS_CIRROCUMULUS_CURL_STRENGTH.comment = Controls cirrocumulus curl strength.
 
 option.CLOUDS_NOCTILUCENT_INTENSITY    = Intensity
-option.CLOUDS_NOCTILUCENT_INTENSITY.comment = Controls intensity.
+option.CLOUDS_NOCTILUCENT_INTENSITY.comment = Controls the brightness/visibility of noctilucent clouds. Higher values make them more prominent against the night sky.
 option.CLOUDS_NOCTILUCENT_RARITY       = Rarity
 option.CLOUDS_NOCTILUCENT_RARITY.comment = Controls rarity.
 
 option.AURORA_NORMAL                   = Aurora in Any Biome
-option.AURORA_NORMAL.comment = Selects the aurora in any biome mode or method.
+option.AURORA_NORMAL.comment             = Selects aurora mode. Any Biome: aurora appears in all biomes. Snow Biome: aurora only appears in snow biomes.
 option.AURORA_SNOW                     = Aurora in Snow Biome
-option.AURORA_SNOW.comment = Selects the aurora in snow biome mode or method.
+option.AURORA_SNOW.comment                 = Selects aurora biome restriction. Note: This option works in conjunction with AURORA_NORMAL - when set to Snow Biome, aurora only appears in snow biomes regardless of the AURORA_NORMAL setting.
 option.AURORA_BRIGHTNESS               = Aurora Brightness
-option.AURORA_BRIGHTNESS.comment = Toggles aurora brightness.
+option.AURORA_BRIGHTNESS.comment           = Controls aurora brightness intensity. Higher values produce more vibrant and intense aurora displays.
 option.AURORA_FREQUENCY                = Aurora Frequency
-option.AURORA_FREQUENCY.comment = Toggles aurora frequency.
+option.AURORA_FREQUENCY.comment             = Controls aurora frequency. Determines how often the aurora appears during a game session.
 option.AURORA_CLOUD_LIGHTING           = Cloud Light Contribution
-option.AURORA_CLOUD_LIGHTING.comment = Toggles cloud light contribution.
+option.AURORA_CLOUD_LIGHTING.comment         = Controls whether aurora light contributes to cloud illumination. When enabled, clouds are illuminated by the aurora colors.
 option.AURORA_GROUND_LIGHTING          = Ground Light Contribution
-option.AURORA_GROUND_LIGHTING.comment = Toggles ground light contribution.
+option.AURORA_GROUND_LIGHTING.comment        = Controls whether aurora light contributes to ground illumination. When enabled, the ground reflects aurora colors.
 
 value.AURORA_NORMAL.AURORA_NEVER       = Never
 value.AURORA_NORMAL.AURORA_RARELY      = Rarely
@@ -561,39 +561,39 @@ value.AURORA_SNOW.AURORA_ALWAYS        = Always
 # Fog settings
 
 option.BORDER_FOG                           = Border Fog
-option.BORDER_FOG.comment                   = Thick fog hugging the edges of the render distance to hide the chunk borders
+option.BORDER_FOG.comment                   = Thick fog that extends to the edges of the render distance. Helps hide chunk borders and creates a more seamless transition to the void.
 option.CAVE_FOG                             = Cave Fog
-option.CAVE_FOG.comment                     = Light, slightly glowing fog applied underground. This makes large caverns feel a lot more atmospheric, and helps you to see the shape of the cave
+option.CAVE_FOG.comment                     = Light, slightly glowing fog applied underground. Enhances cavern atmosphere and helps illuminate cave interiors without significantly impacting performance.
 option.BLOOMY_FOG                           = Bloomy Fog
-option.BLOOMY_FOG.comment                   = Intense bloom in fog. This gives the appearance of light from bright objects scattering within the fog, and illuminates the area behind them. Almost no performance cost
+option.BLOOMY_FOG.comment                   = Intense bloom effect within fog. Simulates light from bright objects scattering within fog volumes. Illuminates areas behind bright objects. Minimal performance impact.
 option.BLOOMY_FOG_INTENSITY                 = Bloomy Fog Intensity
 option.BLOOMY_FOG_INTENSITY.comment         = Adjusts the intensity of "bloomy fog"
 option.OVERWORLD_FOG_INTENSITY              = Overworld Fog Intensity
-option.OVERWORLD_FOG_INTENSITY.comment = Controls overworld fog intensity.
+option.OVERWORLD_FOG_INTENSITY.comment    = Controls the intensity of overworld fog. Higher values create denser fog near the ground, lower values make fog thinner.
 option.VL                                   = Volumetric Fog
-option.LPV_VL.comment                       = Light sources illuminate the fog. Requires Colored Lights! 
-option.VL.comment                           = Adds light shafts and variable fog density
+option.LPV_VL.comment                       = Light sources illuminate the fog volume. Requires Colored Lights enabled. Adds realistic light propagation through fog. Significant performance impact. 
+option.VL.comment                           = Adds volumetric fog with light shafts and variable density. Creates atmosphere and sun rays streaming through the fog. Requires significant GPU resources.
 option.VL_RENDER_SCALE                      = VL Render Scale
 option.VL_RENDER_SCALE.comment = Controls vl render scale.
 option.AIR_FOG_CLOUDY_NOISE                 = Cloudy Fog
-option.AIR_FOG_CLOUDY_NOISE.comment         = Subtle cloudy shapes in the fog, best visible in the morning.\nRequires volumetric fog!
+option.AIR_FOG_CLOUDY_NOISE.comment         = Subtle cloud-like shapes within the fog, best visible in morning light. Requires volumetric fog to be enabled for the effect to appear.
 option.AIR_FOG_COLORED_LIGHT_SHAFTS         = Colored Light Shafts
-option.AIR_FOG_COLORED_LIGHT_SHAFTS.comment = Light shafts passing through translucent objects are tinted by their color
+option.AIR_FOG_COLORED_LIGHT_SHAFTS.comment    = Light shafts passing through translucent objects are tinted by their color. Creates colorful god rays effect when sunlight passes through leaves and glass.
 option.AIR_FOG_COLORED_LIGHT_SHAFTS_INTENSITY         = Colored Light Shafts Intensity
 option.AIR_FOG_COLORED_LIGHT_SHAFTS_INTENSITY.comment = Controls the strength of the color tinting applied to light shafts
 
 # LPV VL
-option.LPV_VL                          = Enabled
-option.LPV_VL_STEPS                    = Steps 
-option.LPV_VL_STEPS.comment = Controls steps.
-option.LPV_VL_INTENSITY_OVERWORLD      = Overworld Intensity
-option.LPV_VL_INTENSITY_OVERWORLD.comment = Controls overworld intensity.
-option.LPV_VL_INTENSITY_UNDERGROUND    = Underground Intensity
-option.LPV_VL_INTENSITY_UNDERGROUND.comment = Controls underground intensity.
-option.LPV_VL_INTENSITY_NETHER         = Nether Intensity
-option.LPV_VL_INTENSITY_NETHER.comment = Controls nether intensity.
-option.LPV_VL_INTENSITY_END            = End Intensity
-option.LPV_VL_INTENSITY_END.comment = Controls end intensity.
+option.LPV_VL                          = Volumetric Colored Light
+option.LPV_VL_STEPS                    = Light March Steps
+option.LPV_VL_STEPS.comment = Adjusts the number of ray-march steps for light scattering in fog. Higher = smoother, more accurate volumetric colored light at higher GPU cost.
+option.LPV_VL_INTENSITY_OVERWORLD      = Overworld Strength
+option.LPV_VL_INTENSITY_OVERWORLD.comment = Adjusts the brightness of volumetric colored-light scattering in the Overworld.
+option.LPV_VL_INTENSITY_UNDERGROUND    = Underground Strength
+option.LPV_VL_INTENSITY_UNDERGROUND.comment = Adjusts the brightness of volumetric colored-light scattering underground/in caves.
+option.LPV_VL_INTENSITY_NETHER         = Nether Strength
+option.LPV_VL_INTENSITY_NETHER.comment = Adjusts the brightness of volumetric colored-light scattering in the Nether.
+option.LPV_VL_INTENSITY_END            = End Strength
+option.LPV_VL_INTENSITY_END.comment = Adjusts the brightness of volumetric colored-light scattering in the End.
 
 # Rayleigh Fog
 option.AIR_FOG_RAYLEIGH_FALLOFF_START             = Rayleigh Falloff Start
@@ -602,13 +602,13 @@ option.AIR_FOG_RAYLEIGH_FALLOFF_HALF_LIFE         = Rayleigh Falloff Half-Life
 option.AIR_FOG_RAYLEIGH_FALLOFF_HALF_LIFE.comment = Altitude above the Rayleigh Falloff Start where the rayleigh fog density is halved
 
 option.AIR_FOG_RAYLEIGH_DENSITY        = Normal Density
-option.AIR_FOG_RAYLEIGH_DENSITY.comment = Controls normal density.
-option.AIR_FOG_RAYLEIGH_R              = §c▍ §fRed
-option.AIR_FOG_RAYLEIGH_R.comment = Controls the ▍ red color channel.
-option.AIR_FOG_RAYLEIGH_G              = §a▍ §fGreen
-option.AIR_FOG_RAYLEIGH_G.comment = Controls the ▍ green color channel.
-option.AIR_FOG_RAYLEIGH_B              = §9▍ §fBlue
-option.AIR_FOG_RAYLEIGH_B.comment = Controls the ▍ blue color channel.
+option.AIR_FOG_RAYLEIGH_DENSITY.comment = Adjusts the base density/thickness of Rayleigh (air) fog under clear weather. Higher = hazier sky.
+option.AIR_FOG_RAYLEIGH_R              = §c▍ §fRed — Normal
+option.AIR_FOG_RAYLEIGH_R.comment = Adjusts the red tint of normal Rayleigh fog. Together with green/blue it sets the fog's clear-weather color.
+option.AIR_FOG_RAYLEIGH_G              = §a▍ §fGreen — Normal
+option.AIR_FOG_RAYLEIGH_G.comment = Adjusts the green tint of normal Rayleigh fog.
+option.AIR_FOG_RAYLEIGH_B              = §9▍ §fBlue — Normal
+option.AIR_FOG_RAYLEIGH_B.comment = Adjusts the blue tint of normal Rayleigh fog. Higher = more bluish haze.
 
 option.AIR_FOG_RAYLEIGH_DENSITY_RAIN   = Rain Density
 option.AIR_FOG_RAYLEIGH_DENSITY_RAIN.comment = Controls rain density.
@@ -686,33 +686,33 @@ option.AIR_FOG_MIE_FALLOFF_HALF_LIFE.comment = Altitude above the Mie Falloff St
 # Materials settings
 
 option.NORMAL_MAPPING                  = Normal Mapping
-option.NORMAL_MAPPING.comment          = Whether to use the normal maps provided by the resource pack. Enable this if you are using a "PBR" resource pack
+option.NORMAL_MAPPING.comment          = Whether to use normal maps from the resource pack. Enable for PBR packs to see proper surface detail. Disable for compatibility or performance.
 option.SPECULAR_MAPPING                = Specular Mapping
-option.SPECULAR_MAPPING.comment        = Whether to use the specular maps provided by the resource pack. Enable this if you are using a "PBR" resource pack
+option.SPECULAR_MAPPING.comment        = Whether to use specular maps from the resource pack. Enable for PBR packs to see proper metallic/specular highlights. Disable for compatibility or performance.
 option.POM                             = Parallax Occlusion Mapping
-option.POM.comment = Toggles parallax occlusion mapping.
+option.POM.comment = Enables parallax occlusion mapping — a high-quality technique that adds depth to block surfaces by offsetting texture coordinates. Significant performance impact on lower-end hardware.
 option.TEXTURE_FORMAT                  = Texture Format
 option.TEXTURE_FORMAT.comment          = The texture format used by the resource pack. Most modern resource packs use lab_p_b_r, while packs that are designed to work with SEUS may use OldPBR.
 option.HARDCODED_SPECULAR              = Hardcoded Specular
-option.HARDCODED_SPECULAR.comment      = Hardcoded specular reflections for some blocks (eg metals)
+option.HARDCODED_SPECULAR.comment      = Hardcoded specular reflections for metallic blocks. Uses built-in values for metal-like surfaces instead of resource pack specular maps.
 option.HARDCODED_EMISSION              = Hardcoded Emission
-option.HARDCODED_EMISSION.comment      = Hardcoded emission for some blocks (eg torches)
+option.HARDCODED_EMISSION.comment      = Hardcoded emission for blocks like torches and glowstone. Provides built-in emissive lighting without requiring resource pack textures.
 option.HARDCODED_SSS                   = Hardcoded SSS
-option.HARDCODED_SSS.comment           = Hardcoded subsurface scattering for some blocks (eg leaves)
+option.HARDCODED_SSS.comment           = Hardcoded subsurface scattering for organic blocks like leaves and wax. Uses built-in scattering profiles instead of resource pack maps.
 option.RAIN_PUDDLES                    = Rain Puddles
-option.RAIN_PUDDLES.comment = Controls rain puddles.
+option.RAIN_PUDDLES.comment = Controls rain puddles on the ground. Puddles form on flat surfaces when it's raining. Can be set to OFF, RAIN (only during rain), or EVERYWHERE (constant).
 option.EMISSION_STRENGTH               = Emission Strength
-option.EMISSION_STRENGTH.comment       = Adjusts the brightness of emissive objects like torches. This does not affect the brightness of the light casted, only the brightness of the light source itself. This also effects the hardcoded emissives
+option.EMISSION_STRENGTH.comment       = Adjusts the brightness of emissive objects like torches. Increases the glow intensity of the light source itself. Also affects hardcoded emissives like torches.
 option.DIRECTIONAL_LIGHTMAPS           = Directional Lightmaps
 option.DIRECTIONAL_LIGHTMAPS.comment   = Caused blocklight and skylight to be affected by normal maps. Can cause some visual issues due to limitations of the method
 option.DIRECTIONAL_LIGHTMAPS_INTENSITY = Directional Lightmaps Strength
 option.DIRECTIONAL_LIGHTMAPS_INTENSITY.comment = Adjusts the intensity of Directional Lightmaps
 option.POM_DEPTH                       = Parallax Depth
-option.POM_DEPTH.comment               = How far POM can recess into a block
+option.POM_DEPTH.comment               = Controls how deeply POM recesses into block geometry. Higher values increase the parallax effect but may reduce performance.
 option.POM_SAMPLES                     = Parallax Samples
-option.POM_SAMPLES.comment             = Adjusts the quality of POM, at the expense of performance
+option.POM_SAMPLES.comment             = Adjusts the number of sampling steps for POM. Higher values increase quality and reduce noise but significantly impact performance.
 option.POM_DISTANCE                    = POM Distance
-option.POM_DISTANCE.comment = Toggles pom distance.
+option.POM_DISTANCE.comment            = Controls the maximum distance at which POM is calculated. Objects beyond this distance use standard texture coordinates. Decreasing can improve performance.
 option.REFRACTION                      = Refraction
 option.REFRACTION.comment = Selects the refraction mode or method.
 value.REFRACTION.REFRACTION_OFF        = Off
@@ -728,37 +728,37 @@ value.TEXTURE_FORMAT.TEXTURE_FORMAT_LAB = labPBR
 value.TEXTURE_FORMAT.TEXTURE_FORMAT_OLD = Old PBR
 
 option.ENVIRONMENT_REFLECTIONS         = Environment Reflections
-option.ENVIRONMENT_REFLECTIONS.comment = Screen-space reflections. Makes water and shiny blocks reflect their environment. Big performance impact
+option.ENVIRONMENT_REFLECTIONS.comment    = Screen-space reflections. Adds reflections to water and shiny blocks. Reflects the scene environment. Significant performance impact, especially on lower-end GPUs.
 option.SKY_REFLECTIONS                 = Sky Reflections
-option.SKY_REFLECTIONS.comment         = Makes water and shiny blocks reflect the sky
+option.SKY_REFLECTIONS.comment              = Makes water and shiny blocks reflect the sky. Enhances the blue sky reflection on water surfaces for a more realistic appearance.
 option.SSR_ROUGHNESS_SUPPORT           = Roughness Support
-option.SSR_ROUGHNESS_SUPPORT.comment   = Makes reflections on rough surfaces actually appear rough. Big performance impact
+option.SSR_ROUGHNESS_SUPPORT.comment        = Makes reflections on rough surfaces appear properly rough. Without this, rough surfaces appear mirror-like. Significant performance impact.
 option.SSR_RAY_COUNT                   = Ray Count
-option.SSR_RAY_COUNT.comment           = Number of rays traced for rough reflections. More rays mean less noise but worse performance
+option.SSR_RAY_COUNT.comment              = Number of rays traced for reflections. More rays reduce noise and improve accuracy but significantly increase performance cost. Lower values for performance, higher for quality.
 option.SSR_INTERSECTION_STEPS_SMOOTH   = Intersection Steps - Smooth
-option.SSR_INTERSECTION_STEPS_SMOOTH.comment = Adjusts the accuracy of smooth reflections, at the expense of performance
+option.SSR_INTERSECTION_STEPS_SMOOTH.comment    = Adjusts the accuracy of smooth reflections. Higher values improve quality but reduce performance. Controls the number of intersection tests for reflective surfaces.
 option.SSR_INTERSECTION_STEPS_ROUGH    = Intersection Steps - Rough
-option.SSR_INTERSECTION_STEPS_ROUGH.comment = Adjusts the accuracy of rough reflections, at the expense of performance
+option.SSR_INTERSECTION_STEPS_ROUGH.comment = Adjusts the accuracy of rough reflections. Higher values improve quality but reduce performance. Controls intersection tests for non-mirror-like surfaces.
 option.SSR_REFINEMENT_STEPS            = Refinement Steps
-option.SSR_REFINEMENT_STEPS.comment    = Adjusts the accuracy of all reflections, at the expense of performance
+option.SSR_REFINEMENT_STEPS.comment       = Adjusts the refinement quality for all reflections. Higher values improve accuracy but increase performance cost. Final polishing step for reflections.
 option.SSR_ROUGHNESS_THRESHOLD         = Roughness Threshold
-option.SSR_ROUGHNESS_THRESHOLD.comment = Adjusts how smooth a surface must be for reflections to appear
+option.SSR_ROUGHNESS_THRESHOLD.comment      = Adjusts the roughness threshold for reflections. Lower values reflect on rougher surfaces, higher values only reflect on smooth/mirror-like surfaces.
 
 # Water settings
 
 option.WATER_CAUSTICS                  = Water Caustics
-option.WATER_CAUSTICS.comment          = Dancing light patterns beneath water
+option.WATER_CAUSTICS.comment               = Dancing light patterns beneath the water surface. Created by light refracting through water waves. Best visible with brighter sunlight.
 option.WATER_CAUSTICS_INTENSITY        = Water Caustics Intensity
 option.WATER_CAUSTICS_INTENSITY.comment = Controls water caustics intensity.
 option.WATER_CAUSTICS.comment          = Adjust the brightness of water caustics
 option.WATER_EDGE_HIGHLIGHT            = Water Edge Highlight
-option.WATER_EDGE_HIGHLIGHT.comment    = White highlights where water meets terrain. Helps to make water more easily visible in some cases
+option.WATER_EDGE_HIGHLIGHT.comment       = White highlights at the water surface edge. Makes water boundaries more visible against terrain, especially in shallow water.
 option.WATER_EDGE_HIGHLIGHT_INTENSITY  = Water Edge Highlight Intensity
 option.WATER_EDGE_HIGHLIGHT_INTENSITY.comment = Controls water edge highlight intensity.
 option.SNELLS_WINDOW                   = Snell's Window
 option.SNELLS_WINDOW.comment           = Total internal reflection underwater
 option.WATER_TEXTURE                   = Water Texture
-option.WATER_TEXTURE.comment           = How to use the vanilla water texture.\n\nOff - no water texture.\nHighlights: water texture adds highlights to the water, like how it works in Bedrock RTX.\nVanilla: water texture is used like any other texture
+option.WATER_TEXTURE.comment              = Controls water texture rendering mode. Off: no texture. Highlights: adds RTX-style highlights. Vanilla: uses standard Minecraft water texture.
 option.BIOME_WATER_COLOR               = Biome-Colored Water
 option.BIOME_WATER_COLOR.comment       = Water absorption takes the biome water colour into account
 
@@ -768,7 +768,7 @@ value.WATER_TEXTURE.WATER_TEXTURE_VANILLA               = Vanilla
 value.WATER_TEXTURE.WATER_TEXTURE_HIGHLIGHT_UNDERGROUND = Highlights (Underground only)
 
 option.WATER_WAVES                     = Enabled
-option.WATER_WAVES.comment = Controls enabled.
+option.WATER_WAVES.comment = Controls water wave animation. Enables the flowing water effect with procedural wave patterns. Significant performance impact with high iteration counts.
 option.WATER_WAVE_ITERATIONS           = Iterations
 option.WATER_WAVE_ITERATIONS.comment = Controls iterations.
 option.WATER_WAVE_STRENGTH             = Intensity
@@ -784,36 +784,36 @@ option.WATER_WAVE_PERSISTENCE.comment = Controls persistence.
 option.WATER_WAVE_LACUNARITY           = Lacunarity
 option.WATER_WAVE_LACUNARITY.comment = Controls lacunarity.
 option.WATER_PARALLAX                  = Water Parallax
-option.WATER_PARALLAX.comment          = Makes water waves appear 3D
+option.WATER_PARALLAX.comment          = Makes water waves appear three-dimensional by offsetting texture coordinates based on view angle. Creates depth effect in water. Performance impact moderate.
 option.WATER_DISPLACEMENT              = Water Displacement
-option.WATER_DISPLACEMENT.comment      = Similar to how waving leaves work, it makes the water geometry itself wave slightly, so the shore line appears less flat
+option.WATER_DISPLACEMENT.comment        = Similar to waving leaves, makes the water geometry itself wave slightly. Creates subtle shoreline movement and makes the water surface less flat. Performance impact minimal.
 option.WATER_WAVES_HEIGHT_VARIATION           = Local Height Variation 
-option.WATER_WAVES_HEIGHT_VARIATION.comment   = The height of water waves varies in space
+option.WATER_WAVES_HEIGHT_VARIATION.comment   = Controls local height variation of water waves. Makes wave heights vary across the surface for a more natural, organic appearance.
 
 option.WATER_ABSORPTION_R              = §c▍ §fRed Absorption
-option.WATER_ABSORPTION_R.comment = Controls the ▍ red absorption color channel.
+option.WATER_ABSORPTION_R.comment         = Controls the red absorption color channel underwater. Determines how much red light is absorbed, affecting the blue/green tint of water.
 option.WATER_ABSORPTION_G              = §a▍ §fGreen Absorption
-option.WATER_ABSORPTION_G.comment = Controls the ▍ green absorption color channel.
+option.WATER_ABSORPTION_G.comment         = Controls the green absorption color channel underwater. Determines how much green light is absorbed, complementing the red absorption for natural water coloring.
 option.WATER_ABSORPTION_B              = §9▍ §fBlue Absorption
-option.WATER_ABSORPTION_B.comment = Controls the ▍ blue absorption color channel.
+option.WATER_ABSORPTION_B.comment         = Controls the blue absorption color channel underwater. Determines how much blue light is absorbed, working with red and green absorption to create the characteristic water color.
 option.WATER_SCATTERING                = Scattering
-option.WATER_SCATTERING.comment = Controls scattering.
+option.WATER_SCATTERING.comment           = Controls light scattering within water. Affects how light penetrates and spreads through the water column, influencing overall water brightness and color.
 
 option.WATER_ABSORPTION_R_UNDERWATER   = §c▍ §fRed Absorption - Underwater
-option.WATER_ABSORPTION_R_UNDERWATER.comment = Controls ▍ red absorption - underwater.
+option.WATER_ABSORPTION_R_UNDERWATER.comment = Controls the red absorption color channel when underwater. Overrides surface absorption for underwater view.
 option.WATER_ABSORPTION_G_UNDERWATER   = §a▍ §fGreen Absorption - Underwater
-option.WATER_ABSORPTION_G_UNDERWATER.comment = Controls ▍ green absorption - underwater.
+option.WATER_ABSORPTION_G_UNDERWATER.comment = Controls the green absorption color channel when underwater. Complements red absorption for realistic underwater coloring.
 option.WATER_ABSORPTION_B_UNDERWATER   = §9▍ §fBlue Absorption - Underwater
-option.WATER_ABSORPTION_B_UNDERWATER.comment = Controls ▍ blue absorption - underwater.
+option.WATER_ABSORPTION_B_UNDERWATER.comment = Controls the blue absorption color channel when underwater. Final component in creating the complete underwater color palette.
 option.WATER_SCATTERING_UNDERWATER     = Scattering - Underwater
-option.WATER_SCATTERING_UNDERWATER.comment = Controls scattering - underwater.
+option.WATER_SCATTERING_UNDERWATER.comment     = Controls light scattering when underwater. Determines how light spreads and penetrates the water column for the submerged view.
 
 # Post-processing settings
 
 option.BLOOM                           = Bloom
-option.BLOOM.comment                   = Soft "glow" effect around bright areas and light sources
+option.BLOOM.comment                    = Soft glow effect around bright areas and light sources. Simulates camera lens flare and bright light bleeding. Performance impact varies with intensity.
 option.BLOOM_INTENSITY                 = Bloom Intensity
-option.BLOOM_INTENSITY.comment         = Adjusts how much the bloom affects the final image
+option.BLOOM_INTENSITY.comment          = Adjusts the bloom intensity. Higher values increase the glow effect and area affected, but may reduce performance.
 option.BLOOM_SPREAD                    = Bloom Spread
 option.BLOOM_UPSAMPLING_FILTER         = Bloom Upsampling Filter
 option.BLOOM_UPSAMPLING_FILTER.comment = Selects the bloom upsampling filter mode or method.
@@ -821,38 +821,38 @@ value.BLOOM_UPSAMPLING_FILTER.texture  = Bilinear
 value.BLOOM_UPSAMPLING_FILTER.bicubic_filter = Bicubic
 option.BLOOM_SPREAD.comment            = Adjusts how much the bloom spreads out
 option.DOF                             = Depth of field
-option.DOF.comment                     = Camera focus effect - blurs out-of-focus areas
+option.DOF.comment                       = Camera depth of field effect. Blurs areas outside the focal distance to simulate camera optics. Controls how much of the scene is in focus.
 option.DOF_INTENSITY                   = DoF Intensity
-option.DOF_INTENSITY.comment           = Adjusts the intensity of Depth of Field
+option.DOF_INTENSITY.comment             = Adjusts the intensity of the depth of field effect. Higher values increase the blur amount for out-of-focus areas.
 option.DOF_SAMPLES                     = DoF Samples
-option.DOF_SAMPLES.comment             = Number of samples taken for Depth of Field. Higher sample counts result in a higher quality blur but take more performance
+option.DOF_SAMPLES.comment               = Number of samples for depth of field calculation. Higher values produce a smoother blur but increase performance cost.
 option.DOF_FOCUS                       = DoF Focus
-option.DOF_FOCUS.comment               = Focal distance for Depth of Field
+option.DOF_FOCUS.comment                 = Focal distance for depth of field. Controls the distance from the camera that appears in focus. Objects closer or further than this distance will be blurred.
 option.MOTION_BLUR                     = Motion Blur
-option.MOTION_BLUR.comment             = Cinematic blur in motion, also useful to smoothen low framerates but can cause motion sickness
+option.MOTION_BLUR.comment                = Cinematic motion blur effect. Simulates camera shutter speed. Helpful for smoothing low framerates but can cause motion sickness in some users.
 option.MOTION_BLUR_INTENSITY           = Motion Blur Intensity
-option.MOTION_BLUR_INTENSITY.comment   = Adjusts the intensity of Motion Blur
+option.MOTION_BLUR_INTENSITY.comment      = Adjusts the intensity of the motion blur effect. Higher values increase the blur amount but may cause motion sickness.
 option.TAA                             = TAA
-option.TAA.comment                     = Temporal anti-aliasing. Massively improves image quality and noise levels, but can also introduce temporal artifacts like flickering and ghosting. Required by TAA Upscaling!
+option.TAA.comment                     = Temporal anti-aliasing. Reduces flickering and improves image quality by averaging samples across frames. Can introduce ghosting artifacts with fast movement. Required by TAAU upscaling.
 option.FXAA                            = FXAA
-option.FXAA.comment                    = Softens edges. Works in conjunction with TAA, especially helping in motion. Very helpful with TAAU
+option.FXAA.comment                    = Fast approximate anti-aliasing. Softens edges and reduces aliasing with minimal performance impact. Works in conjunction with TAA to improve motion clarity.
 option.TAAU                            = TAA Upscaling
 option.TAAU.comment                    = Renders the scene_color at a reduced resolution and uses TAA to upscale it. Massively improves performance, but can reduce image quality and increase temporal artifacts
 option.TAAU_RENDER_SCALE               = TAAU Render Scale
 option.TAAU_RENDER_SCALE.comment       = Resolution scale at which the scene_color is rendered if TAA Upscaling is enabled. If the original resolution is 1920x1080 and TAAU Render Scale is 0.75 (the default), then the scene_color would be rendered at 1440x810
 option.CAS                             = Image Sharpening
-option.CAS.comment                     = Sharpens the final image (contrast-adaptive sharpening)
+option.CAS.comment                     = Contrast-adaptive sharpening. Sharpens the final image to recover detail lost from anti-aliasing. Adjust intensity to avoid halo artifacts.
 option.CAS_INTENSITY                   = Image Sharpening Intensity
-option.CAS_INTENSITY.comment           = Adjusts the effect of Image Sharpening on the image
+option.CAS_INTENSITY.comment           = Adjusts the strength of the contrast-adaptive sharpening effect. Higher values increase detail but may introduce halo artifacts.
 option.VIGNETTE                        = Vignette
-option.VIGNETTE.comment                = Darkens the edges of the screen
+option.VIGNETTE.comment                 = Darkens the edges of the screen (vignetting effect). Simulates camera lens natural darkening at the corners.
 option.VIGNETTE_INTENSITY              = Vignette Intensity
-option.VIGNETTE_INTENSITY.comment      = Adjusts the intensity of Vignette
+option.VIGNETTE_INTENSITY.comment         = Adjusts the intensity of the vignette effect. Higher values increase the darkening at screen edges.
 
 value.DOF_FOCUS.-1.0                   = Automatic
 
 option.tonemap                         = Tonemap Operator
-option.tonemap.comment = Selects the tonemap operator mode or method.
+option.tonemap.comment                 = Selects the color space tonemapping operator. Affects how highlights and overall contrast are rendered. Different operators produce varying levels of brightness and contrast.
 
 value.tonemap.tonemap_aces_fit         = ACES Fit
 value.tonemap.tonemap_aces_full        = ACES Full
@@ -868,51 +868,51 @@ value.tonemap.tonemap_reinhard_jodie   = Reinhard-Jodie
 # Color Grading
 
 option.GRADE_BRIGHTNESS                = Brightness
-option.GRADE_BRIGHTNESS.comment = Controls brightness.
+option.GRADE_BRIGHTNESS.comment = Controls overall brightness of the image. Adjusts the lift of the color grading curve.
 option.GRADE_CONTRAST                  = Contrast
-option.GRADE_CONTRAST.comment = Controls contrast.
+option.GRADE_CONTRAST.comment = Controls contrast of the image. Adjusts the middle tones of the color grading curve.
 option.GRADE_SATURATION                = Saturation
-option.GRADE_SATURATION.comment = Controls saturation.
+option.GRADE_SATURATION.comment = Controls saturation intensity. Increases or decreases color vividness across the entire image.
 option.GRADE_WHITE_BALANCE             = White Balance
-option.GRADE_WHITE_BALANCE.comment = Controls white balance.
+option.GRADE_WHITE_BALANCE.comment = Controls white balance. Adjusts the color temperature toward cooler (bluer) or warmer (orange) tones.
 option.GRADE_ORANGE_SAT_BOOST          = §6▍ §fOrange Saturation Boost
-option.GRADE_ORANGE_SAT_BOOST.comment = Controls ▍ orange saturation boost.
+option.GRADE_ORANGE_SAT_BOOST.comment = Controls orange saturation boost. Adjusts saturation specifically in the orange color range (shadows/midtones).
 option.GRADE_TEAL_SAT_BOOST            = §b▍ §fTeal Saturation Boost
-option.GRADE_TEAL_SAT_BOOST.comment = Controls ▍ teal saturation boost.
+option.GRADE_TEAL_SAT_BOOST.comment = Controls teal saturation boost. Adjusts saturation specifically in the teal color range (midtones/shadows).
 option.GRADE_GREEN_SAT_BOOST           = §a▍ §fGreen Saturation Boost
-option.GRADE_GREEN_SAT_BOOST.comment = Controls ▍ green saturation boost.
+option.GRADE_GREEN_SAT_BOOST.comment = Controls green saturation boost. Adjusts saturation specifically in the green color range (foliage/grass).
 option.GRADE_GREEN_HUE_SHIFT           = §a▍ §fGreen Hue Shift
-option.GRADE_GREEN_HUE_SHIFT.comment = Controls ▍ green hue shift.
+option.GRADE_GREEN_HUE_SHIFT.comment = Controls green hue shift. Shifts the green color channel toward magenta or cyan for creative color grading.
 suffix.GRADE_WHITE_BALANCE             = K
 suffix.GRADE_GREEN_HUE_SHIFT           = °
 
 option.PURKINJE_SHIFT                  = Purkinje Shift
-option.PURKINJE_SHIFT.comment          = Simulates the effect of low lighting on human vision; desaturating all colors and darkening red hues
+option.PURKINJE_SHIFT.comment          = Simulates the Purkinje effect - the human eye's increased sensitivity to blue-green wavelengths in low light. Desaturates colors and shifts brightness perception toward cooler tones.
 option.PURKINJE_SHIFT_INTENSITY        = Purkinje Shift Intensity
-option.PURKINJE_SHIFT_INTENSITY.comment = Controls purkinje shift intensity.
+option.PURKINJE_SHIFT_INTENSITY.comment = Controls the strength of the Purkinje effect. Higher values increase the shift toward blue-green sensitivity and desaturation in low light.
 
 # Exposure
 
 option.AUTO_EXPOSURE                         = Auto Exposure
-option.AUTO_EXPOSURE.comment = Selects the auto exposure mode or method.
+option.AUTO_EXPOSURE.comment                 = Selects the auto exposure mode. Automatically adjusts exposure based on scene brightness.
 option.AUTO_EXPOSURE_BIAS                    = Exposure Bias
-option.AUTO_EXPOSURE_BIAS.comment = Toggles exposure bias.
+option.AUTO_EXPOSURE_BIAS.comment            = Adjusts the exposure bias. Positive values brighten the image, negative values darken it.
 option.AUTO_EXPOSURE_MIN                     = Minimum Exposure
-option.AUTO_EXPOSURE_MIN.comment = Toggles minimum exposure.
+option.AUTO_EXPOSURE_MIN.comment             = Sets the minimum exposure limit. Prevents the image from becoming too bright in bright scenes.
 option.AUTO_EXPOSURE_MAX                     = Maximum Exposure
-option.AUTO_EXPOSURE_MAX.comment = Toggles maximum exposure.
-option.AUTO_EXPOSURE_RATE_DIM_TO_BRIGHT      = Exposure Rate - Increasing
-option.AUTO_EXPOSURE_RATE_DIM_TO_BRIGHT.comment = Toggles exposure rate - increasing.
-option.AUTO_EXPOSURE_RATE_BRIGHT_TO_DIM      = Exposure Rate - Decreasing
-option.AUTO_EXPOSURE_RATE_BRIGHT_TO_DIM.comment = Toggles exposure rate - decreasing.
+option.AUTO_EXPOSURE_MAX.comment             = Sets the maximum exposure limit. Prevents the image from becoming too dark in dark scenes.
+option.AUTO_EXPOSURE_RATE_DIM_TO_BRIGHT      = Adaptation Speed — Brightening
+option.AUTO_EXPOSURE_RATE_DIM_TO_BRIGHT.comment = Adjusts how quickly exposure adapts when the scene gets brighter (e.g., looking from a cave to the sky). Higher = faster adaptation.
+option.AUTO_EXPOSURE_RATE_BRIGHT_TO_DIM      = Adaptation Speed — Darkening
+option.AUTO_EXPOSURE_RATE_BRIGHT_TO_DIM.comment = Adjusts how quickly exposure adapts when the scene gets darker (e.g., entering a cave). Higher = faster dimming.
 option.MANUAL_EXPOSURE_VALUE                 = Manual Exposure Value
-option.MANUAL_EXPOSURE_VALUE.comment = Controls manual exposure value.
+option.MANUAL_EXPOSURE_VALUE.comment        = Manually set the exposure value. Overrides auto exposure settings.
 option.MANUAL_EXPOSURE_USE_SCREEN_BRIGHTNESS = Use Brightness Slider
-option.MANUAL_EXPOSURE_USE_SCREEN_BRIGHTNESS.comment = Exposure value interpolates between Minimum Exposure and Maximum Exposure based on the Brightness slider in the Video Settings menu
+option.MANUAL_EXPOSURE_USE_SCREEN_BRIGHTNESS.comment = Exposure value interpolates between minimum and maximum based on the Brightness slider in Video Settings.
 option.HISTOGRAM_BINS                        = Histogram Bins
-option.HISTOGRAM_BINS.comment = Controls histogram bins.
+option.HISTOGRAM_BINS.comment                = Controls the number of histogram bins used for exposure calculation. More bins provide more precise exposure adjustment.
 option.HISTOGRAM_TARGET                      = Histogram Target CDF Value
-option.HISTOGRAM_TARGET.comment = Controls histogram target cdf value.
+option.HISTOGRAM_TARGET.comment              = Controls the target brightness for auto exposure using the histogram method. Higher values produce a brighter image.
 
 value.AUTO_EXPOSURE.AUTO_EXPOSURE_SIMPLE    = Simple
 value.AUTO_EXPOSURE.AUTO_EXPOSURE_HISTOGRAM = Histogram
@@ -921,28 +921,28 @@ value.AUTO_EXPOSURE.AUTO_EXPOSURE_OFF       = Off
 # Misc settings
 
 option.DEBUG_VIEW                      = Debug View
-option.DEBUG_VIEW.comment = Selects the debug view mode or method.
+option.DEBUG_VIEW.comment              = Selects the debug view mode. Useful for diagnosing rendering issues and visualizing shader output.
 option.DEBUG_SAMPLER                   = Debug Sampler
-option.DEBUG_SAMPLER.comment = Selects the debug sampler mode or method.
+option.DEBUG_SAMPLER.comment           = Selects the debug sampler mode. Used for testing and troubleshooting texture sampling issues.
 option.WHITE_WORLD                     = White World
-option.WHITE_WORLD.comment             = Set every albedo texture to white
+option.WHITE_WORLD.comment             = Sets all albedo textures to white. Useful for debugging material issues or creating a monochrome look.
 option.TONEMAP_COMPARISON              = Tonemap Comparison
-option.TONEMAP_COMPARISON.comment      = Compare two tonemapping functions on the left and right halves of your screen
+option.TONEMAP_COMPARISON.comment      = Compare two different tonemapping operators side-by-side. Helps evaluate the visual differences between modes.
 option.tonemap_left                    = Left Tonemap
-option.tonemap_left.comment = Selects the left tonemap mode or method.
+option.tonemap_left.comment            = Selects the tonemap operator for the left screen half. Use with Tonemap Comparison to evaluate different modes.
 option.tonemap_right                   = Right Tonemap
-option.tonemap_right.comment = Selects the right tonemap mode or method.
+option.tonemap_right.comment           = Selects the tonemap operator for the right screen half. Use with Tonemap Comparison to evaluate different modes.
 option.FANCY_NETHER_PORTAL             = Fancy Nether Portal
-option.FANCY_NETHER_PORTAL.comment     = Fancy nether portal effect inspired by Complementary Reimagined Shaders by EminGT, thanks to Emin for letting me use his idea! May not work as well with some resource packs
+option.FANCY_NETHER_PORTAL.comment     = Fancy nether portal effect inspired by Complementary Reimagined Shaders. May not work optimally with all resource packs.
 option.CUSTOM_SKY                      = Custom Sky
-option.CUSTOM_SKY.comment              = Enable custom skies from resource packs
+option.CUSTOM_SKY.comment              = Enable custom skies from resource packs. Overrides the default sky texture.
 option.CUSTOM_SKY_BRIGHTNESS           = Custom Sky Brightness
-option.CUSTOM_SKY_BRIGHTNESS.comment   = Adjust custom sky brightness
+option.CUSTOM_SKY_BRIGHTNESS.comment   = Adjust the brightness of custom skies from resource packs.
 option.ENCHANTMENT_GLINT_BRIGHTNESS    = Enchantment Glint Brightness
-option.ENCHANTMENT_GLINT_BRIGHTNESS.comment = Controls enchantment glint brightness.
-option.DITHERED_TRANSLUCENCY_FALLBACK  = Dithered Translucency Fallback 
-option.DITHERED_TRANSLUCENCY_FALLBACK.comment = Controls dithered translucency fallback.
-comment.DITHERED_TRANSLUCENCY_FALLBACK = Uses dithered translucency to improve the look of objects that should be translucent but can't when separateEntityDraws is enabled. 
+option.ENCHANTMENT_GLINT_BRIGHTNESS.comment = Controls the brightness of enchantment glints on items.
+option.DITHERED_TRANSLUCENCY_FALLBACK  = Dithered Translucency Fallback
+option.DITHERED_TRANSLUCENCY_FALLBACK.comment = Controls dithered translucency fallback. Improves the look of semi-transparent objects when separate entity draws is enabled.
+comment.DITHERED_TRANSLUCENCY_FALLBACK = Uses dithered translucency to improve the rendering of semi-transparent objects when separateEntityDraws is enabled. 
 
 value.DEBUG_VIEW.DEBUG_VIEW_NONE       = OFF
 value.DEBUG_VIEW.DEBUG_VIEW_SAMPLER    = Sampler
@@ -974,11 +974,11 @@ value.tonemap_right.tonemap_reinhard_jodie = Reinhard-Jodie
 # Distance View 
 
 option.DISTANCE_VIEW                   = Enabled
-option.DISTANCE_VIEW.comment = Controls enabled.
+option.DISTANCE_VIEW.comment           = Controls the distance view feature. Renders the scene from a far distance to see objects that are normally culled.
 option.DISTANCE_VIEW_METHOD            = Method
-option.DISTANCE_VIEW_METHOD.comment = Selects the method mode or method.
+option.DISTANCE_VIEW_METHOD.comment    = Selects the distance view method. Distance: based on depth buffer, Depth: based on geometry depth.
 option.DISTANCE_VIEW_MAX_DISTANCE      = Max Distance
-option.DISTANCE_VIEW_MAX_DISTANCE.comment = Controls max distance.
+option.DISTANCE_VIEW_MAX_DISTANCE.comment = Controls the maximum distance for the distance view feature. Objects beyond this distance will not be rendered.
 suffix.DISTANCE_VIEW_MAX_DISTANCE      = m
 
 value.DISTANCE_VIEW_METHOD.DISTANCE_VIEW_DISTANCE = Distance
@@ -987,7 +987,7 @@ value.DISTANCE_VIEW_METHOD.DISTANCE_VIEW_DEPTH    = Depth
 # Box
 
 option.BOX_MODE                 = Mode
-option.BOX_MODE.comment         = Selection Box Mode
+option.BOX_MODE.comment         = Controls the selection box mode. Default: standard colored box. Custom Color: use a custom RGB color. Rainbow: cycling color effect.
 value.BOX_MODE.BOX_MODE_NONE    = Default
 value.BOX_MODE.BOX_MODE_COLOR   = Custom Color
 value.BOX_MODE.BOX_MODE_RAINBOW = Rainbow
@@ -998,18 +998,18 @@ option.BOX_COLOR_G.comment = Controls the ▍ green color channel.
 option.BOX_COLOR_B              = §9▍ §fBlue
 option.BOX_COLOR_B.comment = Controls the ▍ blue color channel.
 option.BOX_EMISSION             = Emission
-option.BOX_EMISSION.comment     = Scales color past 1. Requires bloom.
+option.BOX_EMISSION.comment     = Scales emission color past value 1.0. Requires bloom to be enabled for the effect to be visible.
 option.BOX_LINE_WIDTH           = Line Width
-option.BOX_LINE_WIDTH.comment = Controls line width.
+option.BOX_LINE_WIDTH.comment   = Controls the line width of the selection box.
 
 # Distant Horizons
 
 option.DH_OVERDRAW_DISTANCE     = Overdraw Distance
-option.DH_OVERDRAW_DISTANCE.comment = Controls overdraw distance.
+option.DH_OVERDRAW_DISTANCE.comment = Controls the overdraw distance for Distant Horizons. Determines how far beyond the camera rendered terrain is drawn.
 option.DH_OVERDRAW_FADE_LENGTH  = Overdraw Fade Length
-option.DH_OVERDRAW_FADE_LENGTH.comment = Controls overdraw fade length.
+option.DH_OVERDRAW_FADE_LENGTH.comment = Controls the fade length for Distant Horizons overdraw. Smooths the transition between rendered and non-rendered terrain.
 option.NOISE_ON_DH_TERRAIN      = Noise on DH Terrain
-option.NOISE_ON_DH_TERRAIN.comment = Controls noise on dh terrain.
+option.NOISE_ON_DH_TERRAIN.comment = Controls whether noise is applied to Distant Horizons terrain. Adds subtle detail variation to avoid repetitive-looking generated terrain.
 
 # Photonics
 
@@ -1023,49 +1023,49 @@ screen.vignette=Vignette
 screen.bloom=Bloom
 screen.voxy=Voxy
 
-# ---- New option labels ----
+# ---- Moon Phase Influence ----
 option.MOON_PHASE_INFLUENCE_INTENSITY=Moon Phase Influence
-option.MOON_PHASE_INFLUENCE_INTENSITY.comment = Toggles moon phase influence.
-option.MOON_PHASE_NIGHT_LIGHTING = Moon Phased Night Lighting
-option.MOON_PHASE_NIGHT_LIGHTING.comment = Enables moon-phase-driven variation in night time lighting.
-option.MOON_PHASE_NIGHT_LIGHTING_INTENSITY=Night Lighting Intensity
-option.MOON_PHASE_NIGHT_LIGHTING_INTENSITY.comment = Toggles night lighting intensity.
-option.MOON_PHASE_NIGHT_LIGHTING_CONTRAST=Night Lighting Contrast
-option.MOON_PHASE_NIGHT_LIGHTING_CONTRAST.comment = Toggles night lighting contrast.
-option.MOON_PHASE_NIGHT_LIGHTING_SATURATION=Night Lighting Saturation
-option.MOON_PHASE_NIGHT_LIGHTING_SATURATION.comment = Toggles night lighting saturation.
-option.MOON_PHASE_NIGHT_ATMOSPHERE = Moon Phased Night Atmosphere
-option.MOON_PHASE_NIGHT_ATMOSPHERE.comment = Enables moon-phase-driven variation in night time atmosphere.
-option.MOON_PHASE_NIGHT_ATMOSPHERE_INTENSITY=Night Atmosphere Intensity
-option.MOON_PHASE_NIGHT_ATMOSPHERE_INTENSITY.comment = Toggles night atmosphere intensity.
-option.MOON_PHASE_NIGHT_ATMOSPHERE_CONTRAST=Night Atmosphere Contrast
-option.MOON_PHASE_NIGHT_ATMOSPHERE_CONTRAST.comment = Toggles night atmosphere contrast.
-option.MOON_PHASE_NIGHT_ATMOSPHERE_SATURATION=Night Atmosphere Saturation
-option.MOON_PHASE_NIGHT_ATMOSPHERE_SATURATION.comment = Toggles night atmosphere saturation.
-option.MOON_PHASE_REFLECTIONS = Moon Phased Reflections
-option.MOON_PHASE_REFLECTIONS.comment = Enables moon-phase-driven variation in reflections.
-option.MOON_PHASE_REFLECTIONS_INTENSITY=Reflections Intensity
-option.MOON_PHASE_REFLECTIONS_INTENSITY.comment = Toggles reflections intensity.
-option.MOON_PHASE_REFLECTIONS_CONTRAST=Reflections Contrast
-option.MOON_PHASE_REFLECTIONS_CONTRAST.comment = Toggles reflections contrast.
-option.MOON_PHASE_REFLECTIONS_SATURATION=Reflections Saturation
-option.MOON_PHASE_REFLECTIONS_SATURATION.comment = Toggles reflections saturation.
+option.MOON_PHASE_INFLUENCE_INTENSITY.comment = Adjusts how strongly the current moon phase affects all moon-phased effects below. 0 = no effect, 1 = full effect.
+option.MOON_PHASE_NIGHT_LIGHTING = Moon-Phased Night Lighting
+option.MOON_PHASE_NIGHT_LIGHTING.comment = When enabled, night-time brightness, contrast and saturation shift with the lunar cycle — brighter near full moon, dimmer near new moon.
+option.MOON_PHASE_NIGHT_LIGHTING_INTENSITY=Night Brightness
+option.MOON_PHASE_NIGHT_LIGHTING_INTENSITY.comment = Adjusts how much the moon phase brightens or dims night lighting.
+option.MOON_PHASE_NIGHT_LIGHTING_CONTRAST=Night Contrast
+option.MOON_PHASE_NIGHT_LIGHTING_CONTRAST.comment = Adjusts how much the moon phase changes contrast at night.
+option.MOON_PHASE_NIGHT_LIGHTING_SATURATION=Night Saturation
+option.MOON_PHASE_NIGHT_LIGHTING_SATURATION.comment = Adjusts how much the moon phase changes color saturation at night.
+option.MOON_PHASE_NIGHT_ATMOSPHERE = Moon-Phased Night Atmosphere
+option.MOON_PHASE_NIGHT_ATMOSPHERE.comment = When enabled, fog and sky atmosphere at night vary with the lunar cycle.
+option.MOON_PHASE_NIGHT_ATMOSPHERE_INTENSITY=Night Fog Intensity
+option.MOON_PHASE_NIGHT_ATMOSPHERE_INTENSITY.comment = Adjusts how strongly the moon phase affects atmospheric fog brightness at night.
+option.MOON_PHASE_NIGHT_ATMOSPHERE_CONTRAST=Night Fog Contrast
+option.MOON_PHASE_NIGHT_ATMOSPHERE_CONTRAST.comment = Adjusts how strongly the moon phase affects atmospheric contrast at night.
+option.MOON_PHASE_NIGHT_ATMOSPHERE_SATURATION=Night Fog Saturation
+option.MOON_PHASE_NIGHT_ATMOSPHERE_SATURATION.comment = Adjusts how strongly the moon phase affects atmospheric color saturation at night.
+option.MOON_PHASE_REFLECTIONS = Moon-Phased Reflections
+option.MOON_PHASE_REFLECTIONS.comment = When enabled, the brightness and color of reflections vary with the lunar cycle.
+option.MOON_PHASE_REFLECTIONS_INTENSITY=Reflection Brightness
+option.MOON_PHASE_REFLECTIONS_INTENSITY.comment = Adjusts how strongly the moon phase affects reflection brightness at night.
+option.MOON_PHASE_REFLECTIONS_CONTRAST=Reflection Contrast
+option.MOON_PHASE_REFLECTIONS_CONTRAST.comment = Adjusts how strongly the moon phase affects reflection contrast at night.
+option.MOON_PHASE_REFLECTIONS_SATURATION=Reflection Saturation
+option.MOON_PHASE_REFLECTIONS_SATURATION.comment = Adjusts how strongly the moon phase affects reflection color saturation at night.
 
 
 
 option.IBL=Image Based Lighting
-option.IBL.comment=Enable image-based lighting using a precomputed split-sum approximation. Adds diffuse irradiance and prefiltered specular reflections sampled from the live sky map. Costs ~12ms/frame on M1.
-option.IBL_DIFFUSE_SAMPLES=IBL Diffuse Samples
-option.IBL_DIFFUSE_SAMPLES.comment=Sample count for the diffuse irradiance precompute. Higher = less noise, lower performance.
-option.IBL_DIFFUSE_INTENSITY=IBL Diffuse Intensity
-option.IBL_DIFFUSE_INTENSITY.comment=Brightness multiplier for the diffuse IBL contribution.
-option.IBL_SPECULAR_SAMPLES=IBL Specular Samples
-option.IBL_SPECULAR_SAMPLES.comment=Sample count for the prefiltered specular panorama. Higher = less noise, lower performance.
-option.IBL_SPECULAR_INTENSITY=IBL Specular Intensity
-option.IBL_SPECULAR_INTENSITY.comment=Brightness multiplier for the specular IBL contribution.
+option.IBL.comment=Adds natural sky lighting to surfaces not directly in sunlight. Brightens shaded sides and interiors with soft sky-colored light and adds subtle environment reflections to smooth and wet materials. The contribution updates live with time of day and weather. High GPU cost — disable on low-end or integrated graphics.
+option.IBL_DIFFUSE_SAMPLES=Diffuse Quality
+option.IBL_DIFFUSE_SAMPLES.comment=Quality of the soft sky illumination. Higher sample counts produce smoother, less noisy shading in shadows at the cost of performance.
+option.IBL_DIFFUSE_INTENSITY=Diffuse Intensity
+option.IBL_DIFFUSE_INTENSITY.comment=Adjusts the brightness of soft sky light in shaded areas. Increase to brighten shadows, decrease to deepen them.
+option.IBL_SPECULAR_SAMPLES=Reflection Quality
+option.IBL_SPECULAR_SAMPLES.comment=Quality of sky reflections on smooth materials. Higher counts produce cleaner, less noisy reflections at higher GPU cost.
+option.IBL_SPECULAR_INTENSITY=Reflection Intensity
+option.IBL_SPECULAR_INTENSITY.comment=Adjusts the strength of sky reflections on shiny surfaces. Higher = more visible environment reflections.
 
 option.RSM_GI=Reflective Shadow Map GI
-option.RSM_GI.comment=Enable single-bounce indirect lighting using a Reflective Shadow Map. Gathers bounced light and color from sunlit surfaces near each shaded pixel, using the existing shadow map as the light source. No compute shaders required.
+option.RSM_GI.comment=Enable single-bounce indirect lighting using a Reflective Shadow Map. Gathers bounced light and color from sunlit surfaces near each shaded pixel, using the existing shadow map as the light source. No compute shaders required. Note: Disabled by default on Mac Compatible profile for GPU compatibility.
 option.RSM_GI_SAMPLES=RSM Samples
 option.RSM_GI_SAMPLES.comment=Number of shadow map taps per pixel when gathering bounced light. Higher = smoother, less noisy GI, lower performance.
 option.RSM_GI_RADIUS=RSM Radius
@@ -1074,12 +1074,12 @@ option.RSM_GI_INTENSITY=RSM Intensity
 option.RSM_GI_INTENSITY.comment=Brightness multiplier for the RSM indirect bounce contribution.
 
 option.FOG_SMOOTHING=Fog Smoothing
-option.FOG_SMOOTHING.comment = Controls fog smoothing.
-option.FOG_SMOOTHING_RADIUS=Fog Smoothing Radius
-option.FOG_SMOOTHING_RADIUS.comment = Controls fog smoothing radius.
+option.FOG_SMOOTHING.comment = When enabled, smoothly blends fog between frames to reduce flickering. Small performance cost.
+option.FOG_SMOOTHING_RADIUS=Fog Blur Radius
+option.FOG_SMOOTHING_RADIUS.comment = Adjusts the spatial blur radius for fog smoothing. Higher = softer, more blended fog at higher cost.
 
-option.CLOUD_LIGHTING_BOUNCES=Cloud Lighting Bounces
-option.CLOUD_LIGHTING_BOUNCES.comment = Toggles cloud lighting bounces.
+option.CLOUD_LIGHTING_BOUNCES=Cloud Light Bounces
+option.CLOUD_LIGHTING_BOUNCES.comment = Adjusts how many times light bounces inside clouds. Higher = more realistic multiple scattering but higher cost. 0 = single scattering only.
 
 option.ANISOTROPIC_FILTERING_MODE=Anisotropic Filtering Mode
 option.ANISOTROPIC_FILTERING_MODE.comment=Anisotropic texture filtering for surface materials. Reduces aliasing and blur on grazing-angle surfaces (ground, walls seen at shallow angles). Off=standard bilinear, 2x/4x/8x/16x=more samples along the major axis of the screen-space footprint.
@@ -1110,25 +1110,25 @@ option.SSS_SHEEN_INTENSITY=Subsurface Sheen Intensity
 option.SSS_SHEEN_INTENSITY.comment=Brightness multiplier for the subsurface sheen effect.
 
 
-option.TAA_INTENSITY=TAA Intensity
-option.TAA_INTENSITY.comment = Toggles taa intensity.
-option.FXAA_INTENSITY=FXAA Intensity
-option.FXAA_INTENSITY.comment = Toggles fxaa intensity.
+option.TAA_INTENSITY=TAA Strength
+option.TAA_INTENSITY.comment = Adjusts the blend weight of temporal anti-aliasing. Higher = smoother image with less flicker but more ghosting on moving objects.
+option.FXAA_INTENSITY=FXAA Strength
+option.FXAA_INTENSITY.comment = Adjusts the strength of fast approximate anti-aliasing. Higher = smoother edges but softer image.
 
 option.VOXY_QUALITY=Voxy Quality
-option.VOXY_QUALITY.comment = Toggles voxy quality.
+option.VOXY_QUALITY.comment = Selects the detail level for Voxy (Distant Horizons LOD) terrain. Higher = more triangles and sharper distant terrain at higher cost.
 value.VOXY_QUALITY_OFF=Off
 value.VOXY_QUALITY_BASIC=Basic
 value.VOXY_QUALITY_STANDARD=Standard
 value.VOXY_QUALITY_HIGH=High
 option.VOXY_LIGHTING_MODE=Voxy Lighting Mode
-option.VOXY_LIGHTING_MODE.comment = Selects the voxy lighting mode mode or method.
+option.VOXY_LIGHTING_MODE.comment = Selects how Voxy terrain is lit. Mode 0 = simple, Mode 1 = more accurate shading.
 option.VOXY_BRIGHTNESS=Voxy Brightness
-option.VOXY_BRIGHTNESS.comment = Toggles voxy brightness.
+option.VOXY_BRIGHTNESS.comment = Adjusts the overall brightness of Voxy distant terrain to better match nearby chunks.
 option.VOXY_SHADOWS=Voxy Shadows
-option.VOXY_SHADOWS.comment = Toggles voxy shadows.
+option.VOXY_SHADOWS.comment = When enabled, Voxy distant terrain casts and receives shadows like nearby terrain. Moderate performance cost.
 option.VOXY_REFLECTIONS=Voxy Reflections
-option.VOXY_REFLECTIONS.comment = Toggles voxy reflections.
+option.VOXY_REFLECTIONS.comment = When enabled, Voxy terrain appears in screen-space reflections. Adds distant reflections on water at higher cost.
 
 option.WATER_WAVES_NOISE_STRENGTH=Water Waves Noise Strength
 option.WATER_WAVES_NOISE_STRENGTH.comment = Controls water waves noise strength.
@@ -1151,8 +1151,8 @@ option.CAVE_FOG_INTENSITY=Cave Fog Intensity
 option.CAVE_FOG_INTENSITY.comment = Controls cave fog intensity.
 option.DESERT_SANDSTORM_INTENSITY=Desert Sandstorm Intensity
 option.DESERT_SANDSTORM_INTENSITY.comment = Controls desert sandstorm intensity.
-option.RAINBOWS_INTENSITY=Rainbows Intensity
-option.RAINBOWS_INTENSITY.comment = Toggles rainbows intensity.
+option.RAINBOWS_INTENSITY=Rainbow Visibility
+option.RAINBOWS_INTENSITY.comment = Adjusts the opacity and vividness of rainbows during/after rain. Higher = brighter, more saturated rainbow.
 option.END_SUN_EFFECT_INTENSITY=End Sun Effect Intensity
 option.END_SUN_EFFECT_INTENSITY.comment = Controls end sun effect intensity.
 option.SKY_GROUND_INTENSITY=Sky Ground Intensity

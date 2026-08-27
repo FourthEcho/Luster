@@ -141,34 +141,35 @@ option.SSS_INTENSITY.comment           = 표면하 산란(SSS)의 밝기를 조�
 option.SHADING_STRENGTH                = 음영 강도
 option.SHADING_STRENGTH.comment        = 직접광 음영의 대비를 조절합니다. 이 옵션을 낮추면 그림자 안에 있지 않으면서 태양을 등진 면이 밝아지고, 높이면 어두워집니다
 
-option.SHADOW                          = 그림자 매핑
-option.SHADOW.comment = Toggles shadow mapping.
-option.SHADOW_PCF                      = 그림자 맵 필터링
-option.SHADOW_PCF.comment = Toggles shadow map filtering.
-option.SHADOW_SSRT                     = SSRT 원거리 그림자
-option.SHADOW_SSRT.comment = Toggles ssrt distant shadows.
-option.SHADOW_SSRT_STEPS               = SSRT 그림자 단계
-option.SHADOW_SSRT_STEPS.comment = Toggles ssrt shadow steps.
+option.SHADOW                          = Shadows
+option.SHADOW.comment = Enables shadows cast by the sun and moon onto the world. Disable for maximum performance — no shadows will be rendered.
+option.SHADOW_PCF                      = Shadow Smoothing
+option.SHADOW_PCF.comment = Softens shadow edges using percentage-closer filtering. When enabled, shadows look smoother and less pixelated.
+option.SHADOW_SSRT                     = Distant Shadows
+option.SHADOW_SSRT.comment = Extends shadows beyond the shadow map distance using screen-space ray tracing. Fills in far shadows without increasing shadow map size. Moderate performance cost.
+option.SHADOW_SSRT_STEPS               = Distant Shadow Quality
+option.SHADOW_SSRT_STEPS.comment = Adjusts the number of ray steps for screen-space distant shadows. Higher = more accurate, less noisy far shadows at higher GPU cost.
 option.SHADOW_COLOR                    = 유색 그림자
 option.SHADOW_COLOR.comment            = 반투명 블록이 색조가 입혀진 그림자를 드리웁니다
 option.SHADOW_VPS                      = 가변 반영(Penumbra) 그림자
 option.SHADOW_VPS.comment              = 광원에서 멀어질수록 그림자가 부드러워집니다
-option.shadowMapResolution             = 그림자 해상도
-option.shadowMapResolution.comment = Controls shadow resolution.
-option.shadowDistance                  = 그림자 거리
-option.shadowDistance.comment = Selects the shadow distance mode or method.
-option.sunPathRotation                 = 태양 경로 회전
-option.sunPathRotation.comment = Controls sun path rotation.
-option.SHADOW_PENUMBRA_SCALE           = 그림자 부드러움
-option.SHADOW_PENUMBRA_SCALE.comment   = 그림자의 부드러움을 조절합니다
-option.ENTITY_SHADOWS                  = 엔티티 그림자
-option.ENTITY_SHADOWS.comment          = 엔티티가 그림자를 드리울 수 있는지 여부.\n대규모 농장이 있는 서바이벌 베이스에서 성능을 향상시키려면 비활성화하세요
-option.BLOCK_ENTITY_SHADOWS            = 블록 엔티티 그림자
-option.BLOCK_ENTITY_SHADOWS.comment = Controls block entity shadows.
-option.PIXELATED_SHADOWS               = 픽셀화된 그림자
-option.PIXELATED_SHADOWS.comment       = 그림자가 블록 텍셀에 맞춰져 픽셀화된 모습을 연출합니다
-option.PIXELATED_SHADOWS_RESOLUTION    = 픽셀화된 그림자 해상도
-option.PIXELATED_SHADOWS_RESOLUTION.comment = Controls pixelated shadows resolution.
+option.shadowMapResolution             = Shadow Resolution
+option.shadowMapResolution.comment = Adjusts the size of the shadow map texture. Higher = sharper, more detailed shadows at higher VRAM and GPU cost.
+option.shadowDistance                  = Shadow Distance
+option.shadowDistance.comment = Maximum distance shadows are rendered, in blocks. Higher values show shadows farther away but reduce detail per block and increase cost.
+option.sunPathRotation                 = Sun Path Tilt
+option.sunPathRotation.comment = Tilts the sun and moon path across the sky in degrees. Negative values tilt south. Affects time-of-day lighting direction.
+option.SHADOW_PENUMBRA_SCALE           = Shadow Softness
+option.SHADOW_PENUMBRA_SCALE.comment   = Scales the overall softness of all shadows. Lower = sharper hard shadows, higher = larger, softer penumbras.
+option.ENTITY_SHADOWS                  = Entity Shadows
+option.ENTITY_SHADOWS.comment          = When enabled, living entities and dropped items cast shadows.
+Disable to improve performance in survival bases with large farms.
+option.BLOCK_ENTITY_SHADOWS            = Block Entity Shadows
+option.BLOCK_ENTITY_SHADOWS.comment = When enabled, chests, signs, banners and other block entities cast shadows. Lower cost than full entity shadows.
+option.PIXELATED_SHADOWS               = Pixelated Shadows
+option.PIXELATED_SHADOWS.comment       = Shadows snap to the block texel grid, creating a retro pixelated look. For stylistic screenshots.
+option.PIXELATED_SHADOWS_RESOLUTION    = Pixel Size
+option.PIXELATED_SHADOWS_RESOLUTION.comment = Adjusts the texel grid size for pixelated shadows. Lower = chunkier, more blocky pixels.
 option.SSS_STEPS                       = SSS 단계
 option.SSS_STEPS.comment               = 값을 높이면 SSS가 적용된 식물이나 기타 재질의 노이즈가 줄어들지만 성능 비용이 발생합니다.
 
@@ -190,72 +191,72 @@ option.GTAO_SLICES.comment             = GTAO가 얼마나 노이즈가 많게 �
 option.GTAO_HORIZON_STEPS              = GTAO 수평선 단계
 option.GTAO_HORIZON_STEPS.comment      = GTAO의 정확도를 조절합니다
 
-option.SUN_NR                          = §c빨강
-option.SUN_NR.comment = Toggles ▍ red.
-option.SUN_NG                          = §a초록
-option.SUN_NG.comment = Toggles ▍ green.
-option.SUN_NB                          = §9파랑
-option.SUN_NB.comment = Toggles ▍ blue.
-option.SUN_MR                          = §c빨강
-option.SUN_MR.comment = Toggles ▍ red.
-option.SUN_MG                          = §a초록
-option.SUN_MG.comment = Toggles ▍ green.
-option.SUN_MB                          = §9파랑
-option.SUN_MB.comment = Toggles ▍ blue.
-option.SUN_ER                          = §c빨강
-option.SUN_ER.comment = Toggles ▍ red.
-option.SUN_EG                          = §a초록
-option.SUN_EG.comment = Toggles ▍ green.
-option.SUN_EB                          = §9파랑
-option.SUN_EB.comment = Toggles ▍ blue.
-option.SUN_I                           = 햇빛 강도
-option.SUN_I.comment = Toggles sunlight intensity.
-option.MOON_R                          = §c빨강
-option.MOON_R.comment = Controls the ▍ red color channel.
-option.MOON_G                          = §a초록
-option.MOON_G.comment = Controls the ▍ green color channel.
-option.MOON_B                          = §9파랑
-option.MOON_B.comment = Controls the ▍ blue color channel.
-option.MOON_I                          = 달빛 강도
-option.MOON_I.comment = Toggles moonlight intensity.
+option.SUN_NR                          = §c▍ §fRed — Noon
+option.SUN_NR.comment = Adjusts the red tint of sunlight at noon. Higher = warmer midday sun.
+option.SUN_NG                          = §a▍ §fGreen — Noon
+option.SUN_NG.comment = Adjusts the green tint of sunlight at noon. Higher = less pink, more neutral daylight.
+option.SUN_NB                          = §9▍ §fBlue — Noon
+option.SUN_NB.comment = Adjusts the blue tint of sunlight at noon. Higher = cooler, more bluish midday light.
+option.SUN_MR                          = §c▍ §fRed — Morning
+option.SUN_MR.comment = Adjusts the red tint of sunlight at sunrise. Higher = warmer, redder dawn light.
+option.SUN_MG                          = §a▍ §fGreen — Morning
+option.SUN_MG.comment = Adjusts the green tint of sunlight at sunrise. Affects the balance between orange and yellow dawn.
+option.SUN_MB                          = §9▍ §fBlue — Morning
+option.SUN_MB.comment = Adjusts the blue tint of sunlight at sunrise. Higher = less orange, more neutral morning.
+option.SUN_ER                          = §c▍ §fRed — Evening
+option.SUN_ER.comment = Adjusts the red tint of sunlight at sunset. Higher = warmer, redder dusk light.
+option.SUN_EG                          = §a▍ §fGreen — Evening
+option.SUN_EG.comment = Adjusts the green tint of sunlight at sunset. Affects the balance between orange and yellow dusk.
+option.SUN_EB                          = §9▍ §fBlue — Evening
+option.SUN_EB.comment = Adjusts the blue tint of sunlight at sunset. Higher = cooler, less orange evening light.
+option.SUN_I                           = Sunlight Intensity
+option.SUN_I.comment = Adjusts the overall brightness of direct sunlight. Higher = brighter sun, stronger highlights and shadows.
+option.MOON_R                          = §c▍ §fRed — Moonlight
+option.MOON_R.comment = Adjusts the red tint of moonlight. Higher = warmer night light.
+option.MOON_G                          = §a▍ §fGreen — Moonlight
+option.MOON_G.comment = Adjusts the green tint of moonlight. Affects the coolness of night lighting.
+option.MOON_B                          = §9▍ §fBlue — Moonlight
+option.MOON_B.comment = Adjusts the blue tint of moonlight. Higher = cooler, more bluish nights.
+option.MOON_I                          = Moonlight Intensity
+option.MOON_I.comment = Adjusts the overall brightness of moonlight. Higher = brighter nights, more visible shadows at night.
 option.LIGHTNING_FLASH                 = 번개 섬광
 option.LIGHTNING_FLASH.comment = Controls lightning flash.
-option.NETHER_USE_BIOME_COLOR          = 생물균계 색상 사용
-option.NETHER_USE_BIOME_COLOR.comment = Controls use biome color.
-option.NETHER_I                        = 주변광 강도
-option.NETHER_I.comment = Controls ambient intensity.
-option.NETHER_S                        = 주변광 채도
-option.NETHER_S.comment = Controls ambient saturation.
-option.NETHER_R                        = §c빨강
-option.NETHER_R.comment = Controls the ▍ red color channel.
-option.NETHER_G                        = §a초록
-option.NETHER_G.comment = Controls the ▍ green color channel.
-option.NETHER_B                        = §9파랑
-option.NETHER_B.comment = Controls the ▍ blue color channel.
-option.END_LIGHT_R                     = §c빨강
-option.END_LIGHT_R.comment = Controls the ▍ red color channel.
-option.END_LIGHT_G                     = §a초록
-option.END_LIGHT_G.comment = Controls the ▍ green color channel.
-option.END_LIGHT_B                     = §9파랑
-option.END_LIGHT_B.comment = Controls the ▍ blue color channel.
-option.END_LIGHT_I                     = 조명 강도
-option.END_LIGHT_I.comment = Controls light intensity.
-option.END_AMBIENT_R                   = §c빨강
-option.END_AMBIENT_R.comment = Controls the ▍ red color channel.
-option.END_AMBIENT_G                   = §a초록
-option.END_AMBIENT_G.comment = Controls the ▍ green color channel.
-option.END_AMBIENT_B                   = §9파랑
-option.END_AMBIENT_B.comment = Controls the ▍ blue color channel.
-option.END_AMBIENT_I                   = 주변광 강도
-option.END_AMBIENT_I.comment = Controls ambient intensity.
-option.BLOCKLIGHT_R                    = §c빨강
-option.BLOCKLIGHT_R.comment = Controls the ▍ red color channel.
-option.BLOCKLIGHT_G                    = §a초록
-option.BLOCKLIGHT_G.comment = Controls the ▍ green color channel.
-option.BLOCKLIGHT_B                    = §9파랑
-option.BLOCKLIGHT_B.comment = Controls the ▍ blue color channel.
-option.BLOCKLIGHT_I                    = 블록 조명 강도
-option.BLOCKLIGHT_I.comment = Controls blocklight intensity.
+option.NETHER_USE_BIOME_COLOR          = Use Biome Color
+option.NETHER_USE_BIOME_COLOR.comment = When enabled, Nether fog and ambient color adapts to the current biome. When disabled, uses the static color below.
+option.NETHER_I                        = Nether Fog Intensity
+option.NETHER_I.comment = Adjusts the overall brightness of Nether fog and ambient light. Higher = brighter, more washed-out Nether.
+option.NETHER_S                        = Nether Fog Saturation
+option.NETHER_S.comment = Adjusts the color vividness of Nether fog. Higher = more saturated orange/red, lower = more grey.
+option.NETHER_R                        = §c▍ §fRed — Nether
+option.NETHER_R.comment = Adjusts the red tint of the static Nether ambient color (when Use Biome Color is off).
+option.NETHER_G                        = §a▍ §fGreen — Nether
+option.NETHER_G.comment = Adjusts the green tint of the static Nether ambient color. Affects the orange-to-yellow balance.
+option.NETHER_B                        = §9▍ §fBlue — Nether
+option.NETHER_B.comment = Adjusts the blue tint of the static Nether ambient color. Higher = more purple/cooler Nether.
+option.END_LIGHT_R                     = §c▍ §fRed — End Light
+option.END_LIGHT_R.comment = Adjusts the red tint of direct light in the End (from the central light source).
+option.END_LIGHT_G                     = §a▍ §fGreen — End Light
+option.END_LIGHT_G.comment = Adjusts the green tint of direct light in the End.
+option.END_LIGHT_B                     = §9▍ §fBlue — End Light
+option.END_LIGHT_B.comment = Adjusts the blue tint of direct light in the End. Higher = cooler, more bluish End light.
+option.END_LIGHT_I                     = End Direct Intensity
+option.END_LIGHT_I.comment = Adjusts the brightness of direct light in the End. Higher = stronger highlights from the End light source.
+option.END_AMBIENT_R                   = §c▍ §fRed — End Ambient
+option.END_AMBIENT_R.comment = Adjusts the red tint of ambient skylight in the End.
+option.END_AMBIENT_G                   = §a▍ §fGreen — End Ambient
+option.END_AMBIENT_G.comment = Adjusts the green tint of ambient skylight in the End.
+option.END_AMBIENT_B                   = §9▍ §fBlue — End Ambient
+option.END_AMBIENT_B.comment = Adjusts the blue tint of ambient skylight in the End. Higher = more violet/blue ambient.
+option.END_AMBIENT_I                   = End Ambient Intensity
+option.END_AMBIENT_I.comment = Adjusts the brightness of ambient skylight in the End. Higher = less contrast, more evenly lit.
+option.BLOCKLIGHT_R                    = §c▍ §fRed — Block Light
+option.BLOCKLIGHT_R.comment = Adjusts the red tint of artificial block lights (torches, lanterns, glowstone). Higher = warmer block light.
+option.BLOCKLIGHT_G                    = §a▍ §fGreen — Block Light
+option.BLOCKLIGHT_G.comment = Adjusts the green tint of block lights. Affects the orange-to-yellow balance of torch light.
+option.BLOCKLIGHT_B                    = §9▍ §fBlue — Block Light
+option.BLOCKLIGHT_B.comment = Adjusts the blue tint of block lights. Higher = cooler, whiter light.
+option.BLOCKLIGHT_I                    = Block Light Intensity
+option.BLOCKLIGHT_I.comment = Adjusts the overall brightness of block light sources. Higher = stronger torch and lamp illumination.
 
 option.VOXEL_VOLUME_SIZE               = 복셀 볼륨 크기
 option.VOXEL_VOLUME_SIZE.comment       = 성능에 큰 영향을 미치며, 그림자 거리의 영향도 받습니다
@@ -293,14 +294,14 @@ value.shadowDistance.4096.0            = 256 청크
 
 # Sky settings
 
-option.VANILLA_SUN                     = 바닐라 태양
-option.VANILLA_SUN.comment = Toggles vanilla sun.
-option.VANILLA_MOON                    = 바닐라 달
-option.VANILLA_MOON.comment = Toggles vanilla moon.
-option.SUN_ANGULAR_RADIUS              = 태양 각반경
-option.SUN_ANGULAR_RADIUS.comment = Toggles sun angular radius.
-option.MOON_ANGULAR_RADIUS             = 달 각반경
-option.MOON_ANGULAR_RADIUS.comment = Toggles moon angular radius.
+option.VANILLA_SUN                     = Vanilla Sun Texture
+option.VANILLA_SUN.comment = When enabled, shows Minecraft's default sun texture. When disabled, uses the shader's procedural sun disc.
+option.VANILLA_MOON                    = Vanilla Moon Texture
+option.VANILLA_MOON.comment = When enabled, shows Minecraft's default moon texture. When disabled, uses the shader's procedural moon disc.
+option.SUN_ANGULAR_RADIUS              = Sun Size
+option.SUN_ANGULAR_RADIUS.comment = Adjusts the apparent size of the sun disc in the sky. Larger = bigger sun and softer shadows due to larger light source.
+option.MOON_ANGULAR_RADIUS             = Moon Size
+option.MOON_ANGULAR_RADIUS.comment = Adjusts the apparent size of the moon disc at night. Larger = bigger moon and softer moon shadows.
 option.SKY_GROUND                      = 하늘 지면
 option.SKY_GROUND.comment              = 수평선 아래로 보이는 행성 표면
 option.ATMOSPHERE_SATURATION_BOOST                      = 대기 채도 증폭
@@ -317,18 +318,18 @@ option.GALAXY                          = 은하수
 option.GALAXY.comment                  = 밤하늘의 은하수 이미지
 option.GALAXY_INTENSITY                = 은하수 강도
 option.GALAXY_INTENSITY.comment        = 밤하늘 은하수의 밝기를 조절합니다
-option.CREPUSCULAR_RAYS                = 활성화
-option.CREPUSCULAR_RAYS.comment = Toggles enabled.
-option.CREPUSCULAR_RAYS_INTENSITY      = 강도
-option.CREPUSCULAR_RAYS_INTENSITY.comment = Toggles intensity.
-option.CREPUSCULAR_RAYS_STEPS_HORIZON  = 단계 수 - 수평선
-option.CREPUSCULAR_RAYS_STEPS_HORIZON.comment = Toggles step count - horizon.
-option.CREPUSCULAR_RAYS_STEPS_ZENITH   = 단계 수 - 천정
-option.CREPUSCULAR_RAYS_STEPS_ZENITH.comment = Toggles step count - zenith.
+option.CREPUSCULAR_RAYS                = Sun Rays
+option.CREPUSCULAR_RAYS.comment = Enables god rays (light shafts) visible when the sun is near the horizon through fog and clouds. Best seen at sunrise/sunset.
+option.CREPUSCULAR_RAYS_INTENSITY      = Ray Intensity
+option.CREPUSCULAR_RAYS_INTENSITY.comment = Adjusts the brightness and contrast of god rays. Higher = more visible light shafts.
+option.CREPUSCULAR_RAYS_STEPS_HORIZON  = Horizon Quality
+option.CREPUSCULAR_RAYS_STEPS_HORIZON.comment = Adjusts ray-marching quality toward the horizon. Higher = smoother, more accurate rays at higher GPU cost.
+option.CREPUSCULAR_RAYS_STEPS_ZENITH   = Zenith Quality
+option.CREPUSCULAR_RAYS_STEPS_ZENITH.comment = Adjusts ray-marching quality toward the zenith (straight up). Higher = smoother rays overhead at higher cost.
 option.LIGHTNING_FLASH                 = 번개 섬광
 option.LIGHTNING_FLASH.comment = Controls lightning flash.
-option.RAINBOWS                        = 무지개
-option.RAINBOWS.comment = Toggles rainbows.
+option.RAINBOWS                        = Rainbows
+option.RAINBOWS.comment = When enabled, a faint rainbow appears opposite the sun during and just after rain.
 option.END_SUN_EFFECT                  = 엔드 태양 효과
 option.END_SUN_EFFECT.comment = Controls end sun effect.
 
@@ -565,16 +566,16 @@ option.AIR_FOG_COLORED_LIGHT_SHAFTS.comment = 반투명 물체를 통과하는 �
 
 # LPV VL
 option.LPV_VL                          = 활성화
-option.LPV_VL_STEPS                    = 단계
-option.LPV_VL_STEPS.comment = Controls steps.
-option.LPV_VL_INTENSITY_OVERWORLD      = 오버월드 강도
-option.LPV_VL_INTENSITY_OVERWORLD.comment = Controls overworld intensity.
-option.LPV_VL_INTENSITY_UNDERGROUND    = 지하 강도
-option.LPV_VL_INTENSITY_UNDERGROUND.comment = Controls underground intensity.
-option.LPV_VL_INTENSITY_NETHER         = 네더 강도
-option.LPV_VL_INTENSITY_NETHER.comment = Controls nether intensity.
-option.LPV_VL_INTENSITY_END            = 엔드 강도
-option.LPV_VL_INTENSITY_END.comment = Controls end intensity.
+option.LPV_VL_STEPS                    = Light March Steps
+option.LPV_VL_STEPS.comment = Adjusts the number of ray-march steps for light scattering in fog. Higher = smoother, more accurate volumetric colored light at higher GPU cost.
+option.LPV_VL_INTENSITY_OVERWORLD      = Overworld Strength
+option.LPV_VL_INTENSITY_OVERWORLD.comment = Adjusts the brightness of volumetric colored-light scattering in the Overworld.
+option.LPV_VL_INTENSITY_UNDERGROUND    = Underground Strength
+option.LPV_VL_INTENSITY_UNDERGROUND.comment = Adjusts the brightness of volumetric colored-light scattering underground/in caves.
+option.LPV_VL_INTENSITY_NETHER         = Nether Strength
+option.LPV_VL_INTENSITY_NETHER.comment = Adjusts the brightness of volumetric colored-light scattering in the Nether.
+option.LPV_VL_INTENSITY_END            = End Strength
+option.LPV_VL_INTENSITY_END.comment = Adjusts the brightness of volumetric colored-light scattering in the End.
 
 # Rayleigh Fog
 option.AIR_FOG_RAYLEIGH_FALLOFF_START             = 레일리 감쇠 시작
@@ -582,14 +583,14 @@ option.AIR_FOG_RAYLEIGH_FALLOFF_START.comment     = 레일리 안개가 감소�
 option.AIR_FOG_RAYLEIGH_FALLOFF_HALF_LIFE         = 레일리 감쇠 반감기
 option.AIR_FOG_RAYLEIGH_FALLOFF_HALF_LIFE.comment = 레일리 감쇠 시작점 위로 레일리 안개 밀도가 절반이 되는 고도
 
-option.AIR_FOG_RAYLEIGH_DENSITY        = 일반 밀도
-option.AIR_FOG_RAYLEIGH_DENSITY.comment = Controls normal density.
-option.AIR_FOG_RAYLEIGH_R              = §c빨강
-option.AIR_FOG_RAYLEIGH_R.comment = Controls the ▍ red color channel.
-option.AIR_FOG_RAYLEIGH_G              = §a초록
-option.AIR_FOG_RAYLEIGH_G.comment = Controls the ▍ green color channel.
-option.AIR_FOG_RAYLEIGH_B              = §9파랑
-option.AIR_FOG_RAYLEIGH_B.comment = Controls the ▍ blue color channel.
+option.AIR_FOG_RAYLEIGH_DENSITY        = Normal Density
+option.AIR_FOG_RAYLEIGH_DENSITY.comment = Adjusts the base density/thickness of Rayleigh (air) fog under clear weather. Higher = hazier sky.
+option.AIR_FOG_RAYLEIGH_R              = §c▍ §fRed — Normal
+option.AIR_FOG_RAYLEIGH_R.comment = Adjusts the red tint of normal Rayleigh fog. Together with green/blue it sets the fog's clear-weather color.
+option.AIR_FOG_RAYLEIGH_G              = §a▍ §fGreen — Normal
+option.AIR_FOG_RAYLEIGH_G.comment = Adjusts the green tint of normal Rayleigh fog.
+option.AIR_FOG_RAYLEIGH_B              = §9▍ §fBlue — Normal
+option.AIR_FOG_RAYLEIGH_B.comment = Adjusts the blue tint of normal Rayleigh fog. Higher = more bluish haze.
 
 option.AIR_FOG_RAYLEIGH_DENSITY_RAIN   = 비 밀도
 option.AIR_FOG_RAYLEIGH_DENSITY_RAIN.comment = Controls rain density.
@@ -670,8 +671,8 @@ option.NORMAL_MAPPING                  = 노멀 매핑
 option.NORMAL_MAPPING.comment          = 리소스팩에서 제공하는 노멀 맵을 사용할지 여부입니다. "PBR" 리소스팩을 사용 중이라면 활성화하세요
 option.SPECULAR_MAPPING                = 반사 매핑
 option.SPECULAR_MAPPING.comment        = 리소스팩에서 제공하는 반사 맵을 사용할지 여부입니다. "PBR" 리소스팩을 사용 중이라면 활성화하세요
-option.POM                             = 시차 차폐 매핑 (POM)
-option.POM.comment = Toggles parallax occlusion mapping.
+option.POM                             = Parallax Occlusion Mapping
+option.POM.comment = Enables parallax occlusion mapping — a high-quality technique that adds depth to block surfaces by offsetting texture coordinates. Significant performance impact on lower-end hardware.
 option.TEXTURE_FORMAT                  = 텍스처 형식
 option.TEXTURE_FORMAT.comment          = 리소스팩에서 사용하는 텍스처 형식입니다. 대부분의 최신 리소스팩은 lab_p_b_r을 사용하며, SEUS용으로 설계된 팩은 OldPBR을 사용할 수 있습니다.
 option.HARDCODED_SPECULAR              = 하드코딩된 반사
@@ -883,10 +884,10 @@ option.AUTO_EXPOSURE_MIN                     = 최소 노출
 option.AUTO_EXPOSURE_MIN.comment = Toggles minimum exposure.
 option.AUTO_EXPOSURE_MAX                     = 최대 노출
 option.AUTO_EXPOSURE_MAX.comment = Toggles maximum exposure.
-option.AUTO_EXPOSURE_RATE_DIM_TO_BRIGHT      = 노출 변화 속도 - 증가
-option.AUTO_EXPOSURE_RATE_DIM_TO_BRIGHT.comment = Toggles exposure rate - increasing.
-option.AUTO_EXPOSURE_RATE_BRIGHT_TO_DIM      = 노출 변화 속도 - 감소
-option.AUTO_EXPOSURE_RATE_BRIGHT_TO_DIM.comment = Toggles exposure rate - decreasing.
+option.AUTO_EXPOSURE_RATE_DIM_TO_BRIGHT      = Adaptation Speed — Brightening
+option.AUTO_EXPOSURE_RATE_DIM_TO_BRIGHT.comment = Adjusts how quickly exposure adapts when the scene gets brighter (e.g., looking from a cave to the sky). Higher = faster adaptation.
+option.AUTO_EXPOSURE_RATE_BRIGHT_TO_DIM      = Adaptation Speed — Darkening
+option.AUTO_EXPOSURE_RATE_BRIGHT_TO_DIM.comment = Adjusts how quickly exposure adapts when the scene gets darker (e.g., entering a cave). Higher = faster dimming.
 option.MANUAL_EXPOSURE_VALUE                 = 수동 노출 값
 option.MANUAL_EXPOSURE_VALUE.comment = Controls manual exposure value.
 option.MANUAL_EXPOSURE_USE_SCREEN_BRIGHTNESS = 밝기 슬라이더 사용
@@ -1023,47 +1024,47 @@ screen.vignette=Vignette
 screen.bloom=Bloom
 screen.voxy=Voxy
 option.MOON_PHASE_INFLUENCE_INTENSITY=Moon Phase Influence
-option.MOON_PHASE_INFLUENCE_INTENSITY.comment = Toggles moon phase influence.
-option.MOON_PHASE_NIGHT_LIGHTING = Moon Phased Night Lighting
-option.MOON_PHASE_NIGHT_LIGHTING.comment = Enables moon-phase-driven variation in night time lighting.
-option.MOON_PHASE_NIGHT_LIGHTING_INTENSITY=Night Lighting Intensity
-option.MOON_PHASE_NIGHT_LIGHTING_INTENSITY.comment = Toggles night lighting intensity.
-option.MOON_PHASE_NIGHT_LIGHTING_CONTRAST=Night Lighting Contrast
-option.MOON_PHASE_NIGHT_LIGHTING_CONTRAST.comment = Toggles night lighting contrast.
-option.MOON_PHASE_NIGHT_LIGHTING_SATURATION=Night Lighting Saturation
-option.MOON_PHASE_NIGHT_LIGHTING_SATURATION.comment = Toggles night lighting saturation.
-option.MOON_PHASE_NIGHT_ATMOSPHERE = Moon Phased Night Atmosphere
-option.MOON_PHASE_NIGHT_ATMOSPHERE.comment = Enables moon-phase-driven variation in night time atmosphere.
-option.MOON_PHASE_NIGHT_ATMOSPHERE_INTENSITY=Night Atmosphere Intensity
-option.MOON_PHASE_NIGHT_ATMOSPHERE_INTENSITY.comment = Toggles night atmosphere intensity.
-option.MOON_PHASE_NIGHT_ATMOSPHERE_CONTRAST=Night Atmosphere Contrast
-option.MOON_PHASE_NIGHT_ATMOSPHERE_CONTRAST.comment = Toggles night atmosphere contrast.
-option.MOON_PHASE_NIGHT_ATMOSPHERE_SATURATION=Night Atmosphere Saturation
-option.MOON_PHASE_NIGHT_ATMOSPHERE_SATURATION.comment = Toggles night atmosphere saturation.
-option.MOON_PHASE_REFLECTIONS = Moon Phased Reflections
-option.MOON_PHASE_REFLECTIONS.comment = Enables moon-phase-driven variation in reflections.
-option.MOON_PHASE_REFLECTIONS_INTENSITY=Reflections Intensity
-option.MOON_PHASE_REFLECTIONS_INTENSITY.comment = Toggles reflections intensity.
-option.MOON_PHASE_REFLECTIONS_CONTRAST=Reflections Contrast
-option.MOON_PHASE_REFLECTIONS_CONTRAST.comment = Toggles reflections contrast.
-option.MOON_PHASE_REFLECTIONS_SATURATION=Reflections Saturation
-option.MOON_PHASE_REFLECTIONS_SATURATION.comment = Toggles reflections saturation.
+option.MOON_PHASE_INFLUENCE_INTENSITY.comment = Adjusts how strongly the current moon phase affects all moon-phased effects below. 0 = no effect, 1 = full effect.
+option.MOON_PHASE_NIGHT_LIGHTING = Moon-Phased Night Lighting
+option.MOON_PHASE_NIGHT_LIGHTING.comment = When enabled, night-time brightness, contrast and saturation shift with the lunar cycle — brighter near full moon, dimmer near new moon.
+option.MOON_PHASE_NIGHT_LIGHTING_INTENSITY=Night Brightness
+option.MOON_PHASE_NIGHT_LIGHTING_INTENSITY.comment = Adjusts how much the moon phase brightens or dims night lighting.
+option.MOON_PHASE_NIGHT_LIGHTING_CONTRAST=Night Contrast
+option.MOON_PHASE_NIGHT_LIGHTING_CONTRAST.comment = Adjusts how much the moon phase changes contrast at night.
+option.MOON_PHASE_NIGHT_LIGHTING_SATURATION=Night Saturation
+option.MOON_PHASE_NIGHT_LIGHTING_SATURATION.comment = Adjusts how much the moon phase changes color saturation at night.
+option.MOON_PHASE_NIGHT_ATMOSPHERE = Moon-Phased Night Atmosphere
+option.MOON_PHASE_NIGHT_ATMOSPHERE.comment = When enabled, fog and sky atmosphere at night vary with the lunar cycle.
+option.MOON_PHASE_NIGHT_ATMOSPHERE_INTENSITY=Night Fog Intensity
+option.MOON_PHASE_NIGHT_ATMOSPHERE_INTENSITY.comment = Adjusts how strongly the moon phase affects atmospheric fog brightness at night.
+option.MOON_PHASE_NIGHT_ATMOSPHERE_CONTRAST=Night Fog Contrast
+option.MOON_PHASE_NIGHT_ATMOSPHERE_CONTRAST.comment = Adjusts how strongly the moon phase affects atmospheric contrast at night.
+option.MOON_PHASE_NIGHT_ATMOSPHERE_SATURATION=Night Fog Saturation
+option.MOON_PHASE_NIGHT_ATMOSPHERE_SATURATION.comment = Adjusts how strongly the moon phase affects atmospheric color saturation at night.
+option.MOON_PHASE_REFLECTIONS = Moon-Phased Reflections
+option.MOON_PHASE_REFLECTIONS.comment = When enabled, the brightness and color of reflections vary with the lunar cycle.
+option.MOON_PHASE_REFLECTIONS_INTENSITY=Reflection Brightness
+option.MOON_PHASE_REFLECTIONS_INTENSITY.comment = Adjusts how strongly the moon phase affects reflection brightness at night.
+option.MOON_PHASE_REFLECTIONS_CONTRAST=Reflection Contrast
+option.MOON_PHASE_REFLECTIONS_CONTRAST.comment = Adjusts how strongly the moon phase affects reflection contrast at night.
+option.MOON_PHASE_REFLECTIONS_SATURATION=Reflection Saturation
+option.MOON_PHASE_REFLECTIONS_SATURATION.comment = Adjusts how strongly the moon phase affects reflection color saturation at night.
 option.IBL=Image Based Lighting
-option.IBL.comment = Enable image-based lighting using a precomputed split-sum approximation. Adds diffuse irradiance and prefiltered specular reflections sampled from the live sky map. Costs ~12ms/frame on M1.
-option.IBL_DIFFUSE_SAMPLES=IBL Diffuse Samples
-option.IBL_DIFFUSE_SAMPLES.comment = Sample count for the diffuse irradiance precompute. Higher = less noise, lower performance.
-option.IBL_DIFFUSE_INTENSITY=IBL Diffuse Intensity
-option.IBL_DIFFUSE_INTENSITY.comment = Brightness multiplier for the diffuse IBL contribution.
-option.IBL_SPECULAR_SAMPLES=IBL Specular Samples
-option.IBL_SPECULAR_SAMPLES.comment = Sample count for the prefiltered specular panorama. Higher = less noise, lower performance.
-option.IBL_SPECULAR_INTENSITY=IBL Specular Intensity
-option.IBL_SPECULAR_INTENSITY.comment = Brightness multiplier for the specular IBL contribution.
+option.IBL.comment=Adds natural sky lighting to surfaces not directly in sunlight. Brightens shaded sides and interiors with soft sky-colored light and adds subtle environment reflections to smooth and wet materials. The contribution updates live with time of day and weather. High GPU cost — disable on low-end or integrated graphics.
+option.IBL_DIFFUSE_SAMPLES=Diffuse Quality
+option.IBL_DIFFUSE_SAMPLES.comment=Quality of the soft sky illumination. Higher sample counts produce smoother, less noisy shading in shadows at the cost of performance.
+option.IBL_DIFFUSE_INTENSITY=Diffuse Intensity
+option.IBL_DIFFUSE_INTENSITY.comment=Adjusts the brightness of soft sky light in shaded areas. Increase to brighten shadows, decrease to deepen them.
+option.IBL_SPECULAR_SAMPLES=Reflection Quality
+option.IBL_SPECULAR_SAMPLES.comment=Quality of sky reflections on smooth materials. Higher counts produce cleaner, less noisy reflections at higher GPU cost.
+option.IBL_SPECULAR_INTENSITY=Reflection Intensity
+option.IBL_SPECULAR_INTENSITY.comment=Adjusts the strength of sky reflections on shiny surfaces. Higher = more visible environment reflections.
 option.FOG_SMOOTHING=Fog Smoothing
-option.FOG_SMOOTHING.comment = Controls fog smoothing.
-option.FOG_SMOOTHING_RADIUS=Fog Smoothing Radius
-option.FOG_SMOOTHING_RADIUS.comment = Controls fog smoothing radius.
-option.CLOUD_LIGHTING_BOUNCES=Cloud Lighting Bounces
-option.CLOUD_LIGHTING_BOUNCES.comment = Toggles cloud lighting bounces.
+option.FOG_SMOOTHING.comment = When enabled, smoothly blends fog between frames to reduce flickering. Small performance cost.
+option.FOG_SMOOTHING_RADIUS=Fog Blur Radius
+option.FOG_SMOOTHING_RADIUS.comment = Adjusts the spatial blur radius for fog smoothing. Higher = softer, more blended fog at higher cost.
+option.CLOUD_LIGHTING_BOUNCES=Cloud Light Bounces
+option.CLOUD_LIGHTING_BOUNCES.comment = Adjusts how many times light bounces inside clouds. Higher = more realistic multiple scattering but higher cost. 0 = single scattering only.
 option.MATERIAL_MAPPING_MODE=Material Mapping Mode
 option.MATERIAL_MAPPING_MODE.comment = Controls how PBR material textures (specular/normal maps via labPBR or OldSchoolPBR conventions) are decoded from resource packs. OFF disables, HARDCODED uses built-in per-block values, SPECULAR_ONLY reads just the specular map, NORMALS_ONLY reads just the normal map, SPECULAR_NORMALS reads both.
 value.MATERIAL_MAPPING_OFF=Off
@@ -1079,12 +1080,12 @@ option.SSS=SSS
 option.SSS.comment = Enable subsurface scattering on organic blocks (leaves, wax, skin). Light enters the surface, scatters inside, and exits at a different point — gives a soft, translucent look.
 option.SSS_SHEEN_INTENSITY=SSS Sheen Intensity
 option.SSS_SHEEN_INTENSITY.comment = Brightness multiplier for the subsurface sheen effect.
-option.TAA_INTENSITY=TAA Intensity
-option.TAA_INTENSITY.comment = Toggles taa intensity.
-option.FXAA_INTENSITY=FXAA Intensity
-option.FXAA_INTENSITY.comment = Toggles fxaa intensity.
+option.TAA_INTENSITY=TAA Strength
+option.TAA_INTENSITY.comment = Adjusts the blend weight of temporal anti-aliasing. Higher = smoother image with less flicker but more ghosting on moving objects.
+option.FXAA_INTENSITY=FXAA Strength
+option.FXAA_INTENSITY.comment = Adjusts the strength of fast approximate anti-aliasing. Higher = smoother edges but softer image.
 option.VOXY_QUALITY=Voxy Quality
-option.VOXY_QUALITY.comment = Toggles voxy quality.
+option.VOXY_QUALITY.comment = Selects the detail level for Voxy (Distant Horizons LOD) terrain. Higher = more triangles and sharper distant terrain at higher cost.
 value.VOXY_QUALITY_OFF=Off
 value.VOXY_QUALITY_BASIC=Basic
 value.VOXY_QUALITY_STANDARD=Standard
@@ -1092,11 +1093,11 @@ value.VOXY_QUALITY_HIGH=High
 option.VOXY_LIGHTING_MODE=Voxy Lighting Mode
 option.VOXY_LIGHTING_MODE.comment = Selects the voxy lighting mode mode or method.
 option.VOXY_BRIGHTNESS=Voxy Brightness
-option.VOXY_BRIGHTNESS.comment = Toggles voxy brightness.
+option.VOXY_BRIGHTNESS.comment = Adjusts the overall brightness of Voxy distant terrain to better match nearby chunks.
 option.VOXY_SHADOWS=Voxy Shadows
-option.VOXY_SHADOWS.comment = Toggles voxy shadows.
+option.VOXY_SHADOWS.comment = When enabled, Voxy distant terrain casts and receives shadows like nearby terrain. Moderate performance cost.
 option.VOXY_REFLECTIONS=Voxy Reflections
-option.VOXY_REFLECTIONS.comment = Toggles voxy reflections.
+option.VOXY_REFLECTIONS.comment = When enabled, Voxy terrain appears in screen-space reflections. Adds distant reflections on water at higher cost.
 option.WATER_WAVES_NOISE_STRENGTH=Water Waves Noise Strength
 option.WATER_WAVES_NOISE_STRENGTH.comment = Controls water waves noise strength.
 option.WATER_TEXTURE_INTENSITY=Water Texture Intensity
@@ -1111,8 +1112,8 @@ option.CAVE_FOG_INTENSITY=Cave Fog Intensity
 option.CAVE_FOG_INTENSITY.comment = Controls cave fog intensity.
 option.DESERT_SANDSTORM_INTENSITY=Desert Sandstorm Intensity
 option.DESERT_SANDSTORM_INTENSITY.comment = Controls desert sandstorm intensity.
-option.RAINBOWS_INTENSITY=Rainbows Intensity
-option.RAINBOWS_INTENSITY.comment = Toggles rainbows intensity.
+option.RAINBOWS_INTENSITY=Rainbow Visibility
+option.RAINBOWS_INTENSITY.comment = Adjusts the opacity and vividness of rainbows during/after rain. Higher = brighter, more saturated rainbow.
 option.END_SUN_EFFECT_INTENSITY=End Sun Effect Intensity
 option.END_SUN_EFFECT_INTENSITY.comment = Controls end sun effect intensity.
 option.SKY_GROUND_INTENSITY=Sky Ground Intensity
