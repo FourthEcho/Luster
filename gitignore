@@ -1,0 +1,194 @@
+# ================================
+# OS generated files
+# ================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+.fseventsd
+.DocumentRevisions-V100
+.TemporaryItems
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.stackdump
+
+# Windows Explorer / Office temporary files
+~$*
+
+# Linux / Unix desktop metadata
+.directory
+.Trash-*
+.nfs*
+
+# ================================
+# Editors / IDEs
+# ================================
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# JetBrains
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# NetBeans
+nbproject/private/
+nbbuild/
+dist/
+.nb-gradle/
+
+# Vim
+*.swp
+*.swo
+*.swn
+*~
+
+# Emacs
+.#*
+\#*\#
+
+# Visual Studio
+.vs/
+*.user
+*.userosscache
+*.suo
+*.vcxproj.user
+
+# ================================
+# General temporary / backup files
+# ================================
+
+*.tmp
+*.temp
+*.bak
+*.backup
+*.old
+*.orig
+*.rej
+*.log
+*.cache
+*.pid
+*.seed
+*.lock
+
+# Crash dumps / diagnostics
+*.dmp
+*.dump
+
+# ================================
+# Archives created during development
+# ================================
+
+# Ignore local build/package archives, but keep intentional release archives
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z
+*.rar
+
+# ================================
+# Build / generated output
+# ================================
+
+build/
+out/
+target/
+bin/
+obj/
+debug/
+release/
+cmake-build-*/
+
+# ================================
+# Language/tool caches
+# ================================
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.venv/
+venv/
+env/
+env*/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.npm/
+.yarn/
+.pnpm-store/
+
+# Java / Gradle / Maven
+.gradle/
+.mvn/timing.properties
+
+# Rust
+/target/
+Cargo.lock
+
+# Go
+/bin/
+
+# ================================
+# Generated documentation / coverage
+# ================================
+
+coverage/
+reports/
+site/
+
+# ================================
+# Local environment / secrets
+# ================================
+
+.env
+.env.*
+!.env.example
+*.local
+
+# ================================
+# Minecraft / shaderpack local clutter
+# ================================
+
+# Common local test/export folders
+shaderpacks-local/
+exports/
+local-builds/
+
+# ================================
+# Generated editor metadata
+# ================================
+
+*.orig
+*.swp
+*.swo
