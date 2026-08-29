@@ -2,9 +2,9 @@
 # Profiles control preset quality levels. Each profile sets shadow resolution,
 # AO method, cloud steps, reflection quality and more. Switch profiles to
 # trade performance for quality — Low for potato PCs, Ultra for high-end.
-# Mac Compatible (red) disables Mac-incompatible or heavy features (IBL,
-# Colored Lights, Colored Shadows/VPS) and keeps GTAO + 4× Aniso for smooth
-# Mac performance.
+# Mac Compatible (red) disables Mac-incompatible or heavy features
+# (Directional Sky Ambient, Colored Lights, Colored Shadows/VPS) and keeps
+# GTAO + 4× Aniso for smooth Mac performance.
 
 profile.low                            = §eLow
 profile.medium                         = §aMedium
@@ -1014,7 +1014,7 @@ option.NOISE_ON_DH_TERRAIN.comment = Controls whether noise is applied to Distan
 # Photonics
 
 
-screen.ibl=Image Based Lighting
+screen.directional_ambient_lighting=Directional Ambient Lighting
 screen.indirect_lighting=Indirect Lighting
 screen.aa=Anti-Aliasing
 screen.motion_blur=Motion Blur
@@ -1053,16 +1053,12 @@ option.MOON_PHASE_REFLECTIONS_SATURATION.comment = Adjusts how strongly the moon
 
 
 
-option.IBL=Image Based Lighting
-option.IBL.comment=Adds natural sky lighting to surfaces not directly in sunlight. Brightens shaded sides and interiors with soft sky-colored light and adds subtle environment reflections to smooth and wet materials. The contribution updates live with time of day and weather. High GPU cost — disable on low-end or integrated graphics.
-option.IBL_DIFFUSE_SAMPLES=Diffuse Quality
-option.IBL_DIFFUSE_SAMPLES.comment=Quality of the soft sky illumination. Higher sample counts produce smoother, less noisy shading in shadows at the cost of performance.
-option.IBL_DIFFUSE_INTENSITY=Diffuse Intensity
-option.IBL_DIFFUSE_INTENSITY.comment=Adjusts the brightness of soft sky light in shaded areas. Increase to brighten shadows, decrease to deepen them.
-option.IBL_SPECULAR_SAMPLES=Reflection Quality
-option.IBL_SPECULAR_SAMPLES.comment=Quality of sky reflections on smooth materials. Higher counts produce cleaner, less noisy reflections at higher GPU cost.
-option.IBL_SPECULAR_INTENSITY=Reflection Intensity
-option.IBL_SPECULAR_INTENSITY.comment=Adjusts the strength of sky reflections on shiny surfaces. Higher = more visible environment reflections.
+option.SH_SKYLIGHT=SH Skylight
+option.SH_SKYLIGHT.comment=Adds natural sky lighting to surfaces not directly in sunlight. Brightens shaded sides and interiors with soft sky-colored light using a compact H-Basis projection of the live sky map. The contribution updates live with time of day and weather, and uses the bent normal plus AO-driven cone-narrowing so corners and crevices pick up the correct average visible sky direction. Far cheaper than per-fragment hemisphere sampling — enabled by default on High/Ultra profiles, disabled on Mac Compatible for GPU compatibility.
+option.SH_SKYLIGHT_INTENSITY=Intensity
+option.SH_SKYLIGHT_INTENSITY.comment=Adjusts the brightness of the soft sky light in shaded areas. Increase to brighten shadows, decrease to deepen them.
+option.SH_SKYLIGHT_QUALITY=Quality
+option.SH_SKYLIGHT_QUALITY.comment=Controls the quality of the live sky projection. Higher settings use more sky samples for smoother, more accurate skylight at higher GPU cost.
 
 option.RSM_GI=Reflective Shadow Map GI
 option.RSM_GI.comment=Enable single-bounce indirect lighting using a Reflective Shadow Map. Gathers bounced light and color from sunlit surfaces near each shaded pixel, using the existing shadow map as the light source. No compute shaders required. Note: Disabled by default on Mac Compatible profile for GPU compatibility.

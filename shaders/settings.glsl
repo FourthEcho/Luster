@@ -655,12 +655,15 @@ const float wetnessHalflife         = 70.0;
 
 
 
-// ---- Image Based Lighting (IBL) ----
-  //#define IBL
-  #define IBL_DIFFUSE_SAMPLES 16 // [1 2 4 8 16 32]
-  #define IBL_DIFFUSE_INTENSITY 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.20 1.50 2.00]
-  #define IBL_SPECULAR_SAMPLES 16 // [1 2 4 8 16 32]
-  #define IBL_SPECULAR_INTENSITY 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.20 1.50 2.00]
+// ---- Directional Ambient Lighting (H-Basis Skylight) ----
+// Enabled by the High/Ultra profiles; disabled on Low/Medium/Mac Compatible
+// (same placement as the former IBL toggle). Internally implemented with a
+// 6-coefficient H-Basis projection of the live sky map rather than a 9-term
+// SH basis, but that distinction is invisible to users so the option keeps
+// the SH_SKYLIGHT naming for continuity with the older category.
+//#define SH_SKYLIGHT
+  #define SH_SKYLIGHT_INTENSITY 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.75 0.80 0.90 1.00 1.20 1.50 2.00]
+  #define SH_SKYLIGHT_QUALITY 512 // [128 256 512 1024]
 
 // ---- Indirect Lighting (RSM GI) ----
 // Enabled by the High/Ultra/Mac Compatible profiles; disabled on Low/Medium.
@@ -772,7 +775,7 @@ const float wetnessHalflife         = 70.0;
 #ifdef COLORED_LIGHTS
 #endif
 
-#ifdef IBL
+#ifdef SH_SKYLIGHT
 #endif
 
 #ifdef FOG_SMOOTHING

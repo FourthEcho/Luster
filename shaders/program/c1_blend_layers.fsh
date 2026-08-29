@@ -57,8 +57,6 @@ uniform sampler2D colortex11; // clouds history
 uniform sampler2D colortex12; // clouds data
 uniform sampler2D colortex13; // rendered translucent layer
 
-#endif
-
 #ifdef SHADOW
 #ifdef AIR_FOG_COLORED_LIGHT_SHAFTS
 uniform sampler2D shadowcolor0;

@@ -92,25 +92,25 @@ vec4 catmull_rom_filter(sampler2D sampler, vec2 coord, out float confidence) {
 
     vec4 result = vec4(0.0);
     result
-        += texture(sampler, vec2(tex_pos_0.x, tex_pos_0.y), 0.0) * w0.x * w0.y;
-    result += texture(sampler, vec2(tex_pos_12.x, tex_pos_0.y), 0.0) * w12.x
+        += textureLod(sampler, vec2(tex_pos_0.x, tex_pos_0.y), 0.0) * w0.x * w0.y;
+    result += textureLod(sampler, vec2(tex_pos_12.x, tex_pos_0.y), 0.0) * w12.x
         * w0.y;
     result
-        += texture(sampler, vec2(tex_pos_3.x, tex_pos_0.y), 0.0) * w3.x * w0.y;
+        += textureLod(sampler, vec2(tex_pos_3.x, tex_pos_0.y), 0.0) * w3.x * w0.y;
 
-    result += texture(sampler, vec2(tex_pos_0.x, tex_pos_12.y), 0.0) * w0.x
+    result += textureLod(sampler, vec2(tex_pos_0.x, tex_pos_12.y), 0.0) * w0.x
         * w12.y;
-    result += texture(sampler, vec2(tex_pos_12.x, tex_pos_12.y), 0.0) * w12.x
+    result += textureLod(sampler, vec2(tex_pos_12.x, tex_pos_12.y), 0.0) * w12.x
         * w12.y;
-    result += texture(sampler, vec2(tex_pos_3.x, tex_pos_12.y), 0.0) * w3.x
+    result += textureLod(sampler, vec2(tex_pos_3.x, tex_pos_12.y), 0.0) * w3.x
         * w12.y;
 
     result
-        += texture(sampler, vec2(tex_pos_0.x, tex_pos_3.y), 0.0) * w0.x * w3.y;
-    result += texture(sampler, vec2(tex_pos_12.x, tex_pos_3.y), 0.0) * w12.x
+        += textureLod(sampler, vec2(tex_pos_0.x, tex_pos_3.y), 0.0) * w0.x * w3.y;
+    result += textureLod(sampler, vec2(tex_pos_12.x, tex_pos_3.y), 0.0) * w12.x
         * w3.y;
     result
-        += texture(sampler, vec2(tex_pos_3.x, tex_pos_3.y), 0.0) * w3.x * w3.y;
+        += textureLod(sampler, vec2(tex_pos_3.x, tex_pos_3.y), 0.0) * w3.x * w3.y;
 
     // Calculate confidence-of-quality factor using UE method (maximum weight)
     confidence = max_of(vec4(w0.x, w1.x, w2.x, w3.x))

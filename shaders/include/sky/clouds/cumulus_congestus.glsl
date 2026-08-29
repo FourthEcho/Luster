@@ -1,6 +1,6 @@
-#include "/include/sky/clouds/cloud_bounce.glsl"
-#if !defined INCLUDe_SKY_CLOUDS_CUMULUS_CONGESTUS
+#if !defined INCLUDE_SKY_CLOUDS_CUMULUS_CONGESTUS
 #define INCLUDE_SKY_CLOUDS_CUMULUS_CONGESTUS
+#include "/include/sky/clouds/cloud_bounce.glsl"
 
 // Alternative 1st layer: distant cumulus congestus clouds
 
@@ -403,4 +403,5 @@ CloudsResult draw_cumulus_congestus_clouds(
     );
 }
 
-#endif
+
+#endif // INCLUDE_SKY_CLOUDS_CUMULUS_CONGESTUS

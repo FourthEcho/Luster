@@ -29,7 +29,6 @@ OverworldFogParameters fog_params;
 
 #include "/include/fog/simple_fog.glsl"
 #include "/include/lighting/diffuse_lighting.glsl"
-#include "/include/lighting/ibl/ibl.glsl"
 #include "/include/lighting/shadows/pcss.glsl"
 #include "/include/lighting/specular_lighting.glsl"
 #include "/include/misc/lod_mod_support.glsl"
@@ -143,8 +142,12 @@ void voxy_emitFragment(VoxyFragmentParameters parameters) {
         = texelFetch(vxDepthTexOpaque, ivec2(gl_FragCoord.xy), 0).x;
 
     // Get direct light color. The old SH skylight slot is retired;
-    // surface ambient is rebuilt from the live IBL environment below.
+    // surface ambient uses the precomputed baked ambient that the sky
+    // shader publishes to colortex4(191, 1). The per-frame H-Basis
+    // coefficients are only available to the deferred path, so Voxy
+    // translucents fall back to the baked ambient term.
     light_color = texelFetch(colortex4, ivec2(191, 0), 0).rgb;
+    ambient_color = texelFetch(colortex4, ivec2(191, 1), 0).rgb;
 
     // Get base properties
 
@@ -158,13 +161,10 @@ void voxy_emitFragment(VoxyFragmentParameters parameters) {
                   )
         * (float(int(parameters.face) & 1) * 2.0 - 1.0);
 
-    // Replace the retired SH skylight with directional IBL irradiance.
-    // A small fixed sample set keeps this path inexpensive while preserving
-    // the sky directionality that the old SH representation supplied.
-    ambient_color = get_ibl_sky_irradiance_shared(
-        normal,
-        vec2(0.37, 0.73)
-    ) * clamp01(parameters.lightMap.y);
+    // Apply the baked sky ambient published to colortex4(191, 1). This
+    // matches the deferred non-skylight path so Voxy translucents stay
+    // consistent with the rest of the forward-shaded world.
+    ambient_color *= clamp01(parameters.lightMap.y);
 
     uint material_mask = max(parameters.customId - 10000u, 0u);
 

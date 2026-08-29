@@ -25,6 +25,10 @@ in vec2 uv;
 flat in vec3 ambient_color;
 flat in vec3 light_color;
 
+// 6 RGB H-Basis sky ambient coefficients projected once per frame from
+// the live sky map. See include/lighting/ambient/h_basis_skylight.glsl.
+flat in vec3 sky_h[6];
+
 #if defined WORLD_OVERWORLD
 flat in vec3 sun_color;
 flat in vec3 moon_color;
@@ -161,7 +165,7 @@ const bool colortex11MipmapEnabled = true;
 #define TEMPORAL_REPROJECTION
 
 #include "/include/fog/simple_fog.glsl"
-#include "/include/lighting/ibl/ibl.glsl"
+#include "/include/lighting/ambient/h_basis_skylight.glsl"
 #include "/include/lighting/diffuse_lighting.glsl"
 #include "/include/lighting/shadows/common.glsl"
 #include "/include/lighting/shadows/pcss.glsl"
@@ -580,20 +584,22 @@ void main() {
             LoV
         );
 
-#ifdef IBL
-        // Dynamic environment lighting. The sky map is already generated at
-        // frame resolution for the current atmosphere/cloud state, so IBL is
-        // evaluated directly from it rather than using a stale offline map.
-        vec2 ibl_dither = hash2(vec3(vec2(texel), 0.0));
-        vec3 ibl_current = get_image_based_lighting(
+#ifdef SH_SKYLIGHT
+        // H-Basis sky ambient: reconstructs cosine-weighted hemisphere
+        // irradiance around the bent normal from the per-frame projection
+        // computed in d4_deferred_shading.vsh. The bent normal + AO
+        // cone-narrowing replace the old IBL's plain-normal hemisphere
+        // sampling at a fraction of the cost.
+        vec3 sh_skylight = get_h_basis_skylight(
             material,
             normal,
-            -direction_world,
             bent_normal,
+            ao,
             clamp01(light_levels.y),
-            ibl_dither
+            SH_SKYLIGHT_INTENSITY,
+            sky_h
         );
-        fragment_color += ibl_current;
+        fragment_color += sh_skylight;
 #endif
 
 #if defined RSM_GI && defined SHADOW && !defined WORLD_NETHER
@@ -604,7 +610,7 @@ void main() {
             vec3 rsm_gi = get_rsm_gi(
                 position_scene,
                 normal,
-                clamp01(light_levels.y),
+                light_levels.y,
                 rsm_dither
             );
 

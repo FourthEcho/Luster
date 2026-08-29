@@ -1,3 +1,5 @@
+#if !defined INCLUDE_BUFFERS
+#define INCLUDE_BUFFERS
 /*
 (included by final.fsh)
 
@@ -51,3 +53,5 @@ const vec4 colortex16ClearColor = vec4(0.0, 0.0, 0.0, 0.0);
 #endif
 
 */
+
+#endif // INCLUDE_BUFFERS

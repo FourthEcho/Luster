@@ -16,6 +16,11 @@ out vec2 uv;
 flat out vec3 ambient_color;
 flat out vec3 light_color;
 
+// 6 RGB H-Basis sky ambient coefficients, projected once per frame from
+// the live sky map. Evaluated per-fragment against the bent normal with
+// AO-driven cone-narrowing. See include/lighting/ambient/h_basis_skylight.glsl.
+flat out vec3 sky_h[6];
+
 #if defined WORLD_OVERWORLD
 flat out vec3 sun_color;
 flat out vec3 moon_color;
@@ -88,6 +93,8 @@ uniform float time_midnight;
 #include "/include/weather/rainbow.glsl"
 #endif
 
+#include "/include/lighting/ambient/h_basis_skylight.glsl"
+#include "/include/utility/bicubic.glsl"
 #include "/include/utility/random.glsl"
 #include "/include/utility/sampling.glsl"
 
@@ -96,6 +103,18 @@ void main() {
 
     light_color = texelFetch(colortex4, ivec2(191, 0), 0).rgb;
     ambient_color = texelFetch(colortex4, ivec2(191, 1), 0).rgb;
+
+    // Project the live sky map into 6 RGB H-Basis coefficients once per
+    // frame. Only 3 vertices run this code (fullscreen triangle), so the
+    // 512-sample projection is amortised across the whole frame and the
+    // fragment stage reconstructs cosine-weighted irradiance in closed
+    // form per pixel — far cheaper than the previous per-fragment
+    // hemisphere IBL sampling.
+#if defined SH_SKYLIGHT && (defined WORLD_OVERWORLD || defined WORLD_END)
+    project_sky_h_basis(sky_h);
+#else
+    for (int i = 0; i < 6; ++i) sky_h[i] = vec3(0.0);
+#endif
 
 #if defined WORLD_OVERWORLD
     Weather weather = get_weather();

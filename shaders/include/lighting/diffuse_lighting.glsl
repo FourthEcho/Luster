@@ -159,8 +159,9 @@ vec3 get_sky_lighting(
     vec3 lighting = vec3(0.0);
 
 #if defined WORLD_NETHER
-    // IBL is Overworld-only (it samples the dynamic sky map), so the Nether
-    // still needs its baked ambient_color term regardless of IBL.
+    // Nether keeps the baked ambient_color term; the H-Basis skylight path
+    // is Overworld/End only (it samples the dynamic sky map), so the Nether
+    // ambient is the only contribution here.
     vec3 skylight = ambient_color * ao;
     vec3 skylight_up = skylight;
 
@@ -171,21 +172,11 @@ vec3 get_sky_lighting(
         * mix(skylight, vec3(dot(skylight, luminance_weights_rec2020)), 0.5);
 
     lighting += skylight * get_skylight_falloff(light_levels.y);
-#elif !defined IBL
-    // Baked ambient_color skylight (IBL off).
-    vec3 skylight = ambient_color * ao;
-    vec3 skylight_up = skylight;
-
-    skylight = mix(skylight, 0.5 * skylight_up * ao, material.sss_amount);
-    skylight += ambient_sss * skylight_up * material.sss_amount * 2.0;
-
-    lighting += skylight * get_skylight_falloff(light_levels.y);
 #else
-    // IBL is now contributive (additive), not replacive: keep the baked
-    // ambient term and add get_ibl_diffuse/specular from
-    // d4_deferred_shading.fsh:576 on top. Preserves baseline skylight
-    // contrast in caves/shade and avoids washout/flat look from full
-    // replacement; tune IBL_DIFFUSE_INTENSITY/SPECULAR_INTENSITY to balance.
+    // Baked ambient_color skylight. The H-Basis sky ambient (when
+    // SH_SKYLIGHT is enabled) is added on top from
+    // program/d4_deferred_shading.fsh so this baseline skylight contrast
+    // in caves/shade is preserved; tune SH_SKYLIGHT_INTENSITY to balance.
     vec3 skylight = ambient_color * ao;
     vec3 skylight_up = skylight;
 
@@ -228,9 +219,9 @@ vec3 get_diffuse_lighting(
 
     vec3 lighting = vec3(0.0);
 
-    // Non-directional lighting sources (blocklight/IBL/ambient) must not depend
-    // on surface orientation. Direct celestial lighting is evaluated separately
-    // from NoL and the shadow term below.
+    // Non-directional lighting sources (blocklight/ambient/H-Basis skylight)
+    // must not depend on surface orientation. Direct celestial lighting is
+    // evaluated separately from NoL and the shadow term below.
     float directional_lighting = 1.0;
 
     // Negative SSS depth => SSS blocked by occluder (SSRT SSS)
@@ -326,7 +317,8 @@ vec3 get_diffuse_lighting(
         directional_lighting
     );
 
-// IBL is wired in from program/d4_deferred_shading.fsh where view_dir is in scope.
+// H-Basis skylight is wired in from program/d4_deferred_shading.fsh where
+// view_dir, bent_normal and sky_h[6] are in scope.
 
     // Blocklight
 

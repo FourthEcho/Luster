@@ -177,7 +177,6 @@ vec3 light_color, ambient_color;
 
 #include "/include/fog/simple_fog.glsl"
 #include "/include/lighting/diffuse_lighting.glsl"
-#include "/include/lighting/ibl/ibl.glsl"
 #include "/include/lighting/shadows/pcss.glsl"
 #include "/include/lighting/specular_lighting.glsl"
 #include "/include/misc/lod_mod_support.glsl"
@@ -451,11 +450,13 @@ void main() {
     vec3 normal = tbn[2];
     vec3 normal_tangent = vec3(0.0, 0.0, 1.0);
 
-    // Resolve the former SH skylight input from the live IBL environment.
-    ambient_color = get_ibl_sky_irradiance_shared(
-        normalize(normal),
-        vec2(0.41, 0.67)
-    ) * clamp01(light_levels.y);
+    // Resolve the ambient_color from the precomputed sky ambient that
+    // the sky shader writes to colortex4. Translucents are forward-shaded
+    // and don't have access to the per-frame H-Basis coefficients projected
+    // by d4_deferred_shading.vsh, so they fall back to the same baked
+    // ambient term the non-skylight deferred path uses.
+    ambient_color = texelFetch(colortex4, ivec2(191, 1), 0).rgb
+        * clamp01(light_levels.y);
 
     bool is_water = material_mask == MATERIAL_WATER;
     bool is_nether_portal = material_mask == MATERIAL_NETHER_PORTAL;
@@ -624,11 +625,12 @@ void main() {
 #endif
     }
 
-    // Replace the retired SH skylight with directional IBL irradiance.
-    ambient_color = get_ibl_sky_irradiance_shared(
-        normalize(normal),
-        vec2(0.41, 0.67)
-    ) * clamp01(adjusted_light_levels.y);
+    // Replace the retired directional irradiance with the precomputed
+    // sky ambient term. Translucents don't carry the per-frame H-Basis
+    // coefficients projected by d4_deferred_shading.vsh, so we use the
+    // baked ambient_color that the sky shader publishes to colortex4.
+    ambient_color = texelFetch(colortex4, ivec2(191, 1), 0).rgb
+        * clamp01(adjusted_light_levels.y);
 
     // Shadows
 
