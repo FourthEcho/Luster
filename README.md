@@ -11,10 +11,6 @@ Atmosphere · lighting · clouds · water · image quality — built with Iris a
 
 [Download](#installation) · [Features](#features) · [Compatibility](#compatibility) · [Configuration](#configuration) · [Issues](https://github.com/shashankpgowda/Luster/issues)
 
-<img src="docs/images/scenery.png" alt="Luster shader pack screenshot" width="800">
-
-</div>
-
 ---
 
 ## About
@@ -71,7 +67,7 @@ Settings are organized into: **World** (weather, moon phase, foliage) · **Light
 
 ## Development
 
-Luster is actively developed. The source tree is organized into reusable modules under `shaders/include/`, rendering programs under `shaders/program/`, and world-specific passes under the `world*` directories. Bug reports and Luster-specific issues go in the [issue tracker](https://github.com/shashankpgowda/Luster/issues). Colored Lights is NOT mac supporte yet.
+Luster is actively developed. The source tree is organized into reusable modules under `shaders/include/`, rendering programs under `shaders/program/`, and world-specific passes under the `world*` directories. Bug reports and Luster-specific issues go in the [issue tracker](https://github.com/shashankpgowda/Luster/issues). Colored Lights is NOT mac supported yet.
 
 ## Acknowledgements
 
