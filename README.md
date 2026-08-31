@@ -55,8 +55,7 @@
 * Nvidia 
 * AMD 
 * Intel 
-* **_NOT_** Apple Metal
-  * You may be able to get the shader pack to work by disabling some settings: try _SH Skylight_ and _Colored Shadows_.
+* Apple(Make sure SH Skylight and Colored Lights are off. If you still get an error than turn off Colored shadows. If still an error turn of Variable Penumbra Shadows too)
 ### Shader loaders
 * Iris - version 1.5 and above
 * OptiFine - on Minecraft 1.16.5 and above
