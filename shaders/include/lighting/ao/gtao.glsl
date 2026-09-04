@@ -5,8 +5,6 @@
 #include "/include/utility/fast_math.glsl"
 #include "/include/utility/space_conversion.glsl"
 
-#define GTAO_FALLOFF_START 0.75
-
 float integrate_arc(vec2 h, float n, float cos_n) {
     vec2 tmp = cos_n + 2.0 * h * sin(n) - cos(2.0 * h - n);
     return 0.25 * (tmp.x + tmp.y);
@@ -161,8 +159,14 @@ vec2 compute_gtao(
     // the shaded fragment's own albedo is a much better local estimate
     // than one fixed guess for every material in every biome. Clamped
     // to keep the multibounce term well-behaved for very dark or very
-    // bright (e.g. snow, glowstone) surfaces.
-    float albedo = clamp(surface_albedo, 0.02, 0.9);
+    // bright (e.g. snow, glowstone) surfaces, then blended by
+    // GTAO_MULTIBOUNCE_INTENSITY so the effect can be dialed down or
+    // disabled without losing the albedo decode itself.
+    float albedo = mix(
+        0.0,
+        clamp(surface_albedo, 0.02, 0.9),
+        GTAO_MULTIBOUNCE_INTENSITY
+    );
 
     ao *= rcp(float(GTAO_SLICES));
     ambient_sss *= rcp(float(GTAO_SLICES));

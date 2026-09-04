@@ -34,7 +34,7 @@ vec2 compute_rtao(
 ) {
     const int sample_count = RTAO_SAMPLES;
     const uint step_count = uint(RTAO_STEPS);
-    const uint refinement_steps = 2u;
+    const uint refinement_steps = uint(RTAO_REFINEMENT_STEPS);
 
     // Increase AO radius for LoD terrain, matching GTAO's treatment
     // (see lighting/ao/gtao.glsl) — LoD chunks are coarser/farther, so a
