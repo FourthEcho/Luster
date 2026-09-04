@@ -89,7 +89,7 @@ See the included `LICENSE` files for full attribution and licensing terms.
 
 ## Community
 
-Luster is a personal shader pack project maintained by [shashankpgowda](https://github.com/FourthEcho).
+Luster is a personal shader pack project maintained by [FourthEcho](https://github.com/FourthEcho).
 
 - [Issues](https://github.com/shashankpgowda/Luster/issues)
 - [Luster Discord](https://discord.gg/Q9n4WMVSK)
