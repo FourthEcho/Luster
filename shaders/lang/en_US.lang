@@ -1344,7 +1344,7 @@ value.MATERIAL_MAPPING_MODE.MATERIAL_MAPPING_NORMALS_ONLY=Normals Only
 value.MATERIAL_MAPPING_MODE.MATERIAL_MAPPING_SPECULAR_NORMALS=Specular + Normals
 value.RAIN_PUDDLES_MODE.RAIN_PUDDLES_OFF=Off
 value.RAIN_PUDDLES_MODE.RAIN_PUDDLES_RAIN=Rain Puddles
-value.RAIN_PUDDLES_MODE.RAIN_PUDDLES_EVERYWHERE=Rain Puddles Everywhere
+value.RAIN_PUDDLES_MODE.RAIN_PUDDLES_EVERYWHERE=Everywhere
 # Explicit labels for remaining slider/value controls
 option.SEA_LEVEL=Sea Level
 option.SEA_LEVEL.comment = Controls sea level.
