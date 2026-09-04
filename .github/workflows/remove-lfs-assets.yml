@@ -1,0 +1,86 @@
+name: Convert LFS assets to Git blobs
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Restore real shader textures
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          OLD_COMMIT="f9f713603c90c5132f9b9539ba98bceedfd13588"
+
+          # Restore assets that already existed as normal Git blobs.
+          for path in \
+            shaders/image/atmosphere/scattering.dat \
+            shaders/image/galaxy.png \
+            shaders/image/noise.png \
+            shaders/image/worley_bubbly.dat \
+            shaders/image/worley_swirley.dat; do
+            git show "${OLD_COMMIT}:${path}" > "${path}"
+          done
+
+          # Restore the three Cumulus assets from the exact Alpha Piscium v1.9.2 release.
+          curl -L --fail --retry 3 \
+            -o /tmp/Alpha-Piscium_v1.9.2.zip \
+            https://github.com/Luna5ama/Alpha-Piscium/releases/download/v1.9.2/Alpha-Piscium_v1.9.2.zip
+          mkdir -p /tmp/alpha
+          unzip -q /tmp/Alpha-Piscium_v1.9.2.zip -d /tmp/alpha
+
+          cp "/tmp/alpha/Alpha Piscium v1.9.2/shaders/textures/cumulus_detail1.bin" shaders/image/cumulus_detail1.bin
+          cp "/tmp/alpha/Alpha Piscium v1.9.2/shaders/textures/cumulus_detail2.bin" shaders/image/cumulus_detail2.bin
+          cp "/tmp/alpha/Alpha Piscium v1.9.2/shaders/textures/cumulus_curl.bin" shaders/image/cumulus_curl.bin
+
+          # Remove the broken documentation screenshot pointer instead of shipping a bogus file.
+          rm -f docs/images/scenery.png
+
+          # Remove the LFS configuration and the README reference to the removed screenshot.
+          rm -f .gitattributes
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('README.md')
+          text = p.read_text()
+          text = text.replace('<img src="docs/images/scenery.png" alt="Luster shader pack screenshot" width="800">\n\n', '')
+          p.write_text(text)
+          PY
+
+      - name: Verify assets are real Git blobs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e .gitattributes
+          test ! -e docs/images/scenery.png
+          test "$(stat -c%s shaders/image/atmosphere/scattering.dat)" -eq 393216
+          test "$(stat -c%s shaders/image/galaxy.png)" -eq 1926668
+          test "$(stat -c%s shaders/image/noise.png)" -eq 758477
+          test "$(stat -c%s shaders/image/worley_bubbly.dat)" -eq 262144
+          test "$(stat -c%s shaders/image/worley_swirley.dat)" -eq 262144
+          test "$(stat -c%s shaders/image/cumulus_detail1.bin)" -eq 2097152
+          test "$(stat -c%s shaders/image/cumulus_detail2.bin)" -eq 2097152
+          test "$(stat -c%s shaders/image/cumulus_curl.bin)" -eq 1048576
+          ! grep -RIl --exclude-dir=.git --fixed-strings 'version https://git-lfs.github.com/spec/v1' shaders/image
+
+      - name: Commit repaired assets and remove this workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/remove-lfs-assets.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Remove Git LFS and restore texture assets'
+          git push origin HEAD:main
