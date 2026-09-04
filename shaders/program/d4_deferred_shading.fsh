@@ -144,6 +144,7 @@ uniform vec2 taa_offset;
 uniform float biome_cave;
 uniform float biome_may_rain;
 uniform float biome_may_snow;
+uniform float biome_snowy;
 
 uniform float time_sunrise;
 uniform float time_noon;
@@ -181,6 +182,7 @@ const bool colortex11MipmapEnabled = true;
 #include "/include/surface/edge_highlight.glsl"
 #include "/include/surface/material.glsl"
 #include "/include/surface/rain_puddles.glsl"
+#include "/include/surface/snow_accumulation.glsl"
 #include "/include/utility/bicubic.glsl"
 #include "/include/utility/color.glsl"
 #include "/include/utility/encoding.glsl"
@@ -419,6 +421,23 @@ void main() {
             );
         }
 #endif
+#endif
+
+        // Snow accumulation
+
+#if defined WORLD_OVERWORLD && defined SNOW_ACCUMULATION
+        if ((wetness > eps && biome_may_snow > eps) || biome_snowy > eps) {
+            bool snowed = get_snow_accumulation(
+                position_world,
+                flat_normal,
+                light_levels,
+                material_mask,
+                normal,
+                material.albedo,
+                material.f0,
+                material.roughness
+            );
+        }
 #endif
 
         // Wet-porosity albedo darkening (Kubelka-Munk)

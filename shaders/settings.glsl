@@ -828,6 +828,10 @@ const float wetnessHalflife         = 70.0;
   #define RAIN_PUDDLES_EVERYWHERE 2
   #define RAIN_PUDDLES_INTENSITY 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.20 1.50 2.00]
 
+// ---- Snow accumulation ----
+  #define SNOW_ACCUMULATION
+  #define SNOW_ACCUMULATION_INTENSITY 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.20 1.50 2.00]
+
 // ---- Water texture intensity ----
   #define WATER_TEXTURE_INTENSITY 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.20 1.50 2.00]
 
