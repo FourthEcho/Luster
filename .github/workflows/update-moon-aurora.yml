@@ -1,0 +1,118 @@
+name: Update moon phase and aurora lighting
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          lfs: false
+
+      - name: Apply changes
+        shell: python3 {0}
+        run: |
+          from pathlib import Path
+          import re
+
+          root = Path('.')
+
+          # Remove Moon Phased Night Lighting entirely from source/settings.
+          settings = root / 'shaders/settings.glsl'
+          s = settings.read_text()
+          s = re.sub(r'^\s*#define\s+MOON_PHASE_NIGHT_LIGHTING(?:_[A-Z0-9_]+)?(?:\s+.*)?\n', '', s, flags=re.M)
+          s = re.sub(r'\n\s*#ifdef\s+MOON_PHASE_NIGHT_LIGHTING\s*\n\s*#endif\s*\n', '\n', s)
+          settings.write_text(s)
+
+          # Remove the direct moon-phase night-lighting application.
+          light = root / 'shaders/include/lighting/colors/light_color.glsl'
+          s = light.read_text()
+          s, n = re.subn(
+              r'\n#ifdef MOON_PHASE_NIGHT_LIGHTING\n.*?\n#endif\n',
+              '\n',
+              s,
+              count=1,
+              flags=re.S,
+          )
+          if n != 1:
+              raise SystemExit('Moon Phased Night Lighting block was not found exactly once')
+          light.write_text(s)
+
+          # Exact requested Moon Phase Influence order.
+          props = root / 'shaders/shaders.properties'
+          p = props.read_text()
+          p, n = re.subn(
+              r'^screen\.moon_phase_influence\s*=.*$',
+              'screen.moon_phase_influence = MOON_PHASE_AFFECTS_BRIGHTNESS MOON_PHASE_BRIGHTNESS_INTENSITY <empty> MOON_PHASE_NIGHT_ATMOSPHERE MOON_PHASE_NIGHT_ATMOSPHERE_INTENSITY <empty> MOON_PHASE_REFLECTIONS MOON_PHASE_REFLECTIONS_INTENSITY',
+              p,
+              count=1,
+              flags=re.M,
+          )
+          if n != 1:
+              raise SystemExit('Moon Phase Influence screen definition not found')
+
+          # Remove Night Lighting intensity from the global slider list only.
+          p = re.sub(r'\s*MOON_PHASE_NIGHT_LIGHTING_INTENSITY(?=\s|$)', '', p)
+
+          # Ensure Aurora submenu contains the new ground-light slider.
+          p, n = re.subn(
+              r'^screen\.aurora\s*=\s*(.*)$',
+              lambda m: 'screen.aurora = ' + (' '.join(dict.fromkeys((m.group(1).split() + ['AURORA_GROUND_LIGHTING'])))),
+              p,
+              count=1,
+              flags=re.M,
+          )
+          if n != 1:
+              raise SystemExit('Aurora screen definition not found')
+          props.write_text(p)
+
+          # Remove obsolete Night Lighting translation keys from every locale.
+          for lang in (root / 'shaders/lang').glob('*.lang'):
+              text = lang.read_text()
+              text = re.sub(
+                  r'^\s*option\.MOON_PHASE_NIGHT_LIGHTING(?:_INTENSITY)?(?:\.comment)?\s*=.*\n',
+                  '',
+                  text,
+                  flags=re.M,
+              )
+              lang.write_text(text)
+
+          # Make Aurora ground lighting actually feed the ground/ambient light.
+          d0 = root / 'shaders/program/d0_sky_map.vsh'
+          text = d0.read_text()
+          needle = '    ambient_color += AURORA_CLOUD_LIGHTING * aurora_lighting;'
+          replacement = needle + '\n    ambient_color += AURORA_GROUND_LIGHTING * aurora_lighting;'
+          if replacement not in text:
+              if text.count(needle) != 1:
+                  raise SystemExit('Aurora ambient lighting insertion point not found exactly once')
+              text = text.replace(needle, replacement, 1)
+          d0.write_text(text)
+
+      - name: Validate
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -RIn --exclude='update-moon-aurora.yml' 'MOON_PHASE_NIGHT_LIGHTING' shaders
+          grep -Eq '^screen\.moon_phase_influence[[:space:]]*=[[:space:]]*MOON_PHASE_AFFECTS_BRIGHTNESS MOON_PHASE_BRIGHTNESS_INTENSITY <empty> MOON_PHASE_NIGHT_ATMOSPHERE MOON_PHASE_NIGHT_ATMOSPHERE_INTENSITY <empty> MOON_PHASE_REFLECTIONS MOON_PHASE_REFLECTIONS_INTENSITY[[:space:]]*$' shaders/shaders.properties
+          grep -Eq '^screen\.aurora.*AURORA_GROUND_LIGHTING' shaders/shaders.properties
+          grep -q 'ambient_color += AURORA_GROUND_LIGHTING \* aurora_lighting;' shaders/program/d0_sky_map.vsh
+
+      - name: Commit and remove workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/update-moon-aurora.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Update moon phase influence and aurora ground lighting [skip ci]'
+          git push origin HEAD:main
