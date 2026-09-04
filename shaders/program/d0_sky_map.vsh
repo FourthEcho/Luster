@@ -123,7 +123,19 @@ vec3 get_ambient_color() {
         false
     );
     sky_color = tau * sky_color * 1.13;
+#ifdef DESERT_SANDSTORM
+    // Sandstorm ambient coupling: the sky-map ambient is what lights
+    // shaded terrain, so without this the ground stays blue while the sky
+    // turns orange. Mix toward the (sand-tinted) weather colour with the
+    // live storm amount, alongside the existing rain coupling.
+    sky_color = mix(
+        sky_color,
+        tau * get_weather_color(),
+        clamp01(rainStrength + desert_sandstorm)
+    );
+#else
     sky_color = mix(sky_color, tau * get_weather_color(), rainStrength);
+#endif
 
     return sky_color;
 }

@@ -88,6 +88,7 @@ uniform float frameTimeCounter;
 uniform int isEyeInWater;
 uniform float eyeAltitude;
 uniform float rainStrength;
+uniform float desert_sandstorm;
 uniform float blindness;
 uniform float darknessFactor;
 

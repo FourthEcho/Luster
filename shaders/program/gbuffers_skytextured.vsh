@@ -32,6 +32,7 @@ attribute vec2 mc_midTexCoord;
 
 uniform float sunAngle;
 uniform float rainStrength;
+uniform float desert_sandstorm;
 uniform int moonPhase;
 
 uniform vec2 taa_offset;

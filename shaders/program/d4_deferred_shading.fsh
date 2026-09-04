@@ -121,6 +121,7 @@ uniform int worldTime;
 uniform int moonPhase;
 uniform float sunAngle;
 uniform float rainStrength;
+uniform float desert_sandstorm;
 uniform float wetness;
 
 uniform int frameCounter;

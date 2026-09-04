@@ -7,6 +7,7 @@
 #include "/include/utility/geometry.glsl"
 #include "/include/utility/phase_functions.glsl"
 #include "/include/sky/ozone.glsl"
+#include "/include/sky/sandstorm.glsl"
 
 // These have to be macros so that they can be used by constant expressions
 #define cone_angle_to_solid_angle(theta) (tau * (1.0 - cos(theta)))
@@ -171,6 +172,13 @@ vec3 atmosphere_planet_bounce(
     // Chapman diffuse factor (~1.9x the vertical column) re-filters the
     // warm ground glow through the Chappuis bands (see sky/ozone.glsl).
     bounced *= ozone_multiple_scattering(1.0);
+#endif
+
+#if defined DESERT_SANDSTORM && defined SANDSTORM_BOUNCE
+    // Bounced light climbs back through the low dust layer (see
+    // sky/sandstorm.glsl), picking up the same warm filtering as the
+    // direct sun path.
+    bounced *= sandstorm_transmittance(0.6);
 #endif
 
     // Ground-bounced light only re-enters the sky along rays that graze
@@ -355,6 +363,13 @@ vec3 atmosphere_scattering(
     scattering *= ozone_layer_transmittance(mu_view, planet_radius);
 #endif
 
+#if defined DESERT_SANDSTORM && defined SANDSTORM_SKY
+    // View-path dust extinction on top of the precomputed LUT (which
+    // bakes in clear air only). Grazing rays cross far more of the low
+    // dust layer, so the horizon milks out first (see sky/sandstorm.glsl).
+    scattering *= sandstorm_transmittance(mu_view);
+#endif
+
     return atmosphere_post_processing(scattering);
 }
 
@@ -405,6 +420,14 @@ vec3 atmosphere_scattering(
 #if defined OZONE_LAYER && defined OZONE_SKY
     sun_lut_color *= ozone_layer_transmittance(mu_sun, planet_radius);
     moon_lut_color *= ozone_layer_transmittance(mu_moon, planet_radius);
+#endif
+#if defined DESERT_SANDSTORM && defined SANDSTORM_SKY
+    // Dust extinction along the sun/moon light paths feeding the LUT.
+    // The LUT is linear in the light radiance, so attenuating the input
+    // colors applies the extra absorption to every scattering order at
+    // once — the same differential trick ozone uses (see above).
+    sun_lut_color *= sandstorm_transmittance(mu_sun);
+    moon_lut_color *= sandstorm_transmittance(mu_moon);
 #endif
 
     float horizon_mu = mix(
@@ -571,6 +594,11 @@ vec3 atmosphere_scattering(
     // added after this factor rather than being attenuated twice
     lut_scattering *= ozone_layer_transmittance(mu_view, planet_radius);
 #endif
+#if defined DESERT_SANDSTORM && defined SANDSTORM_SKY
+    // View-path dust extinction. Planet bounce carries its own up-path
+    // dust filtering, so it is added after this factor (see below).
+    lut_scattering *= sandstorm_transmittance(mu_view);
+#endif
 
     vec3 atmosphere = lut_scattering;
 
@@ -672,7 +700,17 @@ vec3 atmosphere_transmittance(float mu, float r) {
 #endif
 
     vec3 airmass_3 = vec3(airmass.x, airmass.y, ozone_airmass);
-    return clamp01(exp(-air_extinction_coefficients * airmass_3));
+    vec3 transmittance
+        = clamp01(exp(-air_extinction_coefficients * airmass_3));
+
+#if defined DESERT_SANDSTORM && defined SANDSTORM_LAYER
+    // Low dust layer on top of the clear-air model (see sky/sandstorm.glsl).
+    // Scaled by the live storm strength, so a clear desert noon is
+    // untouched and only the storm dims/reddens the sun.
+    transmittance *= sandstorm_transmittance(mu);
+#endif
+
+    return transmittance;
 }
 #endif
 

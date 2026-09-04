@@ -4,6 +4,7 @@
 #include "/include/fog/overworld/parameters.glsl"
 #include "/include/fog/overworld/constants.glsl"
 #include "/include/sky/ozone.glsl"
+#include "/include/sky/sandstorm.glsl"
 #include "/include/utility/color.glsl"
 #include "/include/weather/core.glsl"
 
@@ -150,6 +151,16 @@ OverworldFogParameters get_fog_parameters(Weather weather) {
             normalize(ozone_filtered + 1e-6),
             twilight
         );
+#endif
+#if defined DESERT_SANDSTORM && defined SANDSTORM_MIST
+        // Dust-tinted mist: while the storm is active the light
+        // illuminating ground mist is filtered through the low dust layer,
+        // shifting it toward the warm dust spectrum (see sky/sandstorm.glsl).
+        horizon_tint = normalize(mix(
+            horizon_tint,
+            sandstorm_tint(),
+            sandstorm_strength()
+        ) + 1e-6);
 #endif
 
         params.mist_scattering_coeff = mist_base_scatter_coeff

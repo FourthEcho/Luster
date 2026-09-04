@@ -184,6 +184,12 @@ vec3 draw_sky(
 
     sky *= atmosphere_transmittance(ray_dir.y, planet_radius)
         * (1.0 - rainStrength);
+#if defined DESERT_SANDSTORM && defined SANDSTORM_SKY
+    // Dust view-path extinction for the pre-LUT background (sun disk,
+    // stars, galaxy). The LUT transmittance above bakes in clear air only,
+    // so without this the sun would stay white inside a dust storm.
+    sky *= sandstorm_transmittance(ray_dir.y);
+#endif
     sky += atmosphere;
 
     // Clouds, aurora, crepuscular rays

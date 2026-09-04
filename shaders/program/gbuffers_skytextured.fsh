@@ -38,6 +38,8 @@ uniform int renderStage;
 
 uniform vec3 view_sun_dir;
 
+uniform float desert_sandstorm;
+
 #include "/include/sky/atmosphere.glsl"
 #include "/include/utility/color.glsl"
 

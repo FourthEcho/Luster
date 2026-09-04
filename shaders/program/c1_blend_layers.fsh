@@ -97,6 +97,7 @@ uniform float far;
 uniform float frameTimeCounter;
 uniform float sunAngle;
 uniform float rainStrength;
+uniform float desert_sandstorm;
 uniform float wetness;
 
 uniform int worldTime;
