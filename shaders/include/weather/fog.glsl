@@ -3,6 +3,7 @@
 
 #include "/include/fog/overworld/parameters.glsl"
 #include "/include/fog/overworld/constants.glsl"
+#include "/include/sky/ozone.glsl"
 #include "/include/utility/color.glsl"
 #include "/include/weather/core.glsl"
 
@@ -124,6 +125,33 @@ OverworldFogParameters get_fog_parameters(Weather weather) {
 #if MIST_MODE != MIST_MODE_OFF
     {
         vec3 horizon_tint = normalize(params.rayleigh_scattering_coeff + 1e-6);
+
+#if defined OZONE_LAYER && defined OZONE_MIST
+        // Ozone-filtered twilight tint: the sky light illuminating mist near
+        // the horizon has survived long grazing passes through the
+        // stratospheric ozone layer, which filters out its green/red content
+        // (Chappuis bands) and shifts it toward the twilight blue. Blend the
+        // mist hue toward that filtered spectrum, strongest around dawn and
+        // dusk where the effect actually matters.
+        // Basic: a fixed near-horizon zenith cosine (cheap, no extra
+        // dependency). Advanced: the actual sun zenith cosine, matching
+        // the same mu_sun used for the sky LUT's ozone filtering in
+        // atmosphere.glsl, so mist and sky agree as the sun moves.
+#if MIST_MODE == MIST_MODE_ADVANCED
+        float mist_ozone_mu = sun_dir.y;
+#else
+        float mist_ozone_mu = 0.1;
+#endif
+        vec3 ozone_filtered = horizon_tint
+            * ozone_layer_transmittance(mist_ozone_mu, ozone_planet_radius);
+        float twilight = linear_step(0.7, 1.0, 1.0 - abs(sun_dir.y));
+        horizon_tint = mix(
+            horizon_tint,
+            normalize(ozone_filtered + 1e-6),
+            twilight
+        );
+#endif
+
         params.mist_scattering_coeff = mist_base_scatter_coeff
             * MIST_DENSITY * horizon_tint;
         // Thicken mist during and after rain

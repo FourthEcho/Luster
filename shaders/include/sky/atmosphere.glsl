@@ -6,6 +6,7 @@
 #include "/include/utility/fast_math.glsl"
 #include "/include/utility/geometry.glsl"
 #include "/include/utility/phase_functions.glsl"
+#include "/include/sky/ozone.glsl"
 
 // These have to be macros so that they can be used by constant expressions
 #define cone_angle_to_solid_angle(theta) (tau * (1.0 - cos(theta)))
@@ -164,6 +165,14 @@ vec3 atmosphere_planet_bounce(
         moon_ndotl * moon_color * down_moon
     ) * up_path;
 
+#if defined OZONE_LAYER && defined OZONE_PLANET_BOUNCE
+    // Diffusely bounced light makes an extra quasi-diffuse pass through
+    // the stratospheric ozone layer on its way back up into the sky — the
+    // Chapman diffuse factor (~1.9x the vertical column) re-filters the
+    // warm ground glow through the Chappuis bands (see sky/ozone.glsl).
+    bounced *= ozone_multiple_scattering(1.0);
+#endif
+
     // Ground-bounced light only re-enters the sky along rays that graze
     // or point below the horizon -- fade it out entirely once looking
     // well above the horizon rather than adding a uniform sky-wide term
@@ -317,6 +326,10 @@ vec3 atmosphere_scattering(
     float mu_s,
     bool use_klein_nishina_phase
 ) {
+    // Keep the unclamped view zenith cosine around for the ozone layer's
+    // view-path absorption below
+    float mu_view = mu;
+
     float horizon_mu = mix(-0.01, 0.03, smoothstep(-0.05, 0.1, mu_s));
     mu = max(mu, horizon_mu);
 
@@ -333,6 +346,14 @@ vec3 atmosphere_scattering(
     // Single mie scattering
     uv.x += 0.5;
     scattering += texture(ATMOSPHERE_SCATTERING_LUT, uv).rgb * mie_phase;
+
+#if defined OZONE_LAYER && defined OZONE_SKY
+    // View-path absorption of the adjustable ozone layer on top of the
+    // precomputed LUT (which bakes in a baseline profile): the camera ray
+    // climbs through the stratospheric shell before reaching the eye, so
+    // low view directions lose more green/red than the zenith
+    scattering *= ozone_layer_transmittance(mu_view, planet_radius);
+#endif
 
     return atmosphere_post_processing(scattering);
 }
@@ -363,11 +384,28 @@ vec3 atmosphere_scattering(
 
     float mu = ray_dir.y;
 
+    // Keep the unclamped view zenith cosine around for the ozone layer's
+    // view-path absorption below
+    float mu_view = mu;
+
     float nu_sun = dot(ray_dir, sun_dir);
     float nu_moon = dot(ray_dir, moon_dir);
 
     float mu_sun = sun_dir.y;
     float mu_moon = moon_dir.y;
+
+    // Ozone differential absorption of the adjustable layer on the light
+    // paths feeding the precomputed LUT (OZONE_SKY). The LUT is linear in
+    // the light radiance, so attenuating the sun/moon input colors applies
+    // the extra absorption along their light paths to every scattering
+    // order at once — first order in the differential optical depth, which
+    // is all a precomputed table can support
+    vec3 sun_lut_color = sun_color;
+    vec3 moon_lut_color = moon_color;
+#if defined OZONE_LAYER && defined OZONE_SKY
+    sun_lut_color *= ozone_layer_transmittance(mu_sun, planet_radius);
+    moon_lut_color *= ozone_layer_transmittance(mu_moon, planet_radius);
+#endif
 
     float horizon_mu = mix(
         -0.01,
@@ -522,9 +560,19 @@ vec3 atmosphere_scattering(
     vec3 mie_phase_sun = atmosphere_mie_phase_sun(nu_sun);
     vec3 mie_phase_moon = atmosphere_mie_phase_moon(nu_moon);
 
-    vec3 atmosphere
-        = (scattering_sc + scattering_sm * mie_phase_sun) * sun_color
-        + (scattering_mc + scattering_mm * mie_phase_moon) * moon_color;
+    vec3 lut_scattering
+        = (scattering_sc + scattering_sm * mie_phase_sun) * sun_lut_color
+        + (scattering_mc + scattering_mm * mie_phase_moon) * moon_lut_color;
+
+#if defined OZONE_LAYER && defined OZONE_SKY
+    // View-path absorption of the adjustable ozone layer on top of the
+    // precomputed LUT (which bakes in a baseline profile). The planet
+    // bounce term below carries its own up-path ozone filtering, so it is
+    // added after this factor rather than being attenuated twice
+    lut_scattering *= ozone_layer_transmittance(mu_view, planet_radius);
+#endif
+
+    vec3 atmosphere = lut_scattering;
 
 #ifdef PLANET_BOUNCE
     atmosphere += atmosphere_planet_bounce(
@@ -610,8 +658,21 @@ vec3 atmosphere_transmittance(float mu, float r) {
     airmass.x *= chapman_function_approx(r * rcp_scale_heights.x, mu);
     airmass.y *= chapman_function_approx(r * rcp_scale_heights.y, mu);
 
-    // Approximate ozone density as rayleigh density
-    return clamp01(exp(-air_extinction_coefficients * airmass.xyx));
+#if defined OZONE_LAYER
+    // Ozone: dedicated airmass of the adjustable stratospheric layer, with
+    // the curvature handled explicitly per sub-band (see sky/ozone.glsl).
+    // This replaces the legacy treatment of approximating ozone with the
+    // Rayleigh airmass: the layer sits 20-30km up, where grazing rays
+    // accumulate a very different (and horizon-saturated) amount of ozone
+    // than the Rayleigh density model implies.
+    float ozone_airmass = ozone_layer_airmass(mu, r);
+#else
+    // Legacy fallback: approximate ozone density as rayleigh density
+    float ozone_airmass = airmass.x;
+#endif
+
+    vec3 airmass_3 = vec3(airmass.x, airmass.y, ozone_airmass);
+    return clamp01(exp(-air_extinction_coefficients * airmass_3));
 }
 #endif
 

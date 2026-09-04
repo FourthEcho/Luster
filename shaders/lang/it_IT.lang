@@ -45,6 +45,8 @@ screen.clouds_noctilucent              = Impostazioni Nuvole Nottilucenti
 
 screen.fog_rlh                         = Nebbia Rayleigh
 screen.fog_mie                         = Nebbia Mie
+screen.fog_ozone                    = Ozono
+screen.mist                         = Nebbia al Suolo
 screen.sunlight_color                  = Colore Luce Solare
 screen.moonlight_color                 = Colore Luce Lunare
 screen.blocklight_color                = Colore Luce Blocchi
@@ -504,6 +506,8 @@ option.AURORA_FREQUENCY                = Frequenza Aurora
 option.AURORA_FREQUENCY.comment = Toggles aurora frequency.
 option.AURORA_CLOUD_LIGHTING           = Contribuzione Luce Nuvole
 option.AURORA_CLOUD_LIGHTING.comment = Toggles cloud light contribution.
+option.AURORA_GROUND_LIGHTING           = Contribuzione Luce Terreno
+option.AURORA_GROUND_LIGHTING.comment         = Controlla quanta luce dell'aurora contribuisce all'illuminazione del terreno. Valori più alti fanno brillare terreno, acqua e altre superfici illuminate dal cielo con i colori dell'aurora.
 
 value.AURORA_NORMAL.AURORA_NEVER       = Mai
 value.AURORA_NORMAL.AURORA_RARELY      = Raramente
@@ -543,6 +547,22 @@ option.MIST_SEA_LEVEL_BIAS             = Mist Sea Level Bias
 option.MIST_SEA_LEVEL_BIAS.comment     = Shifts the mist base up or down relative to the configured sea level. Positive = mist starts higher, negative = mist starts lower.
 option.MIST_SHADOW_STEPS               = Mist Shadow Steps
 option.MIST_SHADOW_STEPS.comment       = Number of ray-march steps toward the sun for mist self-shadowing (Advanced mode only). Higher = more accurate self-shadowing at higher GPU cost.
+option.OZONE_LAYER                         = Strato di ozono
+option.OZONE_LAYER.comment = Aggiunge uno strato di ozonosfera regolabile (bande di assorbimento di Chappuis, 400-650nm) al modello atmosferico. Influenza luce solare, luce lunare, illuminazione delle nuvole, cielo, nebbia, foschia e luce rimbalzata dal pianeta. Più visibile all'alba e al tramonto.
+option.OZONE_AMOUNT                        = Quantità di ozono
+option.OZONE_AMOUNT.comment = Intensità dello strato di ozono. 1.00 è una colonna naturale; valori più alti approfondiscono il blu allo zenit e arrossano la luce all'orizzonte; 0 disattiva l'assorbimento.
+option.OZONE_ALTITUDE                      = Altitudine dello strato di ozono
+option.OZONE_ALTITUDE.comment = Altitudine di picco dello strato di ozono in chilometri. Lo strato reale culmina intorno ai 20-30km; strati più alti saturano meno all'orizzonte.
+option.OZONE_THICKNESS                     = Spessore dello strato di ozono
+option.OZONE_THICKNESS.comment = Spessore dello strato in chilometri. Strati sottili concentrano l'assorbimento e amplificano i percorsi radenti; strati spessi lo distribuiscono.
+option.OZONE_SKY                           = Assorbimento dell'ozono nel cielo
+option.OZONE_SKY.comment = Applica lo strato di ozono al cielo: l'assorbimento lungo il raggio visivo e i percorsi luminosi approfondisce il blu dello zenit crepuscolare e scalda la luce all'orizzonte.
+option.OZONE_FOG                           = Diffusione dell'ozono nella nebbia
+option.OZONE_FOG.comment = Applica lo strato di ozono alla nebbia: un'approssimazione di scattering multiplo consapevole dell'ozono in cui gli ordini di scattering superiori perdono più verde/rosso.
+option.OZONE_MIST                          = Tinta dell'ozono nella foschia
+option.OZONE_MIST.comment = Applica lo strato di ozono alla foschia al suolo: all'alba e al tramonto la tinta della foschia riprende lo spettro crepuscolare filtrato dall'ozono.
+option.OZONE_PLANET_BOUNCE                 = Ozono e luce rimbalzata
+option.OZONE_PLANET_BOUNCE.comment = Applica lo strato di ozono alla luce rimbalzata dal pianeta: la luce che rimbalza dal suolo viene nuovamente filtrata dall'ozono risalendo verso il cielo.
 option.VL                              = Illuminazione Volumetrica
 comment.LPV_VL                         = Fonti di luce illuminano la nebbia. Richiede luci colorate! 
 option.VL.comment                      = Aggiunge raggi di luce e variabile nebbia volumetrica
@@ -1078,14 +1098,6 @@ screen.vignette=Vignette
 screen.bloom=Bloom
 option.MOON_PHASE_INFLUENCE_INTENSITY=Moon Phase Influence
 option.MOON_PHASE_INFLUENCE_INTENSITY.comment = Adjusts how strongly the current moon phase affects all moon-phased effects below. 0 = no effect, 1 = full effect.
-option.MOON_PHASE_NIGHT_LIGHTING = Moon-Phased Night Lighting
-option.MOON_PHASE_NIGHT_LIGHTING.comment = When enabled, night-time brightness, contrast and saturation shift with the lunar cycle — brighter near full moon, dimmer near new moon.
-option.MOON_PHASE_NIGHT_LIGHTING_INTENSITY=Night Brightness
-option.MOON_PHASE_NIGHT_LIGHTING_INTENSITY.comment = Adjusts how much the moon phase brightens or dims night lighting.
-option.MOON_PHASE_NIGHT_LIGHTING_CONTRAST=Night Contrast
-option.MOON_PHASE_NIGHT_LIGHTING_CONTRAST.comment = Adjusts how much the moon phase changes contrast at night.
-option.MOON_PHASE_NIGHT_LIGHTING_SATURATION=Night Saturation
-option.MOON_PHASE_NIGHT_LIGHTING_SATURATION.comment = Adjusts how much the moon phase changes color saturation at night.
 option.MOON_PHASE_NIGHT_ATMOSPHERE = Moon-Phased Night Atmosphere
 option.MOON_PHASE_NIGHT_ATMOSPHERE.comment = When enabled, fog and sky atmosphere at night vary with the lunar cycle.
 option.MOON_PHASE_NIGHT_ATMOSPHERE_INTENSITY=Night Fog Intensity

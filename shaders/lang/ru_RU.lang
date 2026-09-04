@@ -47,6 +47,8 @@ screen.clouds_noctilucent              = Настройки серебристы
 
 screen.fog_rlh                         = Коэффициент Рэлея
 screen.fog_mie                         = Коэффициент Ми
+screen.fog_ozone                    = Озон
+screen.mist                         = Туман у земли
 screen.sunlight_color                  = Цвет солнечного света
 screen.moonlight_color                 = Цвет лунного света
 screen.blocklight_color                = Цвет света от блоков
@@ -535,6 +537,8 @@ option.AURORA_FREQUENCY                = Частота сияний
 option.AURORA_FREQUENCY.comment = Toggles aurora frequency.
 option.AURORA_CLOUD_LIGHTING           = Вклад облачного света
 option.AURORA_CLOUD_LIGHTING.comment = Toggles cloud light contribution.
+option.AURORA_GROUND_LIGHTING           = Вклад света на землю
+option.AURORA_GROUND_LIGHTING.comment         = Определяет, сколько света от северного сияния попадает на освещение земли. Более высокие значения заставляют рельеф, воду и другие освещаемые небом поверхности светиться цветами сияния.
 
 value.AURORA_NORMAL.AURORA_NEVER       = Никогда
 value.AURORA_NORMAL.AURORA_RARELY      = Редко
@@ -574,6 +578,22 @@ option.MIST_SEA_LEVEL_BIAS             = Mist Sea Level Bias
 option.MIST_SEA_LEVEL_BIAS.comment     = Shifts the mist base up or down relative to the configured sea level. Positive = mist starts higher, negative = mist starts lower.
 option.MIST_SHADOW_STEPS               = Mist Shadow Steps
 option.MIST_SHADOW_STEPS.comment       = Number of ray-march steps toward the sun for mist self-shadowing (Advanced mode only). Higher = more accurate self-shadowing at higher GPU cost.
+option.OZONE_LAYER                         = Слой озона
+option.OZONE_LAYER.comment = Добавляет настраиваемый слой стратосферного озона (полосы поглощения Шаппюи, 400-650 нм) в модель атмосферы. Влияет на солнечный и лунный свет, освещение облаков, небо, туман, дымку и отражённый от земли свет. Заметнее всего на рассвете и закате.
+option.OZONE_AMOUNT                        = Количество озона
+option.OZONE_AMOUNT.comment = Сила озонового слоя. 1.00 — естественная концентрация; большие значения углубляют синий цвет зенита в сумерках и делают свет у горизонта краснее; 0 отключает поглощение.
+option.OZONE_ALTITUDE                      = Высота слоя озона
+option.OZONE_ALTITUDE.comment = Пиковая высота озонового слоя в километрах. Реальный слой достигает максимума на 20-30 км; чем выше слой, тем слабее насыщение у горизонта.
+option.OZONE_THICKNESS                     = Толщина слоя озона
+option.OZONE_THICKNESS.comment = Толщина слоя в километрах. Тонкие слои концентрируют поглощение и усиливают скользящие пути света; толстые распределяют его.
+option.OZONE_SKY                           = Поглощение озоном неба
+option.OZONE_SKY.comment = Применяет озоновый слой к небу: поглощение вдоль луча взгляда и путей света углубляет синий зенит в сумерках и согревает свет у горизонта.
+option.OZONE_FOG                           = Рассеяние озона в тумане
+option.OZONE_FOG.comment = Применяет озоновый слой к воздушному туману: учитывающее озон приближение многократного рассеяния, где высшие порядки рассеяния теряют больше зелёного и красного.
+option.OZONE_MIST                          = Оттенок озона в дымке
+option.OZONE_MIST.comment = Применяет озоновый слой к приземной дымке: у рассвета и заката оттенок дымки подхватывает пропущенный через озон спектр сумерек.
+option.OZONE_PLANET_BOUNCE                 = Озон и отражённый свет
+option.OZONE_PLANET_BOUNCE.comment = Применяет озоновый слой к отражённому от земли свету: свет, отражённый от земли, снова фильтруется озоном по пути обратно в небо.
 option.VL                              = Объемное освещение (VL)
 option.LPV_VL.comment                  = Источники света освещают туман. Требует включённого цветного освщения! 
 option.VL.comment                      = Создает световые волны и переменную плотность тумана
@@ -1062,14 +1082,6 @@ screen.vignette=Vignette
 screen.bloom=Bloom
 option.MOON_PHASE_INFLUENCE_INTENSITY=Moon Phase Influence
 option.MOON_PHASE_INFLUENCE_INTENSITY.comment = Adjusts how strongly the current moon phase affects all moon-phased effects below. 0 = no effect, 1 = full effect.
-option.MOON_PHASE_NIGHT_LIGHTING = Moon-Phased Night Lighting
-option.MOON_PHASE_NIGHT_LIGHTING.comment = When enabled, night-time brightness, contrast and saturation shift with the lunar cycle — brighter near full moon, dimmer near new moon.
-option.MOON_PHASE_NIGHT_LIGHTING_INTENSITY=Night Brightness
-option.MOON_PHASE_NIGHT_LIGHTING_INTENSITY.comment = Adjusts how much the moon phase brightens or dims night lighting.
-option.MOON_PHASE_NIGHT_LIGHTING_CONTRAST=Night Contrast
-option.MOON_PHASE_NIGHT_LIGHTING_CONTRAST.comment = Adjusts how much the moon phase changes contrast at night.
-option.MOON_PHASE_NIGHT_LIGHTING_SATURATION=Night Saturation
-option.MOON_PHASE_NIGHT_LIGHTING_SATURATION.comment = Adjusts how much the moon phase changes color saturation at night.
 option.MOON_PHASE_NIGHT_ATMOSPHERE = Moon-Phased Night Atmosphere
 option.MOON_PHASE_NIGHT_ATMOSPHERE.comment = When enabled, fog and sky atmosphere at night vary with the lunar cycle.
 option.MOON_PHASE_NIGHT_ATMOSPHERE_INTENSITY=Night Fog Intensity

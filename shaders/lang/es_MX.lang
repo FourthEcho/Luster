@@ -48,6 +48,8 @@ screen.clouds_noctilucent              = Configuración de nubes noctilucentes
 
 screen.fog_rlh                         = Niebla Rayleigh
 screen.fog_mie                         = Niebla Mie
+screen.fog_ozone                    = Ozono
+screen.mist                         = Niebla del Suelo
 screen.sunlight_color                  = Color de la luz solar
 screen.moonlight_color                 = Color de la luz lunar
 screen.blocklight_color                = Color de la luz del bloque
@@ -509,6 +511,8 @@ option.AURORA_FREQUENCY                = Frecuencia de las auroras
 option.AURORA_FREQUENCY.comment = Toggles aurora frequency.
 option.AURORA_CLOUD_LIGHTING           = Contribución de la luz de las nubes
 option.AURORA_CLOUD_LIGHTING.comment = Toggles cloud light contribution.
+option.AURORA_GROUND_LIGHTING           = Contribución de luz al suelo
+option.AURORA_GROUND_LIGHTING.comment         = Controla cuánta luz de la aurora contribuye a la iluminación del suelo. Los valores más altos hacen que el terreno, el agua y otras superficies iluminadas por el cielo brillen con los colores de la aurora.
 
 value.AURORA_NORMAL.AURORA_NEVER       = Nunca
 value.AURORA_NORMAL.AURORA_RARELY      = Rara vez
@@ -548,6 +552,22 @@ option.MIST_SEA_LEVEL_BIAS             = Mist Sea Level Bias
 option.MIST_SEA_LEVEL_BIAS.comment     = Shifts the mist base up or down relative to the configured sea level. Positive = mist starts higher, negative = mist starts lower.
 option.MIST_SHADOW_STEPS               = Mist Shadow Steps
 option.MIST_SHADOW_STEPS.comment       = Number of ray-march steps toward the sun for mist self-shadowing (Advanced mode only). Higher = more accurate self-shadowing at higher GPU cost.
+option.OZONE_LAYER                         = Capa de ozono
+option.OZONE_LAYER.comment = Añade una capa de ozono estratosférico ajustable (bandas de absorción de Chappuis, 400-650nm) al modelo atmosférico. Afecta la luz del sol y de la luna, la iluminación de nubes, el cielo, la niebla, la bruma y la luz rebotada del planeta. Más visible al amanecer y al atardecer.
+option.OZONE_AMOUNT                        = Cantidad de ozono
+option.OZONE_AMOUNT.comment = Fuerza de la capa de ozono. 1.00 es una columna natural; valores más altos intensifican el azul del cenit crepuscular y enrojecen la luz del horizonte; 0 desactiva la absorción.
+option.OZONE_ALTITUDE                      = Altitud de la capa de ozono
+option.OZONE_ALTITUDE.comment = Altitud pico de la capa de ozono en kilómetros. La capa real alcanza su máximo entre 20 y 30km; las capas más altas se saturan menos en el horizonte.
+option.OZONE_THICKNESS                     = Grosor de la capa de ozono
+option.OZONE_THICKNESS.comment = Grosor de la capa en kilómetros. Las capas delgadas concentran la absorción y amplifican los trayectos rasantes; las gruesas la dispersan.
+option.OZONE_SKY                           = Absorción de ozono en el cielo
+option.OZONE_SKY.comment = Aplica la capa de ozono al cielo: la absorción del rayo de visión y de los trayectos de luz profundiza el azul del cenit crepuscular y calienta la luz del horizonte.
+option.OZONE_FOG                           = Dispersión de ozono en la niebla
+option.OZONE_FOG.comment = Aplica la capa de ozono a la niebla del aire: una aproximación de dispersión múltiple consciente del ozono donde los órdenes superiores pierden más verde/rojo.
+option.OZONE_MIST                          = Tinte de ozono en la bruma
+option.OZONE_MIST.comment = Aplica la capa de ozono a la bruma del suelo: al amanecer y al atardecer, el tinte de la bruma adopta el espectro crepuscular filtrado por el ozono.
+option.OZONE_PLANET_BOUNCE                 = Ozono y luz rebotada
+option.OZONE_PLANET_BOUNCE.comment = Aplica la capa de ozono a la luz rebotada del planeta: la luz que rebota en el suelo se filtra de nuevo por el ozono al subir hacia el cielo.
 option.VL                              = Niebla volumétrica
 option.LPV_VL.comment                  = Las fuentes de luz iluminan la niebla. ¡Requiere luces de colores! 
 option.VL.comment                      = Agrega haces de luz y densidad de niebla variable
@@ -1065,14 +1085,6 @@ screen.vignette=Vignette
 screen.bloom=Bloom
 option.MOON_PHASE_INFLUENCE_INTENSITY=Moon Phase Influence
 option.MOON_PHASE_INFLUENCE_INTENSITY.comment = Adjusts how strongly the current moon phase affects all moon-phased effects below. 0 = no effect, 1 = full effect.
-option.MOON_PHASE_NIGHT_LIGHTING = Moon-Phased Night Lighting
-option.MOON_PHASE_NIGHT_LIGHTING.comment = When enabled, night-time brightness, contrast and saturation shift with the lunar cycle — brighter near full moon, dimmer near new moon.
-option.MOON_PHASE_NIGHT_LIGHTING_INTENSITY=Night Brightness
-option.MOON_PHASE_NIGHT_LIGHTING_INTENSITY.comment = Adjusts how much the moon phase brightens or dims night lighting.
-option.MOON_PHASE_NIGHT_LIGHTING_CONTRAST=Night Contrast
-option.MOON_PHASE_NIGHT_LIGHTING_CONTRAST.comment = Adjusts how much the moon phase changes contrast at night.
-option.MOON_PHASE_NIGHT_LIGHTING_SATURATION=Night Saturation
-option.MOON_PHASE_NIGHT_LIGHTING_SATURATION.comment = Adjusts how much the moon phase changes color saturation at night.
 option.MOON_PHASE_NIGHT_ATMOSPHERE = Moon-Phased Night Atmosphere
 option.MOON_PHASE_NIGHT_ATMOSPHERE.comment = When enabled, fog and sky atmosphere at night vary with the lunar cycle.
 option.MOON_PHASE_NIGHT_ATMOSPHERE_INTENSITY=Night Fog Intensity

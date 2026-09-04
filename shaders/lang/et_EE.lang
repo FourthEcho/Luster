@@ -48,6 +48,8 @@ screen.clouds_noctilucent              = Öösäravad pilved
 
 screen.fog_rlh                         = Rayleigh' udu
 screen.fog_mie                         = Mie udu
+screen.fog_ozone                    = Osoon
+screen.mist                         = Maapinna udu
 screen.sunlight_color                  = Päikesevalguse värv
 screen.moonlight_color                 = Kuuvalguse värv
 screen.blocklight_color                = Blokkvalguse värv
@@ -508,6 +510,8 @@ option.AURORA_FREQUENCY                = Virmaliste sagedus
 option.AURORA_FREQUENCY.comment = Toggles aurora frequency.
 option.AURORA_CLOUD_LIGHTING           = Pilve valguspanus
 option.AURORA_CLOUD_LIGHTING.comment = Toggles cloud light contribution.
+option.AURORA_GROUND_LIGHTING           = Maapinna valguse panus
+option.AURORA_GROUND_LIGHTING.comment         = Määrab, kui palju virmaliste valgus panustab maapinna valgustusse. Kõrgemad väärtused panevad maastiku, vee ja muud taevavalgusega valgustatud pinnad virmaliste värvides särama.
 
 value.AURORA_NORMAL.AURORA_NEVER       = Mitte kunagi
 value.AURORA_NORMAL.AURORA_RARELY      = Harva
@@ -547,6 +551,22 @@ option.MIST_SEA_LEVEL_BIAS             = Mist Sea Level Bias
 option.MIST_SEA_LEVEL_BIAS.comment     = Shifts the mist base up or down relative to the configured sea level. Positive = mist starts higher, negative = mist starts lower.
 option.MIST_SHADOW_STEPS               = Mist Shadow Steps
 option.MIST_SHADOW_STEPS.comment       = Number of ray-march steps toward the sun for mist self-shadowing (Advanced mode only). Higher = more accurate self-shadowing at higher GPU cost.
+option.OZONE_LAYER                         = Osooni neeldumiskiht
+option.OZONE_LAYER.comment = Lisab atmosfäärimudelisse reguleeritava stratosfääri osoonikihi (Chappuisi neeldumisribad, 400-650nm). Mõjutab päikese- ja kuule, pilvevalgustust, taevast, udu, hämarikudu ja pinnalt tagasipõrgatunud valgust. Kõige nähtavam koitmisel ja loojumisel.
+option.OZONE_AMOUNT                        = Osooni hulk
+option.OZONE_AMOUNT.comment = Osoonikihi tugevus. 1.00 on looduslik kolonn; kõrgemad väärtused süvendavad hämariku seniidi sinist ja punastavad horisondivalgust; 0 keelab neeldumise.
+option.OZONE_ALTITUDE                      = Osoonikihi kõrgus
+option.OZONE_ALTITUDE.comment = Osoonikihi tippkõrgus kilomeetrites. Tõeline kiht saavutab maksimumi umbes 20-30 km kõrgusel; kõrgemad kihid küllastuvad horisondi lähedal vähem.
+option.OZONE_THICKNESS                     = Osoonikihi paksus
+option.OZONE_THICKNESS.comment = Kihi paksus kilomeetrites. Õhukesed kihid koondavad neeldumise ja võimendavad horisondi põikivaid teid; paksud kihid hajutavad seda.
+option.OZONE_SKY                           = Osooni neeldumine taevas
+option.OZONE_SKY.comment = Rakendab osoonikihi taevas: vaate- ja valgustee neeldumine süvendab hämarikuseniidi sinist ja soojendab horisondivalgust.
+option.OZONE_FOG                           = Osooni hajumine udus
+option.OZONE_FOG.comment = Rakendab osoonikihi õhuudule: osooniteadlik hulkhajumise lähenemine, kus kõrgemad hajumisjärgud kaotavad rohkem rohelist/punast.
+option.OZONE_MIST                          = Osooni toon hämarikus
+option.OZONE_MIST.comment = Rakendab osoonikihi maapinna udule: koitmisel ja loojumisel võtab udu toon osooni läbinud hämarikuspektri.
+option.OZONE_PLANET_BOUNCE                 = Osoon ja tagasipõrgatud valgus
+option.OZONE_PLANET_BOUNCE.comment = Rakendab osoonikihi pinnalt tagasipõrgatud valgusele: pinnalt põrgatud valgus filtreeritakse taevast tagasi tõusues uuesti osoonikihist.
 option.VL                              = Mahuline udu
 option.LPV_VL.comment                  = Valgusallikad valgustavad udu. Vajab värvilist valgust!
 option.VL.comment                      = Lisab valguskiiri ja muutuvat udu tihedust
@@ -1064,14 +1084,6 @@ screen.vignette=Vignette
 screen.bloom=Bloom
 option.MOON_PHASE_INFLUENCE_INTENSITY=Moon Phase Influence
 option.MOON_PHASE_INFLUENCE_INTENSITY.comment = Adjusts how strongly the current moon phase affects all moon-phased effects below. 0 = no effect, 1 = full effect.
-option.MOON_PHASE_NIGHT_LIGHTING = Moon-Phased Night Lighting
-option.MOON_PHASE_NIGHT_LIGHTING.comment = When enabled, night-time brightness, contrast and saturation shift with the lunar cycle — brighter near full moon, dimmer near new moon.
-option.MOON_PHASE_NIGHT_LIGHTING_INTENSITY=Night Brightness
-option.MOON_PHASE_NIGHT_LIGHTING_INTENSITY.comment = Adjusts how much the moon phase brightens or dims night lighting.
-option.MOON_PHASE_NIGHT_LIGHTING_CONTRAST=Night Contrast
-option.MOON_PHASE_NIGHT_LIGHTING_CONTRAST.comment = Adjusts how much the moon phase changes contrast at night.
-option.MOON_PHASE_NIGHT_LIGHTING_SATURATION=Night Saturation
-option.MOON_PHASE_NIGHT_LIGHTING_SATURATION.comment = Adjusts how much the moon phase changes color saturation at night.
 option.MOON_PHASE_NIGHT_ATMOSPHERE = Moon-Phased Night Atmosphere
 option.MOON_PHASE_NIGHT_ATMOSPHERE.comment = When enabled, fog and sky atmosphere at night vary with the lunar cycle.
 option.MOON_PHASE_NIGHT_ATMOSPHERE_INTENSITY=Night Fog Intensity

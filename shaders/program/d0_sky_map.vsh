@@ -144,11 +144,15 @@ void main() {
     clouds_params = get_clouds_parameters(weather);
     fog_params = get_fog_parameters(weather);
 
-    // Aurora clouds influence
+    // Aurora light contribution. sky_color feeds cloud/sky illumination
+    // (Cloud Light Contribution), while ambient_color feeds the ground
+    // lighting term in diffuse_lighting.glsl — so the ground gets its own
+    // slider (Ground Light Contribution) controlling how much aurora
+    // light reaches terrain, water and other sky-lit surfaces.
     vec3 aurora_lighting
         = mix(aurora_colors[0], aurora_colors[1], 0.25) * aurora_amount;
     sky_color += AURORA_CLOUD_LIGHTING * aurora_lighting;
-    ambient_color += AURORA_CLOUD_LIGHTING * aurora_lighting;
+    ambient_color += AURORA_GROUND_LIGHTING * aurora_lighting;
 #endif
 
     gl_Position = vec4(gl_Vertex.xy * 2.0 - 1.0, 0.0, 1.0);

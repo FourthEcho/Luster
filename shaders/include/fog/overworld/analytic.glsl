@@ -91,10 +91,19 @@ mat2x3 air_fog_analytic(
         float mie_phase = 0.7 * henyey_greenstein_phase(LoV, 0.5 * anisotropy)
             + 0.3 * henyey_greenstein_phase(LoV, -0.2 * anisotropy);
 
+        vec3 order_light = light_color;
+#if defined OZONE_LAYER && defined OZONE_FOG
+        // Dedicated ozone-aware multiple scattering: the light illuminating
+        // scatter order i has survived i additional quasi-diffuse passes
+        // through the stratospheric ozone layer, so higher orders lose more
+        // green/red to the Chappuis bands (see sky/ozone.glsl)
+        order_light *= ozone_multiple_scattering(float(i));
+#endif
+
         scattering += scatter_amount
             * (rayleigh_scattering * isotropic_phase
                + mie_scattering * mie_phase)
-            * light_color * (1.0 - 0.9 * rainStrength) * shadow;
+            * order_light * (1.0 - 0.9 * rainStrength) * shadow;
 
         scatter_amount *= 0.5;
         anisotropy *= 0.7;

@@ -65,14 +65,6 @@ vec3 get_light_color() {
         = sunlight_color * atmosphere_transmittance(light_dir.y, planet_radius);
     light_color = atmosphere_post_processing(light_color);
     vec3 moon_light = get_moon_exposure() * get_moon_tint();
-#ifdef MOON_PHASE_NIGHT_LIGHTING
-    moon_light = apply_moon_phase_influence(
-        moon_light,
-        MOON_PHASE_NIGHT_LIGHTING_INTENSITY * MOON_PHASE_INFLUENCE_INTENSITY,
-        MOON_PHASE_NIGHT_LIGHTING_CONTRAST,
-        MOON_PHASE_NIGHT_LIGHTING_SATURATION
-    );
-#endif
 
     light_color *= mix(
         get_sun_exposure() * get_sun_tint(),

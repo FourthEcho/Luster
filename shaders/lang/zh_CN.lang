@@ -48,6 +48,8 @@ screen.clouds_noctilucent              = 夜光云设置
 
 screen.fog_rlh                         = 瑞利系数
 screen.fog_mie                         = 米氏系数
+screen.fog_ozone                    = 臭氧
+screen.mist                         = 地面雾
 screen.sunlight_color                  = 阳光颜色
 screen.moonlight_color                 = 月光颜色
 screen.blocklight_color                = 方块光颜色
@@ -510,6 +512,8 @@ option.AURORA_FREQUENCY                = 极光频率
 option.AURORA_FREQUENCY.comment = Toggles aurora frequency.
 option.AURORA_CLOUD_LIGHTING           = 云层照明贡献率
 option.AURORA_CLOUD_LIGHTING.comment = Toggles cloud light contribution.
+option.AURORA_GROUND_LIGHTING           = 地面光照贡献
+option.AURORA_GROUND_LIGHTING.comment         = 控制极光向地面光照的贡献量。数值越高，地形、水面等受天空照明的表面会被极光颜色照亮得越明显。
 
 value.AURORA_NORMAL.AURORA_NEVER       = 关闭
 value.AURORA_NORMAL.AURORA_RARELY      = 小概率
@@ -549,6 +553,22 @@ option.MIST_SEA_LEVEL_BIAS             = Mist Sea Level Bias
 option.MIST_SEA_LEVEL_BIAS.comment     = Shifts the mist base up or down relative to the configured sea level. Positive = mist starts higher, negative = mist starts lower.
 option.MIST_SHADOW_STEPS               = Mist Shadow Steps
 option.MIST_SHADOW_STEPS.comment       = Number of ray-march steps toward the sun for mist self-shadowing (Advanced mode only). Higher = more accurate self-shadowing at higher GPU cost.
+option.OZONE_LAYER                         = 臭氧吸收层
+option.OZONE_LAYER.comment = 向大气模型中添加可调节的平流层臭氧层（查普伊斯吸收带，400-650nm）。影响阳光、月光、云层照明、天空、雾、薄雾与地面反弹光。在黎明和黄昏最为明显。
+option.OZONE_AMOUNT                        = 臭氧含量
+option.OZONE_AMOUNT.comment = 臭氧层的强度。1.00 为自然含量；更高的值会加深暮光时天顶的蓝色并使地平线光更偏红；0 则禁用吸收。
+option.OZONE_ALTITUDE                      = 臭氧层高度
+option.OZONE_ALTITUDE.comment = 臭氧层的峰值高度（公里）。真实臭氧层约在 20-30 公里处达到峰值；层越高，地平线掠射路径的饱和越弱。
+option.OZONE_THICKNESS                     = 臭氧层厚度
+option.OZONE_THICKNESS.comment = 层的厚度（公里）。薄层集中吸收并放大地平线掠射路径；厚层则分散吸收。
+option.OZONE_SKY                           = 臭氧天空吸收
+option.OZONE_SKY.comment = 将臭氧层应用于天空：对大气施加视线与光路吸收，加深暮光时的蓝色天顶并暖化地平线光。
+option.OZONE_FOG                           = 臭氧雾散射
+option.OZONE_FOG.comment = 将臭氧层应用于空气雾：臭氧感知的多重散射近似，散射阶数越高，绿红分量被臭氧吸收带吸收得越多。
+option.OZONE_MIST                          = 臭氧薄雾色调
+option.OZONE_MIST.comment = 将臭氧层应用于地面薄雾：黎明与黄昏时，薄雾色调会带上经臭氧过滤的暮光光谱。
+option.OZONE_PLANET_BOUNCE                 = 臭氧地面反弹
+option.OZONE_PLANET_BOUNCE.comment = 将臭氧层应用于地面反弹光：从地面反弹的光在向上回到天空途中再次经过臭氧层过滤。
 option.VL                              = 体积雾
 option.LPV_VL.comment                  = 光源可点亮雾气. 需启用彩色光源! 
 option.VL.comment                      = 添加光轴和可变雾气密度.
@@ -1063,14 +1083,6 @@ screen.vignette=Vignette
 screen.bloom=Bloom
 option.MOON_PHASE_INFLUENCE_INTENSITY=Moon Phase Influence
 option.MOON_PHASE_INFLUENCE_INTENSITY.comment = Adjusts how strongly the current moon phase affects all moon-phased effects below. 0 = no effect, 1 = full effect.
-option.MOON_PHASE_NIGHT_LIGHTING = Moon-Phased Night Lighting
-option.MOON_PHASE_NIGHT_LIGHTING.comment = When enabled, night-time brightness, contrast and saturation shift with the lunar cycle — brighter near full moon, dimmer near new moon.
-option.MOON_PHASE_NIGHT_LIGHTING_INTENSITY=Night Brightness
-option.MOON_PHASE_NIGHT_LIGHTING_INTENSITY.comment = Adjusts how much the moon phase brightens or dims night lighting.
-option.MOON_PHASE_NIGHT_LIGHTING_CONTRAST=Night Contrast
-option.MOON_PHASE_NIGHT_LIGHTING_CONTRAST.comment = Adjusts how much the moon phase changes contrast at night.
-option.MOON_PHASE_NIGHT_LIGHTING_SATURATION=Night Saturation
-option.MOON_PHASE_NIGHT_LIGHTING_SATURATION.comment = Adjusts how much the moon phase changes color saturation at night.
 option.MOON_PHASE_NIGHT_ATMOSPHERE = Moon-Phased Night Atmosphere
 option.MOON_PHASE_NIGHT_ATMOSPHERE.comment = When enabled, fog and sky atmosphere at night vary with the lunar cycle.
 option.MOON_PHASE_NIGHT_ATMOSPHERE_INTENSITY=Night Fog Intensity

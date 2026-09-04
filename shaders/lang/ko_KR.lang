@@ -47,6 +47,8 @@ screen.clouds_noctilucent              = 야광운 설정
 
 screen.fog_rlh                         = 레일리 안개
 screen.fog_mie                         = 미 산란 안개
+screen.fog_ozone                    = 오존
+screen.mist                         = 지면 안개
 screen.sunlight_color                  = 햇빛 색상
 screen.moonlight_color                 = 달빛 색상
 screen.blocklight_color                = 블록 조명 색상
@@ -533,6 +535,8 @@ option.AURORA_FREQUENCY                = 오로라 빈도
 option.AURORA_FREQUENCY.comment = Toggles aurora frequency.
 option.AURORA_CLOUD_LIGHTING           = 구름 조명 기여도
 option.AURORA_CLOUD_LIGHTING.comment = Toggles cloud light contribution.
+option.AURORA_GROUND_LIGHTING           = 지면 조명 기여도
+option.AURORA_GROUND_LIGHTING.comment         = 오로라 빛이 지면 조명에 기여하는 정도를 조절합니다. 값이 높을수록 지형, 물 등 하늘빛을 받는 표면이 오로라 색으로 더 밝게 빛납니다.
 
 value.AURORA_NORMAL.AURORA_NEVER       = 나타나지 않음
 value.AURORA_NORMAL.AURORA_RARELY      = 드물게
@@ -572,6 +576,22 @@ option.MIST_SEA_LEVEL_BIAS                = Mist Sea Level Bias
 option.MIST_SEA_LEVEL_BIAS.comment        = Shifts the mist base up or down relative to the configured sea level. Positive = mist starts higher, negative = mist starts lower.
 option.MIST_SHADOW_STEPS                  = Mist Shadow Steps
 option.MIST_SHADOW_STEPS.comment          = Number of ray-march steps toward the sun for mist self-shadowing (Advanced mode only). Higher = more accurate self-shadowing at higher GPU cost.
+option.OZONE_LAYER                         = 오존 흡수층
+option.OZONE_LAYER.comment = 조절 가능한 성층권 오존층(샤퓌스 흡수대, 400-650nm)을 대기 모델에 추가합니다. 햇빛, 달빛, 구름 조명, 하늘, 안개, 엷은 안개, 지면 반사광에 영향을 줍니다. 새벽과 황혼에 가장 뚜렷하게 보입니다.
+option.OZONE_AMOUNT                        = 오존량
+option.OZONE_AMOUNT.comment = 오존층의 강도입니다. 1.00은 자연적인 양이며, 높일수록 황혼의 푸른 천정이 깊어지고 수평선 빛이 붉어집니다. 0이면 흡수가 비활성화됩니다.
+option.OZONE_ALTITUDE                      = 오존층 고도
+option.OZONE_ALTITUDE.comment = 오존층 최고 고도(km). 실제 오존층은 약 20-30km에서 최고치에 도달합니다. 고도가 높을수록 수평선 근처에서의 포화가 약해집니다.
+option.OZONE_THICKNESS                     = 오존층 두께
+option.OZONE_THICKNESS.comment = 층의 두께(km). 얇은 층은 흡수를 집중시키고 수평선을 스치는 광로를 증폭시키며, 두꺼운 층은 흡수를 분산시킵니다.
+option.OZONE_SKY                           = 오존 하늘 흡수
+option.OZONE_SKY.comment = 오존층을 하늘에 적용합니다: 시선 및 광로 흡수가 황혼의 푸른 천정을 깊게 하고 수평선 빛을 따뜻하게 합니다.
+option.OZONE_FOG                           = 오존 안개 산란
+option.OZONE_FOG.comment = 오존층을 대기 안개에 적용합니다: 산란 차수가 높을수록 초록/빨강 성분이 오존 흡수대에 더 많이 흡수되는, 오존을 고려한 다중 산란 근사입니다.
+option.OZONE_MIST                          = 오존 엷은 안개 색조
+option.OZONE_MIST.comment = 오존층을 지면 엷은 안개에 적용합니다: 새벽과 황혼에 엷은 안개 색조가 오존을 거친 황혼 스펙트럼을 띱니다.
+option.OZONE_PLANET_BOUNCE                 = 오존 지면 반사광
+option.OZONE_PLANET_BOUNCE.comment = 오존층을 지면 반사광에 적용합니다: 지면에서 반사된 빛은 하늘로 되돌아가는 길에 오존층을 한 번 더 통과합니다.
 option.VL                                   = 볼류메트릭 안개
 option.LPV_VL.comment                       = 광원이 안개를 비춥니다. 유색 조명이 필요합니다!
 option.VL.comment                           = 빛줄기(광축)와 가변 안개 밀도를 추가합니다
@@ -1054,14 +1074,6 @@ screen.vignette=Vignette
 screen.bloom=Bloom
 option.MOON_PHASE_INFLUENCE_INTENSITY=Moon Phase Influence
 option.MOON_PHASE_INFLUENCE_INTENSITY.comment = Adjusts how strongly the current moon phase affects all moon-phased effects below. 0 = no effect, 1 = full effect.
-option.MOON_PHASE_NIGHT_LIGHTING = Moon-Phased Night Lighting
-option.MOON_PHASE_NIGHT_LIGHTING.comment = When enabled, night-time brightness, contrast and saturation shift with the lunar cycle — brighter near full moon, dimmer near new moon.
-option.MOON_PHASE_NIGHT_LIGHTING_INTENSITY=Night Brightness
-option.MOON_PHASE_NIGHT_LIGHTING_INTENSITY.comment = Adjusts how much the moon phase brightens or dims night lighting.
-option.MOON_PHASE_NIGHT_LIGHTING_CONTRAST=Night Contrast
-option.MOON_PHASE_NIGHT_LIGHTING_CONTRAST.comment = Adjusts how much the moon phase changes contrast at night.
-option.MOON_PHASE_NIGHT_LIGHTING_SATURATION=Night Saturation
-option.MOON_PHASE_NIGHT_LIGHTING_SATURATION.comment = Adjusts how much the moon phase changes color saturation at night.
 option.MOON_PHASE_NIGHT_ATMOSPHERE = Moon-Phased Night Atmosphere
 option.MOON_PHASE_NIGHT_ATMOSPHERE.comment = When enabled, fog and sky atmosphere at night vary with the lunar cycle.
 option.MOON_PHASE_NIGHT_ATMOSPHERE_INTENSITY=Night Fog Intensity

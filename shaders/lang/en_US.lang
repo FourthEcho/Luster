@@ -57,6 +57,8 @@ screen.clouds_noctilucent              = Noctilucent Clouds Settings
 
 screen.fog_rlh                         = Rayleigh Fog
 screen.fog_mie                         = Mie Fog
+screen.fog_ozone                    = Ozone
+screen.mist                         = Ground Mist
 screen.sunlight_color                  = Sunlight Color
 screen.moonlight_color                 = Moonlight Color
 screen.blocklight_color                = Blocklight Color
@@ -554,6 +556,8 @@ option.AURORA_FREQUENCY                = Aurora Frequency
 option.AURORA_FREQUENCY.comment             = Controls aurora frequency. Determines how often the aurora appears during a game session.
 option.AURORA_CLOUD_LIGHTING           = Cloud Light Contribution
 option.AURORA_CLOUD_LIGHTING.comment         = Controls whether aurora light contributes to cloud illumination. When enabled, clouds are illuminated by the aurora colors.
+option.AURORA_GROUND_LIGHTING           = Ground Light Contribution
+option.AURORA_GROUND_LIGHTING.comment         = Controls how much aurora light contributes to ground illumination. Higher values make terrain, water and other sky-lit surfaces glow with the aurora colors.
 
 value.AURORA_NORMAL.AURORA_NEVER       = Never
 value.AURORA_NORMAL.AURORA_RARELY      = Rarely
@@ -594,6 +598,22 @@ option.MIST_SEA_LEVEL_BIAS                 = Mist Sea Level Bias
 option.MIST_SEA_LEVEL_BIAS.comment        = Shifts the mist base up or down relative to the configured sea level. Positive = mist starts higher, negative = mist starts lower.
 option.MIST_SHADOW_STEPS                   = Mist Shadow Steps
 option.MIST_SHADOW_STEPS.comment          = Number of ray-march steps toward the sun for mist self-shadowing (Advanced mode only). Higher = more accurate self-shadowing at higher GPU cost.
+option.OZONE_LAYER                         = Ozone Absorption Layer
+option.OZONE_LAYER.comment = Adds a user-adjustable stratospheric ozone layer (Chappuis absorption bands, 400-650nm) to the atmosphere model. Shapes sunlight, moonlight, cloud lighting, sky, fog, mist and planet bounce. Most visible at dawn and dusk.
+option.OZONE_AMOUNT                        = Ozone Amount
+option.OZONE_AMOUNT.comment = Strength of the ozone layer. 1.00 is a natural column; higher values deepen the twilight blue zenith and redden horizon light; 0 disables the absorption.
+option.OZONE_ALTITUDE                      = Ozone Layer Altitude
+option.OZONE_ALTITUDE.comment = Peak altitude of the ozone layer in kilometres. The real layer peaks around 20-30km; higher layers saturate less at the horizon.
+option.OZONE_THICKNESS                     = Ozone Layer Thickness
+option.OZONE_THICKNESS.comment = Thickness of the layer in kilometres. Thin layers concentrate absorption and amplify horizon-grazing paths; thick layers spread it out.
+option.OZONE_SKY                           = Ozone Sky Absorption
+option.OZONE_SKY.comment = Applies the ozone layer to the sky: view- and light-path absorption on the atmosphere, deepening the twilight blue zenith and warming horizon light.
+option.OZONE_FOG                           = Ozone Fog Scattering
+option.OZONE_FOG.comment = Applies the ozone layer to air fog: an ozone-aware multiple scattering approximation where higher scatter orders lose more green/red to the ozone bands.
+option.OZONE_MIST                          = Ozone Mist Tint
+option.OZONE_MIST.comment = Applies the ozone layer to ground mist: near dawn and dusk the mist tint picks up the ozone-filtered twilight spectrum.
+option.OZONE_PLANET_BOUNCE                 = Ozone Planet Bounce
+option.OZONE_PLANET_BOUNCE.comment = Applies the ozone layer to planet bounce light: ground-bounced light is filtered through the ozone layer again on its way back up into the sky.
 option.VL                                   = Volumetric Fog
 option.LPV_VL.comment                       = Light sources illuminate the fog volume. Requires Colored Lights enabled. Adds realistic light propagation through fog. Significant performance impact. 
 option.VL.comment                           = Adds volumetric fog with light shafts and variable density. Creates atmosphere and sun rays streaming through the fog. Requires significant GPU resources.
@@ -1131,14 +1151,6 @@ screen.bloom=Bloom
 # ---- Moon Phase Influence ----
 option.MOON_PHASE_INFLUENCE_INTENSITY=Moon Phase Influence
 option.MOON_PHASE_INFLUENCE_INTENSITY.comment = Adjusts how strongly the current moon phase affects all moon-phased effects below. 0 = no effect, 1 = full effect.
-option.MOON_PHASE_NIGHT_LIGHTING = Moon-Phased Night Lighting
-option.MOON_PHASE_NIGHT_LIGHTING.comment = When enabled, night-time brightness, contrast and saturation shift with the lunar cycle — brighter near full moon, dimmer near new moon.
-option.MOON_PHASE_NIGHT_LIGHTING_INTENSITY=Night Brightness
-option.MOON_PHASE_NIGHT_LIGHTING_INTENSITY.comment = Adjusts how much the moon phase brightens or dims night lighting.
-option.MOON_PHASE_NIGHT_LIGHTING_CONTRAST=Night Contrast
-option.MOON_PHASE_NIGHT_LIGHTING_CONTRAST.comment = Adjusts how much the moon phase changes contrast at night.
-option.MOON_PHASE_NIGHT_LIGHTING_SATURATION=Night Saturation
-option.MOON_PHASE_NIGHT_LIGHTING_SATURATION.comment = Adjusts how much the moon phase changes color saturation at night.
 option.MOON_PHASE_NIGHT_ATMOSPHERE = Moon-Phased Night Atmosphere
 option.MOON_PHASE_NIGHT_ATMOSPHERE.comment = When enabled, fog and sky atmosphere at night vary with the lunar cycle.
 option.MOON_PHASE_NIGHT_ATMOSPHERE_INTENSITY=Night Fog Intensity

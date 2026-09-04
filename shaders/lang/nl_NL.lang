@@ -46,6 +46,8 @@ screen.clouds_noctilucent              = Nachtschemerende wolk Instellingen
 
 screen.fog_rlh                         = Rayleigh Mist
 screen.fog_mie                         = Mie Mist
+screen.fog_ozone                    = Ozon
+screen.mist                         = Bodemnevel
 screen.sunlight_color                  = Zonlicht Kleur
 screen.moonlight_color                 = Maanlicht Kleur
 screen.blocklight_color                = Bloklicht Kleur
@@ -509,6 +511,8 @@ option.AURORA_FREQUENCY                = Aurora Frequentie
 option.AURORA_FREQUENCY.comment = Toggles aurora frequency.
 option.AURORA_CLOUD_LIGHTING           = Wolkbelichting
 option.AURORA_CLOUD_LIGHTING.comment = Toggles cloud light contribution.
+option.AURORA_GROUND_LIGHTING           = Bodemlichtbijdrage
+option.AURORA_GROUND_LIGHTING.comment         = Bepaalt hoeveel auroralicht bijdraagt aan de verlichting van de bodem. Hogere waarden laten terrein, water en andere door de lucht verlichte oppervlakken oplichten in aurorakleuren.
 
 value.AURORA_NORMAL.AURORA_NEVER       = Nooit
 value.AURORA_NORMAL.AURORA_RARELY      = Zelden
@@ -548,6 +552,22 @@ option.MIST_SEA_LEVEL_BIAS             = Mist Sea Level Bias
 option.MIST_SEA_LEVEL_BIAS.comment     = Shifts the mist base up or down relative to the configured sea level. Positive = mist starts higher, negative = mist starts lower.
 option.MIST_SHADOW_STEPS               = Mist Shadow Steps
 option.MIST_SHADOW_STEPS.comment       = Number of ray-march steps toward the sun for mist self-shadowing (Advanced mode only). Higher = more accurate self-shadowing at higher GPU cost.
+option.OZONE_LAYER                         = Ozonabsorptielaag
+option.OZONE_LAYER.comment = Voegt een instelbare laag stratosferisch ozon (Chappuis-absorptiebanden, 400-650nm) toe aan het atmosfeermodel. Beïnvloedt zon- en maanlicht, bewolking, de lucht, mist, nevel en van de grond weerkaatst licht. Het meest zichtbaar bij zonsopgang en zonsondergang.
+option.OZONE_AMOUNT                        = Ozonhoeveelheid
+option.OZONE_AMOUNT.comment = Sterkte van de ozonlaag. 1.00 is een natuurlijke kolom; hogere waarden verdiepen het blauw van het zenit in de schemering en maken het licht aan de horizon roder; 0 schakelt de absorptie uit.
+option.OZONE_ALTITUDE                      = Hoogte ozonlaag
+option.OZONE_ALTITUDE.comment = Piekhoogte van de ozonlaag in kilometers. De echte laag piekt rond 20-30km; hogere lagen verzadigen minder aan de horizon.
+option.OZONE_THICKNESS                     = Dikte ozonlaag
+option.OZONE_THICKNESS.comment = Dikte van de laag in kilometers. Dunne lagen concentreren de absorptie en versterken schuine paden langs de horizon; dikke lagen verdelen haar.
+option.OZONE_SKY                           = Ozonabsorptie in de lucht
+option.OZONE_SKY.comment = Past de ozonlaag toe op de lucht: absorptie langs de kijkstraal en de lichtpaden verdiept het blauwe zenit in de schemering en warmt het licht aan de horizon op.
+option.OZONE_FOG                           = Ozonverstrooiing in mist
+option.OZONE_FOG.comment = Past de ozonlaag toe op luchtnevel: een ozonbewuste benadering van meervoudige verstrooiing waarbij hogere verstrooiingsordes meer groen/rood verliezen.
+option.OZONE_MIST                          = Ozontint in nevel
+option.OZONE_MIST.comment = Past de ozonlaag toe op bodemnevel: bij zonsopgang en zonsondergang neemt de neveltint het door ozon gefilterde schemerspectrum over.
+option.OZONE_PLANET_BOUNCE                 = Ozon en weerkaatst licht
+option.OZONE_PLANET_BOUNCE.comment = Past de ozonlaag toe op van de grond weerkaatst licht: licht dat van de grond weerkaatst wordt op de weg omhoog nogmaals door de ozonlaag gefilterd.
 option.VL                              = Volumetrische Mist
 option.LPV_VL.comment                  = Lichtbronnen belichten de mist. Vereist Gekleurde Lichtbronnen!
 option.VL.comment                      = Voegt lichtstralen en variabele mist-dichtheid toe.
@@ -1064,14 +1084,6 @@ screen.vignette=Vignette
 screen.bloom=Bloom
 option.MOON_PHASE_INFLUENCE_INTENSITY=Moon Phase Influence
 option.MOON_PHASE_INFLUENCE_INTENSITY.comment = Adjusts how strongly the current moon phase affects all moon-phased effects below. 0 = no effect, 1 = full effect.
-option.MOON_PHASE_NIGHT_LIGHTING = Moon-Phased Night Lighting
-option.MOON_PHASE_NIGHT_LIGHTING.comment = When enabled, night-time brightness, contrast and saturation shift with the lunar cycle — brighter near full moon, dimmer near new moon.
-option.MOON_PHASE_NIGHT_LIGHTING_INTENSITY=Night Brightness
-option.MOON_PHASE_NIGHT_LIGHTING_INTENSITY.comment = Adjusts how much the moon phase brightens or dims night lighting.
-option.MOON_PHASE_NIGHT_LIGHTING_CONTRAST=Night Contrast
-option.MOON_PHASE_NIGHT_LIGHTING_CONTRAST.comment = Adjusts how much the moon phase changes contrast at night.
-option.MOON_PHASE_NIGHT_LIGHTING_SATURATION=Night Saturation
-option.MOON_PHASE_NIGHT_LIGHTING_SATURATION.comment = Adjusts how much the moon phase changes color saturation at night.
 option.MOON_PHASE_NIGHT_ATMOSPHERE = Moon-Phased Night Atmosphere
 option.MOON_PHASE_NIGHT_ATMOSPHERE.comment = When enabled, fog and sky atmosphere at night vary with the lunar cycle.
 option.MOON_PHASE_NIGHT_ATMOSPHERE_INTENSITY=Night Fog Intensity
