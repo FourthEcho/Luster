@@ -203,7 +203,15 @@ void main() {
 
     // Temporal accumulation
 
+#if SHADER_AO == SHADER_AO_RTAO
+    // RTAO's stochastic hemisphere sampling is noisier per-frame than
+    // GTAO's horizon-angle estimate at equal sample counts; lean harder
+    // on temporal reuse to compensate rather than raising RTAO_SAMPLES
+    // (which costs a full extra raymarch per sample, not just a lerp)
+    const float max_accumulated_frames = 16.0;
+#else
     const float max_accumulated_frames = 10.0;
+#endif
     const float depth_rejection_strength = 16.0;
     const float offcenter_rejection_strength = 0.25;
 

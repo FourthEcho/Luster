@@ -33,16 +33,31 @@ vec2 compute_rtao(
     out vec3 bent_normal
 ) {
     const int sample_count = RTAO_SAMPLES;
-    const float radius = RTAO_RADIUS;
+    const uint step_count = uint(RTAO_STEPS);
     const uint refinement_steps = 2u;
+
+    // Increase AO radius for LoD terrain, matching GTAO's treatment
+    // (see lighting/ao/gtao.glsl) — LoD chunks are coarser/farther, so a
+    // radius tuned for nearby detail geometry reads as too tight there
+    float radius = RTAO_RADIUS;
+#ifdef LOD_MOD_ACTIVE
+    if (is_lod) {
+        radius *= 3.0;
+    }
+#endif
 
     mat3 tbn = get_tbn_matrix(view_normal);
     vec3 bent_accum = vec3(0.0);
     float occlusion = 0.0;
-    float hit_weight_sum = 0.0;
 
-    // Small normal offset to avoid self-intersection.
-    vec3 offset_pos = view_pos + view_normal * 0.02;
+    // Self-intersection bias, scaled by both search radius and distance
+    // from the camera. A single fixed bias either leaks light through
+    // thin nearby geometry (bias too large relative to nearby detail) or
+    // self-intersects at range (too small relative to depth-buffer
+    // precision loss with distance) — same reasoning as GTAO's ao_radius
+    // distance scaling above
+    float bias = max(radius * 0.01, length(view_pos) * 0.001);
+    vec3 offset_pos = view_pos + view_normal * bias;
 
     for (int i = 0; i < sample_count; ++i) {
         // Low-discrepancy 2D sample with per-pixel dither and frame jitter.
@@ -66,42 +81,33 @@ vec2 compute_rtao(
         vec3 ray_dir = sample_dir_view * radius;
         vec3 hit_pos;
 
-        // Use SSRT raymarcher; it already handles LOD vs combined depth,
-        // screen bounds, and depth tolerance from DrDesten.
-#if defined SSRT_LOD
-        // Force non-LOD for RTAO when LOD active to keep AO stable.
+        // Use SSRT raymarcher; it already handles LOD vs combined depth
+        // (combined_depth_tex merges LOD + vanilla depth — no separate
+        // LOD path needed here), screen bounds, and depth tolerance from
+        // DrDesten.
         bool hit = raymarch_depth_buffer(
             screen_pos,
             offset_pos,
             ray_dir,
             u.x,
-            uint(RTAO_SAMPLES),
+            step_count,
             refinement_steps,
             hit_pos
         );
-#else
-        bool hit = raymarch_depth_buffer(
-            screen_pos,
-            offset_pos,
-            ray_dir,
-            u.x,
-            uint(RTAO_SAMPLES),
-            refinement_steps,
-            hit_pos
-        );
-#endif
 
         if (hit) {
-            // Distance-based falloff: closer hits occlude more.
+            // Distance-based falloff: closer hits occlude more. Scaled
+            // by radius so a larger search radius stretches the falloff
+            // proportionally instead of hits near the edge of a big
+            // radius always being crushed by the same fixed decay rate.
             vec3 hit_view = screen_to_view_space(
                 SSRT_PROJECTION_MATRIX_INVERSE,
                 hit_pos,
                 true
             );
             float dist = length(hit_view - view_pos);
-            float falloff = exp(-dist * 0.5);
+            float falloff = exp(-(dist / radius) * 2.0);
             occlusion += falloff;
-            hit_weight_sum += 1.0;
         } else {
             bent_accum += sample_dir_view;
         }

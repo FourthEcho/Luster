@@ -159,6 +159,7 @@ const float wetnessHalflife         = 70.0;
 
   #define RTAO_SAMPLES 8 // [4 8 12 16 24 32]
   #define RTAO_RADIUS 2.0 // [0.5 1.0 1.5 2.0 2.5 3.0 4.0 6.0 8.0]
+  #define RTAO_STEPS 8 // [2 4 6 8 12 16 24 32] // Ray march steps per direction, decoupled from RTAO_SAMPLES (direction count) so quality/perf can be tuned independently for shape smoothness vs. how far each ray can reach
 
 // Colored Lights Settings
 
