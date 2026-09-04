@@ -76,6 +76,7 @@ vec2 compute_gtao(
     vec3 view_normal,
     vec2 dither,
     bool is_lod,
+    float surface_albedo,
     out vec3 bent_normal
 ) {
     float ao = 0.0;
@@ -153,7 +154,15 @@ vec2 compute_gtao(
             += viewer_dir * cos(bent_angle) + ortho_dir * sin(bent_angle);
     }
 
-    const float albedo = 0.2; // albedo of surroundings (for multibounce approx)
+    // Albedo of the surrounding surfaces, for the GTAO multibounce
+    // approximation (Jimenez et al., "Practical Realtime Strategies for
+    // Accurate Indirect Occlusion"). Nearby occluding geometry is, on
+    // average, similarly lit/coloured to the shaded surface itself, so
+    // the shaded fragment's own albedo is a much better local estimate
+    // than one fixed guess for every material in every biome. Clamped
+    // to keep the multibounce term well-behaved for very dark or very
+    // bright (e.g. snow, glowstone) surfaces.
+    float albedo = clamp(surface_albedo, 0.02, 0.9);
 
     ao *= rcp(float(GTAO_SLICES));
     ambient_sss *= rcp(float(GTAO_SLICES));

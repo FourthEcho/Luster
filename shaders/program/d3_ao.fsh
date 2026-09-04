@@ -66,6 +66,7 @@ uniform bool world_age_changed;
 #define TEMPORAL_REPROJECTION
 #include "/include/misc/lod_mod_support.glsl"
 #include "/include/utility/bicubic.glsl"
+#include "/include/utility/color.glsl"
 #include "/include/utility/dithering.glsl"
 #include "/include/utility/encoding.glsl"
 #include "/include/utility/fast_math.glsl"
@@ -100,8 +101,10 @@ void main() {
 
 #ifndef NORMAL_MAPPING
     vec4 gbuffer_data = texelFetch(colortex1, view_texel, 0);
+    vec4 gbuffer_data_0 = gbuffer_data;
 #else
     vec4 gbuffer_data = texelFetch(colortex2, view_texel, 0);
+    vec4 gbuffer_data_0 = texelFetch(colortex1, view_texel, 0);
 #endif
     vec2 dither = vec2(
         texelFetch(noisetex, texel & 511, 0).b,
@@ -155,6 +158,16 @@ void main() {
 
     dither = r2(frameCounter, dither);
 
+    // Decode this fragment's own albedo for the GTAO multibounce
+    // approximation (see lighting/ao/gtao.glsl) — cheap luminance
+    // estimate, doesn't need full material decoding
+    vec3 surface_albedo_srgb = vec3(
+        unpack_unorm_2x8(gbuffer_data_0.x),
+        unpack_unorm_2x8(gbuffer_data_0.y).x
+    );
+    float surface_albedo
+        = dot(srgb_eotf_inv(surface_albedo_srgb), luminance_weights_rec709);
+
     // Calculate AO
 
     vec2 ao;
@@ -174,6 +187,7 @@ void main() {
         view_normal,
         dither,
         is_lod,
+        surface_albedo,
         bent_normal
     );
 #elif SHADER_AO == SHADER_AO_RTAO
