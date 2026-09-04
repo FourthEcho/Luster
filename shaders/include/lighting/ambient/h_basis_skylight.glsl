@@ -54,12 +54,7 @@
 #include "/include/surface/material.glsl"
 #include "/include/sky/projection.glsl"
 #include "/include/utility/fast_math.glsl"
-#include "/include/utility/random.glsl"
 
-// Number of sky samples used by the per-frame projection. 512 keeps the
-// vertex shader projection cheap (only 3 vertices run it per frame) while
-// being dense enough to suppress per-frame variance once temporal
-// accumulation is applied via the per-frame jitter.
 #ifndef H_BASIS_SKY_SAMPLES
   #define H_BASIS_SKY_SAMPLES SH_SKYLIGHT_QUALITY
 #endif
@@ -72,29 +67,26 @@
 // be called once per frame from a fullscreen-triangle vertex shader; the
 // returned array is `flat`-qualified to the fragment stage by the caller.
 //
-// Sampling is a low-discrepancy spherical sequence (Hammersley-style with a
-// golden-ratio offset) plus a per-frame jitter so that residual variance
-// averages out over time when temporal reprojection is enabled.
+// The sampling pattern is deliberately deterministic. The projection is
+// recomputed every frame from the live sky map, but changing the sample
+// coordinates with frameCounter would inject Monte-Carlo noise directly into
+// the lighting result because there is no temporal accumulation of these
+// coefficients before they reach the deferred fragment shader. Stable sample
+// locations therefore prevent the SH term from making shadows and ambient
+// lighting flash from frame to frame.
 void project_sky_h_basis(out vec3 h_out[6]) {
     for (int i = 0; i < 6; ++i) h_out[i] = vec3(0.0);
 
     const int N = H_BASIS_SKY_SAMPLES;
 
-    // Per-frame jitter (Halton-style 1D rotation + hashed y offset). The
-    // jitter is small enough to never bias the projection but large enough
-    // to decorrelate samples across frames so temporal accumulation cleans
-    // up residual variance.
-    vec2 jitter = vec2(
-        r1(frameCounter, 0.5),
-        hash1(vec3(float(frameCounter & 31), 0.25, 0.75))
-    );
-
     for (int i = 0; i < N; ++i) {
-        // Low-discrepancy spherical sample via Hammersley sequence with
-        // per-frame jitter.
+        // Fixed low-discrepancy spherical sequence. Do not add per-frame
+        // jitter here: the coefficients are consumed immediately as a
+        // flat per-frame lighting state, so temporal noise would become
+        // visible as flickering illumination/shadows.
         vec2 u = vec2(
-            fract((float(i) + 0.5) / float(N) + jitter.x),
-            fract(float(i) * (1.0 / phi1) + jitter.y)
+            (float(i) + 0.5) / float(N),
+            fract(float(i) * (1.0 / phi1))
         );
 
         // Uniform sphere mapping: u.x = cos(theta) uniform on [-1, 1],
@@ -136,28 +128,15 @@ void project_sky_h_basis(out vec3 h_out[6]) {
 //   Evaluation
 // ---------------------------------------------------------------------------
 
-// Reconstructs the cosine-weighted hemisphere irradiance around `normal`
-// from the projected H-Basis coefficients. Closed-form polynomial
-// evaluation; no extra texture fetches per fragment.
 vec3 evaluate_h_basis_irradiance(vec3 h_in[6], vec3 normal) {
     vec3 n = normalize(normal);
 
-    // Constant lobe.
     vec3 result = h_in[0] * pi;
 
-    // Linear lobes (d_x, d_y, d_z). Coefficient is 2*pi/3, not pi/2 --
-    // verified numerically against a brute-force Monte Carlo hemisphere
-    // integral (the pi/2 guess in an earlier draft was off by ~1.33x,
-    // under-scaling the directional response of the ambient term).
     result += (2.0 * pi / 3.0) * (h_in[1] * n.x + h_in[2] * n.y + h_in[3] * n.z);
 
-    // Quadratic y-dominant lobe (3 y^2 - 1) / 2 with the matching
-    // cosine-weighted hemisphere integral (pi / 4) * (3 n_y^2 - 1).
-    // The factor 0.5 from H_4 is folded with the (pi / 4) into (pi / 8).
     result += (pi * 0.125) * h_in[4] * (3.0 * n.y * n.y - 1.0);
 
-    // Quadratic anisotropic lobe (d_x^2 - d_z^2) / 2 with the matching
-    // (pi / 4) * (n_x^2 - n_z^2) cosine-weighted integral.
     result += (pi * 0.125) * h_in[5] * (n.x * n.x - n.z * n.z);
 
     return max0(result);
@@ -167,15 +146,6 @@ vec3 evaluate_h_basis_irradiance(vec3 h_in[6], vec3 normal) {
 //   Material-aware wrapper
 // ---------------------------------------------------------------------------
 
-// Final sky-ambient contribution for a deferred fragment. Mirrors the
-// material wrapping the old IBL diffuse path used (kd * albedo for
-// dielectrics, no contribution for metals) so existing tuning continues
-// to apply.
-//
-// `ao`             : ambient occlusion factor in [0, 1]
-// `skylight`       : per-pixel skylight visibility (typically
-//                    `clamp01(light_levels.y)`)
-// `intensity`      : user-facing SH_SKYLIGHT_INTENSITY brightness slider
 vec3 get_h_basis_skylight(
     Material material,
     vec3 normal,
@@ -188,37 +158,16 @@ vec3 get_h_basis_skylight(
 #ifndef SH_SKYLIGHT
     return vec3(0.0);
 #else
-    // Always use the bent normal directly, so the compact H-Basis
-    // representation follows the actual visible-sky direction. AO is a
-    // separate visibility factor applied below, not a normal blend --
-    // an earlier version mixed towards bent_normal as ao increased, which
-    // was backwards: bent_normal and normal already converge in open,
-    // unoccluded areas (ao ~ 1), so that blend gave bent_normal correction
-    // the least effect exactly where occlusion (low ao, e.g. corners,
-    // under overhangs) made it matter most. `normal` is kept as a
-    // parameter for call-site/API stability but is not currently used.
     vec3 effective_normal = normalize(bent_normal);
 
     vec3 irradiance = evaluate_h_basis_irradiance(h_in, effective_normal);
 
-    // The renderer already has a baseline baked skylight contribution in
-    // get_sky_lighting(). Only add the directional variation from the live
-    // sky map here; adding the full irradiance would double-count uniform
-    // sky illumination and wash the scene out.
     vec3 baseline = h_in[0] * pi;
 
-    // Keep a small portion of the isotropic sky energy so the feature remains
-    // visibly contributive, while preventing the full sky term from being
-    // stacked on top of the renderer's existing baked skylight. The remaining
-    // directional component still responds to the actual sky distribution.
     irradiance = max0(irradiance - baseline * 0.80)
         * skylight
         * intensity;
 
-    // Wrap with the material's diffuse response: dielectrics use the
-    // (1 - F0) albedo-modulated Lambertian factor, metals contribute
-    // nothing to the diffuse ambient (their F0 is already handled by the
-    // specular reflection path).
     vec3 kd = (vec3(1.0) - material.f0) * float(!material.is_metal);
     return irradiance * material.albedo * kd;
 #endif
