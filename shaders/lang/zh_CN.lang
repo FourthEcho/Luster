@@ -1063,14 +1063,6 @@ screen.vignette=Vignette
 screen.bloom=Bloom
 option.MOON_PHASE_INFLUENCE_INTENSITY=Moon Phase Influence
 option.MOON_PHASE_INFLUENCE_INTENSITY.comment = Adjusts how strongly the current moon phase affects all moon-phased effects below. 0 = no effect, 1 = full effect.
-option.MOON_PHASE_NIGHT_LIGHTING = Moon-Phased Night Lighting
-option.MOON_PHASE_NIGHT_LIGHTING.comment = When enabled, night-time brightness, contrast and saturation shift with the lunar cycle — brighter near full moon, dimmer near new moon.
-option.MOON_PHASE_NIGHT_LIGHTING_INTENSITY=Night Brightness
-option.MOON_PHASE_NIGHT_LIGHTING_INTENSITY.comment = Adjusts how much the moon phase brightens or dims night lighting.
-option.MOON_PHASE_NIGHT_LIGHTING_CONTRAST=Night Contrast
-option.MOON_PHASE_NIGHT_LIGHTING_CONTRAST.comment = Adjusts how much the moon phase changes contrast at night.
-option.MOON_PHASE_NIGHT_LIGHTING_SATURATION=Night Saturation
-option.MOON_PHASE_NIGHT_LIGHTING_SATURATION.comment = Adjusts how much the moon phase changes color saturation at night.
 option.MOON_PHASE_NIGHT_ATMOSPHERE = Moon-Phased Night Atmosphere
 option.MOON_PHASE_NIGHT_ATMOSPHERE.comment = When enabled, fog and sky atmosphere at night vary with the lunar cycle.
 option.MOON_PHASE_NIGHT_ATMOSPHERE_INTENSITY=Night Fog Intensity
