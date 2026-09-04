@@ -68,6 +68,21 @@ void debug_weather(inout vec3 color) {
     text.char_pos.x = number_col;
     print_float(weather.wind);
     print_line();
+    print(
+        (_T,
+         _u,
+         _r,
+         _b,
+         _u,
+         _l,
+         _e,
+         _n,
+         _c,
+         _e)
+    );
+    text.char_pos.x = number_col;
+    print_float(weather.turbulence);
+    print_line();
     print_line();
     print((_C, _L, _O, _U, _D, _S));
     print_line();

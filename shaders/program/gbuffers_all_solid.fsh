@@ -460,6 +460,23 @@ void main() {
     float material_ao;
     decode_normal_map(normal_map, normal, material_ao);
 
+#if defined PROGRAM_GBUFFERS_TERRAIN && defined POM
+    // POM slope normals: perturb the tangent-space normal with the
+    // heightfield gradient at the raymarched hit, so POM relief shades
+    // instead of only shifting UVs. Same close-range fade as the POM
+    // march itself, skipped for lava which never raymarches.
+    if (length(tangent_pos) < POM_DISTANCE
+        && material_mask != MATERIAL_LAVA) {
+        normal = normalize(
+            normal
+            + get_pom_slope_normal(
+                get_local_coord_from_uv(parallax_uv),
+                uv_gradient
+            )
+        );
+    }
+#endif
+
     normal = tbn * normal;
 
     adjusted_light_levels *= mix(0.7, 1.0, material_ao);

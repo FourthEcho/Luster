@@ -30,6 +30,8 @@ uniform int frameCounter;
 
 uniform vec3 sun_dir;
 
+uniform float desert_sandstorm;
+
 uniform vec2 taa_offset;
 uniform vec2 view_pixel_size;
 

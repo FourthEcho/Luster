@@ -17,6 +17,8 @@
 #undef COLORED_LIGHTS
 #endif
 
+uniform float desert_sandstorm;
+
 vec3 ambient_color;
 vec3 light_color;
 

@@ -22,6 +22,7 @@ struct CloudsParameters {
     float noctilucent_amount;
     // Other
     float crepuscular_rays_amount;
+    float l0_turbulence; // domain-warp amount for the coverage field
 };
 
 #endif // INCLUDE_SKY_CLOUDS_PARAMETERS

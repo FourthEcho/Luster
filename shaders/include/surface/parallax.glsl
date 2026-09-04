@@ -18,6 +18,21 @@ float get_depth_value(vec2 local_coord, mat2 uv_gradient) {
     return 1.0 - get_height_value(local_coord, uv_gradient);
 }
 
+// POM slope normals: central differences of the heightfield around the ray
+// hit, converted to a tangent-space perturbation. Part of the POM path
+// itself (no separate toggle): relief found by raymarching should also
+// shade, not just offset UVs. Depth = 1 - height, so the depth gradient
+// already points the way a bump normal tilts.
+vec3 get_pom_slope_normal(vec2 local_coord, mat2 uv_gradient) {
+    vec2 texel = atlas_tile_scale / vec2(textureSize(normals, 0));
+    float hx = get_depth_value(local_coord + vec2(texel.x, 0.0), uv_gradient)
+             - get_depth_value(local_coord - vec2(texel.x, 0.0), uv_gradient);
+    float hy = get_depth_value(local_coord + vec2(0.0, texel.y), uv_gradient)
+             - get_depth_value(local_coord - vec2(0.0, texel.y), uv_gradient);
+    const float slope_gain = 2.0;
+    return vec3(hx * slope_gain, hy * slope_gain, 0.0);
+}
+
 vec2 get_parallax_uv(
     vec3 tangent_dir,
     mat2 uv_gradient,

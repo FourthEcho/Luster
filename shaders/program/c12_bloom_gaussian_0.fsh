@@ -55,7 +55,15 @@ void main() {
     float weight_sum = 0.0;
 
     for (int i = -4; i <= 4; ++i) {
+#ifdef BLOOM_ANAMORPHIC
+        // Anamorphic stretch: widen the horizontal kernel so bright
+        // sources smear into horizontal streaks like an anamorphic lens.
+        // At 1.0 the taps land exactly on texels (no-op).
+        ivec2 pos
+            = texel + ivec2(int(round(float(i) * BLOOM_ANAMORPHIC_STRETCH)), 0);
+#else
         ivec2 pos = texel + ivec2(i, 0);
+#endif
         float weight = binomial_weights_9[abs(i)]
             * float(clamp(pos.x, bounds_min.x + 2, bounds_max.x - 2) == pos.x);
         bloom_tiles += texelFetch(colortex0, pos, 0).rgb * weight;

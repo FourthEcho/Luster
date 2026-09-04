@@ -117,5 +117,34 @@ void main() {
     }
 
     scene_color *= rcp(DOF_SAMPLES);
+
+#ifdef CHROMATIC_DISPERSION
+    // Chromatic dispersion: radial spectral fringing scaled by the circle
+    // of confusion, so in-focus regions stay clean and only defocused
+    // areas fringe like a real camera lens
+    {
+        float coc_radius = length(CoC);
+        vec2 center_offset = uv - 0.5;
+        vec2 radial_dir
+            = center_offset / max(length(center_offset), 1e-4);
+        vec2 spectral_offset
+            = radial_dir * coc_radius * (CHROMATIC_DISPERSION_STRENGTH * 0.1);
+        vec2 clamp_max = vec2(
+            1.0 - 2.0 * view_pixel_size * rcp(taau_render_scale)
+        );
+        scene_color.r = textureLod(
+            colortex0,
+            clamp(vec2(uv - spectral_offset), vec2(0.0), clamp_max)
+                * taau_render_scale,
+            0
+        ).r;
+        scene_color.b = textureLod(
+            colortex0,
+            clamp(vec2(uv + spectral_offset), vec2(0.0), clamp_max)
+                * taau_render_scale,
+            0
+        ).b;
+    }
+#endif
 }
 

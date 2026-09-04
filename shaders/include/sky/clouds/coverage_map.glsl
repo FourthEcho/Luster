@@ -14,6 +14,20 @@ float clouds_cumulus_local_coverage(vec2 pos) {
     pos += cameraPosition.xz * CLOUDS_SCALE;
     pos += wind_velocity * world_age;
 
+    // Turbulence domain warp: churn the coverage field with a large-scale
+    // curl-ish offset so gusty weather breaks clouds into streaks and
+    // cells instead of just fading them. Driven per-frame by the live
+    // weather turbulence (see weather/clouds.glsl).
+    float warp_amount = clouds_params.l0_turbulence;
+    if (warp_amount > eps) {
+        vec2 warp_uv = (0.0000007 / CLOUDS_CUMULUS_SIZE) * pos;
+        vec2 warp = vec2(
+            texture(noisetex, warp_uv).y - 0.5,
+            texture(noisetex, warp_uv + 0.37).z - 0.5
+        );
+        pos += warp * warp_amount * 9000.0;
+    }
+
     // Sample noise
     vec2 p1 = (0.000002 / CLOUDS_CUMULUS_SIZE) * pos;
     vec2 p2 = (0.000027 / CLOUDS_CUMULUS_SIZE) * pos;

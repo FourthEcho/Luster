@@ -125,12 +125,16 @@ option.WEATHER_HUMIDITY_BIAS               = Humidity Bias
 option.WEATHER_HUMIDITY_BIAS.comment = Controls humidity bias.
 option.WEATHER_WIND_BIAS                   = Windiness Bias
 option.WEATHER_WIND_BIAS.comment = Controls windiness bias.
+option.WEATHER_TURBULENCE_BIAS             = Turbulence Bias
+option.WEATHER_TURBULENCE_BIAS.comment = Controls turbulence bias. Turbulence tears clouds into broken detail and grows storm towers.
 option.WEATHER_TEMPERATURE_VARIATION_SPEED = Temperature Variation Speed
 option.WEATHER_TEMPERATURE_VARIATION_SPEED.comment = Controls temperature variation speed.
 option.WEATHER_HUMIDITY_VARIATION_SPEED    = Humidity Variation Speed
 option.WEATHER_HUMIDITY_VARIATION_SPEED.comment = Controls humidity variation speed.
 option.WEATHER_WIND_VARIATION_SPEED        = Windiness Variation Speed
 option.WEATHER_WIND_VARIATION_SPEED.comment = Controls windiness variation speed.
+option.WEATHER_TURBULENCE_VARIATION_SPEED  = Turbulence Variation Speed
+option.WEATHER_TURBULENCE_VARIATION_SPEED.comment = Controls turbulence variation speed.
 
 # Lighting settings
 
@@ -286,6 +290,8 @@ option.BLOCKLIGHT_B                    = §9▍ §fBlue — Block Light
 option.BLOCKLIGHT_B.comment = Adjusts the blue tint of block lights. Higher = cooler, whiter light.
 option.BLOCKLIGHT_I                    = Block Light Intensity
 option.BLOCKLIGHT_I.comment = Adjusts the overall brightness of block light sources. Higher = stronger torch and lamp illumination.
+option.BLOCKLIGHT_TEMPERATURE          = Block Light Temperature
+option.BLOCKLIGHT_TEMPERATURE.comment = Blackbody temperature of block lights in Kelvin. Lower = deep orange candle glow; higher = cooler white light. Normalized at 3400K so the default look is unchanged.
 option.CAVE_LIGHTING_I                  = Cave Ambient
 option.CAVE_LIGHTING_I.comment = Adjusts the base brightness of underground ambient light when no direct light is present. Higher = caves appear less pitch-black.
 
@@ -878,6 +884,10 @@ option.BLOOM                           = Bloom
 option.BLOOM.comment                    = Soft glow effect around bright areas and light sources. Simulates camera lens flare and bright light bleeding. Performance impact varies with intensity.
 option.BLOOM_INTENSITY                 = Bloom Intensity
 option.BLOOM_INTENSITY.comment          = Adjusts the bloom intensity. Higher values increase the glow effect and area affected, but may reduce performance.
+option.BLOOM_ANAMORPHIC                = Anamorphic Bloom
+option.BLOOM_ANAMORPHIC.comment         = Widens the horizontal bloom blur so bright sources smear into horizontal streaks like an anamorphic camera lens.
+option.BLOOM_ANAMORPHIC_STRETCH        = Anamorphic Stretch
+option.BLOOM_ANAMORPHIC_STRETCH.comment = Adjusts the horizontal stretch of the anamorphic bloom. 1.00 is neutral; higher values lengthen the streaks.
 option.BLOOM_SPREAD                    = Bloom Spread
 option.BLOOM_UPSAMPLING_FILTER         = Bloom Upsampling Filter
 option.BLOOM_UPSAMPLING_FILTER.comment = Selects the bloom upsampling filter mode or method.
@@ -886,6 +896,10 @@ value.BLOOM_UPSAMPLING_FILTER.bicubic_filter = Bicubic
 option.BLOOM_SPREAD.comment            = Adjusts how much the bloom spreads out
 option.DOF                             = Depth of field
 option.DOF.comment                       = Camera depth of field effect. Blurs areas outside the focal distance to simulate camera optics. Controls how much of the scene is in focus.
+option.CHROMATIC_DISPERSION            = Chromatic Dispersion
+option.CHROMATIC_DISPERSION.comment      = Radial spectral fringing scaled by defocus, simulating real camera lens dispersion. In-focus regions stay clean; blurred areas fringe with color.
+option.CHROMATIC_DISPERSION_STRENGTH   = Dispersion Strength
+option.CHROMATIC_DISPERSION_STRENGTH.comment = Adjusts the strength of the chromatic dispersion fringing. Higher values widen the red/blue separation in out-of-focus areas.
 option.DOF_INTENSITY                   = DoF Intensity
 option.DOF_INTENSITY.comment             = Adjusts the intensity of the depth of field effect. Higher values increase the blur amount for out-of-focus areas.
 option.DOF_SAMPLES                     = DoF Samples
@@ -1209,6 +1223,10 @@ option.FOG_SMOOTHING_RADIUS.comment = Adjusts the radius of the Gaussian blur ke
 
 option.CLOUD_LIGHTING_BOUNCES=Cloud Light Bounces
 option.CLOUD_LIGHTING_BOUNCES.comment = Adjusts how many times light bounces inside clouds. Higher = more realistic multiple scattering but higher cost. 0 = single scattering only.
+option.CLOUDS_WEATHER_TURBULENCE       = Weather Turbulence Amount
+option.CLOUDS_WEATHER_TURBULENCE.comment = Scales how strongly live weather turbulence warps cloud coverage, adds detail and grows storm towers. Higher = more churned, broken skies.
+option.CLOUDS_WEATHER_CIRRUS_BLEND     = Cirrus Weather Blend
+option.CLOUDS_WEATHER_CIRRUS_BLEND.comment = Blends high clouds between a steady background veil and full weather coupling. At 1.0 cirrus follows temperature, humidity and rain; lower values keep a constant veil.
 
 option.ANISOTROPIC_FILTERING_MODE=Anisotropic Filtering Mode
 option.ANISOTROPIC_FILTERING_MODE.comment=Anisotropic texture filtering for surface materials. Reduces aliasing and blur on grazing-angle surfaces (ground, walls seen at shallow angles). Off=standard bilinear, 2x/4x/8x/16x=more samples along the major axis of the screen-space footprint.
