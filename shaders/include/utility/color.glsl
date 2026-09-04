@@ -156,16 +156,6 @@ float cie_lab_f_inv(float t) {
     }
 }
 
-vec3 xyz_to_lab(vec3 xyz) {
-    const vec3 xyz_n = vec3(95.0489, 100.0, 108.8840);
-
-    xyz /= xyz_n;
-
-    vec3 f = vec3(cie_lab_f(xyz.x), cie_lab_f(xyz.y), cie_lab_f(xyz.z));
-
-    return vec3(116.0 * f.y - 16.0, 500.0 * (f.x - f.y), 200.0 * (f.y - f.z));
-}
-
 vec3 lab_to_xyz(vec3 lab) {
     const vec3 xyz_n = vec3(95.0489, 100.0, 108.8840);
 

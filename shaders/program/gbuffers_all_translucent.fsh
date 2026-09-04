@@ -350,8 +350,7 @@ vec2 get_local_coord_from_uv(vec2 uv) {
 vec4 draw_nether_portal(vec3 direction_world, float layer_dist) {
     const int step_count = 20;
     const float parallax_depth = 0.2;
-    const float portal_brightness = 4.0;
-    const float density_threshold = 0.6;
+        const float density_threshold = 0.6;
     const float depth_step = rcp(float(step_count));
 
     float dither = interleaved_gradient_noise(gl_FragCoord.xy, frameCounter);
@@ -392,7 +391,7 @@ vec4 draw_nether_portal(vec3 direction_world, float layer_dist) {
     float edge_highlight = cube(max0(1.0 - 2.0 * dist));
     result *= 1.0 + 2.0 * edge_highlight;
 
-    return clamp01(result * portal_brightness * depth_step);
+    return clamp01(result * NETHER_PORTAL_INTENSITY * depth_step);
 }
 
 #else

@@ -33,7 +33,6 @@ flat in OverworldFogParameters fog_params;
 uniform sampler2D noisetex;
 
 uniform sampler3D colortex0; // 3D worley noise
-uniform sampler3D perlin_3d; // existing 3D Perlin volume used by Nether smoke
 uniform sampler2D colortex1; // gbuffer data
 uniform sampler2D colortex3; // translucent color
 uniform sampler2D colortex4; // sky map

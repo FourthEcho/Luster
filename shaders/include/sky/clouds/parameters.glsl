@@ -16,7 +16,6 @@ struct CloudsParameters {
     // Volumetric layer 1
     vec2 l1_coverage;
     float l1_cumulus_stratus_blend;
-    float l1_shadow;
     // Planar clouds
     float cirrus_amount;
     float cirrocumulus_amount;

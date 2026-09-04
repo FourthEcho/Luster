@@ -33,7 +33,7 @@
 // around a unit normal n is reconstructed in closed form as:
 //
 //   E(n) = pi * h_0
-//        + (pi / 2) * (h_1 * n.x + h_2 * n.y + h_3 * n.z)
+//        + (2 * pi / 3) * (h_1 * n.x + h_2 * n.y + h_3 * n.z)
 //        + (pi / 8) * h_4 * (3 * n.y^2 - 1)
 //        + (pi / 8) * h_5 * (n.x^2 - n.z^2)
 //
@@ -41,7 +41,7 @@
 // against (d . n) over the upper hemisphere around n:
 //
 //   integral_hemisphere(n) (d . n) d_omega                          = pi
-//   integral_hemisphere(n) d_i (d . n) d_omega  (i in {x, y, z})     = (pi / 2) * n_i
+//   integral_hemisphere(n) d_i (d . n) d_omega  (i in {x, y, z})     = (2 * pi / 3) * n_i
 //   integral_hemisphere(n) (3 * d_y^2 - 1) (d . n) d_omega           = (pi / 4) * (3 * n_y^2 - 1)
 //   integral_hemisphere(n) (d_x^2 - d_z^2) (d . n) d_omega           = (pi / 4) * (n_x^2 - n_z^2)
 //
@@ -145,8 +145,11 @@ vec3 evaluate_h_basis_irradiance(vec3 h_in[6], vec3 normal) {
     // Constant lobe.
     vec3 result = h_in[0] * pi;
 
-    // Linear lobes (d_x, d_y, d_z).
-    result += (pi * 0.5) * (h_in[1] * n.x + h_in[2] * n.y + h_in[3] * n.z);
+    // Linear lobes (d_x, d_y, d_z). Coefficient is 2*pi/3, not pi/2 --
+    // verified numerically against a brute-force Monte Carlo hemisphere
+    // integral (the pi/2 guess in an earlier draft was off by ~1.33x,
+    // under-scaling the directional response of the ambient term).
+    result += (2.0 * pi / 3.0) * (h_in[1] * n.x + h_in[2] * n.y + h_in[3] * n.z);
 
     // Quadratic y-dominant lobe (3 y^2 - 1) / 2 with the matching
     // cosine-weighted hemisphere integral (pi / 4) * (3 n_y^2 - 1).
@@ -185,10 +188,16 @@ vec3 get_h_basis_skylight(
 #ifndef SH_SKYLIGHT
     return vec3(0.0);
 #else
-    // Always evaluate against the bent normal so the compact H-Basis
-    // representation follows the actual visible-sky direction. AO remains
-    // a visibility factor below rather than changing the cone shape.
-    vec3 effective_normal = normalize(mix(normal, bent_normal, clamp01(ao)));
+    // Always use the bent normal directly, so the compact H-Basis
+    // representation follows the actual visible-sky direction. AO is a
+    // separate visibility factor applied below, not a normal blend --
+    // an earlier version mixed towards bent_normal as ao increased, which
+    // was backwards: bent_normal and normal already converge in open,
+    // unoccluded areas (ao ~ 1), so that blend gave bent_normal correction
+    // the least effect exactly where occlusion (low ao, e.g. corners,
+    // under overhangs) made it matter most. `normal` is kept as a
+    // parameter for call-site/API stability but is not currently used.
+    vec3 effective_normal = normalize(bent_normal);
 
     vec3 irradiance = evaluate_h_basis_irradiance(h_in, effective_normal);
 

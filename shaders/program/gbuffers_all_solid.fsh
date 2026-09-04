@@ -263,6 +263,7 @@ void main() {
     }
 #endif
 
+    bool parallax_shadow = false;
     float dither = interleaved_gradient_noise(gl_FragCoord.xy, frameCounter);
 
 #ifndef PROGRAM_GBUFFERS_VOXELS
@@ -282,18 +283,31 @@ void main() {
 
     if (has_pom) {
         float pom_depth;
-        vec3 pom_trace_pos;
+        vec3 shadow_trace_pos;
 
         parallax_uv = get_parallax_uv(
             tangent_dir,
             uv_gradient,
             view_distance,
             dither,
-            pom_trace_pos,
+            shadow_trace_pos,
             pom_depth
         );
+#ifdef POM_SHADOW
+        if (dot(tbn[2], light_dir) >= eps) {
+            parallax_shadow = get_parallax_shadow(
+                shadow_trace_pos,
+                uv_gradient,
+                view_distance,
+                dither
+            );
+        } else {
+            parallax_shadow = false;
+        }
+#endif
     } else {
         parallax_uv = uv;
+        parallax_shadow = false;
     }
 #endif
 
@@ -392,6 +406,7 @@ void main() {
         frameCounter,
         texelFetch(noisetex, ivec2(gl_FragCoord.xy) & 511, 0).z
     );
+    dither_pattern = mix(0.5, dither_pattern, DITHERED_TRANSLUCENCY_STRENGTH);
     if (base_color.a < dither_pattern) {
         discard;
         return;
@@ -400,7 +415,7 @@ void main() {
 #endif
 
 #ifdef WHITE_WORLD
-    base_color.rgb = vec3(1.0);
+    base_color.rgb = vec3(WHITE_WORLD_BRIGHTNESS);
 #endif
 
 #if defined PROGRAM_GBUFFERS_TERRAIN && defined VANILLA_AO
@@ -486,10 +501,20 @@ void main() {
 #endif
 
 #ifdef SPECULAR_MAPPING
+#if defined POM && defined POM_SHADOW
+    // Pack parallax shadow in alpha component of specular map
+    // Specular map alpha >= 0.5 => parallax shadow
+    specular_map.a *= step(specular_map.a, 0.999);
+    specular_map.a
+        = clamp01(specular_map.a * 0.5 + 0.5 * float(parallax_shadow));
+#endif
 
     gbuffer_data_1.z = pack_unorm_2x8(specular_map.xy);
     gbuffer_data_1.w = pack_unorm_2x8(specular_map.zw);
 #else
+#if defined POM && defined POM_SHADOW
+    gbuffer_data_1.z = float(parallax_shadow);
+#endif
 #endif
 
 #if defined PROGRAM_GBUFFERS_PARTICLES

@@ -33,12 +33,6 @@ vec3 scene_to_voxel_space(vec3 scene_pos) {
         + to_center;
 }
 
-vec3 voxel_to_scene_space(vec3 voxel_pos) {
-    vec3 to_center = get_voxel_volume_center(gbufferModelViewInverse[2].xyz);
-    return voxel_pos - fract(cameraPosition) - (0.5 * vec3(voxel_volume_size))
-        - to_center;
-}
-
 bool is_inside_voxel_volume(vec3 voxel_pos) {
     voxel_pos *= rcp(vec3(voxel_volume_size));
     return clamp01(voxel_pos) == voxel_pos;

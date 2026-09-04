@@ -82,6 +82,10 @@ mat2x3 air_fog_analytic(
 
     scattering += 2.0 * (rayleigh_scattering + mie_scattering) * isotropic_phase
         * ambient_color;
+#if defined SH_SKYLIGHT
+    scattering += 1.15 * (rayleigh_scattering + mie_scattering) * isotropic_phase
+        * ambient_color * SH_SKYLIGHT_INTENSITY;
+#endif
 
     for (int i = 0; i < 4; ++i) {
         float mie_phase = 0.7 * henyey_greenstein_phase(LoV, 0.5 * anisotropy)

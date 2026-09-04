@@ -39,12 +39,10 @@ uniform sampler3D colortex6; // 3D bubbly worley noise
 uniform sampler3D colortex7; // 3D swirley worley noise
 #define SAMPLER_WORLEY_SWIRLEY colortex7
 
-// 3D noise textures for cloud rendering (bound as custom-named samplers in
-// shaders.properties — they don't consume any colortex slot).
-//   perlin_3d     — multi-octave Perlin noise (3 channels at freq 1/2/4)
-//   curl_3d       — divergence-free 3D velocity field for advection
-uniform sampler3D perlin_3d;
-uniform sampler3D curl_3d;
+// 3D noise textures for cloud rendering (Alpha Piscium curl/detail).
+uniform sampler3D cumulus_curl;
+uniform sampler3D cumulus_detail1;
+uniform sampler3D cumulus_detail2;
 
 uniform sampler2D colortex8; // cloud shadow map
 
@@ -163,6 +161,7 @@ void main() {
     ivec2 texel = ivec2(gl_FragCoord.xy);
 
     clouds = vec4(0.0, 0.0, 0.0, 1.0);
+    clouds_data = vec2(1e6, 0.0);
 
 #if defined WORLD_OVERWORLD
     ivec2 checkerboard_pos = CLOUDS_TEMPORAL_UPSCALING * texel

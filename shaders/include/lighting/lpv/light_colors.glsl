@@ -1,7 +1,7 @@
 #if !defined INCLUDE_LIGHTING_LPV_LIGHT_COLORS
 #define INCLUDE_LIGHTING_LPV_LIGHT_COLORS
 
-const vec3[48] light_color = vec3[48](
+const vec3[48] handheld_emitter_light_color = vec3[48](
     vec3(1.00, 1.00, 1.00) * 12.0, // Strong white light
     vec3(1.00, 1.00, 1.00) * 6.0, // Medium white light
     vec3(1.00, 1.00, 1.00) * 1.0, // Weak white light

@@ -140,7 +140,6 @@ float texture_min_4x4(sampler2D s, vec2 coord) {
 
 vec3 reproject_clouds(vec2 uv, float distance_to_cloud) {
     const float planet_radius = 6371e3;
-    const float clouds_cumulus_radius = planet_radius + CLOUDS_CUMULUS_ALTITUDE;
     const float clouds_altocumulus_radius
         = planet_radius + CLOUDS_ALTOCUMULUS_ALTITUDE;
     const float clouds_cirrus_radius = planet_radius + CLOUDS_CIRRUS_ALTITUDE;
@@ -194,6 +193,12 @@ vec3 reproject_clouds(vec2 uv, float distance_to_cloud) {
 }
 
 void main() {
+    clouds_history = vec4(0.0, 0.0, 0.0, 1.0);
+    clouds_data = vec3(1e6, 0.0, 0.0);
+#ifdef LOD_MOD_ACTIVE
+    combined_depth = 1.0;
+#endif
+
     const int checkerboard_area
         = CLOUDS_TEMPORAL_UPSCALING * CLOUDS_TEMPORAL_UPSCALING;
 

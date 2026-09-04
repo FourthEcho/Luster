@@ -35,9 +35,9 @@ float clouds_cumulus_congestus_altitude_shaping(
 }
 
 float clouds_cumulus_congestus_density(vec3 pos) {
-    const float wind_angle = CLOUDS_CUMULUS_WIND_ANGLE * degree;
-    const vec2 wind_velocity
-        = CLOUDS_CUMULUS_WIND_SPEED * vec2(cos(wind_angle), sin(wind_angle));
+    const float wind_angle = CLOUDS_CUMULUS_CONGESTUS_WIND_ANGLE * degree;
+    const vec2 wind_velocity = CLOUDS_CUMULUS_CONGESTUS_WIND_SPEED
+        * vec2(cos(wind_angle), sin(wind_angle));
 
     float r = length(pos);
     if (r < clouds_cumulus_congestus_radius
@@ -81,6 +81,7 @@ float clouds_cumulus_congestus_density(vec3 pos) {
         = clouds_cumulus_congestus_altitude_shaping(density, altitude_fraction);
     density *= 4.0 * distance_fraction * (1.0 - distance_fraction);
     density *= linear_step(0.0, 0.3, clouds_params.cumulus_congestus_blend);
+    density *= CLOUDS_CUMULUS_CONGESTUS_DENSITY;
 
     if (density < eps) {
         return 0.0;
@@ -207,7 +208,17 @@ CloudsResult draw_cumulus_congestus_clouds(
     //   Raymarching Setup
     // ---------------------
 
-    const uint primary_steps = CLOUDS_CUMULUS_CONGESTUS_PRIMARY_STEPS;
+#if defined PROGRAM_DEFERRED0
+    const uint primary_steps_horizon
+        = max(1u, CLOUDS_CUMULUS_CONGESTUS_PRIMARY_STEPS_H / 2);
+    const uint primary_steps_zenith
+        = max(1u, CLOUDS_CUMULUS_CONGESTUS_PRIMARY_STEPS_Z / 2);
+#else
+    const uint primary_steps_horizon
+        = CLOUDS_CUMULUS_CONGESTUS_PRIMARY_STEPS_H;
+    const uint primary_steps_zenith
+        = CLOUDS_CUMULUS_CONGESTUS_PRIMARY_STEPS_Z;
+#endif
     const uint lighting_steps = CLOUDS_CUMULUS_CONGESTUS_LIGHTING_STEPS;
     const uint ambient_steps = CLOUDS_CUMULUS_CONGESTUS_AMBIENT_STEPS;
 
@@ -248,6 +259,10 @@ CloudsResult draw_cumulus_congestus_clouds(
         || distance_to_terrain > 0.0) {
         return clouds_not_hit;
     }
+
+    uint primary_steps = uint(
+        mix(primary_steps_horizon, primary_steps_zenith, abs(ray_dir.y))
+    );
 
     float ray_length = dists.y - dists.x;
     float step_length = ray_length * rcp(float(primary_steps));

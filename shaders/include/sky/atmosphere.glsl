@@ -73,6 +73,12 @@ const mat3x3 air_extinction_coefficients = mat3x3(
 
 uniform float atmosphere_saturation_boost_amount;
 
+// Forward declaration: full definition (either LUT-sampling or the
+// Chapman-function analytic fallback) appears later in this file, but
+// atmosphere_planet_bounce() and atmosphere_scattering() both need to
+// call it before that point
+vec3 atmosphere_transmittance(float mu, float r);
+
 float atmosphere_mie_phase(float nu, bool use_klein_nishina_phase) {
     return use_klein_nishina_phase
         ? klein_nishina_phase_area(
@@ -104,6 +110,68 @@ vec3 atmosphere_mie_phase_moon(float nu) {
     vec3 nvidiaRGB = vec3(r, g, b);
     return nvidiaRGB * moonIntensity;
 }
+
+#ifdef PLANET_BOUNCE
+// ---------------------------------------------------------------------
+// Planet bounce light
+//
+// Sunlight/moonlight that hits the ground reflects diffusely and
+// re-scatters upward through the atmosphere, contributing a warm glow
+// to the sky near the horizon (most visible looking down toward
+// distant terrain, e.g. from a mountain). This reuses the existing
+// atmosphere_transmittance() LUT lookups for both the down-path
+// (light source -> ground) and the up-path (ground -> camera), so it
+// costs two cheap texture samples instead of an extra raymarch.
+// ---------------------------------------------------------------------
+
+// Average reflectance of Minecraft-typical ground cover (grass/dirt),
+// tinted slightly green the way real vegetated terrain is
+const vec3 planet_bounce_albedo = vec3(0.30, 0.33, 0.22);
+
+vec3 atmosphere_planet_bounce(
+    vec3 ray_dir,
+    vec3 sun_color,
+    vec3 sun_dir,
+    vec3 moon_color,
+    vec3 moon_dir
+) {
+    // Ground normal directly below the camera. Using the true local-up
+    // direction (rather than an approximated/hardcoded lambert term)
+    // keeps the shading correct if planet_radius is ever changed.
+    const vec3 ground_normal = vec3(0.0, 1.0, 0.0);
+
+    // Wet ground reflects less light back up, and what it does reflect
+    // is less saturated (thin water film flattens the diffuse albedo)
+    vec3 albedo = mix(
+        planet_bounce_albedo,
+        planet_bounce_albedo * vec3(0.4),
+        rainStrength
+    );
+
+    float sun_ndotl = max0(dot(ground_normal, sun_dir));
+    float moon_ndotl = max0(dot(ground_normal, moon_dir));
+
+    // Down-path: how much sun/moon light survives to reach the ground
+    // Up-path: how much of the reflected light survives back to the camera
+    // Both come from the same transmittance LUT already used for the
+    // rest of the sky, so this is effectively free
+    vec3 down_sun = atmosphere_transmittance(sun_dir.y, planet_radius);
+    vec3 down_moon = atmosphere_transmittance(moon_dir.y, planet_radius);
+    vec3 up_path = atmosphere_transmittance(max(ray_dir.y, 0.01), planet_radius);
+
+    vec3 bounced = albedo * (1.0 / pi) * (
+        sun_ndotl * sun_color * down_sun +
+        moon_ndotl * moon_color * down_moon
+    ) * up_path;
+
+    // Ground-bounced light only re-enters the sky along rays that graze
+    // or point below the horizon -- fade it out entirely once looking
+    // well above the horizon rather than adding a uniform sky-wide term
+    float ground_weight = clamp01(1.0 - ray_dir.y * 2.0);
+
+    return bounced * ground_weight * PLANET_BOUNCE_INTENSITY;
+}
+#endif
 
 // Post-processing applied to the atmosphere color
 vec3 atmosphere_post_processing(vec3 atmosphere) {
@@ -249,17 +317,8 @@ vec3 atmosphere_scattering(
     float mu_s,
     bool use_klein_nishina_phase
 ) {
-#ifndef SKY_GROUND
     float horizon_mu = mix(-0.01, 0.03, smoothstep(-0.05, 0.1, mu_s));
     mu = max(mu, horizon_mu);
-#else
-    // SKY_GROUND is on: blend between the clamped (no ground) and
-    // unclamped (full ground) mu based on SKY_GROUND_INTENSITY. At 0 the
-    // horizon is clamped just like the default path; at 1 the full
-    // ground-level scattering is sampled.
-    float horizon_mu = mix(-0.01, 0.03, smoothstep(-0.05, 0.1, mu_s));
-    mu = mix(max(mu, horizon_mu), mu, clamp01(SKY_GROUND_INTENSITY));
-#endif
 
     vec3 uv = atmosphere_scattering_uv(nu, mu, mu_s);
 
@@ -310,23 +369,12 @@ vec3 atmosphere_scattering(
     float mu_sun = sun_dir.y;
     float mu_moon = moon_dir.y;
 
-#ifndef SKY_GROUND
     float horizon_mu = mix(
         -0.01,
         0.03,
         clamp01(smoothstep(-0.05, 0.1, mu_sun) + smoothstep(0.05, 0.1, mu_moon))
     );
     mu = max(mu, horizon_mu);
-#else
-    // SKY_GROUND is on: blend between clamped and unclamped mu based on
-    // SKY_GROUND_INTENSITY. At 0 horizon is clamped; at 1 full ground.
-    float horizon_mu = mix(
-        -0.01,
-        0.03,
-        clamp01(smoothstep(-0.05, 0.1, mu_sun) + smoothstep(0.05, 0.1, mu_moon))
-    );
-    mu = mix(max(mu, horizon_mu), mu, clamp01(SKY_GROUND_INTENSITY));
-#endif
 
     // Improved mapping for nu from Spectrum by Zombye
 
@@ -477,6 +525,16 @@ vec3 atmosphere_scattering(
     vec3 atmosphere
         = (scattering_sc + scattering_sm * mie_phase_sun) * sun_color
         + (scattering_mc + scattering_mm * mie_phase_moon) * moon_color;
+
+#ifdef PLANET_BOUNCE
+    atmosphere += atmosphere_planet_bounce(
+        ray_dir,
+        sun_color,
+        sun_dir,
+        moon_color,
+        moon_dir
+    );
+#endif
 
     return atmosphere_post_processing(atmosphere);
 }

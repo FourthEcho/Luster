@@ -152,51 +152,6 @@ vec4 common_fog(float view_dist, const bool sky, vec3 scene_pos) {
 }
 
 // Calculates the alpha component only
-float common_fog_alpha(float view_dist, bool sky, vec3 scene_pos) {
-    float fog = 1.0;
-
-    // Lava fog
-    fog *= spherical_fog(
-        view_dist,
-        lava_fog_start,
-        lava_fog_density * float(isEyeInWater == 2)
-    );
-
-    // Powdered snow fog
-    fog *= spherical_fog(
-        view_dist,
-        snow_fog_start,
-        snow_fog_density * float(isEyeInWater == 3)
-    );
-
-    // Blindness fog
-    fog *= spherical_fog(
-        view_dist,
-        blindness_fog_start,
-        blindness * blindness_fog_density
-    );
-
-#if defined WORLD_OVERWORLD && defined CAVE_FOG
-    // Cave fog
-    fog *= spherical_fog(
-        view_dist,
-        cave_fog_start,
-        cave_fog_density * biome_cave * float(!sky)
-    ); // Cave fog
-#endif
-
-#if defined WORLD_NETHER && !defined VL
-    // Match the volumetric Nether fog density in the analytic path.
-    fog *= spherical_fog(
-        view_dist,
-        0.0,
-        0.01 * nether_fog_density(scene_pos + cameraPosition)
-    );
-#endif
-
-    return fog;
-}
-
 // Water fog
 
 const vec3 water_absorption_coeff
@@ -251,6 +206,9 @@ mat2x3 water_fog_simple(
     dist = max(dist, 2.0 - 1.0 * skylight_factor);
 
     vec3 light_ambient = ambient_color * light_levels.y;
+#if defined SH_SKYLIGHT
+    light_ambient += ambient_color * light_levels.y * SH_SKYLIGHT_INTENSITY * 0.35;
+#endif
     light_ambient
         += 1.41 * blocklight_color * blocklight_scale * sqr(light_levels.x);
 

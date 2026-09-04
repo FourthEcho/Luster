@@ -17,8 +17,7 @@ const float clouds_altocumulus_top_radius
     = clouds_altocumulus_radius + clouds_altocumulus_thickness;
 
 const float clouds_cirrus_radius = planet_radius + CLOUDS_CIRRUS_ALTITUDE;
-const float clouds_cirrus_thickness
-    = CLOUDS_CIRRUS_ALTITUDE * CLOUDS_ALTOCUMULUS_THICKNESS;
+const float clouds_cirrus_thickness = CLOUDS_CIRRUS_THICKNESS;
 const float clouds_cirrus_top_radius
     = clouds_cirrus_radius + clouds_cirrus_thickness;
 const float clouds_cirrus_extinction_coeff = 0.15;

@@ -87,10 +87,4 @@ vec3 get_light_color() {
     return light_color;
 }
 
-float get_skylight_boost() {
-    float early_night
-        = linear_step(0.05, 1.0, exp(-25.0 * sqr(sun_dir.y + 0.3)));
-    return 1.0 + 0.5 * early_night;
-}
-
 #endif // INCLUDE_LIGHTING_COLORS_LIGHT_COLOR

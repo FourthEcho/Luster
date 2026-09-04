@@ -37,27 +37,29 @@ const Material water_material = Material(
 
 #if TEXTURE_FORMAT == TEXTURE_FORMAT_LAB
 void decode_specular_map(vec4 specular_map, inout Material material) {
-    // f0 and f82 values for hardcoded metals from Jessie LC
-    // (https://github.com/Jessie-LC)
-    const vec3[] metal_f0 = vec3[](
-        vec3(0.78, 0.77, 0.74), // Iron
-        vec3(1.00, 0.90, 0.61), // Gold
-        vec3(1.00, 0.98, 1.00), // Aluminum
-        vec3(0.77, 0.80, 0.79), // Chrome
-        vec3(1.00, 0.89, 0.73), // Copper
-        vec3(0.79, 0.87, 0.85), // Lead
-        vec3(0.92, 0.90, 0.83), // Platinum
-        vec3(1.00, 1.00, 0.91) // Silver
+    // Measured complex refractive indices (n, k) for hardcoded metals.
+    // n = real part (stored in f0), k = extinction coefficient (stored in f82).
+    // Values sampled at sRGB primaries (R≈700nm, G≈546nm, B≈436nm).
+    // Sources: Palik "Handbook of Optical Constants", refractiveindex.info.
+    const vec3[] metal_n = vec3[](
+        vec3(2.9114, 2.9497, 2.7743), // Iron
+        vec3(0.1431, 0.3740, 1.4400), // Gold
+        vec3(1.0970, 0.8795, 0.5237), // Aluminum
+        vec3(3.1071, 3.1812, 2.3230), // Chrome
+        vec3(0.2140, 0.9300, 1.1000), // Copper
+        vec3(1.9100, 1.8300, 1.4400), // Lead
+        vec3(2.3757, 2.0847, 1.8453), // Platinum
+        vec3(0.1550, 0.1160, 0.1390)  // Silver
     );
-    const vec3[] metal_f82 = vec3[](
-        vec3(0.74, 0.76, 0.76),
-        vec3(1.00, 0.93, 0.73),
-        vec3(0.96, 0.97, 0.98),
-        vec3(0.74, 0.79, 0.78),
-        vec3(1.00, 0.90, 0.80),
-        vec3(0.83, 0.80, 0.83),
-        vec3(0.89, 0.87, 0.81),
-        vec3(1.00, 1.00, 0.95)
+    const vec3[] metal_k = vec3[](
+        vec3(3.0893, 2.9318, 2.7670), // Iron
+        vec3(3.9800, 2.3880, 1.6030), // Gold
+        vec3(6.7942, 6.2875, 5.3000), // Aluminum
+        vec3(3.3314, 3.3291, 3.1350), // Chrome
+        vec3(3.9100, 2.5900, 2.3600), // Copper
+        vec3(3.5100, 3.4000, 3.1800), // Lead
+        vec3(4.2655, 3.7153, 3.1365), // Platinum
+        vec3(4.8200, 3.1160, 2.1440)  // Silver
     );
 
     material.roughness = sqr(1.0 - specular_map.r);
@@ -74,7 +76,9 @@ void decode_specular_map(vec4 specular_map, inout Material material) {
     // already been applied to the hardcoded emission inside material_from,
     // so we apply it to the map emission too here.
     float has_emission_map = step(specular_map.a, 254.5 / 255.0);
-    vec3 map_emission = material.albedo * specular_map.a * EMISSION_STRENGTH;
+    // labPBR 1.3: alpha 1/255..254/255 encodes emission; remap to 0..1
+    float emission_value = (specular_map.a * 255.0 - 1.0) / 254.0;
+    vec3 map_emission = material.albedo * emission_value * EMISSION_STRENGTH;
     material.emission = mix(
         material.emission,
         map_emission,
@@ -127,8 +131,8 @@ void decode_specular_map(vec4 specular_map, inout Material material) {
         // Hardcoded metals
         uint metal_id = clamp(uint(255.0 * specular_map.g) - 230u, 0u, 7u);
 
-        material.f0 = metal_f0[metal_id];
-        material.f82 = metal_f82[metal_id];
+        material.f0 = metal_n[metal_id];
+        material.f82 = metal_k[metal_id];
         material.is_metal = true;
         material.is_hardcoded_metal = true;
     } else {
@@ -168,6 +172,19 @@ void decode_specular_map(vec4 specular_map, inout Material material) {
     ); // based on Kneemund's method
 }
 #endif
+
+void decode_specular_map(
+    vec4 specular_map,
+    inout Material material,
+    out bool parallax_shadow
+) {
+    parallax_shadow = false;
+#if defined POM && defined POM_SHADOW
+    parallax_shadow = specular_map.a >= 0.5;
+    specular_map.a = fract(specular_map.a * 2.0);
+#endif
+    decode_specular_map(specular_map, material);
+}
 
 Material material_from(
     vec3 albedo_srgb,

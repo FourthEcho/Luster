@@ -375,6 +375,7 @@ void main() {
         );
 
         vec3 normal = flat_normal;
+        bool parallax_shadow = false;
 
 #ifdef LOD_MOD_ACTIVE
         if (!is_lod) {
@@ -389,7 +390,9 @@ void main() {
                 unpack_unorm_2x8(gbuffer_data_1.z),
                 unpack_unorm_2x8(gbuffer_data_1.w)
             );
-            decode_specular_map(specular_map, material);
+            decode_specular_map(specular_map, material, parallax_shadow);
+#elif defined NORMAL_MAPPING
+            parallax_shadow = gbuffer_data_1.z >= 0.5;
 #endif
 
 #ifdef LOD_MOD_ACTIVE
@@ -415,6 +418,23 @@ void main() {
             );
         }
 #endif
+#endif
+
+        // Wet-porosity albedo darkening (Kubelka-Munk)
+        // Runs independently of puddle placement: any porous surface exposed
+        // to rain darkens as water fills its pores, even where puddles don't
+        // form (e.g. vertical faces, high-porosity surfaces that absorb
+        // rather than pool water).
+#if defined WORLD_OVERWORLD && defined POROSITY
+        if (wetness > eps && material.porosity > eps) {
+            float biome_wet = (RAIN_PUDDLES_MODE == RAIN_PUDDLES_EVERYWHERE)
+                ? 1.0 : max0(biome_may_rain);
+            material.albedo = apply_wet_porosity_darkening(
+                material.albedo,
+                material.porosity,
+                wetness * biome_wet
+            );
+        }
 #endif
 
         // Upscale ambient occlusion
@@ -546,6 +566,11 @@ void main() {
                 sss_depth_distant,
                 clamp01(shadow_distance_fade)
             );
+
+#if defined POM && defined POM_SHADOW \
+    && (defined SPECULAR_MAPPING || defined NORMAL_MAPPING)
+            shadows *= float(!parallax_shadow);
+#endif
 
         }
 #else

@@ -33,6 +33,6 @@ void main() {
     );
 }
 
-#ifndef COLORED_LIGHTS
-#error "This program should be disabled if colored lights are disabled"
+#if !defined COLORED_LIGHTS && HANDHELD_LIGHTING_MODE != 2
+#error "This program should be disabled when no colored-light data is required"
 #endif

@@ -2,12 +2,13 @@
 #define INCLUDE_FOG_AIR_FOG_VL
 
 #include "/include/fog/overworld/constants.glsl"
+#include "/include/utility/phase_functions.glsl"
 #include "/include/lighting/cloud_shadows.glsl"
+#include "/include/fog/overworld/mist.glsl"
 #include "/include/lighting/shadows/distortion.glsl"
 #include "/include/misc/lod_mod_support.glsl"
 #include "/include/sky/atmosphere.glsl"
 #include "/include/utility/encoding.glsl"
-#include "/include/utility/phase_functions.glsl"
 #include "/include/utility/random.glsl"
 #include "/include/utility/space_conversion.glsl"
 
@@ -152,6 +153,12 @@ mat2x3 raymarch_air_fog(
         vec3 step_optical_depth
             = fog_params.rayleigh_scattering_coeff * density.x
             + fog_params.mie_extinction_coeff * density.y;
+
+#if MIST_MODE != MIST_MODE_OFF
+        float mist_d = mist_density(world_pos) * step_length;
+        step_optical_depth += fog_params.mist_scattering_coeff * mist_d;
+#endif
+
         vec3 step_transmittance = exp(-step_optical_depth);
         vec3 step_transmitted_fraction
             = (1.0 - step_transmittance) / max(step_optical_depth, eps);
@@ -162,6 +169,26 @@ mat2x3 raymarch_air_fog(
         light_sun[1] += visible_scattering * density.y * shadow;
         light_sky[0] += visible_scattering * density.x;
         light_sky[1] += visible_scattering * density.y;
+
+#if MIST_MODE != MIST_MODE_OFF
+        if (mist_d > 1e-5) {
+            float LoV = dot(world_dir, light_dir);
+
+#if MIST_MODE == MIST_MODE_ADVANCED
+            float mist_od  = mist_shadow_od(world_pos, mist_d / step_length);
+            // Power-law self-extinction matching Kappa's formula, plus cloud occlusion
+            float mist_sun_shadow = pow(1.0 + 0.7 * mist_od, -1.0 / 0.7) * float(shadow > 0.0);
+            float mist_phase_val  = mist_phase(LoV, mist_d / step_length);
+#else
+            float mist_sun_shadow = float(shadow > 0.0);
+            float mist_phase_val  = mist_phase(LoV, mist_d / step_length);
+#endif
+
+            vec3 mist_scatter = fog_params.mist_scattering_coeff * mist_d * visible_scattering;
+            light_sun[1] += mist_scatter * mist_phase_val * mist_sun_shadow;
+            light_sky[1] += mist_scatter * isotropic_phase;
+        }
+#endif
 
         transmittance *= step_transmittance;
     }
@@ -197,6 +224,10 @@ mat2x3 raymarch_air_fog(
 #endif
 
     scattering += 2.0 * light_sky * vec2(isotropic_phase) * ambient_color;
+#if defined SH_SKYLIGHT
+    scattering += 1.15 * light_sky * vec2(isotropic_phase)
+        * ambient_color * SH_SKYLIGHT_INTENSITY;
+#endif
 
     for (int i = 0; i < 4; ++i) {
         float mie_phase = 0.7 * henyey_greenstein_phase(LoV, 0.5 * anisotropy)

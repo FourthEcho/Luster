@@ -14,12 +14,9 @@ vec4 draw_crepuscular_rays(
     const uint step_count_horizon = CREPUSCULAR_RAYS_STEPS_HORIZON;
     const uint step_count_zenith = CREPUSCULAR_RAYS_STEPS_ZENITH;
     const float max_ray_length = 4096.0 / (CLOUDS_SCALE / 10.0);
-#ifdef SKY_GROUND
-    const float volume_inner_radius = planet_radius;
-#else
-    // Allow volume to extend indefinitely into planet
+    // Volume extends indefinitely into the planet (SKY_GROUND removed —
+    // this was the only path in use anyway)
     const float volume_inner_radius = 1.0;
-#endif
     const float volume_outer_radius
         = clouds_cumulus_radius + clouds_cumulus_thickness * 0.5;
     vec3 extinction_coeff = 2.0 * dampen(clouds_params.crepuscular_rays_amount)

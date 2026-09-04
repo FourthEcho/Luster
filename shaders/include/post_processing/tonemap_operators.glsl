@@ -2,6 +2,7 @@
 #define INCLUDE_MISC_TONEMAP_OPERATORS
 
 #include "/include/post_processing/aces/aces.glsl"
+#include "/include/post_processing/agx/agx.glsl"
 #include "/include/utility/color.glsl"
 
 // ACES RRT and ODT
@@ -13,7 +14,7 @@ vec3 tonemap_aces_full(vec3 rgb) {
     rgb = aces_rrt(rgb);
     rgb = aces_odt(rgb);
 
-    return rgb * ap1_to_rec2020;
+    return academy_color_controls(rgb * ap1_to_rec2020);
 }
 
 // ACES RRT and ODT approximation
@@ -29,7 +30,7 @@ vec3 tonemap_aces_fit(vec3 rgb) {
     vec3 grayscale = vec3(dot(rgb, luminance_weights));
     rgb = mix(grayscale, rgb, odt_sat_factor);
 
-    return rgb * ap1_to_rec2020;
+    return academy_color_controls(rgb * ap1_to_rec2020);
 }
 
 vec3 tonemap_hejl_2015(vec3 rgb) {
@@ -117,6 +118,20 @@ vec3 tonemap_reinhard(vec3 rgb) { return rgb / (rgb + 1.0); }
 vec3 tonemap_reinhard_jodie(vec3 rgb) {
     vec3 reinhard = rgb / (rgb + 1.0);
     return mix(rgb / (dot(rgb, luminance_weights) + 1.0), reinhard, reinhard);
+}
+
+// AGX wrappers (from agx/agx.glsl). Input/output linear Rec.709.
+// tonemap_agx is base (Blender default), punchy/golden are looks.
+vec3 tonemap_agx_wrapper(vec3 rgb) {
+    return tonemap_agx(rgb);
+}
+
+vec3 tonemap_agx_punchy_wrapper(vec3 rgb) {
+    return tonemap_agx_punchy(rgb);
+}
+
+vec3 tonemap_agx_golden_wrapper(vec3 rgb) {
+    return tonemap_agx_golden(rgb);
 }
 
 #endif // INCLUDE_MISC_TONEMAP_OPERATORS

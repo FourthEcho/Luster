@@ -81,6 +81,10 @@ uniform bool world_age_changed;
 #include "/include/lighting/ao/gtao.glsl"
 #endif
 
+#if SHADER_AO == SHADER_AO_RTAO
+#include "/include/lighting/ao/rtao.glsl"
+#endif
+
 const float ao_render_scale = 0.5;
 
 void main() {
@@ -165,6 +169,15 @@ void main() {
     bent_normal = view_normal;
 #elif SHADER_AO == SHADER_AO_GTAO
     ao = compute_gtao(
+        screen_pos,
+        view_pos,
+        view_normal,
+        dither,
+        is_lod,
+        bent_normal
+    );
+#elif SHADER_AO == SHADER_AO_RTAO
+    ao = compute_rtao(
         screen_pos,
         view_pos,
         view_normal,

@@ -54,33 +54,6 @@ float sigmoid_shaper(float x) {
 
 // "Red modifier" functions
 
-float cubic_basis_shaper(float x, const float width) {
-    const mat4 M = mat4(
-        vec4(-1.0, 3.0, -3.0, 1.0) / 6.0,
-        vec4(3.0, -6.0, 3.0, 0.0) / 6.0,
-        vec4(-3.0, 0.0, 3.0, 0.0) / 6.0,
-        vec4(1.0, 4.0, 1.0, 0.0) / 6.0
-    );
-
-    float knots[5]
-        = float[](-0.5 * width, -0.25 * width, 0.0, 0.25 * width, 0.5 * width);
-
-    float knot_coord = (x - knots[0]) * 4.0 / width;
-    uint i = 3 - uint(clamp(knot_coord, 0.0, 3.0));
-    float f = fract(knot_coord);
-
-    if (x < knots[0] || x > knots[4] || i > 3) {
-        return 0.0;
-    }
-
-    vec4 monomials = vec4(f * f * f, f * f, f, 1.0);
-
-    float y = monomials[0] * M[0][i] + monomials[1] * M[1][i]
-        + monomials[2] * M[2][i] + monomials[3] * M[3][i];
-
-    return 1.5 * y;
-}
-
 float cubic_basis_shaper_fit(float x, const float width) {
     float radius = 0.5 * width;
     return abs(x) < radius ? sqr(cubic_smooth(1.0 - abs(x) / radius)) : 0.0;
@@ -204,6 +177,34 @@ vec3 rrt_and_odt_fit(vec3 rgb) {
     vec3 b = rgb * (0.983729 * rgb + 0.4329510) + 0.238081;
 
     return a / b;
+}
+
+
+// Luster Academy Color controls. These are only reached by ACES tonemap operators.
+vec3 academy_color_controls(vec3 color) {
+    color *= exp2(ACADEMY_EXPOSURE);
+
+    // Stable contrast around 18% middle grey in the post-ODT linear domain.
+    const float pivot = 0.18;
+    color = exp2((log2(max(color, vec3(1e-6))) - log2(pivot))
+        * ACADEMY_CONTRAST + log2(pivot));
+
+    // Saturation + optional colorfulness shaping.
+    float luma = dot(color, vec3(0.2126, 0.7152, 0.0722));
+    float sat = max(ACADEMY_SATURATION + ACADEMY_COLORFULNESS * (1.0 - clamp(luma, 0.0, 1.0)), 0.0);
+    color = mix(vec3(luma), color, sat);
+
+    // Soft highlight compression. Neutral at zero.
+    float highlight = smoothstep(0.45, 1.0, clamp(luma, 0.0, 1.0));
+    float roll = max(ACADEMY_HIGHLIGHT_ROLLOFF, 0.0) * highlight;
+    color /= 1.0 + roll * max(color - vec3(pivot), vec3(0.0));
+
+    // Controlled toe lift, preserving the neutral result at zero.
+    float shadow = 1.0 - smoothstep(0.0, 0.24, clamp(luma, 0.0, 1.0));
+    float toe = max(ACADEMY_SHADOW_TOE, 0.0) * shadow;
+    color += toe * vec3(0.045) * (1.0 - color);
+
+    return clamp(color, vec3(0.0), vec3(1.0));
 }
 
 #endif // INCLUDE_ACES_ACES

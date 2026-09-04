@@ -46,8 +46,9 @@ uniform sampler3D colortex6; // 3D bubbly worley noise
 uniform sampler3D colortex7; // 3D swirley worley noise
 #define SAMPLER_WORLEY_SWIRLEY colortex7
 
-uniform sampler3D perlin_3d;
-uniform sampler3D curl_3d;
+uniform sampler3D cumulus_curl;
+uniform sampler3D cumulus_detail1;
+uniform sampler3D cumulus_detail2;
 
 #if defined WORLD_OVERWORLD && defined GALAXY
 uniform sampler2D colortex13;
@@ -114,7 +115,6 @@ uniform float biome_may_snow;
 // ------------
 
 #define ATMOSPHERE_SCATTERING_LUT depthtex0
-#define CLOUDS_USE_LOCAL_COVERAGE_MAP
 
 #ifdef CLOUDS_CUMULUS_PRECOMPUTE_LOCAL_COVERAGE
 #define CLOUDS_USE_LOCAL_COVERAGE_MAP

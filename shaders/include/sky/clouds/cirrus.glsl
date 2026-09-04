@@ -40,7 +40,7 @@ float clouds_cirrus_density(vec2 coord, float altitude_fraction) {
 
     vec2 detail_coord = coord;
 
-    float detail_amplitude = 0.2;
+    float detail_amplitude = 0.2 * CLOUDS_CIRRUS_DETAIL_STRENGTH;
     float detail_frequency = 0.00002;
     float curl_strength = 0.1 * CLOUDS_CIRRUS_CURL_STRENGTH;
 
@@ -312,9 +312,6 @@ CloudsResult draw_cirrus_clouds(
     );
 
     // Get main light color for this layer
-    float r_sq = dot(sphere_pos, sphere_pos);
-    float rcp_r = inversesqrt(r_sq);
-    float mu = dot(sphere_pos, light_dir) * rcp_r;
 
     vec3 light_color
         = sunlight_color * atmosphere_transmittance(sphere_pos, light_dir);

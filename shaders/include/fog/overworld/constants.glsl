@@ -12,4 +12,11 @@ const vec2 air_fog_falloff_start
 const vec2 air_fog_falloff_half_life
     = vec2(AIR_FOG_RAYLEIGH_FALLOFF_HALF_LIFE, AIR_FOG_MIE_FALLOFF_HALF_LIFE);
 
+// ---- Mist constants ----
+// MIST_ALTITUDE    : hard ceiling (blocks) above which mist cannot exist
+// MIST_FALLOFF_RATE: exp2 decay rate per block above sea level (higher = thinner layer)
+// MIST_SEA_LEVEL_BIAS: shifts the mist base up/down relative to SEA_LEVEL
+// MIST_SHADOW_STEPS: sun-ray steps for advanced self-shadowing
+const float mist_base_scatter_coeff = 8e-3;
+
 #endif // INCLUDE_FOG_OVERWORLD_CONSTANTS

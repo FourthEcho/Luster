@@ -38,7 +38,7 @@ uniform vec2 taa_offset;
 
 const float K = 12.5; // Light-meter calibration constant
 const float sensitivity = 100.0; // ISO
-const float calibration = exp2(AUTO_EXPOSURE_BIAS) * K / sensitivity / 1.2;
+const float calibration = K / sensitivity / 1.2;
 
 const float min_luminance
     = get_luminance_from_exposure(get_exposure_from_ev_100(AUTO_EXPOSURE_MIN));

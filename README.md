@@ -11,6 +11,10 @@ Atmosphere · lighting · clouds · water · image quality — built with Iris a
 
 [Download](#installation) · [Features](#features) · [Compatibility](#compatibility) · [Configuration](#configuration) · [Issues](https://github.com/shashankpgowda/Luster/issues)
 
+<img src="docs/images/scenery.png" alt="Luster shader pack screenshot" width="800">
+
+</div>
+
 ---
 
 ## About
@@ -21,13 +25,13 @@ A dedicated **Mac Compatible** profile makes Luster one of the few shader packs 
 
 ## Features
 
-- **Lighting** — sun/moon/block/Nether/End lighting, optional voxel-based colored lighting, Directional Ambient Lighting, RSM for Indirect Lighting, multiple shadow paths (PCF + screen-space), SSAO/GTAO
-- **Sky & atmosphere** — dynamic Rayleigh/Mie scattering, biome- and weather-aware color, aurora, stars, galaxy, rainbows, god rays
+- **Lighting** — sun/moon/block/Nether/End lighting, optional voxel-based colored lighting, Directional Ambient Lighting, RSM for Sun Bounce GI, multiple shadow paths (PCF + screen-space), SSAO/GTAO
+- **Sky & atmosphere** — dynamic Rayleigh/Mie scattering, biome and weather-aware color, aurora, stars, galaxy, rainbows, god rays, and advanced Mist shading.
 - **Clouds** — Cumulus, AltoCumulus, Cumulus Congestus, Cirrus/Cirrocumulus, noctilucent, and optional blocky clouds, independently tunable per layer, with up to 16× temporal upscaling
 - **Water & materials** — physically-inspired absorption/scattering, procedural waves, parallax, caustics, Snell's window, biome-colored water, rain puddles, POM, subsurface scattering, full labPBR support
 - **Reflections** — environment, sky, and screen-space reflections, roughness-aware, tuned separately for water and other materials
 - **Fog & volumetrics** — full atmospheric fog per biome, colored volumetric light shafts, cave/border fog, dedicated Nether and End fog paths
-- **Post-processing** — TAA/FXAA/CAS, TAAU, bloom, DOF, motion blur, vignette, Purkinje shift, multiple exposure modes, ACES tonemapping, full color grading
+- **Post-processing** — TAA/FXAA/CAS, TAAU, bloom, DOF, motion blur, vignette, Purkinje shift, multiple exposure modes, ACES and AGX tonemapping, full color grading
 
 Not every feature is enabled on every profile — the in-game settings menu is the source of truth for what's available on your hardware and shader loader.
 
@@ -67,7 +71,7 @@ Settings are organized into: **World** (weather, moon phase, foliage) · **Light
 
 ## Development
 
-Luster is actively developed. The source tree is organized into reusable modules under `shaders/include/`, rendering programs under `shaders/program/`, and world-specific passes under the `world*` directories. Bug reports and Luster-specific issues go in the [issue tracker](https://github.com/shashankpgowda/Luster/issues). Colored Lights is NOT mac supported yet.
+Luster is actively developed. The source tree is organized into reusable modules under `shaders/include/`, rendering programs under `shaders/program/`, and world-specific passes under the `world*` directories. Bug reports and Luster-specific issues go in the [issue tracker](https://github.com/shashankpgowda/Luster/issues). Colored Lights is NOT mac supporte yet.
 
 ## Acknowledgements
 
@@ -87,10 +91,9 @@ See the included `LICENSE` files for full attribution and licensing terms.
 
 Luster is a personal shader pack project maintained by [shashankpgowda](https://github.com/shashankpgowda).
 
-- 🔗 [Repository](https://github.com/shashankpgowda/Luster)
-- 🐛 [Issues](https://github.com/shashankpgowda/Luster/issues)
-- 💬 [Photon Discord](https://discord.gg/ngEW66HScd)
-- ⬆️ [Upstream: Photon](https://github.com/sixthsurge/photon)
+- [Issues](https://github.com/shashankpgowda/Luster/issues)
+- [Luster Discord](https://discord.gg/Q9n4WMVSK)
+- [Upstream: Photon](https://github.com/sixthsurge/photon)
 
 <div align="center">
 <sub>Luster · Minecraft Shader Pack</sub>

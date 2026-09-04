@@ -163,11 +163,6 @@ float cubic_smooth(float x) { return sqr(x) * (3.0 - 2.0 * x); }
 
 vec2 cubic_smooth(vec2 x) { return sqr(x) * (3.0 - 2.0 * x); }
 
-// Similar to the above, but even smoother with a zero second derivative at zero
-// and one
-float quintic_smooth(float x) {
-    return cube(x) * (x * (x * 6.0 - 15.0) + 10.0);
-}
 
 // Converts between the unit range [0, 1] and texture coordinates on [0.5/res, 1
 // - 0.5/res]. This prevents extrapolation at texture edges (used for atmosphere
@@ -176,31 +171,9 @@ float get_uv_from_unit_range(float values, const int res) {
     return values * (1.0 - 1.0 / float(res)) + (0.5 / float(res));
 }
 
-float get_unit_range_from_uv(float uv, const int res) {
-    return (uv - 0.5 / float(res)) / (1.0 - 1.0 / float(res));
-}
 
 // (the following functions are from https://iquilezles.org/articles/functions/)
 
-// Applies a smooth minimum value to a signal, where n is the new minimum value
-// and m is the threshold after which x remains unchanged
-float almost_identity(float x, float m, float n) {
-    if (x > m) {
-        return x;
-    }
-
-    float a = 2.0 * n - m;
-    float b = 2.0 * m - 3.0 * n;
-    float t = x / m;
-
-    return (a * t + b) * t * t + n;
-}
-
-// Equivalent to almost_identity with n = 0 and m = 1
-float almost_unit_identity(float x) { return x * x * (2.0 - x); }
-
-// Remaps center +/- 0.5 * width to zero and center to 1, with the same
-// smoothing function as smoothstep
 float pulse(float x, float center, float width) {
     x = abs(x - center) / width;
     return x > 1.0 ? 0.0 : 1.0 - cubic_smooth(x);

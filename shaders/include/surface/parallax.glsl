@@ -59,6 +59,36 @@ vec2 get_parallax_uv(
     return get_uv_from_local_coord(pos.xy);
 }
 
+bool get_parallax_shadow(
+    vec3 pos,
+    mat2 uv_gradient,
+    float view_distance,
+    float dither
+) {
+    float parallax_fade
+        = linear_step(0.75 * POM_DISTANCE, POM_DISTANCE, view_distance);
 
+    vec3 tangent_dir = light_dir * tbn;
+    vec3 ray_step = vec3(
+                        tangent_dir.xy * rcp(tangent_dir.z) * POM_DEPTH
+                            * (1.0 - parallax_fade),
+                        -1.0
+                    )
+        * pos.z * rcp(float(POM_SHADOW_SAMPLES));
+
+    pos.xy += ray_step.xy * dither;
+
+    float max_height = get_depth_value(pos.xy, uv_gradient);
+    for (int i = 0; i < POM_SHADOW_SAMPLES; ++i) {
+        pos += ray_step;
+        float offset_height = get_depth_value(pos.xy, uv_gradient);
+        float diff = pos.z - offset_height;
+        if (diff > 0.0 && max_height - offset_height > eps) {
+            return true;
+        }
+    }
+
+    return false;
+}
 
 #endif // INCLUDE_MISC_PARALLAX

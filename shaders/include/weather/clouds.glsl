@@ -26,7 +26,7 @@ float clouds_l0_cumulus_stratus_blend(Weather weather) {
     return clamp01(temperature_weight * wind_weight);
 }
 
-vec2 clouds_l0_coverage(Weather weather, float cumulus_congestus_blend) {
+vec2 clouds_l0_coverage(Weather weather) {
     // very high temperature -> lower coverage
     // higher humidity -> higher coverage
     float temperature_weight
@@ -121,8 +121,7 @@ CloudsParameters get_clouds_parameters(Weather weather) {
 
     // Volumetric layer 0 - cumulus/stratocumulus/stratus
     params.l0_cumulus_stratus_blend = clouds_l0_cumulus_stratus_blend(weather);
-    params.l0_coverage
-        = clouds_l0_coverage(weather, params.cumulus_congestus_blend);
+    params.l0_coverage = clouds_l0_coverage(weather);
     params.l0_detail_weights
         = clouds_l0_detail_weights(weather, params.l0_cumulus_stratus_blend);
     params.l0_edge_sharpening

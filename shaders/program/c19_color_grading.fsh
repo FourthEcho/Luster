@@ -17,8 +17,10 @@ layout(location = 0) out vec3 scene_color;
 
 in vec2 uv;
 
-#if GRADE_WHITE_BALANCE != 6500
+#ifdef COLOR_GRADING
+  #if GRADE_WHITE_BALANCE != 6500
 flat in mat3 white_balance_matrix;
+  #endif
 #endif
 
 // ------------
@@ -41,8 +43,98 @@ uniform float eye_skylight;
 uniform vec2 view_pixel_size;
 
 #include "/include/post_processing/tonemap_operators.glsl"
+#include "/include/post_processing/color_grading.glsl"
 #include "/include/utility/bicubic.glsl"
 #include "/include/utility/color.glsl"
+
+// HDR-aware local exposure.
+//
+// The global exposure is still the photographic exposure of the whole scene.
+// This pass only adds a restrained spatially-varying correction around that
+// exposure. The neighborhood is measured in log luminance, which makes the
+// response behave in stops instead of raw linear multiplication. A center-
+// luminance similarity term keeps the filter from bleeding exposure across
+// strong depth/color boundaries, reducing the classic local-tone halos.
+float local_exposure_luma(vec3 rgb) {
+    return max(dot(max(rgb, vec3(0.0)), luminance_weights), 1e-5);
+}
+
+#ifdef LOCAL_EXPOSURE
+float compute_local_exposure_ev(vec2 texel_uv, vec3 center_rgb) {
+    float center_log = log2(local_exposure_luma(center_rgb));
+
+    float sum_log = center_log * 4.0;
+    float sum_w = 4.0;
+
+    // Small Gaussian footprint. Radius is deliberately modest because this is
+    // a per-pixel post pass; larger-scale adaptation is already handled by the
+    // global exposure system.
+    const vec2 o = vec2(2.0);
+    vec3 s;
+    float l, w, d;
+
+    s = textureLod(colortex5, texel_uv + view_pixel_size * vec2(-o.x, 0.0), 0.0).rgb;
+    l = log2(local_exposure_luma(s));
+    d = abs(l - center_log);
+    w = 2.0 * exp2(-d * 1.442695); // ~= exp(-d)
+    sum_log += l * w; sum_w += w;
+
+    s = textureLod(colortex5, texel_uv + view_pixel_size * vec2( o.x, 0.0), 0.0).rgb;
+    l = log2(local_exposure_luma(s));
+    d = abs(l - center_log);
+    w = 2.0 * exp2(-d * 1.442695);
+    sum_log += l * w; sum_w += w;
+
+    s = textureLod(colortex5, texel_uv + view_pixel_size * vec2(0.0, -o.y), 0.0).rgb;
+    l = log2(local_exposure_luma(s));
+    d = abs(l - center_log);
+    w = 2.0 * exp2(-d * 1.442695);
+    sum_log += l * w; sum_w += w;
+
+    s = textureLod(colortex5, texel_uv + view_pixel_size * vec2(0.0,  o.y), 0.0).rgb;
+    l = log2(local_exposure_luma(s));
+    d = abs(l - center_log);
+    w = 2.0 * exp2(-d * 1.442695);
+    sum_log += l * w; sum_w += w;
+
+    const float diag = 1.41421356 * 2.0;
+    s = textureLod(colortex5, texel_uv + view_pixel_size * vec2(-diag, -diag), 0.0).rgb;
+    l = log2(local_exposure_luma(s));
+    d = abs(l - center_log);
+    w = exp2(-d * 1.442695);
+    sum_log += l * w; sum_w += w;
+
+    s = textureLod(colortex5, texel_uv + view_pixel_size * vec2( diag, -diag), 0.0).rgb;
+    l = log2(local_exposure_luma(s));
+    d = abs(l - center_log);
+    w = exp2(-d * 1.442695);
+    sum_log += l * w; sum_w += w;
+
+    s = textureLod(colortex5, texel_uv + view_pixel_size * vec2(-diag,  diag), 0.0).rgb;
+    l = log2(local_exposure_luma(s));
+    d = abs(l - center_log);
+    w = exp2(-d * 1.442695);
+    sum_log += l * w; sum_w += w;
+
+    s = textureLod(colortex5, texel_uv + view_pixel_size * vec2( diag,  diag), 0.0).rgb;
+    l = log2(local_exposure_luma(s));
+    d = abs(l - center_log);
+    w = exp2(-d * 1.442695);
+    sum_log += l * w; sum_w += w;
+
+    float local_log = sum_log / max(sum_w, 1e-5);
+
+    // The global exposure pipeline targets the meter-calibrated middle gray.
+    // Local exposure only moves a fraction of the way toward that target.
+    const float middle_gray = 0.18;
+    const float adaptation = 0.28;
+    float ev = (log2(middle_gray) - local_log) * adaptation;
+
+    // Keep local exposure a detail-preserving correction, never a replacement
+    // for the user's global exposure. The symmetric limit is 2/3 stop.
+    return clamp(ev, -0.6666667, 0.6666667);
+}
+#endif
 
 vec3 get_bloom() {
     // Upsample last bloom tile. 
@@ -51,80 +143,6 @@ vec3 get_bloom() {
     vec2 uv_src = clamp(uv, pad_amount, 1.0 - pad_amount) * 0.5;
 
     return BLOOM_UPSAMPLING_FILTER(colortex0, uv_src).rgb;
-}
-
-// Color grading
-
-vec3 gain(vec3 x, float k) {
-    vec3 a = 0.5 * pow(2.0 * mix(x, 1.0 - x, step(0.5, x)), vec3(k));
-    return mix(a, 1.0 - a, step(0.5, x));
-}
-
-// Color grading applied before tone mapping
-// rgb := color in acescg [0, inf]
-vec3 grade_input(vec3 rgb) {
-    float brightness = 0.83 * GRADE_BRIGHTNESS;
-    float contrast = 1.00 * GRADE_CONTRAST;
-    float saturation = 0.98 * GRADE_SATURATION;
-
-    // Brightness
-    rgb *= brightness;
-
-    // Contrast
-    const float log_midpoint = log2(0.18);
-    rgb = log2(rgb + eps);
-    rgb = contrast * (rgb - log_midpoint) + log_midpoint;
-    rgb = max0(exp2(rgb) - eps);
-
-    // Saturation
-    float lum = dot(rgb, luminance_weights);
-    rgb = max0(mix(vec3(lum), rgb, saturation));
-
-    // White balance
-#if GRADE_WHITE_BALANCE != 6500
-    rgb = rgb * rec2020_to_xyz;
-    rgb = rgb * white_balance_matrix;
-    rgb = rgb * xyz_to_rec2020;
-#endif
-
-    rgb = max0(rgb);
-
-    return rgb;
-}
-
-// Color grading applied after tone mapping
-// rgb := color in linear rec.709 [0, 1]
-vec3 grade_output(vec3 rgb) {
-    // Convert to roughly perceptual RGB for color grading
-    rgb = sqrt(rgb);
-
-    // HSL color grading inspired by Tech's color grading setup in Lux Shaders
-
-    const float orange_sat_boost = GRADE_ORANGE_SAT_BOOST;
-    const float teal_sat_boost = GRADE_TEAL_SAT_BOOST;
-    const float green_sat_boost = GRADE_GREEN_SAT_BOOST;
-    const float green_hue_shift = GRADE_GREEN_HUE_SHIFT / 360.0;
-
-    vec3 hsl = rgb_to_hsl(rgb);
-
-    // Oranges
-    float orange = isolate_hue(hsl, 30.0, 20.0);
-    hsl.y *= 1.0 + orange_sat_boost * orange;
-
-    // Teals
-    float teal = isolate_hue(hsl, 210.0, 20.0);
-    hsl.y *= 1.0 + teal_sat_boost * teal;
-
-    // Greens
-    float green = isolate_hue(hsl, 90.0, 44.0);
-    hsl.x += green_hue_shift * green;
-    hsl.y *= 1.0 + green_sat_boost * green;
-
-    rgb = hsl_to_rgb(hsl);
-
-    rgb = gain(rgb, 1.05);
-
-    return sqr(rgb);
 }
 
 float vignette(vec2 uv) {
@@ -169,21 +187,34 @@ void main() {
 
     scene_color *= exposure;
 
+#ifdef LOCAL_EXPOSURE
+    float local_ev = compute_local_exposure_ev(uv, scene_color / max(exposure, 1e-6));
+    scene_color *= exp2(local_ev);
+#endif
+
 #ifdef VIGNETTE
     scene_color *= vignette(uv);
 #endif
 
-    scene_color = grade_input(scene_color);
+#ifdef COLOR_GRADING
+  #if GRADE_WHITE_BALANCE != 6500
+    scene_color = color_grade_input(scene_color, white_balance_matrix);
+  #else
+    scene_color = color_grade_input(scene_color, mat3(1.0));
+  #endif
+#endif
 
 #ifdef TONEMAP_COMPARISON
     scene_color
-        = uv.x < 0.5 ? tonemap_left(scene_color) : tonemap_right(scene_color);
+        = uv.x < TONEMAP_COMPARISON_SPLIT ? tonemap_left(scene_color) : tonemap_right(scene_color);
 #else
     scene_color = tonemap(scene_color);
 #endif
 
     scene_color = clamp01(scene_color * working_to_display_color);
-    scene_color = grade_output(scene_color);
+#ifdef COLOR_GRADING
+    scene_color = color_grade_output(scene_color);
+#endif
 
 #if 0 // Tonemap plot
 	const float scale = 2.0;

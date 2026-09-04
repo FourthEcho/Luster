@@ -47,9 +47,6 @@ vec3 draw_sun(vec3 ray_dir) {
 }
 
 vec4 draw_moon(vec3 ray_dir) {
-    const float angle = 0.7;
-    const mat2 rot = mat2(cos(angle), sin(angle), -sin(angle), cos(angle));
-
     const vec3 lit_color
         = vec3(MOON_R, MOON_G <= 0.03 ? 0.0 : MOON_G - 0.03, MOON_B);
     const vec3 glow_color
@@ -313,7 +310,7 @@ vec3 draw_sun(vec3 ray_dir) {
     float center_to_edge = max0(sun_angular_radius - r);
     vec3 limb_darkening
         = pow(vec3(1.0 - sqr(1.0 - center_to_edge)), 0.5 * alpha);
-    vec3 sun_disk = vec3(r < sun_angular_radius);
+    vec3 sun_disk = limb_darkening * vec3(r < sun_angular_radius);
 
     // Solar flare effect
 

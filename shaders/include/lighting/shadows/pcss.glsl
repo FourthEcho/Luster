@@ -8,7 +8,6 @@
 #include "/include/utility/color.glsl"
 #include "/include/utility/dithering.glsl"
 #include "/include/utility/random.glsl"
-#include "/include/utility/rotation.glsl"
 #include "/include/utility/sampling.glsl"
 
 const ivec2[9] blur_kernel_offsets_3x3 = ivec2[9](

@@ -1,8 +1,8 @@
 #if !defined INCLUDE_LIGHTING_HANDHELD_LIGHTING
 #define INCLUDE_LIGHTING_HANDHELD_LIGHTING
 
-#ifdef COLORED_LIGHTS
-uniform sampler2D light_data_sampler;
+#if HANDHELD_LIGHTING_MODE == HANDHELD_LIGHTING_COLORED
+#include "/include/lighting/lpv/light_colors.glsl"
 #endif
 
 #ifdef IS_IRIS
@@ -15,23 +15,18 @@ uniform int heldBlockLightValue;
 uniform int heldBlockLightValue2;
 
 vec3 get_handheld_light_color(int held_item_id, int held_item_light_value) {
-#ifdef COLORED_LIGHTS
-    bool is_emitter = 10032 <= held_item_id && held_item_id < 10080;
+#if HANDHELD_LIGHTING_MODE == HANDHELD_LIGHTING_COLORED
+    const int first_emitter_id = 10032;
+    const int emitter_count = 48;
+    int emitter_index = held_item_id - first_emitter_id;
 
-    if (is_emitter) {
-        return texelFetch(
-                   light_data_sampler,
-                   ivec2(int(held_item_id) - 10032, 0),
-                   0
-        )
-            .rgb;
-    } else {
-        return vec3(0.0);
+    if (emitter_index >= 0 && emitter_index < emitter_count) {
+        return handheld_emitter_light_color[emitter_index];
     }
-#else
+#endif
+
     return (blocklight_color * blocklight_scale * rcp(15.0))
         * held_item_light_value;
-#endif
 }
 
 float get_handheld_light_falloff(vec3 scene_pos, float ao) {

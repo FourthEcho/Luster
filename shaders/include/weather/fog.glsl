@@ -2,8 +2,17 @@
 #define INCLUDE_WEATHER_FOG
 
 #include "/include/fog/overworld/parameters.glsl"
+#include "/include/fog/overworld/constants.glsl"
 #include "/include/utility/color.glsl"
 #include "/include/weather/core.glsl"
+
+// Sentinel guards so MIST_MODE comparisons compile even when mist.glsl
+// has not been included yet (e.g. in vertex shaders).
+#ifndef MIST_MODE_OFF
+#define MIST_MODE_OFF      0
+#define MIST_MODE_BASIC    1
+#define MIST_MODE_ADVANCED 2
+#endif
 
 uniform float biome_pale_garden;
 
@@ -107,6 +116,22 @@ OverworldFogParameters get_fog_parameters(Weather weather) {
     float mie_albedo = mix(0.9, 0.5, rainStrength * biome_may_rain);
     params.mie_scattering_coeff = vec3(mie_albedo * mie);
     params.mie_extinction_coeff = vec3(mie);
+
+    // ---- Mist scattering coefficient ----
+    // Tinted by the current Rayleigh colour so mist picks up the correct
+    // time-of-day hue (orange at sunset, blue-white at dawn) without needing
+    // a sky-map sample in the vertex shader.
+#if MIST_MODE != MIST_MODE_OFF
+    {
+        vec3 horizon_tint = normalize(params.rayleigh_scattering_coeff + 1e-6);
+        params.mist_scattering_coeff = mist_base_scatter_coeff
+            * MIST_DENSITY * horizon_tint;
+        // Thicken mist during and after rain
+        params.mist_scattering_coeff *= 1.0 + 0.5 * rainStrength * biome_may_rain;
+    }
+#else
+    params.mist_scattering_coeff = vec3(0.0);
+#endif
 
 #ifdef DESERT_SANDSTORM
     // DESERT_SANDSTORM_INTENSITY scales the sandstorm fog density and
