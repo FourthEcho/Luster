@@ -770,7 +770,7 @@ const float wetnessHalflife         = 70.0;
 // 6-coefficient H-Basis projection of the live sky map rather than a 9-term
 // SH basis, but that distinction is invisible to users so the option keeps
 // the SH_SKYLIGHT naming for continuity with the older category.
-//#define SH_SKYLIGHT
+#define SH_SKYLIGHT
   #define SH_SKYLIGHT_INTENSITY 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.75 0.80 0.90 1.00 1.20 1.50 2.00]
   #define SH_SKYLIGHT_QUALITY 512 // [128 256 512 1024]
 
