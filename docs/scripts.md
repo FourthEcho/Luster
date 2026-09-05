@@ -4,20 +4,6 @@ Utility scripts in `scripts/`. Run from the repo root unless noted otherwise.
 
 ---
 
-## zip.py
-
-Builds a release zip for `.minecraft/shaderpacks/`. Packages everything under a single top-level `Luster-main/` folder (including `shaders/`, `LICENSE`, `README.md`, etc.). Iris detects `shaders/` inside the single top-level directory and loads the pack correctly, so the zip can be dropped straight into shaderpacks without any restructuring.
-
-```
-python3 scripts/zip.py [output]
-```
-
-`output` defaults to `Luster.zip` next to the repo root.
-
-The zip has a single top-level folder `Luster-main/` containing `shaders/`, `LICENSE`, `README.md`, etc. Iris detects `shaders/` inside the single top-level directory and loads the pack correctly — no manual restructuring needed.
-
----
-
 ## find_replace.py
 
 Find and replace a string across all shader files (`.glsl`, `.fsh`, `.vsh`, `.csh`) in a directory.
