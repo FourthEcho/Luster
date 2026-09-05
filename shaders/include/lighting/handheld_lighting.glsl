@@ -22,7 +22,10 @@ vec3 get_handheld_light_color(int held_item_id, int held_item_light_value) {
     int emitter_index = held_item_id - first_emitter_id;
 
     if (emitter_index >= 0 && emitter_index < emitter_count) {
-        return handheld_emitter_light_color[emitter_index];
+        vec3 color = handheld_emitter_light_color[emitter_index];
+        if (color.r > 0.0 || color.g > 0.0 || color.b > 0.0) {
+            return color;
+        }
     }
 #endif
 
