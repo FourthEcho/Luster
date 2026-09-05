@@ -10,6 +10,7 @@
 */
 
 #include "/include/global.glsl"
+#include "/include/camera/camera.glsl"
 
 out vec2 uv;
 
@@ -92,6 +93,7 @@ void build_histogram(out float[HISTOGRAM_BINS] pdf) {
     float lod = ceil(log2(max_of(view_res * tile_size)));
 
     // Sample into histogram
+    float total_weight = 0.0;
     for (int y = 0; y < tiles.y; ++y) {
         for (int x = 0; x < tiles.x; ++x) {
             vec2 coord = vec2(x, y) * tile_size + (0.5 * tile_size);
@@ -108,29 +110,54 @@ void build_histogram(out float[HISTOGRAM_BINS] pdf) {
             float weight1 = fract(bin);
             float weight0 = 1.0 - weight1;
 
-            pdf[bin0] += weight0;
-            pdf[bin1] += weight1;
+            // Center-weighted metering: frame edges (often sky, ground
+            // or vignette) steer exposure less than the subject area,
+            // like a real evaluative meter. Parabolic falloff.
+            vec2 weight_uv = (vec2(x, y) + 0.5) / vec2(tiles);
+            float center_weight = (1.0 - sqr(weight_uv.x * 2.0 - 1.0))
+                * (1.0 - sqr(weight_uv.y * 2.0 - 1.0));
+            center_weight *= center_weight;
+
+            pdf[bin0] += weight0 * center_weight;
+            pdf[bin1] += weight1 * center_weight;
+            total_weight += center_weight;
         }
     }
 
-    // Normalize PDF
-    float tile_area = tile_size.x * tile_size.y;
+    // Normalize PDF by the accumulated weight so CDF percentiles stay exact
     for (int i = 0; i < HISTOGRAM_BINS; ++i) {
-        pdf[i] *= tile_area;
+        pdf[i] /= max(total_weight, eps);
     }
 }
 
-float get_median_luminance(float[HISTOGRAM_BINS] pdf) {
+float get_percentile_luminance(float[HISTOGRAM_BINS] pdf, float target) {
     float cdf = 0.0;
 
     for (int i = 0; i < HISTOGRAM_BINS; ++i) {
         cdf += pdf[i];
-        if (cdf > HISTOGRAM_TARGET) {
+        if (cdf > target) {
             return get_luminance_from_bin(i);
         }
     }
 
     return 0.0; // ??
+}
+
+// Three-population meter: shadows, midtones and highlights metered
+// separately from the histogram CDF, then recombined with user weights.
+// A lone median (or mean) lets one bright sun or one dark cave dictate
+// exposure; the population split protects highlights without crushing
+// shadows, and the weights tune which population wins.
+float get_metered_luminance(float[HISTOGRAM_BINS] pdf) {
+    float luminance_mid = get_percentile_luminance(pdf, HISTOGRAM_TARGET);
+    float luminance_dark = get_percentile_luminance(pdf, 0.2);
+    float luminance_bright = get_percentile_luminance(pdf, 0.8);
+
+    float weight_sum = 1.0 + HISTOGRAM_SHADOW_WEIGHT + HISTOGRAM_HIGHLIGHT_WEIGHT;
+
+    return (luminance_mid + HISTOGRAM_SHADOW_WEIGHT * luminance_dark
+            + HISTOGRAM_HIGHLIGHT_WEIGHT * luminance_bright)
+        / weight_sum;
 }
 
 void main() {
@@ -153,7 +180,7 @@ void main() {
     float[HISTOGRAM_BINS] pdf;
     build_histogram(pdf);
 
-    float luminance = get_median_luminance(pdf);
+    float luminance = get_metered_luminance(pdf);
 #endif
 
     float target_exposure = get_exposure_from_luminance(luminance);
@@ -169,6 +196,12 @@ void main() {
 
     exposure = mix(target_exposure, previous_exposure, blend_weight);
 #endif
+
+    // Physical ISO gain: the metering above is calibrated for ISO 100,
+    // so scale the final exposure by the camera sensitivity. Applies to
+    // manual, simple and histogram paths alike.
+    // Closed exposure triangle (see include/camera/camera.glsl).
+    exposure *= camera_exposure_triangle_factor();
 
 #if AUTO_EXPOSURE == AUTO_EXPOSURE_HISTOGRAM \
     && DEBUG_VIEW == DEBUG_VIEW_HISTOGRAM

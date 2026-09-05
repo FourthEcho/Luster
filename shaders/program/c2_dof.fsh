@@ -16,6 +16,7 @@
 */
 
 #include "/include/global.glsl"
+#include "/include/camera/camera.glsl"
 
 layout(location = 0) out vec3 scene_color;
 
@@ -84,18 +85,39 @@ void main() {
     theta = r1(frameCounter, theta);
     theta *= tau;
 
-    // ---- Compute the circle of confusion (CoC) radius ----
-    // Focus-based: |depth - focus| drives the CoC. Things
-    // at the focus plane stay sharp; things in front or behind blur.
-    // Intensity comes from DOF_INTENSITY.
+    // ---- Physical circle of confusion (thin-lens model) ----
+    // Focal length from the vertical FOV and sensor height, aperture
+    // diameter from the f-stop number: CoC = (f^2 / N) * |1/S - 1/D|.
+    // Replaces the old artistic DOF_INTENSITY scaling: wide apertures
+    // (f/0.8) give razor-thin focus, narrow ones (f/16) are sharp deep
+    // into the scene, exactly like a real lens.
     vec2 CoC;
 
-    float focus = DOF_FOCUS < 0.0
-        ? centerDepthSmooth
-        : view_to_screen_space_depth(gbufferProjection, DOF_FOCUS);
-    CoC = min(abs(depth - focus), 0.1)
-        * (DOF_INTENSITY * 0.2 / 1.37)
-        * vec2(1.0, aspectRatio) * gbufferProjection[1][1];
+    float dist_lin = max(
+        abs(screen_to_view_space_depth(gbufferProjectionInverse, depth)),
+        eps
+    );
+    float focus_lin = DOF_FOCUS < 0.0
+        ? max(
+              abs(screen_to_view_space_depth(
+                  gbufferProjectionInverse,
+                  centerDepthSmooth
+              )),
+              eps
+          )
+        : max(abs(DOF_FOCUS), eps);
+    float sensor_h = camera_sensor_height_mm(aspectRatio);
+    float focal_mm
+        = camera_focal_length_mm(gbufferProjection[1][1], aspectRatio);
+    float coc = min(
+        camera_coc_height_fraction(focal_mm, sensor_h, focus_lin, dist_lin),
+        0.05
+    );
+    CoC = coc * vec2(1.0, aspectRatio);
+#ifdef BLOOM_ANAMORPHIC
+    // Anamorphic squeeze: horizontal CoC stretch for oval bokeh
+    CoC.x *= BLOOM_ANAMORPHIC_STRETCH;
+#endif
 
     scene_color = vec3(0.0);
 

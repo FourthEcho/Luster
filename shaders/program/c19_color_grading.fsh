@@ -132,7 +132,25 @@ float compute_local_exposure_ev(vec2 texel_uv, vec3 center_rgb) {
 
     // Keep local exposure a detail-preserving correction, never a replacement
     // for the user's global exposure. The symmetric limit is 2/3 stop.
-    return clamp(ev, -0.6666667, 0.6666667);
+    // DETAIL scales the fine bilateral term (1.0 = full detail correction).
+    ev = clamp(ev * LOCAL_EXPOSURE_DETAIL, -0.6666667, 0.6666667);
+
+    // Regional adaptation: the fine bilateral taps above only see pixels,
+    // so broad light/shadow regions (a bright sky over a dark valley) slip
+    // through. A low-res neighborhood luminance steers whole regions toward
+    // middle gray — dodge and burn at area scale — clamped to RANGE stops
+    // so it grades but never overrides the global exposure.
+    float region_lod = ceil(log2(max_of(rcp(view_pixel_size)) * 0.02));
+    vec3 region_rgb
+        = textureLod(colortex5, texel_uv, region_lod).rgb;
+    float region_log = log2(local_exposure_luma(region_rgb));
+    float region_ev = clamp(
+        (log2(middle_gray) - region_log) * adaptation,
+        -LOCAL_EXPOSURE_RANGE,
+        LOCAL_EXPOSURE_RANGE
+    );
+
+    return mix(ev, region_ev, LOCAL_EXPOSURE_REGIONAL);
 }
 #endif
 
@@ -159,7 +177,16 @@ float vignette(vec2 uv) {
             + 0.2 * darkness_pulse * darknessFactor
     );
 
-    return vignette;
+    // Radial shaping: confine the falloff between START and END with
+    // EXPONENT rolloff (Kappa-style). At defaults the corners and center
+    // match the unshaped curve exactly; only the midrange blend softens.
+    float vignette_r = length((uv - 0.5) * 2.0);
+    float vignette_shaping = pow(
+        smoothstep(VIGNETTE_START, VIGNETTE_END, vignette_r),
+        VIGNETTE_EXPONENT
+    );
+
+    return mix(1.0, vignette, vignette_shaping);
 }
 
 void main() {

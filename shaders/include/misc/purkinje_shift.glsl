@@ -21,7 +21,11 @@ vec3 purkinje_shift(vec3 rgb, vec2 light_levels) {
         return rgb;
     }
 
-    const vec3 purkinje_tint = vec3(0.5, 0.7, 1.0) * rec709_to_rec2020;
+    const vec3 purkinje_tint = vec3(
+        PURKINJE_SHIFT_R,
+        PURKINJE_SHIFT_G,
+        PURKINJE_SHIFT_B
+    ) * rec709_to_rec2020;
     const vec3 rod_response
         = vec3(7.15e-5, 4.81e-1, 3.28e-1) * rec709_to_rec2020;
 

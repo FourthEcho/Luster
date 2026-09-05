@@ -10,6 +10,7 @@
 */
 
 #include "/include/global.glsl"
+#include "/include/camera/camera.glsl"
 
 layout(location = 0) out vec3 scene_color;
 
@@ -47,8 +48,6 @@ uniform vec2 taa_offset;
 #define TEMPORAL_REPROJECTION
 #include "/include/utility/space_conversion.glsl"
 
-#define MOTION_BLUR_SAMPLES 20
-
 void main() {
     ivec2 texel = ivec2(gl_FragCoord.xy);
     ivec2 view_texel = ivec2(gl_FragCoord.xy * taau_render_scale);
@@ -63,8 +62,14 @@ void main() {
     vec2 velocity = uv - reproject(vec3(uv, depth)).xy;
     ;
     vec2 pos = uv;
+    // Physical shutter: the velocity spans one frame at the reference
+    // 60Hz capture, so the trail length scales with exposure time
+    // (1/CAM_SHUTTER_SPEED), times the user scale. 1/60s at 1.00 scale
+    // matches the old neutral look; slower speeds streak longer.
     vec2 increment
-        = (0.5 * MOTION_BLUR_INTENSITY / float(MOTION_BLUR_SAMPLES)) * velocity;
+        = (0.5 * camera_shutter_trail_factor() * MOTION_BLUR_SCALE
+            / float(MOTION_BLUR_SAMPLES))
+        * velocity;
 
     vec3 color_sum = vec3(0.0);
     float weight_sum = 0.0;
