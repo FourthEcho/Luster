@@ -13,10 +13,6 @@
 #undef SHADOW_SSRT
 #endif
 
-#ifdef COLORED_LIGHTS
-#undef COLORED_LIGHTS
-#endif
-
 uniform float desert_sandstorm;
 
 vec3 ambient_color;

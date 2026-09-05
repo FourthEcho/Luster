@@ -68,22 +68,12 @@ uniform float time_midnight;
 uniform float biome_temperature;
 uniform float biome_humidity;
 
-#ifdef COLORED_LIGHTS
-writeonly uniform uimage3D voxel_img;
-
-uniform int renderStage;
-#endif
-
 // ------------
 //   Includes
 // ------------
 
 #include "/include/lighting/shadows/distortion.glsl"
 #include "/include/vertex/displacement.glsl"
-
-#ifdef COLORED_LIGHTS
-#include "/include/lighting/lpv/voxelization.glsl"
-#endif
 
 void main() {
     uv = gl_MultiTexCoord0.xy;
@@ -99,11 +89,6 @@ void main() {
     rsm_vpl_normal = normalize(
         mat3(shadowModelViewInverse) * (gl_NormalMatrix * gl_Normal)
     );
-#endif
-
-
-#if defined COLORED_LIGHTS && !defined PROGRAM_SHADOW_ENTITIES
-    update_voxel_map(material_mask);
 #endif
 
 #if defined WORLD_NETHER

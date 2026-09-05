@@ -3,7 +3,7 @@
 # AO method, cloud steps, reflection quality and more. Switch profiles to
 # trade performance for quality — Low for potato PCs, Ultra for high-end.
 # Mac Compatible (red) disables Mac-incompatible or heavy features
-# (Directional Sky Ambient, Colored Lights, Colored Shadows/VPS) and keeps
+# (Directional Sky Ambient, Colored Shadows/VPS) and keeps
 # GTAO + 4× Aniso for smooth Mac performance.
 
 profile.low                            = §eLow
@@ -29,8 +29,6 @@ screen.mods                            = Mod Options
 
 screen.weather                         = Weather 
 screen.moon_phase_influence             = Moon Phase Influence
-screen.colored_lights                  = Colored Lights
-screen.colored_lights_settings         = Colored Lights Settings
 screen.purkinje_shift                 = Purkinje Shift
 screen.rp_settings                     = Resource Pack Settings
 screen.reflections                     = Reflections
@@ -40,7 +38,6 @@ screen.shadows                         = Shadows
 screen.ao                              = Ambient Occlusion
 screen.color_grading                   = Color Grading
 screen.exposure                        = Exposure
-screen.lpv_vl                          = Colored Lights Fog Scattering
 screen.box                             = Selection Box
 screen.developer                       = Developer Options
 
@@ -140,8 +137,6 @@ option.WEATHER_TURBULENCE_VARIATION_SPEED.comment = Controls turbulence variatio
 
 # Lighting settings
 
-option.COLORED_LIGHTS                  = Colored Lights
-option.COLORED_LIGHTS.comment          = Variable-color block lighting using flood fill algorithm. Requires Iris 1.6 or above
 option.HANDHELD_LIGHTING_MODE        = Handheld Lighting
 option.HANDHELD_LIGHTING_MODE.comment       = Controls handheld lighting. Off disables it, Normal uses the standard light color, and Colored uses each handheld emitter's own light color.
 value.HANDHELD_LIGHTING_MODE.0                       = Off
@@ -293,15 +288,8 @@ option.BLOCKLIGHT_TEMPERATURE.comment = Blackbody temperature of block lights in
 option.CAVE_LIGHTING_I                  = Cave Ambient
 option.CAVE_LIGHTING_I.comment = Adjusts the base brightness of underground ambient light when no direct light is present. Higher = caves appear less pitch-black.
 
-option.VOXEL_VOLUME_SIZE                                            = Voxel Volume Size
-option.VOXEL_VOLUME_SIZE.comment                                    = Adjusts the size of the volume in which colored lighting is calculated. High performance impact, also affected by shadow distance
-suffix.VOXEL_VOLUME_SIZE                                            = m³
-option.VOXEL_VOLUME_CENTER                                          = Voxel Volume Center
-option.VOXEL_VOLUME_CENTER.comment                                  = Ahead: voxel volume is centered in front of the player, meaning that more of it is visible
 
 
-value.VOXEL_VOLUME_CENTER.VOXEL_VOLUME_CENTER_AHEAD  = Ahead
-value.VOXEL_VOLUME_CENTER.VOXEL_VOLUME_CENTER_PLAYER = Player
 
 suffix.shadowMapResolution             = ²
 suffix.sunPathRotation                 = °
@@ -635,7 +623,6 @@ option.SANDSTORM_MIST.comment = Applies the desert sandstorm to ground mist: whi
 option.SANDSTORM_BOUNCE                    = Sandstorm Planet Bounce
 option.SANDSTORM_BOUNCE.comment = Applies the desert sandstorm to planet bounce light: ground-bounced light is re-filtered through the dust layer on its way back up into the sky.
 option.VL                                   = Volumetric Fog
-option.LPV_VL.comment                       = Light sources illuminate the fog volume. Requires Colored Lights enabled. Adds realistic light propagation through fog. Significant performance impact. 
 option.VL.comment                           = Adds volumetric fog with light shafts and variable density. Creates atmosphere and sun rays streaming through the fog. Requires significant GPU resources.
 option.VL_RENDER_SCALE                      = VL Render Scale
 option.VL_RENDER_SCALE.comment = Controls vl render scale.
@@ -646,18 +633,6 @@ option.AIR_FOG_COLORED_LIGHT_SHAFTS.comment    = Light shafts passing through tr
 option.AIR_FOG_COLORED_LIGHT_SHAFTS_INTENSITY         = Colored Light Shafts Intensity
 option.AIR_FOG_COLORED_LIGHT_SHAFTS_INTENSITY.comment = Controls the strength of the color tinting applied to light shafts
 
-# LPV VL
-option.LPV_VL                          = Colored Fog
-option.LPV_VL_STEPS                    = Light March Steps
-option.LPV_VL_STEPS.comment = Adjusts the number of ray-march steps for light scattering in fog. Higher = smoother, more accurate colored fog at higher GPU cost.
-option.LPV_VL_INTENSITY_OVERWORLD      = Overworld Strength
-option.LPV_VL_INTENSITY_OVERWORLD.comment = Adjusts the brightness of colored fog scattering in the Overworld.
-option.LPV_VL_INTENSITY_UNDERGROUND    = Underground Strength
-option.LPV_VL_INTENSITY_UNDERGROUND.comment = Adjusts the brightness of colored fog scattering underground/in caves.
-option.LPV_VL_INTENSITY_NETHER         = Nether Strength
-option.LPV_VL_INTENSITY_NETHER.comment = Adjusts the brightness of colored fog scattering in the Nether.
-option.LPV_VL_INTENSITY_END            = End Strength
-option.LPV_VL_INTENSITY_END.comment = Adjusts the brightness of colored fog scattering in the End.
 
 # Rayleigh Fog
 option.AIR_FOG_RAYLEIGH_FALLOFF_START             = Rayleigh Falloff Start
@@ -1219,7 +1194,7 @@ option.NOISE_ON_DH_TERRAIN.comment = Controls whether noise is applied to Distan
 
 
 screen.directional_ambient_lighting=Directional Ambient Lighting
-screen.indirect_lighting=Sun Bounce GI
+screen.indirect_lighting=Indirect Lighting
 screen.aa=Anti-Aliasing
 screen.motion_blur=Motion Blur
 screen.dof=Depth of field
@@ -1361,8 +1336,6 @@ option.PLANET_BOUNCE_INTENSITY.comment = Adjusts the strength of ground-bounced 
 value.SHADER_AO.SHADER_AO_NONE=Off
 value.SHADER_AO.SHADER_AO_SSAO=SSAO
 value.SHADER_AO.SHADER_AO_GTAO=GTAO
-value.VOXEL_VOLUME_CENTER.VOXEL_VOLUME_CENTER_AHEAD=Ahead
-value.VOXEL_VOLUME_CENTER.VOXEL_VOLUME_CENTER_PLAYER=Player
 value.TEXTURE_FORMAT.TEXTURE_FORMAT_LAB=labPBR
 value.TEXTURE_FORMAT.TEXTURE_FORMAT_OLD=Old PBR
 value.REFRACTION.REFRACTION_OFF=Off
@@ -1422,10 +1395,6 @@ value.DEBUG_SAMPLER.shadowtex0=shadowtex0
 value.DEBUG_SAMPLER.shadowtex1=shadowtex1
 value.DEBUG_SAMPLER.shadowcolor0=shadowcolor0
 
-option.COLORED_LIGHTS_FALLOFF = Falloff Mode
-option.COLORED_LIGHTS_FALLOFF.comment = Controls the automatic colored-light fallback falloff.
-value.COLORED_LIGHTS_FALLOFF.COLORED_LIGHTS_FALLOFF_SQUARED = Squared
-value.COLORED_LIGHTS_FALLOFF.COLORED_LIGHTS_FALLOFF_LINEAR = Linear
 option.IMAGE_SHARPENING_INTENSITY = Image Sharpening
 option.IMAGE_SHARPENING_INTENSITY.comment = Controls final edge-aware image sharpening strength.
 

@@ -116,13 +116,6 @@ uniform float time_midnight;
 #include "/include/utility/random.glsl"
 #include "/include/utility/space_conversion.glsl"
 
-#if defined LPV_VL && defined COLORED_LIGHTS && defined LPV_VL
-uniform sampler3D light_sampler_a;
-uniform sampler3D light_sampler_b;
-
-#include "/include/fog/lpv_fog.glsl"
-#endif
-
 void main() {
     ivec2 fog_texel = ivec2(gl_FragCoord.xy);
     ivec2 view_texel
@@ -236,8 +229,4 @@ void main() {
     fog_transmittance = vec3(1.0);
 #endif
 
-#if defined LPV_VL && defined COLORED_LIGHTS && defined LPV_VL
-    fog_scattering
-        += get_lpv_fog_scattering(world_start_pos, world_end_pos, dither);
-#endif
 }

@@ -7,10 +7,6 @@
 #include "/include/surface/material.glsl"
 #include "/include/utility/fast_math.glsl"
 #include "/include/utility/phase_functions.glsl"
-#ifdef COLORED_LIGHTS
-#include "/include/lighting/lpv/blocklight.glsl"
-#endif
-
 #ifdef HANDHELD_LIGHTING
 #include "/include/lighting/handheld_lighting.glsl"
 #endif
@@ -130,16 +126,7 @@ vec3 get_block_lighting(
     vec3 mc_blocklight = (blocklight_falloff * directional_lighting)
         * (blocklight_scale * blocklight_color);
 
-#ifdef COLORED_LIGHTS
-    lighting += get_lpv_blocklight(
-        scene_pos,
-        flat_normal,
-        mc_blocklight,
-        ao * directional_lighting
-    );
-#else
     lighting += mc_blocklight;
-#endif
 
 #ifdef HANDHELD_LIGHTING
     lighting += get_handheld_lighting(scene_pos, ao);
