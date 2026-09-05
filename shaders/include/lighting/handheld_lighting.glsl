@@ -13,6 +13,7 @@ uniform int heldItemId;
 uniform int heldItemId2;
 uniform int heldBlockLightValue;
 uniform int heldBlockLightValue2;
+uniform vec3 handheld_emitter_light_color[48];
 
 vec3 get_handheld_light_color(int held_item_id, int held_item_light_value) {
 #if HANDHELD_LIGHTING_MODE == HANDHELD_LIGHTING_COLORED
