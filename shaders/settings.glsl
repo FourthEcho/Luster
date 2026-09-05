@@ -64,7 +64,7 @@ const float wetnessHalflife         = 70.0;
   #define HANDHELD_LIGHTING_OFF      0
   #define HANDHELD_LIGHTING_NORMAL    1
   #define HANDHELD_LIGHTING_COLORED   2
-  #define HANDHELD_LIGHTING_MODE 1 // [0 1 2] Handheld lighting mode: 0 = Off, 1 = Normal, 2 = Colored.
+  #define HANDHELD_LIGHTING_MODE 2 // [0 1 2] Handheld lighting mode: 0 = Off, 1 = Normal, 2 = Colored.
 #if HANDHELD_LIGHTING_MODE != HANDHELD_LIGHTING_OFF
   #define HANDHELD_LIGHTING
 #endif
