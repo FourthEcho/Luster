@@ -8,4 +8,4 @@
   * Smaller contributions such as bug fixes, optimizations, translations, and fixes to existing systems are much more likely to be accepted.
 * Use the project's GitHub issues or my discord server to talk about potential or ongoing development.
 * Please be aware that I may sometimes go long periods without actively working on Luster, so it can take a while for me to review a pull request.
-* Please follow [Style Guide](https://github.com/FourthEcho/Luster/blob/main/docs/style_guide.md)
+* Please follow [Style Guide](https://github.com/FourthEcho/Luster/blob/main/docs/style_guide.md) for contributions
