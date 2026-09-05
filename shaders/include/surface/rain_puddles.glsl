@@ -111,7 +111,6 @@ float get_puddle_noise(vec3 world_pos, vec3 flat_normal, vec2 light_levels) {
 // (proportional to porosity). This is applied per-channel so chromatic
 // darkening is preserved (wet red clay darkens differently from wet sand).
 //
-// Additional refinements over a plain Kappa-style scalar version:
 //   - Per-channel application preserves hue shift (wet surfaces desaturate
 //     slightly toward their absorption colour).
 //   - k is modulated by sqrt(albedo) so already-dark surfaces (low albedo)
@@ -123,7 +122,6 @@ vec3 apply_wet_porosity_darkening(vec3 albedo, float porosity, float wetness_fac
     return albedo;
 #else
     // Maximum absorbed fraction per internal bounce, scaled by porosity.
-    // 0.7 matches Kappa's empirical coefficient; sqrt(albedo) makes the
     // effect self-limiting on already-dark surfaces.
     vec3 k = 0.7 * porosity * sqrt(albedo);
 
