@@ -111,7 +111,7 @@ void main() {
         = camera_focal_length_mm(gbufferProjection[1][1], aspectRatio);
     float coc = min(
         camera_coc_height_fraction(focal_mm, sensor_h, focus_lin, dist_lin),
-        0.05
+        DOF_MAX_RADIUS
     );
     CoC = coc * vec2(1.0, aspectRatio);
 #ifdef BLOOM_ANAMORPHIC

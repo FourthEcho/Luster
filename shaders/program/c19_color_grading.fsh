@@ -31,6 +31,13 @@ uniform sampler2D colortex0; // bloom tiles
 uniform sampler2D colortex3; // fog transmittance
 uniform sampler2D colortex5; // scene color
 
+uniform mat4 gbufferProjection;
+uniform mat4 gbufferModelView;
+
+uniform vec3 sun_dir;
+
+uniform float rainStrength;
+
 uniform float aspectRatio;
 uniform float blindness;
 uniform float darknessFactor;
@@ -46,6 +53,7 @@ uniform vec2 view_pixel_size;
 #include "/include/post_processing/color_grading.glsl"
 #include "/include/utility/bicubic.glsl"
 #include "/include/utility/color.glsl"
+#include "/include/camera/lens_flare.glsl"
 
 // HDR-aware local exposure.
 //
@@ -195,6 +203,11 @@ void main() {
     scene_color = texelFetch(colortex5, texel, 0).rgb;
 
     float exposure = texelFetch(colortex5, ivec2(0), 0).a;
+
+#if defined LENS_FLARE && defined WORLD_OVERWORLD
+    // Lens flare in HDR before exposure/tonemap so it grades with the scene
+    scene_color += get_lens_flare(uv);
+#endif
 
 #ifdef BLOOM
     vec3 bloom = get_bloom();
