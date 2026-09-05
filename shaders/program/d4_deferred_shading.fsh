@@ -620,9 +620,6 @@ void main() {
 #else
             shadow_distance_fade,
 #endif
-#ifdef PHOTONICS_DIFFUSE
-            is_lod,
-#endif
             NoL,
             NoV,
             NoH,
