@@ -4,19 +4,6 @@
 // ---------------------------------------------------------------------------
 //   Lens flare: ghosts + halo
 //
-//   Architecture follows Kappa's lens passes (bright blurred source, mirrored
-//   ghost march with chromatic spacing, halo ring, additive-back), rewritten
-//   for this pipeline: no extra programs or buffers exist here, so the
-//   smallest bloom tiles stand in for Kappa's bokeh buffer (pre-blurred
-//   full-frame bright content), ghosts march with bicubic taps, and the
-//   result composites pre-tonemap in the grading pass.
-//
-//   Kept from our own design (Kappa has no analogue):
-//    * ghosts track the true projected sun and fade when it leaves the
-//      frame or drops below the horizon, instead of firing blindly;
-//    * rain/storm dimming and an energy-bounded output that cannot blow
-//      the frame out no matter how bright the source is.
-//
 //   Requires from the including program: colortex0 (bloom tiles) +
 //   colortex5 samplers, view_pixel_size + aspectRatio uniforms, and sun_dir,
 //   gbufferProjection, gbufferModelView, rainStrength uniforms.
