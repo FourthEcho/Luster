@@ -11,7 +11,6 @@
 
 #ifdef LENS_FLARE
 // Blurred bright source: bloom tile 2 is the full frame downsampled into a
-// small tile, i.e. pre-blurred bright content like Kappa's bokeh buffer.
 // Threshold is subtractive so sub-threshold sky contributes exactly zero.
 vec3 lens_flare_source(vec2 screen_uv) {
 #ifdef BLOOM
