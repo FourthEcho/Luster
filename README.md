@@ -7,7 +7,7 @@ Atmosphere · lighting · clouds · water · image quality — built with Iris a
 
 [![Iris](https://img.shields.io/badge/loader-Iris-6b5ce7?style=flat-square)](https://irisshaders.dev/)
 [![License](https://img.shields.io/badge/license-see%20LICENSE-blue?style=flat-square)](./LICENSE)
-[![Discord](https://discord.gg/Q9n4WMVSK)
+[![Discord](https://discord.com/channels/1543406509000491098/1543406509923377247)
 
 [Download](#installation) · [Features](#features) · [Compatibility](#compatibility) · [Configuration](#configuration) · [Issues](https://github.com/shashankpgowda/Luster/issues)
 
