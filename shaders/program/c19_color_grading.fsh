@@ -190,7 +190,11 @@ float vignette(vec2 uv) {
     // match the unshaped curve exactly; only the midrange blend softens.
     float vignette_r = length((uv - 0.5) * 2.0);
     float vignette_shaping = pow(
-        smoothstep(VIGNETTE_START, VIGNETTE_END, vignette_r),
+        smoothstep(
+            VIGNETTE_START,
+            max(VIGNETTE_END, VIGNETTE_START + 1e-3),
+            vignette_r
+        ),
         VIGNETTE_EXPONENT
     );
 

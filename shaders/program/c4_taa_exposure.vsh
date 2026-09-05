@@ -105,7 +105,7 @@ void build_histogram(out float[HISTOGRAM_BINS] pdf) {
             float bin = get_bin_from_luminance(luminance);
 
             uint bin0 = uint(bin);
-            uint bin1 = bin0 + 1;
+            uint bin1 = min(bin0 + 1u, uint(HISTOGRAM_BINS) - 1u);
 
             float weight1 = fract(bin);
             float weight0 = 1.0 - weight1;
