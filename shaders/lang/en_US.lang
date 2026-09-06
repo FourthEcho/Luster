@@ -83,7 +83,7 @@ screen.nether_color                    = Static Color
 screen.distance_view                   = Distance View
 
 option.INFO                            = Luster Shaders
-option.INFO.comment = Shaderpack information and profile label.
+option.INFO.comment = Hope you like it
 value.INFO.0                           = §eBy Fourth Echo
 value.INFO.1                           = §aBy Fourth Echo
 value.INFO.2                           = §bBy Fourth Echo
