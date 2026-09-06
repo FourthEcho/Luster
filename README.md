@@ -26,7 +26,7 @@ A dedicated **Mac Compatible** profile makes Luster one of the few shader packs 
 ## Features
 
 - **Lighting** — sun/moon/block/Nether/End lighting, SSPT Indirect Lighting + Colored Lighting, Directional Ambient Lighting, multiple shadow paths (PCF + screen-space), SSAO/GTAO
-- **Sky & atmosphere** — dynamic Rayleigh/Mie scattering, biome and weather-aware color, aurora, stars, galaxy, rainbows, god rays, and advanced Mist shading.
+- **Sky & atmosphere** — dynamic Rayleigh/Mie scattering/Ozone/Mist, biome and weather-aware color, aurora, stars, galaxy, rainbows, god rays, and advanced Mist shading.
 - **Clouds** — Cumulus, AltoCumulus, Cumulus Congestus, Cirrus/Cirrocumulus, noctilucent, and optional blocky clouds, independently tunable per layer, with up to 16× temporal upscaling
 - **Water & materials** — physically-inspired absorption/scattering, procedural waves, parallax, caustics, Snell's window, biome-colored water, rain puddles, POM, subsurface scattering, full labPBR support
 - **Reflections** — environment, sky, and screen-space reflections, roughness-aware, tuned separately for water and other materials
@@ -72,7 +72,7 @@ Settings are organized into: **World** (weather, moon phase, foliage) · **Light
 
 ## Development
 
-Luster is actively developed. The source tree is organized into reusable modules under `shaders/include/`, rendering programs under `shaders/program/`, and world-specific passes under the `world*` directories. Bug reports and Luster-specific issues go in the [issue tracker](https://github.com/shashankpgowda/Luster/issues). Colored Lights is NOT mac supporte yet.
+Luster is actively developed. The source tree is organized into reusable modules under `shaders/include/`, rendering programs under `shaders/program/`, and world-specific passes under the `world*` directories. Bug reports and Luster-specific issues go in the [issue tracker](https://github.com/shashankpgowda/Luster/issues).
 
 ## Acknowledgements
 
