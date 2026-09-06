@@ -58,7 +58,7 @@ Not every feature is enabled on every profile — the in-game settings menu is t
 
 ## Compatibility
 
-**GPU vendors:** Nvidia · AMD · Intel · Apple Silicon (via Iris' OpenGL compatibility path)
+**GPU vendors:** Nvidia · AMD · Intel · Apple Silicon (via Iris' OpenGL compatibility path) Just because this is meant for macs doesn't mean that you cant play with this shader without a macbook. this shader has some features other windows only shaders may not.
 
 **Shader loader:** Iris only
 
