@@ -155,7 +155,7 @@ vec3 draw_sky(
 
     // Sun, moon stars
 
-#if defined PROGRAM_DEFERRED4
+#if defined PROGRAM_DEFERRED11
     vec3 skytextured_output
         = texelFetch(colortex0, ivec2(gl_FragCoord.xy), 0).rgb;
     sky += texelFetch(colortex0, ivec2(gl_FragCoord.xy), 0).rgb;
@@ -352,7 +352,7 @@ vec3 draw_sky(vec3 ray_dir) {
     float mie_phase = cornette_shanks_phase(dot(ray_dir, sun_dir), 0.6);
     sky += 0.1 * (ambient_color + 0.5 * end_sun_color) * mie_phase;
 
-#if defined PROGRAM_DEFERRED4
+#if defined PROGRAM_DEFERRED11
     // Sun
 
 #ifdef END_SUN_EFFECT
