@@ -31,7 +31,8 @@ A dedicated **Mac Compatible** profile makes Luster one of the few shader packs 
 - **Water & materials** — physically-inspired absorption/scattering, procedural waves, parallax, caustics, Snell's window, biome-colored water, rain puddles, POM, subsurface scattering, full labPBR support
 - **Reflections** — environment, sky, and screen-space reflections, roughness-aware, tuned separately for water and other materials
 - **Fog & volumetrics** — full atmospheric fog per biome, colored volumetric light shafts, cave/border fog, dedicated Nether and End fog paths
-- **Post-processing** — TAA/FXAA/CAS, TAAU, bloom, DOF, motion blur, vignette, Purkinje shift, multiple exposure modes, ACES and AGX tonemapping, full color grading
+- **Post-processing** — TAA/FXAA/CAS, TAAU, Purkinje shift, ACES and AGX tonemapping, full color grading
+- **Camera** - bloom, DOF, motion blur, vignette, multiple exposure modes, lens flare
 
 Not every feature is enabled on every profile — the in-game settings menu is the source of truth for what's available on your hardware and shader loader.
 
