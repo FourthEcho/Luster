@@ -21,6 +21,19 @@ struct Material {
     bool is_hardcoded_metal;
 };
 
+// Keep every emissive surface at one common luminance while preserving its
+// color. This makes hardcoded blocks and labPBR emissive texels feed the same
+// brightness into the primary pass and the SSPT light gather.
+void normalize_emission(inout Material material) {
+    float emission_luminance = dot(
+        material.emission,
+        vec3(0.2126, 0.7152, 0.0722)
+    );
+    if (emission_luminance > 1e-4) {
+        material.emission *= EMISSION_STRENGTH / emission_luminance;
+    }
+}
+
 const Material water_material = Material(
     vec3(0.0),
     vec3(0.0),
@@ -141,6 +154,7 @@ void decode_specular_map(vec4 specular_map, inout Material material) {
         material.is_metal = true;
     }
 
+    normalize_emission(material);
     material.ssr_multiplier = step(
         0.01,
         (material.f0.x
@@ -165,6 +179,7 @@ void decode_specular_map(vec4 specular_map, inout Material material) {
         has_emission_map
     );
 
+    normalize_emission(material);
     material.ssr_multiplier = step(
         0.01,
         (material.f0.x
@@ -954,6 +969,7 @@ Material material_from(
     // this scaled hardcoded value where the pack declares an emissive
     // texel.
     material.emission *= EMISSION_STRENGTH;
+    normalize_emission(material);
 
 #ifdef POROSITY
     // POROSITY_STRENGTH scales the hardcoded porosity. Same override

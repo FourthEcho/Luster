@@ -12,7 +12,7 @@
 
 // Returns the scalar mist density at world_pos.
 // Two-octave hierarchical noise with a curl-advected wind offset gives
-// organic wisps rather than the blobby single-octave value3D used by Kappa.
+// organic, wind-shaped wisps.
 float mist_density(vec3 world_pos) {
     // Slow horizontal drift — two independent directions for each octave
     vec2 wind0 = vec2(frameTimeCounter * 0.004,  frameTimeCounter * 0.0025);
@@ -52,7 +52,7 @@ float mist_phase(float cos_theta, float local_density) {
 // Short shadow ray toward the sun to compute mist self-shadowing OD.
 // Only fired when the sun is near the horizon (where self-shadowing matters)
 // and local density is non-trivial — free on clear days.
-// Also multiplies by cloud shadows above the mist layer, which Kappa omits.
+// Also multiplies by cloud shadows above the mist layer.
 float mist_shadow_od(vec3 world_pos, float local_density) {
     if (local_density < 0.01 || sun_dir.y > 0.3) return 0.0;
 

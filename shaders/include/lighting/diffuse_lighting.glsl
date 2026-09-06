@@ -126,7 +126,15 @@ vec3 get_block_lighting(
     vec3 mc_blocklight = (blocklight_falloff * directional_lighting)
         * (blocklight_scale * blocklight_color);
 
+#ifdef ssptEnabled
+    // Colored blocklight handled by the SSPT chain in
+    // d4_deferred_shading.fsh (emission + colored lighting, temporally
+    // accumulated + SVGF filtered, fragment-only passes).
+    // Skip vanilla here; the SSPT result provides colored bounce and the
+    // accumulator's lightmap fallback.
+#else
     lighting += mc_blocklight;
+#endif
 
 #ifdef HANDHELD_LIGHTING
     lighting += get_handheld_lighting(scene_pos, ao);
@@ -225,15 +233,12 @@ vec3 get_diffuse_lighting(
         * (1.0 - 0.5 * material.sss_amount)
     );
 
-    // Cheap legacy bounced-light fallback. RSM GI replaces this term when
-    // enabled, so the two indirect-lighting systems never stack.
+    // Cheap legacy bounced-light fallback for sunlit surfaces.
     vec3 bounced = vec3(0.0);
-#ifndef RSM_GI
     bounced = 0.033 * (1.0 - shadows)
         * (1.0 - 0.1 * max0(normal.y))
         * pow1d5(ao + eps)
         * pow4(light_levels.y);
-#endif
 
     vec3 sss = sss_approx(
                    material.albedo,
@@ -322,7 +327,7 @@ vec3 get_diffuse_lighting(
 #if defined WORLD_OVERWORLD
     // Cave lighting: preserve a subtle underground ambient fill even when
     // skylight is zero. This matches the reference cave-lighting behavior
-    // while remaining independent of RSM and the bounced-light fallback.
+    // while remaining independent of the bounced-light fallback.
     lighting += 0.15 * CAVE_LIGHTING_I * directional_lighting * ao
         * (1.0 - light_levels.y * light_levels.y)
         * (1.0 - 0.7 * darknessFactor);

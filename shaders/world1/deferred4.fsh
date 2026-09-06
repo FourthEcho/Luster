@@ -2,4 +2,4 @@
 #define WORLD_END
 #define PROGRAM_DEFERRED4
 #define fsh
-#include "/program/d4_deferred_shading.fsh"
+#include "/program/d4_sspt.fsh"

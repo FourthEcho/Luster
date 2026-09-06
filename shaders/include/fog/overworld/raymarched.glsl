@@ -176,7 +176,8 @@ mat2x3 raymarch_air_fog(
 
 #if MIST_MODE == MIST_MODE_ADVANCED
             float mist_od  = mist_shadow_od(world_pos, mist_d / step_length);
-            // Power-law self-extinction matching Kappa's formula, plus cloud occlusion
+            // Power-law self-extinction keeps dense mist from glowing
+            // through itself, plus cloud occlusion above the mist layer
             float mist_sun_shadow = pow(1.0 + 0.7 * mist_od, -1.0 / 0.7) * float(shadow > 0.0);
             float mist_phase_val  = mist_phase(LoV, mist_d / step_length);
 #else

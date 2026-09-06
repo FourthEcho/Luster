@@ -57,6 +57,10 @@ uniform sampler2D colortex11; // clouds history
 uniform sampler2D colortex12; // clouds data
 uniform sampler2D colortex14; // ambient lighting history data
 
+#ifdef ssptEnabled
+uniform sampler2D colortex17; // filtered SSPT emission (half res)
+#endif
+
 #ifndef USE_SEPARATE_ENTITY_DRAWS
 uniform sampler2D colortex3; // OF damage overlay, armor glint
 #endif
@@ -85,10 +89,6 @@ uniform sampler2DShadow shadowtex1;
 
 #ifdef SHADOW_COLOR
 uniform sampler2D shadowcolor0;
-#endif
-
-#ifdef RSM_GI
-uniform sampler2D shadowcolor1;
 #endif
 #endif
 #endif
@@ -166,9 +166,6 @@ const bool colortex11MipmapEnabled = true;
 #include "/include/lighting/diffuse_lighting.glsl"
 #include "/include/lighting/shadows/common.glsl"
 #include "/include/lighting/shadows/pcss.glsl"
-#if defined RSM_GI && defined SHADOW && !defined WORLD_NETHER
-#include "/include/lighting/gi/rsm.glsl"
-#endif
 #include "/include/lighting/shadows/ssrt.glsl"
 #include "/include/lighting/specular_lighting.glsl"
 #include "/include/misc/lod_mod_support.glsl"
@@ -576,6 +573,12 @@ void main() {
                 clamp01(shadow_distance_fade)
             );
 
+#ifdef CONTACT_SHADOWS
+            // Independent of SHADOW_SSRT (distant-shadow extension above) -
+            // this only narrows down fine, close-range self-shadowing
+            shadows *= get_contact_shadows(uv, position_view, depth);
+#endif
+
             sss_depth = mix(
                 sss_depth_near,
                 sss_depth_distant,
@@ -621,6 +624,27 @@ void main() {
             LoV
         );
 
+#ifdef ssptEnabled
+        {
+            // Sample the SSPT chain's output: screen-space path traced
+            // emission + colored lighting, temporally accumulated by
+            // d5_sspt_accumulate and a-trous filtered by d6_sspt_filter.
+            // The indirect buffers span the whole screen, so plain uv works.
+            vec3 sspt_light = max0(texture(colortex17, uv).rgb);
+
+            // Same application as the vanilla blocklight path:
+            // diffuse modulation by albedo, AO, and metal diffuse amount.
+            sspt_light *= material.albedo * rcp_pi * ao;
+            sspt_light *= mix(1.0, metal_diffuse_amount, float(material.is_metal));
+
+#ifdef CLOUD_SHADOWS
+            sspt_light *= cloud_shadows;
+#endif
+
+            fragment_color += sspt_light;
+        }
+#endif
+
 #ifdef SH_SKYLIGHT
         // H-Basis sky ambient: reconstructs cosine-weighted hemisphere
         // irradiance around the bent normal from the per-frame projection
@@ -637,30 +661,6 @@ void main() {
             sky_h
         );
         fragment_color += sh_skylight;
-#endif
-
-#if defined RSM_GI && defined SHADOW && !defined WORLD_NETHER
-        {
-            float rsm_dither = texelFetch(noisetex, texel & 511, 0).b;
-            rsm_dither = r1(frameCounter, rsm_dither);
-
-            vec3 rsm_gi = get_rsm_gi(
-                position_scene,
-                normal,
-                light_levels.y,
-                rsm_dither
-            );
-
-            rsm_gi *= material.albedo * light_color
-                * (rcp_pi * RSM_GI_INTENSITY * ao)
-                * mix(1.0, metal_diffuse_amount, float(material.is_metal));
-
-#ifdef CLOUD_SHADOWS
-            rsm_gi *= cloud_shadows;
-#endif
-
-            fragment_color += rsm_gi;
-        }
 #endif
 
         // Specular highlight

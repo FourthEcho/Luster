@@ -106,6 +106,84 @@ bool raymarch_shadow(
     return hit;
 }
 
+#ifdef CONTACT_SHADOWS
+// Contact shadows: a short, fixed-radius screen-space raymarch along the
+// light direction, run near every shaded surface to catch fine self-
+// shadowing (thin blocks, foliage, small overhangs) that the shadow map's
+// texel resolution misses. This is separate from SHADOW_SSRT above, which
+// only kicks in *beyond* the shadow map's render distance to substitute for
+// missing shadow-map coverage there - contact shadows run at all distances
+// but only search a small radius near the surface, and are gated by their
+// own toggle so either can be enabled/disabled without touching the other.
+float raymarch_contact_shadow(vec3 ray_origin_screen, vec3 ray_origin_view, float dither) {
+    const uint step_count = uint(CONTACT_SHADOW_QUALITY);
+    const float contact_radius_view = 1.0; // blocks searched along the light dir
+    const float z_tolerance = 0.5; // tighter than the distant SSRT's 10.0 -
+                                    // contact shadows should only catch thin, nearby occluders
+
+    vec3 radius_end_screen = view_to_screen_space(
+        gbufferProjection,
+        ray_origin_view + view_light_dir * contact_radius_view,
+        true
+    );
+
+    vec3 ray_dir_screen = normalize(radius_end_screen - ray_origin_screen);
+
+    float ray_length = min_of(
+        abs(sign(ray_dir_screen) - ray_origin_screen)
+        / max(abs(ray_dir_screen), eps)
+    );
+    // Cap to the fixed contact radius in screen space so this never
+    // marches farther than intended, regardless of view distance
+    ray_length = min(ray_length, distance(radius_end_screen, ray_origin_screen));
+
+    float step_length = ray_length * rcp(float(step_count));
+    vec3 ray_pos = ray_origin_screen + length(view_pixel_size) * ray_dir_screen;
+
+    bool hit = false;
+
+    for (uint i = 0u; i < step_count; ++i) {
+        vec3 ray_step = ray_dir_screen * step_length;
+        vec3 dithered_pos = ray_pos + dither * ray_step;
+        ray_pos += ray_step;
+
+        if (clamp01(dithered_pos) != dithered_pos) {
+            break;
+        }
+
+        float depth = texelFetch(
+            depthtex1,
+            ivec2(dithered_pos.xy * view_res * taau_render_scale),
+            0
+        ).x;
+
+        float z_ray = screen_to_view_space_depth(gbufferProjectionInverse, dithered_pos.z);
+        float z_sample = screen_to_view_space_depth(gbufferProjectionInverse, depth);
+
+        bool inside = depth != 0.0 && depth < dithered_pos.z
+            && abs(z_tolerance - (z_ray - z_sample)) < z_tolerance;
+
+        if (inside) {
+            hit = true;
+            break;
+        }
+    }
+
+    return float(!hit);
+}
+
+float get_contact_shadows(vec2 position_screen_xy, vec3 position_view, float depth) {
+    float dither = texelFetch(noisetex, ivec2(gl_FragCoord.xy) & 511, 0).b;
+    dither = r1(frameCounter, dither);
+
+    return raymarch_contact_shadow(
+        vec3(position_screen_xy, depth),
+        position_view,
+        dither
+    );
+}
+#endif
+
 float get_screen_space_shadows(
     vec2 position_screen_xy,
     vec3 position_view,

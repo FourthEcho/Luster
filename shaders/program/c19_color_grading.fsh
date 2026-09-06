@@ -186,8 +186,8 @@ float vignette(vec2 uv) {
     );
 
     // Radial shaping: confine the falloff between START and END with
-    // EXPONENT rolloff (Kappa-style). At defaults the corners and center
-    // match the unshaped curve exactly; only the midrange blend softens.
+    // EXPONENT rolloff. At defaults the corners and center match the
+    // unshaped curve exactly; only the midrange blend softens.
     float vignette_r = length((uv - 0.5) * 2.0);
     float vignette_shaping = pow(
         smoothstep(
@@ -261,13 +261,13 @@ void main() {
 #endif
 
 #if 0 // Tonemap plot
-	const float scale = 2.0;
-	vec2 uv_scaled = uv * scale * vec2(1.0, 1.0 / aspectRatio);
-	float x = uv_scaled.x;
-	float y = tonemap(vec3(x)).x;
+        const float scale = 2.0;
+        vec2 uv_scaled = uv * scale * vec2(1.0, 1.0 / aspectRatio);
+        float x = uv_scaled.x;
+        float y = tonemap(vec3(x)).x;
 
-	if (abs(uv_scaled.x - 1.0) < 0.001 * scale) scene_color = vec3(1.0, 0.0, 0.0);
-	if (abs(uv_scaled.y - 1.0) < 0.001 * scale) scene_color = vec3(1.0, 0.0, 0.0);
-	if (abs(uv_scaled.y - y) < 0.001 * scale) scene_color = vec3(1.0);
+        if (abs(uv_scaled.x - 1.0) < 0.001 * scale) scene_color = vec3(1.0, 0.0, 0.0);
+        if (abs(uv_scaled.y - 1.0) < 0.001 * scale) scene_color = vec3(1.0, 0.0, 0.0);
+        if (abs(uv_scaled.y - y) < 0.001 * scale) scene_color = vec3(1.0);
 #endif
 }

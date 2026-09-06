@@ -34,7 +34,7 @@ screen.rp_settings                     = Resource Pack Settings
 screen.reflections                     = Reflections
 screen.refraction                      = Refraction
 screen.light_sources                   = Light Sources
-screen.shadows                         = Shadows
+screen.shadows                         = Direct Lighting
 screen.ao                              = Ambient Occlusion
 screen.color_grading                   = Color Grading
 screen.exposure                        = Exposure
@@ -157,7 +157,7 @@ option.SSS_INTENSITY.comment           = Adjusts the brightness of subsurface sc
 option.SHADING_STRENGTH                = Shading Strength
 option.SHADING_STRENGTH.comment        = Adjusts the contrast of direct light shading. Reducing this option makes faces facing away from the sun that aren't in shadow brighter; increasing it makes them darker
 
-option.SHADOW                          = Shadows
+option.SHADOW                          = Shadow Mapping
 option.SHADOW.comment = Enables shadows cast by the sun and moon onto the world. Disable for maximum performance — no shadows will be rendered.
 option.SHADOW_PCF                      = Shadowmap Filtering
 option.SHADOW_PCF.comment = Softens shadow edges using percentage-closer filtering. When enabled, shadows look smoother and less pixelated.
@@ -165,6 +165,10 @@ option.SHADOW_SSRT                     = Distant Shadows
 option.SHADOW_SSRT.comment = Extends shadows beyond the shadow map distance using screen-space ray tracing. Fills in far shadows without increasing shadow map size. Moderate performance cost.
 option.SHADOW_SSRT_STEPS               = Distant Shadow Quality
 option.SHADOW_SSRT_STEPS.comment = Adjusts the number of ray steps for screen-space distant shadows. Higher = more accurate, less noisy far shadows at higher GPU cost.
+option.CONTACT_SHADOWS                 = Contact Shadows
+option.CONTACT_SHADOWS.comment = Short-range screen-space shadow check near every surface, catching fine self-shadowing (thin blocks, foliage, small overhangs) that the shadow map's resolution misses. Independent of Distant Shadows above, which only extends shadows beyond the shadow map's render distance.
+option.CONTACT_SHADOW_QUALITY          = Contact Shadow Quality
+option.CONTACT_SHADOW_QUALITY.comment = Adjusts the number of ray steps for contact shadows. Higher = more accurate, less noisy close-range shadows at a small GPU cost.
 option.SHADOW_COLOR                    = Colored Shadows
 option.SHADOW_COLOR.comment            = Translucent blocks cast tinted shadows
 option.SHADOW_VPS                      = Variable Penumbra Shadows
@@ -1230,14 +1234,50 @@ option.SH_SKYLIGHT_INTENSITY.comment=Adjusts the brightness of the soft sky ligh
 option.SH_SKYLIGHT_QUALITY=Quality
 option.SH_SKYLIGHT_QUALITY.comment=Controls the quality of the live sky projection. Higher settings use more sky samples for smoother, more accurate skylight at higher GPU cost.
 
-option.RSM_GI=Reflective Shadow Map GI
-option.RSM_GI.comment=Enable single-bounce indirect lighting using a Reflective Shadow Map. Gathers bounced light and color from sunlit surfaces near each shaded pixel, using the existing shadow map as the light source. No compute shaders required. Note: Disabled by default on Mac Compatible profile for GPU compatibility.
-option.RSM_GI_SAMPLES=RSM Samples
-option.RSM_GI_SAMPLES.comment=Number of shadow map taps per pixel when gathering bounced light. Higher = smoother, less noisy GI, lower performance.
-option.RSM_GI_RADIUS=RSM Radius
-option.RSM_GI_RADIUS.comment=Maximum gather radius, in blocks, for collecting bounced light around each pixel.
-option.RSM_GI_INTENSITY=RSM Intensity
-option.RSM_GI_INTENSITY.comment=Brightness multiplier for the RSM indirect bounce contribution.
+screen.sspt_filter=SVGF Filter
+
+# ---- SSPT ----
+option.ssptEnabled=SSPT
+option.ssptEnabled.comment=Screen-space path traced emission and colored lighting. Big performance impact. It is suggested not to use RTAO with SSPT: both darken crevices and can cause weird double darkening on blocks.
+option.ssptFullRangeRT=Long Range SSPT
+option.ssptFullRangeRT.comment=Traces the whole screen instead of a short range. Needs more samples for similar quality.
+option.indirectResReduction=SSPT Resolution
+option.indirectResReduction.comment=Resolution of the SSPT trace and filter buffers, relative to the screen. Lower = faster but softer indirect light.
+value.indirectResReduction.1=100%
+value.indirectResReduction.2=50%
+value.indirectResReduction.3=33%
+value.indirectResReduction.4=25%
+option.ssptSPP=Samples per Pixel
+option.ssptSPP.comment=Paths traced per pixel per frame. More samples = less noise, more cost.
+option.ssptBounces=Bounces
+option.ssptBounces.comment=Path bounces per sample. More bounces = more colored light bleed.
+option.ssptEmissionDistance=Emission Distance
+option.ssptEmissionDistance.comment=How far colored emission carries before fading out (blocks).
+option.ssptLightmapBlend=Lightmap Blending
+option.ssptLightmapBlend.comment=How strongly the vanilla lightmap blocklight blends into the SSPT accumulation.
+option.SSPT_INTENSITY=SSPT Intensity
+option.SSPT_INTENSITY.comment=Global brightness multiplier for the SSPT indirect emission contribution.
+option.SSPT_EMISSION_MODE=Emission Mode
+option.SSPT_EMISSION_MODE.comment=Which emissive surfaces the SSPT tracer gathers: Hardcoded (vanilla emissive blocks only), LabPBR (resource-pack emission maps included), or Auto (LabPBR maps where the pack provides them, hardcoded fallback elsewhere).
+value.SSPT_EMISSION_MODE.SSPT_EMISSION_HARDCODED=Hardcoded
+value.SSPT_EMISSION_MODE.SSPT_EMISSION_LABPBR=LabPBR
+value.SSPT_EMISSION_MODE.SSPT_EMISSION_AUTO=Auto
+option.SSPT_LABPBR_EMISSION=LabPBR Emission
+option.SSPT_LABPBR_EMISSION.comment=Extra multiplier for LabPBR pack emission gathered by SSPT. Applies in LabPBR and Auto emission modes.
+option.maxFrames=Max Accumulated Frames
+option.maxFrames.comment=Temporal history length. Higher = smoother, but more ghosting.
+option.minAccumMult=Accumulation Weight Mult
+option.minAccumMult.comment=Minimum blend weight per frame. Higher = reacts faster, noisier.
+option.ADAPT_STRENGTH=Adaptive Strength
+option.ADAPT_STRENGTH.comment=How quickly history is discarded when the lightmap changes.
+option.SVGF_FILTER=Filtering
+option.SVGF_FILTER.comment=SVGF a-trous filter: removes the remaining SSPT noise edge-aware.
+option.SVGF_RAD=Filter Radius
+option.SVGF_RAD.comment=Tap radius of each a-trous filter iteration.
+option.SVGF_STRICTNESS=Luminance Strictness
+option.SVGF_STRICTNESS.comment=How aggressively the filter preserves brightness differences.
+option.SVGF_NORMALEXP=Normal Weight
+option.SVGF_NORMALEXP.comment=How strongly surface normal differences block filtering across edges.
 
 option.FOG_SMOOTHING=Fog Smoothing
 option.FOG_SMOOTHING.comment = When enabled, applies an edge-aware Gaussian blur to the fog buffer each frame to reduce blocky/noisy fog artifacts. Current-frame only (no temporal blending), so it won't smear or ghost on fast camera movement. Small performance cost.

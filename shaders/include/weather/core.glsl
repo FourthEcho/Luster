@@ -112,10 +112,10 @@ float weather_wind() {
 float weather_turbulence(Weather weather) {
     // Turbulence is the gustiness inside the air mass: strong, shifting
     // winds and sharp temperature contrasts tear clouds apart, while calm
-    // humid air lets flat stratus sheets form. Kappa exposes this as a
-    // static slider; here it is a live fourth weather dimension driven by
-    // wind variation with temperature-contrast and storm coupling, so it
-    // evolves with the same weather system as everything else.
+    // humid air lets flat stratus sheets form. It is a live fourth weather
+    // dimension driven by wind variation with temperature-contrast and
+    // storm coupling, so it evolves with the same weather system as
+    // everything else.
     const float turbulence_variation_speed
         = 0.61 * golden_ratio * rcp(600.0) * WEATHER_TURBULENCE_VARIATION_SPEED;
     const float random_turbulence_min = 0.15;
