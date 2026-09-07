@@ -104,11 +104,16 @@ vec3 sss_approx(
     // path above scales it by 0.8 * SSS_INTENSITY, so we mirror that here
     // to keep the two paths visually consistent.
     float sss = 0.06 * sss_scale * pi;
+
+#ifdef SSS_SHEEN
     vec3 sheen = (0.8 * SSS_SHEEN_INTENSITY) * rcp(albedo + eps)
         * henyey_greenstein_phase(-LoV, 0.5)
         * linear_step(-0.8, -0.2, -LoV) * shadow;
 
     return sss + sheen * sheen_amount;
+#else
+    return vec3(sss);
+#endif
 }
 #endif
 
@@ -276,11 +281,13 @@ vec3 get_diffuse_lighting(
     // the shadow-enabled path above. We now scale it by SSS_INTENSITY
     // (via sss_scale) and apply SSS_SHEEN_INTENSITY to the sheen term
     // so both paths respond to the same user-facing sliders.
-    vec3 sss = 0.08 * sss_scale * pi
-        + 0.5 * SSS_SHEEN_INTENSITY * material.sheen_amount
-            * rcp(material.albedo + eps)
-            * henyey_greenstein_phase(-LoV, 0.5)
-            * linear_step(-0.8, -0.2, -LoV);
+    vec3 sss = vec3(0.08 * sss_scale * pi);
+#ifdef SSS_SHEEN
+    sss += 0.5 * SSS_SHEEN_INTENSITY * material.sheen_amount
+        * rcp(material.albedo + eps)
+        * henyey_greenstein_phase(-LoV, 0.5)
+        * linear_step(-0.8, -0.2, -LoV);
+#endif
 
     vec3 diffuse
         = vec3(lift(max0(NoL), 0.5 * rcp(SHADING_STRENGTH)) * 0.6 + 0.4)
