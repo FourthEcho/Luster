@@ -103,42 +103,48 @@ void decode_specular_map(vec4 specular_map, inout Material material) {
         material.f0 = max(material.f0, specular_map.g);
 
         // ---- SSS (Subsurface Scattering) ----
-        // labPBR stores SSS in the upper half of specular.b (> 64/255).
-        // We only read it when the SSS master toggle is on — when SSS is
-        // off, no map searching and no hardcoded values are used, so
-        // sss_amount stays at 0 and no SSS rendering happens.
-#ifdef SSS
-        float has_sss = step(64.5 / 255.0, specular_map.b);
-        material.sss_amount = max(
-            material.sss_amount,
-            linear_step(64.0 / 255.0, 1.0, specular_map.b * has_sss)
+        // MAPS mode is pure: the labPBR specular.B channel is the only
+        // source. B >= 65/255 -> pack declares SSS, map value wins.
+        // Anything else (vanilla texel B == 0, or porosity texel) means
+        // no SSS data -> SSS and sheen both go to 0 (no hardcoded
+        // fallback in this mode; use HARDCODED mode for built-ins).
+        // has_sss_region is always computed so the porosity calculation
+        // below can subtract the SSS region even when SSS is disabled
+        // (otherwise an SSS texel would misread as fully porous).
+        float has_sss_region = step(64.5 / 255.0, specular_map.b);
+#ifdef SSS_USE_MAPS
+        float map_sss = linear_step(
+            64.0 / 255.0,
+            1.0,
+            specular_map.b * has_sss_region
         );
-#else
-        // SSS off: has_sss is always 0 so the porosity calculation below
-        // uses the full specular.b range (no SSS region to subtract).
-        const float has_sss = 0.0;
+        material.sss_amount = map_sss * has_sss_region;
+#ifdef SSS_SHEEN
+        // Sheen follows the map: present where the pack declares SSS,
+        // absent where it does not. labPBR has no separate sheen
+        // channel, so presence of SSS implies sheen.
+        material.sheen_amount = has_sss_region;
+#endif
 #endif
 
         // ---- Porosity ----
-        // labPBR stores porosity in the lower half of specular.b
-        // (0..64/255). When a non-zero B channel is present at this texel
-        // we trust the pack and let it fully override the hardcoded mask
-        // porosity. POROSITY_STRENGTH is applied to the map value so the
-        // user can globally tame the effect.
-#ifdef POROSITY
+        // MAPS mode is pure: the labPBR specular.B channel is the only
+        // source. B == 0      -> vanilla texel, no data -> porosity 0.
+        // B in 1..64  -> pack declares porosity, map wins.
+        // B >= 65     -> pack declares SSS, so porosity is 0.
+        // (Use HARDCODED mode for built-in per-block porosity.)
+        // POROSITY_STRENGTH scales the map value so the user can
+        // globally tame the effect.
+#ifdef POROSITY_USE_MAPS
         float map_porosity = linear_step(
             0.0,
             64.0 / 255.0,
-            max0(specular_map.b - specular_map.b * has_sss)
+            max0(specular_map.b - specular_map.b * has_sss_region)
         );
-        // Detect "this texel actually carries labPBR data" (B != 0)
-        // vs "vanilla texture with B == 0" (fall back to hardcoded).
+        // Any non-zero B means the pack carries data (porosity or SSS);
+        // B == 0 (vanilla) means no data -> 0, no hardcoded fallback.
         float has_porosity_data = step(0.5 / 255.0, specular_map.b);
-        material.porosity = mix(
-            material.porosity,
-            map_porosity * POROSITY_STRENGTH,
-            has_porosity_data
-        );
+        material.porosity = map_porosity * POROSITY_STRENGTH * has_porosity_data;
 #endif
     } else if (specular_map.g < 237.5 / 255.0) {
         // Hardcoded metals

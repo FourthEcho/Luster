@@ -82,7 +82,7 @@ vec3 sss_approx(
         * pi;
 
 #ifdef SSS_SHEEN
-    vec3 sheen = (0.8 * SSS_INTENSITY) * rcp(albedo + eps)
+    vec3 sheen = (0.8 * SSS_SHEEN_INTENSITY) * rcp(albedo + eps)
         * exp2(-1.0 * coeff * sss_depth) * henyey_greenstein_phase(-LoV, 0.5)
         * linear_step(-0.8, -0.2, -LoV);
     sss += sheen * sheen_amount;
@@ -99,10 +99,10 @@ vec3 sss_approx(
     float LoV,
     float shadow
 ) {
-    // Blur-based SSS (used when SHADOW_VPS is off). The sheen term was
-    // previously hardcoded to 0.8, ignoring SSS_SHEEN_INTENSITY — the VPS
-    // path above scales it by 0.8 * SSS_INTENSITY, so we mirror that here
-    // to keep the two paths visually consistent.
+    // Blur-based SSS (used when SHADOW_VPS is off). Both SSS paths scale
+    // the sheen term by 0.8 * SSS_SHEEN_INTENSITY so the slider affects
+    // VPS and non-VPS consistently (SSS_INTENSITY drives the main lobe
+    // via sss_scale, SSS_SHEEN_INTENSITY drives only the sheen lobe).
     float sss = 0.06 * sss_scale * pi;
 
 #ifdef SSS_SHEEN

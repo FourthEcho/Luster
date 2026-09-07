@@ -437,8 +437,30 @@ const float wetnessHalflife         = 70.0;
 
 //#define POM
   #define HARDCODED_EMISSION
-#ifdef SSS
+// ---- SSS mode: Off = no SSS, Hardcoded = built-in masks only,
+// Maps = read labPBR specular.B only (no fallback) ----
+  #define SSS_OFF 0
+  #define SSS_HARDCODED 1
+  #define SSS_MAPS 2
+  #define SSS_MODE SSS_HARDCODED // [SSS_OFF SSS_HARDCODED SSS_MAPS]
+#if SSS_MODE != SSS_OFF
+  #define SSS
   #define HARDCODED_SSS
+#endif
+#if SSS_MODE == SSS_MAPS
+  #define SSS_USE_MAPS
+#endif
+// ---- Porosity mode: Off = no wetness, Hardcoded = built-in masks only,
+// Maps = read labPBR specular.B only (no fallback) ----
+  #define POROSITY_OFF 0
+  #define POROSITY_HARDCODED 1
+  #define POROSITY_MAPS 2
+  #define POROSITY_MODE POROSITY_HARDCODED // [POROSITY_OFF POROSITY_HARDCODED POROSITY_MAPS]
+#if POROSITY_MODE != POROSITY_OFF
+  #define POROSITY
+#endif
+#if POROSITY_MODE == POROSITY_MAPS
+  #define POROSITY_USE_MAPS
 #endif
   #define RAIN_PUDDLES
 
@@ -895,9 +917,7 @@ const float wetnessHalflife         = 70.0;
   #define ANISOTROPIC_FILTERING_16 4
 
 // ---- Porosity / SSS / Directional lightmaps settings ----
-  #define POROSITY
   #define POROSITY_STRENGTH 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.20 1.50 2.00]
-  #define SSS
 #ifdef SSS
   #define SSS_SHEEN
   #define SSS_SHEEN_INTENSITY 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.20 1.50 2.00]
@@ -929,7 +949,13 @@ const float wetnessHalflife         = 70.0;
 #ifdef POROSITY
 #endif
 
+#ifdef POROSITY_USE_MAPS
+#endif
+
 #ifdef SSS
+#endif
+
+#ifdef SSS_USE_MAPS
 #endif
 
 #ifdef SSS_SHEEN
