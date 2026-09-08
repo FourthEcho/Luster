@@ -18,6 +18,8 @@
 #include "/include/sky/rainbow.glsl"
 #include "/include/sky/stars.glsl"
 #include "/include/utility/geometry.glsl"
+#include "/include/sky/airglow.glsl"
+#include "/include/sky/twilight_wedge.glsl"
 
 #if defined PROGRAM_DEFERRED0
 #include "/include/sky/clouds.glsl"
@@ -191,6 +193,12 @@ vec3 draw_sky(
     sky *= sandstorm_transmittance(ray_dir.y);
 #endif
     sky += atmosphere;
+
+    // Twilight wedge opposite the sun at dusk (background: clouds occlude it)
+    sky += draw_twilight_wedge(ray_dir);
+
+    // Night airglow (background: clouds occlude it below)
+    sky += draw_airglow(ray_dir);
 
     // Clouds, aurora, crepuscular rays
 

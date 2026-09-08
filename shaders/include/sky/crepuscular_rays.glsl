@@ -14,8 +14,8 @@ vec4 draw_crepuscular_rays(
     const uint step_count_horizon = CREPUSCULAR_RAYS_STEPS_HORIZON;
     const uint step_count_zenith = CREPUSCULAR_RAYS_STEPS_ZENITH;
     const float max_ray_length = 4096.0 / (CLOUDS_SCALE / 10.0);
-    // Volume extends indefinitely into the planet (SKY_GROUND removed —
-    // this was the only path in use anyway)
+    // Volume extends indefinitely into the planet (no ground cutoff —
+    // the unclipped path was the only one in use anyway)
     const float volume_inner_radius = 1.0;
     const float volume_outer_radius
         = clouds_cumulus_radius + clouds_cumulus_thickness * 0.5;

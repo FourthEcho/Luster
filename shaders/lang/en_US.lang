@@ -355,6 +355,10 @@ option.RAINBOWS                        = Rainbows
 option.RAINBOWS.comment = When enabled, a faint rainbow appears opposite the sun during and just after rain.
 option.END_SUN_EFFECT                  = End Sun Effect
 option.END_SUN_EFFECT.comment = Controls end sun effect.
+option.TWILIGHT_WEDGE                    = Twilight Wedge
+option.TWILIGHT_WEDGE.comment = Pink Belt of Venus arch opposite the sun just after sunset, with the dark Earth's-shadow band beneath it. Most visible looking away from the sunset on clear evenings.
+option.AIRGLOW                          = Night Airglow
+option.AIRGLOW.comment = Faint green oxygen emission hugging the horizon on clear nights. Lifts the night horizon out of pure black; most visible far from rain and moonlight.
 option.ATMOSPHERE_SATURATION_BOOST                    = Atmosphere Saturation Boost
 option.ATMOSPHERE_SATURATION_BOOST.comment            = Increases the saturation of the sky and sunlight color depending on the time of day
 option.ATMOSPHERE_SATURATION_BOOST_INTENSITY          = Saturation Boost Intensity
@@ -1377,6 +1381,10 @@ option.RAINBOWS_INTENSITY=Rainbow Visibility
 option.RAINBOWS_INTENSITY.comment = Adjusts the opacity and vividness of rainbows during/after rain. Higher = brighter, more saturated rainbow.
 option.END_SUN_EFFECT_INTENSITY=End Sun Effect Intensity
 option.END_SUN_EFFECT_INTENSITY.comment = Controls end sun effect intensity.
+option.TWILIGHT_WEDGE_INTENSITY=Twilight Wedge Intensity
+option.TWILIGHT_WEDGE_INTENSITY.comment = Adjusts the strength of the Belt of Venus arch and Earth's shadow at dusk. Higher = more vivid pink band; 0 disables the effect visually.
+option.AIRGLOW_INTENSITY=Night Airglow Intensity
+option.AIRGLOW_INTENSITY.comment = Adjusts the brightness of the night airglow band. Higher = stronger green horizon glow; 0 disables the effect visually.
 option.PLANET_BOUNCE_INTENSITY=Planet Bounce Intensity
 option.PLANET_BOUNCE_INTENSITY.comment = Adjusts the strength of ground-bounced light re-entering the sky. Higher = brighter, warmer horizon glow; 0 disables the contribution entirely.
 
