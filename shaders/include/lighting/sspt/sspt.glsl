@@ -12,6 +12,8 @@
 //  buffer and gathers two contributions at the ray hits:
 //    - material emission, rebuilt from the gbuffer and labPBR specular maps
 //    - one bounce of shadowed sun/moon light, tinted by the hit albedo
+//    - one bounce of the held light source (torch etc.), same falloff and
+//      color the primary pass uses, tinted by the hit albedo
 //  Rays are drawn from a Lambertian lobe and weighted with the
 //  renormalized Hammon diffuse BRDF (E. Hammon, "PBR Diffuse Lighting for
 //  GGX+Renormalized Burley", GDC 2017). Sample positions come from the R2
@@ -40,6 +42,7 @@
 // ============================================================================
 
 #include "/include/lighting/colors/blocklight_color.glsl"
+#include "/include/lighting/handheld_lighting.glsl"
 #include "/include/lighting/cloud_shadows.glsl"
 #include "/include/lighting/shadows/distortion.glsl"
 #include "/include/misc/lod_mod_support.glsl"
@@ -259,25 +262,12 @@ vec3 sspt_hit_emission(sspt_hit_data hit, ivec2 hit_texel, vec3 hit_view_pos) {
 
 #if SSPT_EMISSION_MODE == SSPT_EMISSION_HARDCODED
     return hardcoded_emission * emission_scale * SSPT_INTENSITY;
-#elif SSPT_EMISSION_MODE == SSPT_EMISSION_LABPBR
+#else // SSPT_EMISSION_LABPBR
     // Full material emission: hardcoded fallback plus the labPBR map, with
-    // the user multiplier for pack-provided emission.
+    // the user multiplier for pack-provided emission. Where the pack
+    // declares no emissive texel, decode leaves the hardcoded value in
+    // place, so this branch also covers vanilla correctly.
     return hit_material.emission * emission_scale * SSPT_INTENSITY * SSPT_LABPBR_EMISSION;
-#else // SSPT_EMISSION_AUTO
-  #if TEXTURE_FORMAT == TEXTURE_FORMAT_LAB && defined(SPECULAR_MAPPING)
-    // labPBR marks an emission map with luminance < 255 in the alpha
-    // channel; where one exists it wins, hardcoded fills in everywhere else.
-    float has_emission_map = step(map.a, 254.5 * rcp(255.0));
-    return mix(
-        hardcoded_emission,
-        hit_material.emission * SSPT_LABPBR_EMISSION,
-        has_emission_map
-    ) * emission_scale * SSPT_INTENSITY;
-  #else
-    // No specular data to consult (maps disabled or a legacy texture
-    // format), so this degrades to hardcoded-only.
-    return hardcoded_emission * emission_scale * SSPT_INTENSITY;
-  #endif
 #endif
 }
 
@@ -326,41 +316,57 @@ vec3 sspt_moon_radiance() {
 // same chain the PCSS filter applies for primary shading. Skylight is
 // deliberately absent (owned by SH_SKYLIGHT, see header).
 vec3 sspt_hit_direct_light(sspt_hit_data hit, vec3 hit_view_pos) {
+    vec3 hit_scene_pos = view_to_scene_space(hit_view_pos);
+    vec3 direct = vec3(0.0);
+
+    // Sun/moon contribution: conditional, so a sunless hit (facing away,
+    // fully shadowed, deep cave) still falls through to the handheld term
+    // below instead of earlying out.
     vec3 light_dir_world = sunAngle < 0.5 ? sun_dir : moon_dir;
 
     float NoL = dot(hit.scene_normal, light_dir_world);
-    if (NoL <= 0.0) return vec3(0.0);
+    if (NoL > 0.0) {
+        vec3 bias = get_shadow_bias(hit_scene_pos, hit.scene_normal, NoL, hit.light_levels.y);
+        vec3 shadow_view_pos = transform(shadowModelView, hit_scene_pos + bias);
+        vec3 shadow_clip_pos = project_ortho(shadowProjection, shadow_view_pos);
+        vec3 shadow_coords = distort_shadow_space(shadow_clip_pos) * 0.5 + 0.5;
 
-    vec3 hit_scene_pos = view_to_scene_space(hit_view_pos);
+        bool outside_shadow_map = any(lessThan(shadow_coords, vec3(0.0)))
+                               || any(greaterThan(shadow_coords, vec3(1.0)));
 
-    vec3 bias = get_shadow_bias(hit_scene_pos, hit.scene_normal, NoL, hit.light_levels.y);
-    vec3 shadow_view_pos = transform(shadowModelView, hit_scene_pos + bias);
-    vec3 shadow_clip_pos = project_ortho(shadowProjection, shadow_view_pos);
-    vec3 shadow_coords = distort_shadow_space(shadow_clip_pos) * 0.5 + 0.5;
-
-    bool outside_shadow_map = any(lessThan(shadow_coords, vec3(0.0)))
-                           || any(greaterThan(shadow_coords, vec3(1.0)));
-
-    float visibility = outside_shadow_map ? 1.0 : texture(shadowtex1, shadow_coords);
-    if (visibility <= 0.0) return vec3(0.0);
-
-    vec3 radiance = sunAngle < 0.5 ? sspt_sun_radiance() : sspt_moon_radiance();
-    vec3 direct = radiance * (visibility * NoL);
+        float visibility = outside_shadow_map ? 1.0 : texture(shadowtex1, shadow_coords);
+        if (visibility > 0.0) {
+            vec3 radiance = sunAngle < 0.5 ? sspt_sun_radiance() : sspt_moon_radiance();
+            direct = radiance * (visibility * NoL);
 
 #ifdef SHADOW_COLOR
-    if (!outside_shadow_map) {
-        // Sunlight passing through stained glass picks up the glass tint.
-        // Fully blocked hits early out above, so this only colors
-        // transmitted light.
-        ivec2 shadow_texel = ivec2(shadow_coords.xy * vec2(textureSize(shadowtex0, 0)));
-        float blocker_depth = texelFetch(shadowtex0, shadow_texel, 0).x;
-        vec3 transmission = texelFetch(shadowcolor0, shadow_texel, 0).rgb;
-        direct *= mix(vec3(1.0), 4.0 * transmission, step(blocker_depth, shadow_coords.z));
-    }
+            if (!outside_shadow_map) {
+                // Sunlight passing through stained glass picks up the glass tint.
+                // Fully blocked hits skip this block via visibility, so this
+                // only colors transmitted light.
+                ivec2 shadow_texel = ivec2(shadow_coords.xy * vec2(textureSize(shadowtex0, 0)));
+                float blocker_depth = texelFetch(shadowtex0, shadow_texel, 0).x;
+                vec3 transmission = texelFetch(shadowcolor0, shadow_texel, 0).rgb;
+                direct *= mix(vec3(1.0), 4.0 * transmission, step(blocker_depth, shadow_coords.z));
+            }
 #endif
 
 #if defined WORLD_OVERWORLD && defined CLOUD_SHADOWS
-    direct *= get_cloud_shadows(colortex8, hit_scene_pos);
+            direct *= get_cloud_shadows(colortex8, hit_scene_pos);
+#endif
+        }
+    }
+
+#ifdef HANDHELD_LIGHTING
+    // Held light source as traced bounce light: evaluated at the hit with
+    // the exact falloff and color the primary pass uses
+    // (get_handheld_lighting expects a camera-relative position, which is
+    // what hit_scene_pos is). AO passes as 1.0 — the hit's own occlusion
+    // is unknown here and the path throughput already shapes the result.
+    // No shadow tap: bare falloff, like the primary pass. Joins `direct`
+    // so it picks up the hit-albedo tint and SSPT_INTENSITY below, keeping
+    // bounced torchlight in agreement with bounced sunlight.
+    direct += get_handheld_lighting(hit_scene_pos, 1.0);
 #endif
 
     return hit.albedo * (direct * SSPT_INTENSITY);

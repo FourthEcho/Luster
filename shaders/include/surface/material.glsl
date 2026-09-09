@@ -850,7 +850,11 @@ Material material_from(
                         }
                     } else { // 54-56
                         if (material_mask == 54u) { // 54
-
+#ifdef HARDCODED_EMISSION
+                            // Enchanting table
+                            material.emission
+                                = vec3(0.20) * (0.1 + 0.9 * hsl.z);
+#endif
                         } else { // 55
 #ifdef HARDCODED_EMISSION
                             // Amethyst cluster
@@ -903,7 +907,7 @@ Material material_from(
 #endif
 
 #ifdef HARDCODED_EMISSION
-                            // Redstone block
+                            // Open eyeblossom
                             material.emission
                                 = 0.9 * albedo_sqrt * step(0.5, hsl.y);
 #endif
@@ -913,34 +917,32 @@ Material material_from(
                     if (material_mask < 62u) { // 60-62
                         if (material_mask == 60u) { // 60
 #ifdef HARDCODED_EMISSION
-                            // Copper torch and lanterns
-                            material.emission = 0.05 * albedo_sqrt;
+                            // Copper torch and lanterns: green copper flame
+                            // (same hue the handheld table uses). Gated on
+                            // bright texels so the copper casing stays dark.
+                            material.emission = vec3(0.55, 1.00, 0.70)
+                                * linear_step(0.50, 0.70, hsl.z);
 #endif
                         } else { // 61
 #ifdef HARDCODED_EMISSION
-                            // Medium golden light
-                            float orange_yellow = max(
-                                isolate_hue(hsl, 30.0, 15.0),
-                                max(isolate_hue(hsl, 45.0, 15.0),
-                                    isolate_hue(hsl, 60.0, 15.0))
-                            );
-
-                            if (orange_yellow > 0.5 && hsl.z > 0.65) {
-                                material.emission = 0.85 * albedo_sqrt
-                                    * linear_step(0.3, 0.7, hsl.z)
-                                    * orange_yellow;
-                            } else {
-                                material.emission = vec3(0.0);
-                            }
+                            // Copper bulbs, all oxidation states, lit: the
+                            // glowing face carries the state color — amber
+                            // when fresh, teal-green when oxidized — so emit
+                            // the albedo hue gated on brightness. (Gating on
+                            // orange alone zeroed oxidized bulbs entirely.)
+                            material.emission = 0.85 * albedo_sqrt
+                                * linear_step(0.3, 0.7, hsl.z);
 #endif
                         }
                     } else { // 62-64
                         if (material_mask == 62u) { // 62
-                            // Nether portal
-                            material.emission = vec3(1.0);
+                            // Nether portal: the texture is the glow, so
+                            // emit its purple hue (was flat white)
+                            material.emission = albedo_sqrt;
                         } else { // 63
-                            // End portal
-                            material.emission = vec3(1.0);
+                            // End portal: near-black starfield, so albedo
+                            // alone would go dark — pale starlight instead
+                            material.emission = vec3(0.65, 0.85, 1.00);
                         }
                     }
                 }
@@ -950,6 +952,13 @@ Material material_from(
 
     if (64u <= material_mask && material_mask < 80u) {
 // Stained glass, honey and slime
+#ifdef HARDCODED_EMISSION
+        // Masks 64-79 are modded colored lights (simplylight/luminax,
+        // one hue per mask). Their textures are the glow color, gated on
+        // brightness so frames and casings stay dark. (Glass lives at
+        // 80+, handled below by the specular/SSS terms, not here.)
+        material.emission = albedo_sqrt * linear_step(0.40, 0.60, hsl.z);
+#endif
 #ifdef HARDCODED_SPECULAR
         material.f0 = vec3(0.04);
         material.roughness = 0.1;

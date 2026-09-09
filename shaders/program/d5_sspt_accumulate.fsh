@@ -138,12 +138,17 @@ bool sspt_surface_gate(float center_depth, float tap_depth) {
 
 // Bilateral estimate of this frame's raw trace, feeding the temporal
 // blend. 5x5 binomial-gaussian footprint; taps are dropped across depth
-// discontinuities and weighted by normal agreement and a Huber-style
-// relative luminance response.
+// discontinuities and weighted by normal agreement only — deliberately no
+// luminance firefly rejection: at 1-2spp a small bright emitter (torch
+// flame, bulb face) is hit rarely at 1000:1 contrast, and any exp-style
+// luma clip erases those hits faster than accumulation can converge, so
+// colored bounce from small emitters could never form. Sun-bounce taps
+// are bounded anyway (clamped throughput, albedo <= 1); residual sparkle
+// on fresh disocclusion is absorbed by the temporal blend, the inflated
+// sigma, and the SVGF passes downstream.
 vec3 sspt_prefiltered_trace(ivec2 texel) {
     vec4 center_data = sspt_filter_data(texel);
     vec3 center_color = texelFetch(colortex17, texel, 0).rgb;
-    float center_luminance = sspt_luminance(center_color);
 
     // Separable binomial weights: outer product of (1, 4, 6, 4, 1) / 16,
     // indexed by |offset| along each axis.
@@ -161,19 +166,12 @@ vec3 sspt_prefiltered_trace(ivec2 texel) {
             if (sspt_surface_gate(center_data.w, tap_data.w)) continue;
 
             vec3 tap_color = texelFetch(colortex17, tap_texel, 0).rgb;
-            float tap_luminance = sspt_luminance(tap_color);
 
             float footprint = binomial[abs(x)] * binomial[abs(y)];
             float normal_agreement
                 = pow(max0(dot(center_data.xyz, tap_data.xyz)), 4.0);
 
-            // Huber-style response: linear in the relative luminance
-            // difference, clipped so lone fireflies cannot dominate.
-            float luma_ratio = abs(tap_luminance - center_luminance)
-                             * rcp(max(center_luminance, 1e-3));
-            float luma_weight = exp(-min(luma_ratio, 4.0));
-
-            float weight = footprint * normal_agreement * luma_weight;
+            float weight = footprint * normal_agreement;
 
             color_sum += tap_color * weight;
             weight_sum += weight;
@@ -380,8 +378,50 @@ void main() {
 
     // Merge the vanilla blocklight fallback into the displayed result only:
     // the history keeps the pure trace, so the gate can follow the lightmap
-    // without poisoning the accumulation.
-    vec3 merged_light = accumulated_light + blocklight_gate * blocklight_color * rcp(tau);
+    // without poisoning the accumulation. Scaled by blocklight_scale so the
+    // fallback matches the primary pass's vanilla term
+    // (get_blocklight_falloff * blocklight_scale in diffuse_lighting.glsl).
+    //
+    // Chroma spread: at 1-2spp a small emitter is hit rarely, so the traced
+    // hue exists only as sparse speckles (visible with SVGF off) that the
+    // wavelet filter then edge-stops away — pools stay vanilla-warm forever.
+    // Fix it deterministically: blur ONLY chroma from temporal history over
+    // a wide stride-2 footprint (normal-gated, no luma gate so brightness
+    // can't veto hue), and repaint the solid fallback with that chroma at
+    // the fallback's own luminance. Self-neutralizing: where gathered hue
+    // already matches vanilla warm, the tint is identity; where fallback is
+    // zero the product is zero, so noise can't invent light.
+    vec3 fallback_light = blocklight_gate * blocklight_color * blocklight_scale;
+    float fallback_luminance = sspt_luminance(fallback_light);
+
+    vec3 chroma_sum = vec3(0.0);
+    float chroma_weight_sum = 0.0;
+    vec4 spread_center_data = sspt_filter_data(texel);
+
+    for (int y = -4; y <= 4; y += 2) {
+        for (int x = -4; x <= 4; x += 2) {
+            ivec2 spread_texel = sspt_clamp_texel(texel + ivec2(x, y));
+            vec4 spread_data = sspt_filter_data(spread_texel);
+
+            if (sspt_surface_gate(spread_center_data.w, spread_data.w)) continue;
+
+            vec3 spread_color = texelFetch(colortex18, spread_texel, 0).rgb;
+            float spread_weight = pow(
+                max0(dot(spread_center_data.xyz, spread_data.xyz)), 2.0
+            );
+
+            chroma_sum += spread_color * spread_weight;
+            chroma_weight_sum += spread_weight;
+        }
+    }
+
+    vec3 spread_chroma = chroma_sum / max(chroma_weight_sum, 1e-6);
+    float spread_luminance = sspt_luminance(spread_chroma);
+
+    vec3 tinted_fallback
+        = spread_chroma * (fallback_luminance / max(spread_luminance, 1e-6));
+
+    vec3 merged_light = accumulated_light + tinted_fallback;
 
     sspt_filtered = vec4(merged_light, sigma);
     sspt_history = vec4(accumulated_light, accumulated_frames);

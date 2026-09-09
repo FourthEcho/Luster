@@ -1262,12 +1262,11 @@ option.ssptLightmapBlend.comment=How strongly the vanilla lightmap blocklight bl
 option.SSPT_INTENSITY=SSPT Intensity
 option.SSPT_INTENSITY.comment=Global brightness multiplier for the SSPT indirect emission contribution.
 option.SSPT_EMISSION_MODE=Emission Mode
-option.SSPT_EMISSION_MODE.comment=Which emissive surfaces the SSPT tracer gathers: Hardcoded (vanilla emissive blocks only), LabPBR (resource-pack emission maps included), or Auto (LabPBR maps where the pack provides them, hardcoded fallback elsewhere).
+option.SSPT_EMISSION_MODE.comment=Which emissive surfaces the SSPT tracer gathers: Hardcoded (vanilla emissive blocks only) or LabPBR (resource-pack emission maps included, hardcoded fallback elsewhere).
 value.SSPT_EMISSION_MODE.SSPT_EMISSION_HARDCODED=Hardcoded
 value.SSPT_EMISSION_MODE.SSPT_EMISSION_LABPBR=LabPBR
-value.SSPT_EMISSION_MODE.SSPT_EMISSION_AUTO=Auto
 option.SSPT_LABPBR_EMISSION=LabPBR Emission
-option.SSPT_LABPBR_EMISSION.comment=Extra multiplier for LabPBR pack emission gathered by SSPT. Applies in LabPBR and Auto emission modes.
+option.SSPT_LABPBR_EMISSION.comment=Extra multiplier for LabPBR pack emission gathered by SSPT. Applies in LabPBR emission mode.
 option.maxFrames=Max Accumulated Frames
 option.maxFrames.comment=Temporal history length. Higher = smoother, but more ghosting.
 option.minAccumMult=Accumulation Weight Mult
