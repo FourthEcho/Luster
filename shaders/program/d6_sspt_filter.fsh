@@ -2,34 +2,37 @@
 --------------------------------------------------------------------------------
 
   program/d6_sspt_filter:
-  One a-trous wavelet iteration over the accumulated SSPT radiance,
-  following the SVGF schedule (Schied et al. 2017, "Spatiotemporal
-  Variance-Guided Filtering"): wide, cheap hops first, narrow detail passes
-  last. Instantiated five times per frame with SVGF_SIZE = 32 / 16 / 8 / 4 / 2.
+  One a-trous SVGF filter iteration for the SSPT emission. Instantiated five
+  times per frame with SVGF_SIZE = 32 / 16 / 8 / 4 / 2.
+  Reads:
 
-  Edge stopping runs on the filter data (view normal, sqrt normalized
-  depth) and on relative luminance, with the luminance tolerance driven by
-  the local variance estimate and by how long the pixel has been
-  accumulating (colortex18.a) — young pixels get a gentler filter while
-  their statistics are still weak.
+    colortex17  accumulated color (rgb) + sigma (a) — from d5, then from the
+                previous filter iteration
+    colortex19  filter gbuffer data (view normal + sqrt normalized depth)
+    colortex18  history frames (pixel age)
 
-  Reads
-    colortex17  accumulated radiance (rgb) + relative sigma (a)
-    colortex18  history frames (a)
-    colortex19  filter data: view normal, sqrt normalized depth
-
-  Writes colortex17 with the filtered radiance and filtered sigma.
+  Writes colortex17 (denoised color + smoothed sigma).
 
 --------------------------------------------------------------------------------
 */
 
 #include "/include/global.glsl"
 
+// Iris/OptiFine only register a #define as a toggleable boolean GUI option if
+// it's checked at least once in GLSL source via #ifdef/#ifndef/#if defined.
+// SVGF_FILTER was previously only ever referenced in shaders.properties
+// (program.*.enabled = SVGF_FILTER), which does NOT count for GUI detection,
+// so the "Filtering" toggle on the SSPT Filter screen never rendered. This
+// pass is already only compiled when SVGF_FILTER is defined, so the check
+// below is a no-op at runtime but satisfies Iris' option scanner.
+#ifdef SVGF_FILTER
+#endif
+
 #ifndef SVGF_SIZE
 #define SVGF_SIZE 4
 #endif
 
-layout(location = 0) out vec4 sspt_filtered; // colortex17
+layout(location = 0) out vec4 filtered; // colortex17
 
 /* RENDERTARGETS: 17 */
 
@@ -41,10 +44,9 @@ in vec2 uv;
 
 uniform sampler2D colortex17; // sspt color + sigma
 uniform sampler2D colortex18; // sspt history frames
-uniform sampler2D colortex19; // sspt filter data
-uniform sampler2D depthtex1;  // combined_depth_tex when no LoD mod is active
+uniform sampler2D colortex19; // sspt gbuffer data
 
-uniform float far;
+uniform sampler2D depthtex1;  // geometry depth (non-DH path, via combined_depth_tex)
 
 uniform vec2 view_res;
 
@@ -56,159 +58,126 @@ uniform vec2 view_res;
 #include "/include/utility/color.glsl"
 #include "/include/utility/fast_math.glsl"
 
-// SSPT buffer scale — mirrors size.buffer.colortex17-20 in
-// shaders.properties, driven by indirectResReduction
-#if indirectResReduction == 1
-const float sspt_render_scale = 1.0;
-#elif indirectResReduction == 3
-const float sspt_render_scale = 0.333333;
-#elif indirectResReduction == 4
-const float sspt_render_scale = 0.25;
-#else // indirectResReduction == 2
-const float sspt_render_scale = 0.5;
-#endif
-
-// ------------
-//   Helpers
-// ------------
+// Half-res SSPT buffer bookkeeping (matches size.buffer.colortex17-20)
+const float bufferScale = 0.5;
 
 // Relative luminance in the pack's working color space (Rec. 2020).
-float sspt_luminance(vec3 color) {
-    return dot(color, luminance_weights_rec2020);
+float getLuma(vec3 c) {
+    return dot(c, luminance_weights_rec2020);
 }
 
-// Active SSPT buffer extent in texels.
-vec2 sspt_buffer_size() {
-    return view_res * sspt_render_scale;
+vec2 bufferSize() {
+    return view_res * bufferScale;
 }
 
-// Filter data is stored as normal * 0.5 + 0.5 and sqrt(normalized depth);
-// the alpha is squared to get linear normalized depth back.
-vec4 sspt_filter_data(ivec2 texel) {
-    vec4 value = texelFetch(colortex19, texel, 0);
-    return vec4(value.rgb * 2.0 - 1.0, sqr(value.a));
+ivec2 clampTexel(ivec2 texel) {
+    return clamp(texel, ivec2(0), ivec2(bufferSize()) - 1);
 }
 
-// 3x3 binomial gaussian over the variance channel — a cheap estimate of
-// how noisy this neighborhood currently is.
-const float variance_kernel[4] = float[4](0.25, 0.125, 0.125, 0.0625);
+/* ------ ATROUS SVGF ------ */
 
-// Binomial-weighted variance average around a texel, returned as a
-// standard deviation. Seeded with the center's own variance so isolated
-// pixels still produce a usable estimate.
-float sspt_local_sigma(ivec2 texel, float center_variance) {
-    float variance = center_variance * variance_kernel[0];
+vec4 fetchGbuffer(ivec2 texel) {
+    vec4 val = texelFetch(colortex19, texel, 0);
+    return vec4(val.rgb * 2.0 - 1.0, sqr(val.a));
+}
 
-    for (int y = -1; y <= 1; ++y) {
-        for (int x = -1; x <= 1; ++x) {
-            if (x == 0 && y == 0) continue;
+// 3x3 gaussian-weighted sigma estimate over the
+// color buffer's variance channel (.a)
+const float gaussKernel[4] = float[4](
+    1.0 / 4.0, 1.0 / 8.0,
+    1.0 / 8.0, 1.0 / 16.0
+);
 
-            ivec2 tap_texel = clamp(
-                texel + ivec2(x, y), ivec2(0), ivec2(sspt_buffer_size()) - 1
-            );
-            variance += texelFetch(colortex17, tap_texel, 0).a
-                      * variance_kernel[abs(y) * 2 + abs(x)];
+float computeSigmaL(ivec2 texel, float center) {
+    float sum = center * gaussKernel[0];
+
+    const int r = 1;
+    for (int y = -r; y <= r; ++y) {
+        for (int x = -r; x <= r; ++x) {
+            if (x != 0 || y != 0) {
+                ivec2 tap = clampTexel(texel + ivec2(x, y));
+                float variance = texelFetch(colortex17, tap, 0).a;
+                float w = gaussKernel[abs(y) * 2 + abs(x)];
+                sum += variance * w;
+            }
         }
     }
 
-    return sqrt(max(variance, 1e-8));
+    return sqrt(max(sum, 1e-8));
 }
 
-// ------------
-//   A-trous iteration
-// ------------
+vec4 atrousSVGF(ivec2 texel, const int size) {
+    vec4 center_data = fetchGbuffer(texel);
 
-// One à-trous wavelet iteration over the accumulated radiance, following
-// the SVGF reconstruction schedule (Schied et al. 2017): taps hop
-// step_size texels apart, wide hops first, narrow detail passes last.
-// Each tap is weighted by three edge-stopping terms — normal agreement,
-// depth similarity and luminance similarity — with the luminance
-// tolerance driven by the local variance estimate and by how long the
-// pixel has been accumulating: freshly reset pixels have weak statistics,
-// so their filters lean on geometry until the moments settle.
-vec4 sspt_atrous_iteration(ivec2 texel, const int step_size) {
-    vec4 center_data = sspt_filter_data(texel);
     vec4 center_color = texelFetch(colortex17, texel, 0);
-    float center_luminance = sspt_luminance(center_color.rgb);
+    float center_luma = getLuma(center_color.rgb);
 
-    float pixel_age = texelFetch(colortex18, texel, 0).a;
+    // Pixel age drives how aggressively the filter converges.
+    float frames = texelFetch(colortex18, texel, 0).a;
 
-    // Exponential trust curves over the pixel's accumulation age, with
-    // three time constants so luminance, variance and normal behaviour
-    // each relax at their own pace.
-    float trust_luma   = 1.0 - exp(-pixel_age * 0.05);
-    float trust_sigma  = 1.0 - exp(-pixel_age * 0.10);
-    float trust_normal = 1.0 - exp(-pixel_age * 0.20);
+    float sigma_bias = (4.0 / max(frames, 1.0)) + 0.25;
+    float max_delta = mix(half_pi, tau, clamp01(frames / 32.0));
+    float offset = mix(0.04 / (0.5 * SVGF_RAD), 0.03, clamp01(frames / 32.0));
+    float sigma_mul = mix(2.718281828459045, 0.41, clamp01(frames / 16.0));
 
-    // Relative-luminance floor: dark pixels must not produce enormous
-    // relative differences out of tiny absolute noise.
-    float luminance_floor = mix(0.12, 0.02, trust_luma);
-    // Variance multiplier: young pixels discount their own (unreliable)
-    // variance estimate, mature pixels lean on it.
-    float variance_scale = mix(3.0, 0.5, trust_sigma);
-    float normal_power = (2.0 + 4.0 * trust_normal) * SVGF_NORMALEXP;
+    float sigma_dist_mul = 2.0 - (1.0 / (1.0 + center_data.a / 64.0));
 
-    // Depth tolerance grows linearly with distance: the same normalized
-    // depth error is many world units far away and almost none up close.
-    float depth_tolerance = 1.0 + 2.0 * center_data.w;
-
-    // Inverse luminance sigma. The additive prior keeps the filter alive
-    // on young pixels whose variance has not settled yet.
-    float luma_confidence = rcp(
-        variance_scale * SVGF_STRICTNESS * depth_tolerance
-            * sspt_local_sigma(texel, center_color.a)
-        + (2.0 * exp(-0.05 * pixel_age) + 0.2) * depth_tolerance
+    float sigma_l = 1.0 / (
+        sigma_mul * SVGF_STRICTNESS * sigma_dist_mul
+            * computeSigmaL(texel, center_color.a)
+        + sigma_bias * sigma_dist_mul
     );
 
-    vec4 filtered = center_color;
-    float weight_sum = 1.0;
+    float normal_exp = mix(2.0, 8.0, clamp01(frames / 8.0)) * SVGF_NORMALEXP;
 
-    const int radius = SVGF_RAD;
-    for (int y = -radius; y <= radius; ++y) {
-        for (int x = -radius; x <= radius; ++x) {
+    vec4 total = center_color;
+    float total_weight = 1.0;
+
+    const int r = SVGF_RAD;
+    for (int y = -r; y <= r; ++y) {
+        for (int x = -r; x <= r; ++x) {
+            ivec2 p = texel + ivec2(x, y) * size;
+
             if (x == 0 && y == 0) continue;
 
-            ivec2 tap_texel = texel + ivec2(x, y) * step_size;
+            bool valid = all(greaterThanEqual(p, ivec2(0)))
+                      && all(lessThan(p, ivec2(bufferSize())));
 
-            if (any(lessThan(tap_texel, ivec2(0)))) continue;
-            if (any(greaterThanEqual(tap_texel, ivec2(sspt_buffer_size())))) continue;
+            if (!valid) continue;
 
-            vec4 tap_data = sspt_filter_data(tap_texel);
-            vec4 tap_color = texelFetch(colortex17, tap_texel, 0);
-            float tap_luminance = sspt_luminance(tap_color.rgb);
+            vec4 current_data = fetchGbuffer(p);
 
-            // Coarse passes cover more ground per hop, so they tolerate
-            // proportionally larger depth gaps.
-            float depth_term = exp(
-                -abs(center_data.w - tap_data.w)
-                    * rcp(0.5 * sqrt(float(step_size)))
-            );
+            vec4 current_color = texelFetch(colortex17, p, 0);
+            float current_luma = getLuma(current_color.rgb);
 
-            float luma_ratio = abs(tap_luminance - center_luminance)
-                             * rcp(max(center_luminance, luminance_floor));
-            float luma_term = exp(-luma_ratio * luma_confidence);
+            float w = 1.0;
 
-            float weight = pow(max0(dot(center_data.xyz, tap_data.xyz)), normal_power)
-                         * depth_term
-                         * luma_term;
+            float dist_lum = abs(center_luma - current_luma);
+                dist_lum = sqr(dist_lum) / max(center_luma, offset);
+                dist_lum = clamp(dist_lum, 0.0, max_delta);
 
-            // The sigma channel rides along with squared weights so it
-            // stays a variance after normalization (Schied et al. 2017).
-            filtered += tap_color * weight * vec4(1.0, 1.0, 1.0, weight);
-            weight_sum += weight;
+            float dist_depth = abs(center_data.a - current_data.a) * 4.0;
+
+                w *= pow(max0(dot(center_data.xyz, current_data.xyz)), normal_exp);
+                w *= exp(-dist_depth / sqrt(float(size)) - sqrt(dist_lum * sigma_l));
+
+            // accumulate stuff
+            total += current_color * w * vec4(1.0, 1.0, 1.0, w);
+
+            total_weight += w;
         }
     }
 
-    return filtered / vec4(weight_sum, weight_sum, weight_sum, sqr(weight_sum));
+    // compensate for total sampling weight
+    total /= vec4(total_weight, total_weight, total_weight, sqr(total_weight));
+
+    return total;
 }
 
 // ------------
 //   Main
 // ------------
 
-// One filtered output texel: an à-trous iteration where the SSPT chain is
-// active, the untouched input everywhere else (sky pixels, or the whole
-// buffer when the filter is disabled via shaders.properties).
 void main() {
     ivec2 texel = ivec2(gl_FragCoord.xy);
     ivec2 gbuffer_texel = ivec2(uv * view_res * taau_render_scale);
@@ -216,16 +185,8 @@ void main() {
     float depth = texelFetch(combined_depth_tex, gbuffer_texel, 0).x;
 
     if (depth < 1.0) {
-#ifdef SVGF_FILTER
-        sspt_filtered = sspt_atrous_iteration(texel, SVGF_SIZE);
-#else
-        // Filtering disabled: forward the accumulated result untouched.
-        // (shaders.properties skips these passes via
-        // program.*deferred6-10.enabled = SVGF_FILTER; this path only
-        // exists as a safety net.)
-        sspt_filtered = texelFetch(colortex17, texel, 0);
-#endif
+        filtered = atrousSVGF(texel, SVGF_SIZE);
     } else {
-        sspt_filtered = texelFetch(colortex17, texel, 0);
+        filtered = texelFetch(colortex17, texel, 0);
     }
 }

@@ -2,24 +2,21 @@
 --------------------------------------------------------------------------------
 
   program/d4_sspt:
-  Trace stage of the SSPT chain. Fires screen-space path traced rays per
-  pixel and gathers material emission plus one bounce of colored sun/moon
-  light (see include/lighting/sspt/sspt.glsl). The output is deliberately
-  noisy — program/d5_sspt_accumulate and the a-trous filter passes
-  (program/d6_sspt_filter, sizes 32/16/8/4/2) reconstruct a stable image
-  from it.
-
-  Renders at the indirect-light resolution into colortex17 (radiance +
-  vanilla blocklight gate) and colortex19 (filter data: view normal,
-  sqrt normalized depth).
+  Trace one frame of screen-space path traced emission + colored lighting
+  (emission + shadowed sun/moon and handheld bounce from
+  include/lighting/sspt/sspt.glsl).
+  Raw, noisy output — program/d5_sspt_accumulate and the SVGF filter passes
+  (program/d6_sspt_filter, sizes 32/16/8/4/2) denoise it. Runs at half
+  resolution in colortex17, with filter gbuffer side-data (view normal +
+  sqrt view depth) in colortex19.
 
 --------------------------------------------------------------------------------
 */
 
 #include "/include/global.glsl"
 
-layout(location = 0) out vec4 sspt_indirect;     // colortex17
-layout(location = 1) out vec4 sspt_filter_data;  // colortex19
+layout(location = 0) out vec4 indirect;      // colortex17
+layout(location = 1) out vec4 filterData;  // colortex19
 
 /* RENDERTARGETS: 17,19 */
 
@@ -33,8 +30,9 @@ uniform sampler2D noisetex;
 
 uniform sampler2D colortex1; // gbuffer 0
 uniform sampler2D colortex2; // gbuffer 1
-uniform sampler2D colortex6; // ambient occlusion (fixed 0.5x buffer, sampled by uv below)
-uniform sampler2D depthtex1; // combined_depth_tex when no LoD mod is active
+uniform sampler2D colortex6; // ambient occlusion (same resolution)
+
+uniform sampler2D depthtex1; // geometry depth (non-DH path)
 
 uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
@@ -89,9 +87,9 @@ uniform int moonPhase;
 //   Includes
 // ------------
 
-#define SSPT_DEPTH_SAMPLER combined_depth_tex
-#define SSPT_PROJECTION_MATRIX combined_projection_matrix
-#define SSPT_PROJECTION_MATRIX_INVERSE combined_projection_matrix_inverse
+#define TRACE_DEPTH combined_depth_tex
+#define TRACE_PROJ combined_projection_matrix
+#define TRACE_PROJ_INV combined_projection_matrix_inverse
 
 #include "/include/misc/lod_mod_support.glsl"
 #include "/include/lighting/sspt/sspt.glsl"
@@ -103,73 +101,73 @@ uniform int moonPhase;
 // ------------
 
 void main() {
-    // This pass renders into the reduced-resolution SSPT buffers:
-    // gl_FragCoord counts buffer texels, uv still spans the whole screen.
+    // This pass renders into the half-res SSPT buffers; gl_FragCoord is in
+    // buffer texels while uv spans the whole screen.
     ivec2 gbuffer_texel = ivec2(uv * view_res * taau_render_scale);
 
-    // Defaults for sky pixels: no radiance, filter data pointing straight
-    // up at maximum depth.
-    sspt_indirect = vec4(0.0);
-    sspt_filter_data = vec4(0.5, 0.5, 1.0, 1.0);
+    // initialize outputs before any early return (sky = vec4(0.0),
+    // filter gbuffer = (0,0,1)*0.5+0.5 packed + depth 1)
+    indirect = vec4(0.0);
+    filterData = vec4(0.5, 0.5, 1.0, 1.0);
 
-    if (clamp(gbuffer_texel, ivec2(0), ivec2(view_res) - 1) != gbuffer_texel) return;
+    if (clamp(gbuffer_texel, ivec2(0), ivec2(view_res) - 1) != gbuffer_texel) {
+        return;
+    }
 
     float depth = texelFetch(combined_depth_tex, gbuffer_texel, 0).x;
 
-    if (depth >= 1.0) return;
+    if (depth >= 1.0) {
+        return;
+    }
 
     bool is_hand = depth < hand_depth;
 
+    vec3 screen_pos = vec3(uv, depth);
     vec3 view_pos = screen_to_view_space(
         combined_projection_matrix_inverse,
-        vec3(uv, depth),
+        screen_pos,
         true
     );
 
-    // ---- filter data ----
-    // rgb: view-space flat normal, remapped to [0, 1] (the filter passes
-    //      reverse this before weighting taps)
-    // a:   square root of the normalized axial view depth; squaring it
-    //      recovers a linear depth in [0, 1]
+    // ---- gbuffer unpack (same packing as d4_deferred_shading) ----
 
     vec4 gbuffer_data_0 = texelFetch(colortex1, gbuffer_texel, 0);
 
     vec3 flat_normal = decode_unit_vector(unpack_unorm_2x8(gbuffer_data_0.z));
     vec3 view_normal = mat3(gbufferModelView) * flat_normal;
 
-    sspt_filter_data = vec4(view_normal * 0.5 + 0.5, sqrt(clamp01(-view_pos.z / far)));
+    // ---- filter gbuffer side-data ----
+    // rgb: view normal * 0.5 + 0.5 (unpacked as rgb * 2 - 1)
+    // a:   sqrt(normalized axial linear depth)
+    //      (squared back to [0, 1] linear depth on fetch)
 
-    // ---- trace ----
-
-    // Bluenoise dither for the ray march start, rotated per frame so the
-    // march pattern does not repeat under the accumulator.
-    float march_jitter = fract(
-        texelFetch(noisetex, ivec2(gl_FragCoord.xy) & 511, 0).b
-      + hash1(vec3(gl_FragCoord.xy, float(frameCounter)))
+    filterData = vec4(
+        view_normal * 0.5 + 0.5,
+        sqrt(clamp01(-view_pos.z / far))
     );
 
-    vec3 indirect_light = sspt_gather_light(view_pos, flat_normal, march_jitter, is_hand);
+    // ---- trace ----
+    // Hash dithers, consumed as the screenspace-RT march noise by traceIndirect.
 
-    // ---- vanilla blocklight gate ----
-    // .a carries how much of the accumulated vanilla blocklight fallback
-    // this pixel earns: blocklight from the lightmap, weighted by the
-    // selected AO mode (SSAO/GTAO/Off=>1) and the user's blend amount.
-    // d5_sspt_accumulate merges it into the temporal result, so close-range
-    // blocklight stays solid even where screen-space tracing misses (no
-    // geometry to bounce from) — that miss case is exactly where the AO
-    // mode takes over. With SSPT off this pass is disabled and the
-    // deferred pass uses full AO + vanilla blocklight directly.
+    vec2 dither = vec2(
+        texelFetch(noisetex, ivec2(gl_FragCoord.xy) & 511, 0).b,
+        texelFetch(noisetex, (ivec2(gl_FragCoord.xy) + 249) & 511, 0).b
+    );
+
+    // Emission + sun/moon + handheld bounce.
+    vec3 indirect_light = traceIndirect(view_pos, flat_normal, dither, is_hand);
+
+    // ---- blocklight lightmap weight ----
+    // pow5(lightmap) * sqr(ao) * ssptLightmapBlend. Consumed by
+    // program/d5_sspt_accumulate as the temporally-merged vanilla
+    // blocklight fallback.
 
     vec2 light_levels = unpack_unorm_2x8(gbuffer_data_0.w);
 
-    // colortex6 is a fixed 0.5x buffer while this pass renders at the
-    // indirectResReduction scale, so fetch by uv instead of gl_FragCoord.
-    ivec2 ao_size = textureSize(colortex6, 0);
-    ivec2 ao_texel = clamp(ivec2(uv * vec2(ao_size)), ivec2(0), ao_size - 1);
-    float ao = texelFetch(colortex6, ao_texel, 0).x;
+    float ao = texelFetch(colortex6, ivec2(gl_FragCoord.xy), 0).x;
     if (is_hand) ao = 1.0;
 
-    float blocklight_gate = pow4(light_levels.x) * sqr(ao) * ssptLightmapBlend;
+    float lightmap_weight = pow5(light_levels.x) * sqr(ao) * ssptLightmapBlend;
 
-    sspt_indirect = vec4(indirect_light, blocklight_gate);
+    indirect = vec4(indirect_light, lightmap_weight);
 }
