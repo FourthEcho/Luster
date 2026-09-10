@@ -33,7 +33,7 @@ uniform sampler2D noisetex;
 
 uniform sampler2D colortex1; // gbuffer 0
 uniform sampler2D colortex2; // gbuffer 1
-uniform sampler2D colortex6; // ambient occlusion (same resolution)
+uniform sampler2D colortex6; // ambient occlusion (fixed 0.5x buffer, sampled by uv below)
 uniform sampler2D depthtex1; // combined_depth_tex when no LoD mod is active
 
 uniform mat4 gbufferModelView;
@@ -152,14 +152,21 @@ void main() {
 
     // ---- vanilla blocklight gate ----
     // .a carries how much of the accumulated vanilla blocklight fallback
-    // this pixel earns: blocklight from the lightmap, weighted by AO and
-    // the user's blend amount. d5_sspt_accumulate merges it into the
-    // temporal result, so close-range blocklight stays solid even where
-    // screen-space tracing has no geometry to bounce from.
+    // this pixel earns: blocklight from the lightmap, weighted by the
+    // selected AO mode (SSAO/GTAO/Off=>1) and the user's blend amount.
+    // d5_sspt_accumulate merges it into the temporal result, so close-range
+    // blocklight stays solid even where screen-space tracing misses (no
+    // geometry to bounce from) — that miss case is exactly where the AO
+    // mode takes over. With SSPT off this pass is disabled and the
+    // deferred pass uses full AO + vanilla blocklight directly.
 
     vec2 light_levels = unpack_unorm_2x8(gbuffer_data_0.w);
 
-    float ao = texelFetch(colortex6, ivec2(gl_FragCoord.xy), 0).x;
+    // colortex6 is a fixed 0.5x buffer while this pass renders at the
+    // indirectResReduction scale, so fetch by uv instead of gl_FragCoord.
+    ivec2 ao_size = textureSize(colortex6, 0);
+    ivec2 ao_texel = clamp(ivec2(uv * vec2(ao_size)), ivec2(0), ao_size - 1);
+    float ao = texelFetch(colortex6, ao_texel, 0).x;
     if (is_hand) ao = 1.0;
 
     float blocklight_gate = pow4(light_levels.x) * sqr(ao) * ssptLightmapBlend;

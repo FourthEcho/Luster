@@ -612,6 +612,13 @@ void main() {
             // emission + colored lighting, temporally accumulated by
             // d5_sspt_accumulate and a-trous filtered by d6_sspt_filter.
             // The indirect buffers span the whole screen, so plain uv works.
+            // Where the trace missed (no bounce geometry / off-screen), the
+            // accumulation holds only the AO-weighted vanilla fallback
+            // (blocklight gate from d4_sspt), so the selected AO mode
+            // (SSAO/GTAO/Off) still shapes those pixels via `ao` below and
+            // via the gate. With SSPT off this block is compiled out and
+            // get_diffuse_lighting() above applies full AO + vanilla
+            // blocklight instead.
             vec3 sspt_light = max0(texture(colortex17, uv).rgb);
 
             // Same application as the vanilla blocklight path:

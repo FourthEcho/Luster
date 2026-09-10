@@ -155,8 +155,7 @@ const float wetnessHalflife         = 70.0;
   #define SHADER_AO_NONE 0 
   #define SHADER_AO_SSAO 1 
   #define SHADER_AO_GTAO 2 
-  #define SHADER_AO_RTAO 3 
-  #define SHADER_AO SHADER_AO_GTAO // [SHADER_AO_NONE SHADER_AO_SSAO SHADER_AO_GTAO SHADER_AO_RTAO]
+  #define SHADER_AO SHADER_AO_GTAO // [SHADER_AO_NONE SHADER_AO_SSAO SHADER_AO_GTAO]
 
   #define SSAO_STEPS 12 // [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64]
   #define SSAO_RADIUS 2.0 // [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0 2.1 2.2 2.3 2.4 2.5 2.6 2.7 2.8 2.9 3.0 3.1 3.2 3.3 3.4 3.5 3.6 3.7 3.8 3.9 4.0 4.1 4.2 4.3 4.4 4.5 4.6 4.7 4.8 4.9 5.0 5.1 5.2 5.3 5.4 5.5 5.6 5.7 5.8 5.9 6.0 6.1 6.2 6.3 6.4 6.5 6.6 6.7 6.8 6.9 7.0 7 .1 7.2 7.3 7.4 7.5 7.6 7.7 7.8 7.9 8.0]
@@ -166,11 +165,6 @@ const float wetnessHalflife         = 70.0;
   #define GTAO_RADIUS 2.0 // [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0 2.1 2.2 2.3 2.4 2.5 2.6 2.7 2.8 2.9 3.0 3.1 3.2 3.3 3.4 3.5 3.6 3.7 3.8 3.9 4.0 4.1 4.2 4.3 4.4 4.5 4.6 4.7 4.8 4.9 5.0 5.1 5.2 5.3 5.4 5.5 5.6 5.7 5.8 5.9 6.0 6.1 6.2 6.3 6.4 6.5 6.6 6.7 6.8 6.9 7.0 7 .1 7.2 7.3 7.4 7.5 7.6 7.7 7.8 7.9 8.0]
   #define GTAO_FALLOFF_START 0.75 // Fraction of GTAO_RADIUS where the occlusion falloff begins (no longer a GUI slider)
   #define GTAO_MULTIBOUNCE_INTENSITY 1.00 // Blends the surface-albedo-based GTAO multibounce approximation in/out (no longer a GUI slider)
-
-  #define RTAO_SAMPLES 8 // [4 8 12 16 24 32]
-  #define RTAO_RADIUS 2.0 // [0.5 1.0 1.5 2.0 2.5 3.0 4.0 6.0 8.0]
-  #define RTAO_STEPS 8 // [2 4 6 8 12 16 24 32] // Ray march steps per direction, decoupled from RTAO_SAMPLES (direction count) so quality/perf can be tuned independently for shape smoothness vs. how far each ray can reach
-  #define RTAO_REFINEMENT_STEPS 2 // [0 1 2 3 4 5 6] // Binary-search refinement steps after a raymarch hit, tightens the hit position; was hardcoded inside rtao.glsl, now exposed
 
 // -------
 //   Sky
@@ -830,10 +824,6 @@ const float wetnessHalflife         = 70.0;
   #define ssptEmissionDistance 32.0 // [2.0 4.0 6.0 8.0 10.0 12.0 14.0 16.0 18.0 20.0 22.0 24.0 26.0 28.0 30.0 32.0 36.0 40.0 44.0 48.0 52.0 56.0 60.0 64.0]
   #define ssptLightmapBlend 1.0 // [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
   #define SSPT_INTENSITY 4.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.40 1.50 1.60 1.70 1.80 1.90 2.00 2.50 3.00 4.00]
-  #define SSPT_EMISSION_HARDCODED 0
-  #define SSPT_EMISSION_LABPBR 1
-  #define SSPT_EMISSION_MODE SSPT_EMISSION_LABPBR // [SSPT_EMISSION_HARDCODED SSPT_EMISSION_LABPBR]
-  #define SSPT_LABPBR_EMISSION 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.50 2.00 3.00 4.00]
 
   #define maxFrames 128.0 // [16.0 32.0 64.0 128.0 192.0 256.0 384.0 512.0 768.0 1024.0]
   #define minAccumMult 1.0 // [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]

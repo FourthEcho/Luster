@@ -193,11 +193,10 @@ option.SSS_STEPS                       = SSS Steps
 option.SSS_STEPS.comment               = Increase to reduce noise on foliage and other materials with SSS, at the cost of performance.
 
 option.SHADER_AO                       = Shader AO
-option.SHADER_AO.comment               = AO method. Off - no shader AO. SSAO - screen-space, light. GTAO - horizon-based, better quality. RTAO - ray-traced, most accurate, uses depth-buffer ray march; provides bent normal for SH Skylight and costs more
+option.SHADER_AO.comment               = AO method. Off - no shader AO. SSAO - screen-space, light. GTAO - horizon-based, better quality; provides bent normal for SH Skylight
 value.SHADER_AO.SHADER_AO_NONE         = Off
 value.SHADER_AO.SHADER_AO_SSAO         = SSAO
 value.SHADER_AO.SHADER_AO_GTAO         = GTAO
-value.SHADER_AO.SHADER_AO_RTAO         = RTAO
 option.VANILLA_AO                      = Vanilla AO
 option.VANILLA_AO.comment              = Minecraft's built-in ambient occlusion
 option.VANILLA_AO_INTENSITY            = Vanilla AO Intensity
@@ -212,14 +211,6 @@ option.GTAO_SLICES                     = GTAO Slices
 option.GTAO_SLICES.comment             = Controls how noisy the GTAO appears
 option.GTAO_HORIZON_STEPS              = GTAO Horizon Steps
 option.GTAO_HORIZON_STEPS.comment      = Controls the accuracy of GTAO. A higher step count also increase the intensity of the effect
-option.RTAO_SAMPLES                    = RTAO Samples
-option.RTAO_SAMPLES.comment            = Number of ray-marched samples per pixel for RTAO. Higher = less noise, better bent normal for SH Skylight, higher GPU cost
-option.RTAO_RADIUS                     = RTAO Radius
-option.RTAO_RADIUS.comment             = World-space ray length for RTAO. Larger catches farther occluders but increases noise and cost. Tuned with RTAO Samples
-option.RTAO_STEPS                      = RTAO Steps
-option.RTAO_STEPS.comment              = Ray march steps per direction. Higher lets rays reach farther/more accurately along their length before giving up, independent of RTAO Samples (which controls how many directions are sampled)
-option.RTAO_REFINEMENT_STEPS           = RTAO Refinement Steps
-option.RTAO_REFINEMENT_STEPS.comment   = Extra steps used to narrow down exactly where a ray hit after a hit is detected. Higher gives a more precise hit position (sharper contact shadows) at a small extra cost
 
 option.SUN_NR                          = §c▍ §fRed — Noon
 option.SUN_NR.comment = Adjusts the red tint of sunlight at noon. Higher = warmer midday sun.
@@ -1242,7 +1233,7 @@ screen.sspt_filter=SVGF Filter
 
 # ---- SSPT ----
 option.ssptEnabled=SSPT
-option.ssptEnabled.comment=Screen-space path traced emission and colored lighting. Big performance impact. It is suggested not to use RTAO with SSPT: both darken crevices and can cause weird double darkening on blocks.
+option.ssptEnabled.comment=Screen-space path traced emission and colored lighting. Big performance impact.
 option.ssptFullRangeRT=Long Range SSPT
 option.ssptFullRangeRT.comment=Traces the whole screen instead of a short range. Needs more samples for similar quality.
 option.indirectResReduction=SSPT Resolution
@@ -1261,12 +1252,6 @@ option.ssptLightmapBlend=Lightmap Blending
 option.ssptLightmapBlend.comment=How strongly the vanilla lightmap blocklight blends into the SSPT accumulation.
 option.SSPT_INTENSITY=SSPT Intensity
 option.SSPT_INTENSITY.comment=Global brightness multiplier for the SSPT indirect emission contribution.
-option.SSPT_EMISSION_MODE=Emission Mode
-option.SSPT_EMISSION_MODE.comment=Which emissive surfaces the SSPT tracer gathers: Hardcoded (vanilla emissive blocks only) or LabPBR (resource-pack emission maps included, hardcoded fallback elsewhere).
-value.SSPT_EMISSION_MODE.SSPT_EMISSION_HARDCODED=Hardcoded
-value.SSPT_EMISSION_MODE.SSPT_EMISSION_LABPBR=LabPBR
-option.SSPT_LABPBR_EMISSION=LabPBR Emission
-option.SSPT_LABPBR_EMISSION.comment=Extra multiplier for LabPBR pack emission gathered by SSPT. Applies in LabPBR emission mode.
 option.maxFrames=Max Accumulated Frames
 option.maxFrames.comment=Temporal history length. Higher = smoother, but more ghosting.
 option.minAccumMult=Accumulation Weight Mult

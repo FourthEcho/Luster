@@ -234,11 +234,16 @@ bool sspt_march(vec3 view_pos, vec3 view_dir, float jitter, out vec3 hit) {
 // Hit emission
 // ----------------------------------------------------------------------------
 // The hit surface's emission is rebuilt on demand instead of being read
-// from a dedicated buffer: material_from() covers every hardcoded emissive
-// block, and the labPBR specular map folds pack-provided emission in. The
-// result is pre-scaled by emission_scale — the same factor the primary
-// shading pass applies — so a bounced emitter and a directly viewed one
-// agree on brightness.
+// from a dedicated buffer, following the exact same system as the primary
+// pass (d4_deferred_shading.fsh): material_from() covers every hardcoded
+// emissive block; where SPECULAR_MAPPING is active (labPBR or old texture
+// format with a specular material reading mode) the specular map is
+// decoded on top and overrides where the pack declares an emissive texel,
+// falling back to the hardcoded value where it declares none. With a
+// hardcoded specular mode the hardcoded emission is used as-is. The result
+// is pre-scaled by emission_scale — the same factor the primary shading
+// pass applies — so a bounced emitter and a directly viewed one agree on
+// brightness.
 
 vec3 sspt_hit_emission(sspt_hit_data hit, ivec2 hit_texel, vec3 hit_view_pos) {
     vec3 hit_world_pos = view_to_scene_space(hit_view_pos) + cameraPosition;
@@ -247,9 +252,6 @@ vec3 sspt_hit_emission(sspt_hit_data hit, ivec2 hit_texel, vec3 hit_view_pos) {
     Material hit_material = material_from(
         hit.albedo, hit.mask, hit_world_pos, hit.scene_normal, light_levels
     );
-
-    // Hardcoded contribution, saved before the specular map can override it.
-    vec3 hardcoded_emission = hit_material.emission;
 
 #ifdef SPECULAR_MAPPING
     vec4 specular_pack = texelFetch(colortex2, hit_texel, 0);
@@ -260,15 +262,7 @@ vec3 sspt_hit_emission(sspt_hit_data hit, ivec2 hit_texel, vec3 hit_view_pos) {
     decode_specular_map(map, hit_material);
 #endif
 
-#if SSPT_EMISSION_MODE == SSPT_EMISSION_HARDCODED
-    return hardcoded_emission * emission_scale * SSPT_INTENSITY;
-#else // SSPT_EMISSION_LABPBR
-    // Full material emission: hardcoded fallback plus the labPBR map, with
-    // the user multiplier for pack-provided emission. Where the pack
-    // declares no emissive texel, decode leaves the hardcoded value in
-    // place, so this branch also covers vanilla correctly.
-    return hit_material.emission * emission_scale * SSPT_INTENSITY * SSPT_LABPBR_EMISSION;
-#endif
+    return hit_material.emission * emission_scale * SSPT_INTENSITY;
 }
 
 // ----------------------------------------------------------------------------
