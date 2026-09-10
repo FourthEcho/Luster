@@ -5,7 +5,6 @@
 
 const float phi1 = 1.6180339887; // Golden ratio, solution to x^2 = x + 1
 const float phi2 = 1.3247179572; // Plastic constant, solution to x^3 = x + 1
-const float phi3 = 1.2207440846; // Solution to x^4 = x + 1
 
 float r1(int n, float seed) {
     const float alpha = 1.0 / phi1;
@@ -20,13 +19,6 @@ vec2 r2(int n, vec2 seed) {
 }
 
 vec2 r2(int n) { return r2(n, vec2(0.5)); }
-
-vec3 r3(int n, vec3 seed) {
-    const vec3 alpha = 1.0 / vec3(phi3, phi3 * phi3, phi3 * phi3 * phi3);
-    return fract(seed + n * alpha);
-}
-
-vec3 r3(int n) { return r3(n, vec3(0.5)); }
 
 //----------------------------------------------------------------------------//
 
@@ -114,30 +106,8 @@ vec2 hash2(vec3 p3) {
 
 //*/
 
-/*
-vec3 hash3(float p) {
-   vec3 p3 = fract(vec3(p) * vec3(.1031, .1030, .0973));
-   p3 += dot(p3, p3.yzx+33.33);
-   return fract((p3.xxy+p3.yzz)*p3.zyx);
-}
-//*/
 
-/*
-vec3 hash3(vec2 p) {
-    vec3 p3 = fract(vec3(p.xyx) * vec3(.1031, .1030, .0973));
-    p3 += dot(p3, p3.yxz+33.33);
-    return fract((p3.xxy+p3.yzz)*p3.zyx);
-}
-//*/
 
-/*
-vec3 hash3(vec3 p3) {
-    p3 = fract(p3 * vec3(.1031, .1030, .0973));
-    p3 += dot(p3, p3.yxz+33.33);
-    return fract((p3.xxy + p3.yxx)*p3.zyx);
-
-}
-//*/
 
 /*
 vec4 hash4(float p) {

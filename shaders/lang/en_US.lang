@@ -115,25 +115,25 @@ option.END_GLOW.comment                = Wavery glowing effect in the End. Requi
 
 # Weather
 option.RANDOM_WEATHER_VARIATION            = Random Variation
-option.RANDOM_WEATHER_VARIATION.comment = Controls random variation.
+option.RANDOM_WEATHER_VARIATION.comment = Drifts temperature, humidity, wind and turbulence over time so weather evolves on its own.
 option.BIOME_WEATHER_VARIATION             = Biome-based Variation
-option.BIOME_WEATHER_VARIATION.comment = Controls biome-based variation.
+option.BIOME_WEATHER_VARIATION.comment = Lets the current biome shape the weather, so deserts stay dry and jungles stay humid.
 option.WEATHER_TEMPERATURE_BIAS            = Temperature Bias
-option.WEATHER_TEMPERATURE_BIAS.comment = Controls temperature bias.
+option.WEATHER_TEMPERATURE_BIAS.comment = Shifts the baseline temperature. Warmer skies grow taller clouds, colder skies flatten them out.
 option.WEATHER_HUMIDITY_BIAS               = Humidity Bias
-option.WEATHER_HUMIDITY_BIAS.comment = Controls humidity bias.
+option.WEATHER_HUMIDITY_BIAS.comment = Shifts baseline moisture. Higher values thicken cloud cover, lower values clear the sky.
 option.WEATHER_WIND_BIAS                   = Windiness Bias
-option.WEATHER_WIND_BIAS.comment = Controls windiness bias.
+option.WEATHER_WIND_BIAS.comment = Shifts the baseline wind strength, speeding up or calming cloud drift.
 option.WEATHER_TURBULENCE_BIAS             = Turbulence Bias
-option.WEATHER_TURBULENCE_BIAS.comment = Controls turbulence bias. Turbulence tears clouds into broken detail and grows storm towers.
+option.WEATHER_TURBULENCE_BIAS.comment = Shifts baseline turbulence. Higher values tear clouds into broken, wispy detail.
 option.WEATHER_TEMPERATURE_VARIATION_SPEED = Temperature Variation Speed
-option.WEATHER_TEMPERATURE_VARIATION_SPEED.comment = Controls temperature variation speed.
+option.WEATHER_TEMPERATURE_VARIATION_SPEED.comment = How fast temperature drifts. Higher values make cloud shapes evolve more quickly.
 option.WEATHER_HUMIDITY_VARIATION_SPEED    = Humidity Variation Speed
-option.WEATHER_HUMIDITY_VARIATION_SPEED.comment = Controls humidity variation speed.
+option.WEATHER_HUMIDITY_VARIATION_SPEED.comment = How fast moisture drifts. Higher values make cloud cover build and break faster.
 option.WEATHER_WIND_VARIATION_SPEED        = Windiness Variation Speed
-option.WEATHER_WIND_VARIATION_SPEED.comment = Controls windiness variation speed.
+option.WEATHER_WIND_VARIATION_SPEED.comment = How fast wind strength drifts. Higher values make gusts come and go faster.
 option.WEATHER_TURBULENCE_VARIATION_SPEED  = Turbulence Variation Speed
-option.WEATHER_TURBULENCE_VARIATION_SPEED.comment = Controls turbulence variation speed.
+option.WEATHER_TURBULENCE_VARIATION_SPEED.comment = How fast turbulence drifts. Higher values make cloud detail churn faster.
 
 # Lighting settings
 
@@ -1325,10 +1325,6 @@ option.VOXY_LIGHTING_MODE=Voxy Lighting Mode
 option.VOXY_LIGHTING_MODE.comment = Selects how Voxy terrain is lit. Mode 0 = simple, Mode 1 = more accurate shading.
 option.VOXY_BRIGHTNESS=Voxy Brightness
 option.VOXY_BRIGHTNESS.comment = Adjusts the overall brightness of Voxy distant terrain to better match nearby chunks.
-option.VOXY_SHADOWS=Voxy Shadows
-option.VOXY_SHADOWS.comment = When enabled, Voxy distant terrain casts and receives shadows like nearby terrain. Moderate performance cost.
-option.VOXY_REFLECTIONS=Voxy Reflections
-option.VOXY_REFLECTIONS.comment = When enabled, Voxy terrain appears in screen-space reflections. Adds distant reflections on water at higher cost.
 
 option.WATER_WAVES_NOISE_STRENGTH=Water Waves Noise Strength
 option.WATER_WAVES_NOISE_STRENGTH.comment = Controls water waves noise strength.

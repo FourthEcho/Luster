@@ -136,16 +136,6 @@ vec3 ycocg_to_rgb(vec3 ycocg) {
 
 // XYZ <-> LAB
 
-float cie_lab_f(float t) {
-    const float delta = 6.0 / 29.0;
-
-    if (t > cube(delta)) {
-        return pow(t, rcp(3.0));
-    } else {
-        return rcp(3.0 * delta * delta) * t + (4.0 / 29.0);
-    }
-}
-
 float cie_lab_f_inv(float t) {
     const float delta = 6.0 / 29.0;
 

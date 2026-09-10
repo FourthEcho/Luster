@@ -62,7 +62,6 @@ const float wetnessHalflife         = 70.0;
 
   // Handheld lighting mode: Off, Normal, or Colored.
   #define HANDHELD_LIGHTING_OFF      0
-  #define HANDHELD_LIGHTING_NORMAL    1
   #define HANDHELD_LIGHTING_COLORED   2
   #define HANDHELD_LIGHTING_MODE 2 // [0 1 2] Handheld lighting mode: 0 = Off, 1 = Normal, 2 = Colored.
 #if HANDHELD_LIGHTING_MODE != HANDHELD_LIGHTING_OFF
@@ -819,13 +818,13 @@ const float wetnessHalflife         = 70.0;
   //#define ssptEnabled
   //#define ssptFullRangeRT
   #define indirectResReduction 2 // [1 2 3 4]
-  #define ssptSPP 2 // [1 2 3 4 5 6]
+  #define ssptSPP 1 // [1 2 3 4 5 6]
   #define ssptBounces 1 // [1 2 3 4 5 6]
   #define ssptEmissionDistance 8.0 // [2.0 4.0 6.0 8.0 10.0 12.0 14.0 16.0 18.0 20.0 22.0 24.0 26.0 28.0 30.0 32.0 36.0 40.0 44.0 48.0 52.0 56.0 60.0 64.0]
   #define ssptLightmapBlend 1.0 // [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
   #define SSPT_INTENSITY 4.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.40 1.50 1.60 1.70 1.80 1.90 2.00 2.50 3.00 4.00]
 
-  #define maxFrames 256.0 // [16.0 32.0 64.0 128.0 192.0 256.0 384.0 512.0 768.0 1024.0]
+  #define maxFrames 128.0 // [16.0 32.0 64.0 128.0 192.0 256.0 384.0 512.0 768.0 1024.0]
   #define minAccumMult 1.0 // [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
   #define ADAPT_STRENGTH 1.0 // [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5]
 
@@ -842,7 +841,7 @@ const float wetnessHalflife         = 70.0;
   #define CLOUD_LIGHTING_BOUNCES 1 // [0 1 2 3 4]
 
 // ---- Moon Phase Influence subscreen ----
-//#define MOON_PHASE_NIGHT_ATMOSPHERE
+#define MOON_PHASE_NIGHT_ATMOSPHERE
   #define MOON_PHASE_NIGHT_ATMOSPHERE_INTENSITY 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.20 1.50 2.00]
   #define MOON_PHASE_NIGHT_ATMOSPHERE_CONTRAST 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.20 1.50 2.00]
   #define MOON_PHASE_NIGHT_ATMOSPHERE_SATURATION 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.20 1.50 2.00]
@@ -859,8 +858,6 @@ const float wetnessHalflife         = 70.0;
   #define VOXY_QUALITY_HIGH 3
   #define VOXY_LIGHTING_MODE 1 // [0 1]
   #define VOXY_BRIGHTNESS 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.20 1.50 2.00]
-//#define VOXY_SHADOWS
-//#define VOXY_REFLECTIONS
 
 // ---- Water waves noise strength ----
   #define WATER_WAVES_NOISE_STRENGTH 0.50 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00]
@@ -931,12 +928,6 @@ const float wetnessHalflife         = 70.0;
 #endif
 
 #ifdef FOG_SMOOTHING
-#endif
-
-#ifdef VOXY_SHADOWS
-#endif
-
-#ifdef VOXY_REFLECTIONS
 #endif
 
 #ifdef POROSITY

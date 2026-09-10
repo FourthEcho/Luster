@@ -32,8 +32,6 @@ float pow4(float x) { return sqr(sqr(x)); }
 
 float pow5(float x) { return pow4(x) * x; }
 
-float pow6(float x) { return sqr(cube(x)); }
-
 float pow8(float x) { return sqr(pow4(x)); }
 
 float pow12(float x) { return cube(pow4(x)); }

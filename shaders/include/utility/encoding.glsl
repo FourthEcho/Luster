@@ -36,11 +36,6 @@ vec3 decode_unit_vector(vec2 e) {
 // The following functions are from
 // https://github.com/Jessie-LC/open-source-utility-code/blob/main/advanced/packing.glsl
 
-float pack_unorm_2x4(vec2 xy) {
-    return dot(floor(15.0 * xy + 0.5), vec2(1.0 / 255.0, 16.0 / 255.0));
-}
-
-float pack_unorm_2x4(float x, float y) { return pack_unorm_2x4(vec2(x, y)); }
 
 float pack_unorm_2x8(vec2 v) {
     return dot(floor(255.0 * v + 0.5), vec2(1.0 / 65535.0, 256.0 / 65535.0));
