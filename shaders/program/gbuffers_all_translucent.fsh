@@ -587,12 +587,10 @@ void main() {
     // Refraction data — written whenever the output is declared above.
     // For water this is always the case; for non-water translucents it's
     // only written in REFRACTION_ALL mode (so stained glass / ice / etc.
-    // also refract the background). Layout (see surface/refraction.glsl):
-    // xy = world normal x in [-1, 1] mapped to [0, 1] (z is rebuilt as
-    // sqrt(1 - x^2 - y^2); all paths below write unit normals), zw =
-    // 16-bit surface roughness driving the refraction blur.
+    // also refract the background). The encoding is the same for both —
+    // the surface normal tangent in [-1, 1] mapped to [0, 1].
 #if defined PROGRAM_GBUFFERS_WATER || REFRACTION == REFRACTION_ALL
-    refraction_data.xy = split_2x8(normal.x * 0.5 + 0.5);
-    refraction_data.zw = split_2x8(clamp01(material.roughness));
+    refraction_data.xy = split_2x8(normal_tangent.x * 0.5 + 0.5);
+    refraction_data.zw = split_2x8(normal_tangent.y * 0.5 + 0.5);
 #endif
 }
