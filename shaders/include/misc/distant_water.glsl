@@ -25,7 +25,7 @@ vec4 draw_distant_water(
 
     // Common fog
 
-    float fog_visibility = common_fog(view_distance, false).a;
+    float fog_visibility = common_fog(view_distance, false, position_world - cameraPosition).a;
 
     // Cloud shadows
 

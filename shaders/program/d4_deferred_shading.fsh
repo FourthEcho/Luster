@@ -175,6 +175,7 @@ const bool colortex11MipmapEnabled = true;
 #include "/include/surface/material.glsl"
 #include "/include/surface/rain_puddles.glsl"
 #include "/include/utility/bicubic.glsl"
+#include "/include/utility/bilateral_upscale.glsl"
 #include "/include/utility/color.glsl"
 #include "/include/utility/encoding.glsl"
 #include "/include/utility/space_conversion.glsl"
@@ -322,18 +323,17 @@ void main() {
         ivec2 i = ivec2(half_res_pos);
         vec2 f = fract(half_res_pos);
 
-        ivec2 p10 = i + ivec2(1, 0);
-        ivec2 p01 = i + ivec2(0, 1);
-        ivec2 p11 = i + ivec2(1, 1);
-
-        vec4 ambient_00 = texelFetch(colortex6, i, 0);
-        vec4 ambient_10 = texelFetch(colortex6, p10, 0);
-        vec4 ambient_01 = texelFetch(colortex6, p01, 0);
-        vec4 ambient_11 = texelFetch(colortex6, p11, 0);
-        float ambient_depth_00 = texelFetch(colortex14, i, 0).x;
-        float ambient_depth_10 = texelFetch(colortex14, p10, 0).x;
-        float ambient_depth_01 = texelFetch(colortex14, p01, 0).x;
-        float ambient_depth_11 = texelFetch(colortex14, p11, 0).x;
+        // Sampled early for latency hiding - resolved further down once
+        // this fragment's own linear depth (lin_z) is available.
+        vec4 ao_data00, ao_data10, ao_data01, ao_data11;
+        float ao_depth00, ao_depth10, ao_depth01, ao_depth11;
+        bilateral_upscale_sample(
+            colortex6,
+            colortex14,
+            i,
+            ao_data00, ao_data10, ao_data01, ao_data11,
+            ao_depth00, ao_depth10, ao_depth01, ao_depth11
+        );
 
         // Unpack gbuffer data
 
@@ -438,34 +438,14 @@ void main() {
             depth
         );
 
-#define depth_weight(reversed_depth) \
-    exp2( \
-        -10.0 \
-        * abs( \
-            screen_to_view_space_depth( \
-                combined_projection_matrix_inverse, \
-                1.0 - reversed_depth \
-            ) \
-            - lin_z \
-        ) \
-    )
-        float w00 = depth_weight(ambient_depth_00) * (1.0 - f.x) * (1.0 - f.y);
-        float w10 = depth_weight(ambient_depth_10) * (f.x - f.x * f.y);
-        float w01 = depth_weight(ambient_depth_01) * (f.y - f.x * f.y);
-        float w11 = depth_weight(ambient_depth_11) * (f.x * f.y);
-#undef depth_weight
-
-        vec4 ambient_upscaled;
-        float weight_sum = w00 + w10 + w01 + w11;
-
-        if (abs(weight_sum) > eps) {
-            ambient_upscaled = ambient_00 * w00 + ambient_10 * w10
-                + ambient_01 * w01 + ambient_11 * w11;
-
-            ambient_upscaled *= rcp(weight_sum);
-        } else {
-            ambient_upscaled = ambient_00;
-        }
+        vec4 ambient_upscaled = bilateral_upscale_resolve(
+            ao_data00, ao_data10, ao_data01, ao_data11,
+            ao_depth00, ao_depth10, ao_depth01, ao_depth11,
+            f,
+            combined_projection_matrix_inverse,
+            lin_z,
+            10.0
+        );
 
         float ao = ambient_upscaled.x;
         float ambient_sss = ambient_upscaled.y;

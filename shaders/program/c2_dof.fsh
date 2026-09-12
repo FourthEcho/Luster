@@ -50,6 +50,7 @@ uniform vec2 view_pixel_size;
 uniform vec2 taa_offset;
 
 #include "/include/misc/lod_mod_support.glsl"
+#include "/include/utility/chromatic_dispersion.glsl"
 #include "/include/utility/random.glsl"
 #include "/include/utility/sampling.glsl"
 #include "/include/utility/space_conversion.glsl"
@@ -144,29 +145,15 @@ void main() {
     // Chromatic dispersion: radial spectral fringing scaled by the circle
     // of confusion, so in-focus regions stay clean and only defocused
     // areas fringe like a real camera lens
-    {
-        float coc_radius = length(CoC);
-        vec2 center_offset = uv - 0.5;
-        vec2 radial_dir
-            = center_offset / max(length(center_offset), 1e-4);
-        vec2 spectral_offset
-            = radial_dir * coc_radius * (CHROMATIC_DISPERSION_STRENGTH * 0.1);
-        vec2 clamp_max = vec2(
-            1.0 - 2.0 * view_pixel_size * rcp(taau_render_scale)
-        );
-        scene_color.r = textureLod(
-            colortex0,
-            clamp(vec2(uv - spectral_offset), vec2(0.0), clamp_max)
-                * taau_render_scale,
-            0
-        ).r;
-        scene_color.b = textureLod(
-            colortex0,
-            clamp(vec2(uv + spectral_offset), vec2(0.0), clamp_max)
-                * taau_render_scale,
-            0
-        ).b;
-    }
+    scene_color = apply_chromatic_dispersion(
+        colortex0,
+        uv,
+        scene_color,
+        length(CoC),
+        CHROMATIC_DISPERSION_STRENGTH * 0.1,
+        vec2(1.0 - 2.0 * view_pixel_size * rcp(taau_render_scale)),
+        taau_render_scale
+    );
 #endif
 }
 
