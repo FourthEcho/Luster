@@ -54,7 +54,7 @@ Not every feature is enabled on every profile — the in-game settings menu is t
 2. [Download the latest Luster archive](#).
 3. Drop the `.zip` into `.minecraft/shaderpacks`.
 4. In Minecraft: **Video Settings → Shader Packs → Luster**.
-5. Start on **Mac Compatible**, **Medium**, or **High** depending on your hardware, then tune from there.
+5. Start on **Mac Compae**, **Medium**, or **High** depending on your hardware, then tune from there.
 
 ## Compatibility
 
