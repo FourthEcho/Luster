@@ -60,6 +60,7 @@ uniform vec2 taa_offset;
 uniform vec3 light_dir;
 
 #include "/include/surface/water_normal.glsl"
+#include "/include/fog/water_absorption.glsl"
 #include "/include/utility/color.glsl"
 #include "/include/utility/encoding.glsl"
 
@@ -85,29 +86,6 @@ vec3 refract_safe(vec3 I, vec3 N, float eta) {
     } else {
         return eta * I - (eta * NoI + sqrt(k)) * N;
     }
-}
-
-vec3 biome_water_coeff(vec3 biome_water_color) {
-    const float density_scale = 0.15;
-    const float biome_color_contribution = 0.33;
-
-    const vec3 base_absorption_coeff
-        = vec3(WATER_ABSORPTION_R, WATER_ABSORPTION_G, WATER_ABSORPTION_B)
-        * rec709_to_working_color;
-    const vec3 forest_absorption_coeff
-        = -density_scale * log(vec3(0.1245, 0.1797, 0.7108));
-
-#ifdef BIOME_WATER_COLOR
-    vec3 biome_absorption_coeff = -density_scale * log(biome_water_color + eps)
-        - forest_absorption_coeff;
-
-    return max0(
-        base_absorption_coeff
-        + biome_absorption_coeff * biome_color_contribution
-    );
-#else
-    return base_absorption_coeff;
-#endif
 }
 
 float get_water_caustics() {

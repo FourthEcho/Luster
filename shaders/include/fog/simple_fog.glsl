@@ -2,6 +2,7 @@
 #define INCLUDE_FOG_SIMPLE_FOG
 
 #include "/include/lighting/colors/blocklight_color.glsl"
+#include "/include/fog/water_absorption.glsl"
 #include "/include/misc/lod_mod_support.glsl"
 #include "/include/sky/projection.glsl"
 #include "/include/utility/bicubic.glsl"
@@ -157,29 +158,6 @@ vec4 common_fog(float view_dist, const bool sky, vec3 scene_pos) {
 const vec3 water_absorption_coeff
     = vec3(WATER_ABSORPTION_R, WATER_ABSORPTION_G, WATER_ABSORPTION_B)
     * rec709_to_working_color;
-
-vec3 biome_water_coeff(vec3 biome_water_color) {
-    const float density_scale = 0.15;
-    const float biome_color_contribution = 0.33;
-
-    const vec3 base_absorption_coeff
-        = vec3(WATER_ABSORPTION_R, WATER_ABSORPTION_G, WATER_ABSORPTION_B)
-        * rec709_to_working_color;
-    const vec3 forest_absorption_coeff
-        = -density_scale * log(vec3(0.1245, 0.1797, 0.7108));
-
-#ifdef BIOME_WATER_COLOR
-    vec3 biome_absorption_coeff = -density_scale * log(biome_water_color + eps)
-        - forest_absorption_coeff;
-
-    return max0(
-        base_absorption_coeff
-        + biome_absorption_coeff * biome_color_contribution
-    );
-#else
-    return base_absorption_coeff;
-#endif
-}
 
 // Simple water fog applied behind water or when volumetric fog is disabled
 mat2x3 water_fog_simple(

@@ -88,6 +88,7 @@ uniform bool world_age_changed;
 #include "/include/utility/fast_math.glsl"
 #include "/include/utility/geometry.glsl"
 #include "/include/utility/random.glsl"
+#include "/include/utility/sampling.glsl"
 #include "/include/utility/space_conversion.glsl"
 
 vec4 min_of(vec4 a, vec4 b, vec4 c, vec4 d, vec4 e) {
@@ -96,20 +97,6 @@ vec4 min_of(vec4 a, vec4 b, vec4 c, vec4 d, vec4 e) {
 
 vec4 max_of(vec4 a, vec4 b, vec4 c, vec4 d, vec4 e) {
     return max(a, max(b, max(c, max(d, e))));
-}
-
-vec4 smooth_filter(sampler2D sampler, vec2 coord) {
-    // from https://iquilezles.org/www/articles/texture/texture.htm
-    vec2 res = vec2(textureSize(sampler, 0));
-
-    coord = coord * res + 0.5;
-
-    vec2 i, f = modf(coord, i);
-    f = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
-    coord = i + f;
-
-    coord = (coord - 0.5) / res;
-    return texture(sampler, coord);
 }
 
 float texture_min_4x4(sampler2D s, vec2 coord) {

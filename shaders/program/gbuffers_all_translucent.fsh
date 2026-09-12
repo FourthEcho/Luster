@@ -216,20 +216,6 @@ const float lod_bias = log2(taau_render_scale);
 #include "/include/surface/water_material.glsl"
 #include "/include/misc/fancy_nether_portal.glsl"
 
-#if TEXTURE_FORMAT == TEXTURE_FORMAT_LAB
-void decode_normal_map(vec3 normal_map, out vec3 normal, out float ao) {
-    normal.xy = normal_map.xy * 2.0 - 1.0;
-    normal.z = sqrt(clamp01(1.0 - dot(normal.xy, normal.xy)));
-    ao = normal_map.z;
-}
-#elif TEXTURE_FORMAT == TEXTURE_FORMAT_OLD
-void decode_normal_map(vec3 normal_map, out vec3 normal, out float ao) {
-    normal = normal_map * 2.0 - 1.0;
-    ao = length(normal);
-    normal *= rcp(ao);
-}
-#endif
-
 void main() {
     vec2 coord = gl_FragCoord.xy * view_pixel_size * rcp(taau_render_scale);
 

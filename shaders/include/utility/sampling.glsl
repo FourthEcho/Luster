@@ -19,5 +19,20 @@ vec3 uniform_sphere_sample(vec2 hash) {
     );
 }
 
+// Smootherstep-filtered texture lookup.
+// https://iquilezles.org/www/articles/texture/texture.htm
+vec4 smooth_filter(sampler2D sampler, vec2 coord) {
+    vec2 res = vec2(textureSize(sampler, 0));
+
+    coord = coord * res + 0.5;
+
+    vec2 i, f = modf(coord, i);
+    f = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
+    coord = i + f;
+
+    coord = (coord - 0.5) / res;
+    return texture(sampler, coord);
+}
+
 // https://amietia.com/lambertnotangent.html
 #endif // INCLUDE_UTILITY_SAMPLING

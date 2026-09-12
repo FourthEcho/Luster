@@ -66,30 +66,15 @@ uniform bool world_age_changed;
 // ------------
 
 #include "/include/lighting/colors/blocklight_color.glsl"
+#include "/include/lighting/sspt/temporal.glsl"
 #include "/include/misc/lod_mod_support.glsl"
 #include "/include/utility/encoding.glsl"
 #include "/include/utility/fast_math.glsl"
 #include "/include/utility/space_conversion.glsl"
 
-// Half-res SSPT buffer bookkeeping (matches size.buffer.colortex17-20)
-const float bufferScale = 0.5;
-
-// Relative luminance in the pack's working color space (Rec. 2020).
-float getLuma(vec3 c) {
-    return dot(c, luminance_weights_rec2020);
-}
-
 // Mean of two values.
 float avgOf(vec2 v) {
     return (v.x + v.y) * 0.5;
-}
-
-vec2 bufferSize() {
-    return view_res * bufferScale;
-}
-
-ivec2 clampTexel(ivec2 texel) {
-    return clamp(texel, ivec2(0), ivec2(bufferSize()) - 1);
 }
 
 /* ------ REPROJECTION ------ */
@@ -102,11 +87,6 @@ vec3 reprojectHistory(vec3 scene_space) {
 }
 
 /* ------ EDGE-AWARE SPATIAL FILTERS ------ */
-
-vec4 fetchGbuffer(ivec2 texel) {
-    vec4 val = texelFetch(colortex19, texel, 0);
-    return vec4(val.rgb * 2.0 - 1.0, sqr(val.a));
-}
 
 vec3 spatialColor(ivec2 texel) {
     // 5x5 gather, normal + depth + luma weighted.

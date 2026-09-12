@@ -54,32 +54,12 @@ uniform vec2 view_res;
 //   Includes
 // ------------
 
+#include "/include/lighting/sspt/temporal.glsl"
 #include "/include/misc/lod_mod_support.glsl"
 #include "/include/utility/color.glsl"
 #include "/include/utility/fast_math.glsl"
 
-// Half-res SSPT buffer bookkeeping (matches size.buffer.colortex17-20)
-const float bufferScale = 0.5;
-
-// Relative luminance in the pack's working color space (Rec. 2020).
-float getLuma(vec3 c) {
-    return dot(c, luminance_weights_rec2020);
-}
-
-vec2 bufferSize() {
-    return view_res * bufferScale;
-}
-
-ivec2 clampTexel(ivec2 texel) {
-    return clamp(texel, ivec2(0), ivec2(bufferSize()) - 1);
-}
-
 /* ------ ATROUS SVGF ------ */
-
-vec4 fetchGbuffer(ivec2 texel) {
-    vec4 val = texelFetch(colortex19, texel, 0);
-    return vec4(val.rgb * 2.0 - 1.0, sqr(val.a));
-}
 
 // 3x3 gaussian-weighted sigma estimate over the
 // color buffer's variance channel (.a)
