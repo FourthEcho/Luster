@@ -1,7 +1,6 @@
 #if !defined INCLUDE_COLOR_GRADING
 #define INCLUDE_COLOR_GRADING
 
-// Professional-style grading pipeline for Luster.
 // Stage A: scene-linear controls before tone mapping.
 // Stage B: display-linear perceptual controls after tone mapping.
 

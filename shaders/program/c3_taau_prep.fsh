@@ -22,16 +22,10 @@ uniform sampler2D colortex0;
 
 #include "/include/utility/color.glsl"
 
-vec3 min_of(vec3 a, vec3 b, vec3 c, vec3 d, vec3 f) {
-    return min(a, min(b, min(c, min(d, f))));
-}
-
-vec3 max_of(vec3 a, vec3 b, vec3 c, vec3 d, vec3 f) {
-    return max(a, max(b, max(c, max(d, f))));
-}
-
 // Invertible tonemapping operator (Reinhard) applied before blending the
 // current and previous frames Improves the appearance of emissive objects
+// (shared with "/include/post_processing/taa.glsl"; kept local here so this
+// pass does not pull in the full TAA neighborhood machinery)
 vec3 reinhard(vec3 rgb) { return rgb / (rgb + 1.0); }
 
 void main() {

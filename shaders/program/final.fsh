@@ -32,6 +32,7 @@ uniform float frameTimeCounter;
 #include "/include/utility/color.glsl"
 #include "/include/utility/dithering.glsl"
 #include "/include/utility/text_rendering.glsl"
+#include "/include/post_processing/sharpening.glsl"
 
 #ifdef DISTANCE_VIEW
 uniform sampler2D depthtex0;
@@ -57,90 +58,6 @@ ivec2 debug_text_position = ivec2(0, int(viewHeight) / debug_text_scale);
 #if DEBUG_VIEW == DEBUG_VIEW_WEATHER
 #include "/include/misc/debug_weather.glsl"
 #endif
-
-vec3 min_of(vec3 a, vec3 b, vec3 c, vec3 d, vec3 f) {
-    return min(a, min(b, min(c, min(d, f))));
-}
-
-vec3 max_of(vec3 a, vec3 b, vec3 c, vec3 d, vec3 f) {
-    return max(a, max(b, max(c, max(d, f))));
-}
-
-// FidelityFX contrast-adaptive sharpening filter
-// https://github.com/GPUOpen-Effects/FidelityFX-CAS
-// Edge-aware final image sharpening, independent from CAS.
-vec3 image_sharpen_filter(
-    sampler2D sampler,
-    ivec2 texel,
-    vec3 center,
-    float amount
-) {
-    if (amount <= 0.0) return center;
-
-    vec3 left  = display_eotf(texelFetch(sampler, texel + ivec2(-1, 0), 0).rgb);
-    vec3 right = display_eotf(texelFetch(sampler, texel + ivec2( 1, 0), 0).rgb);
-    vec3 up    = display_eotf(texelFetch(sampler, texel + ivec2(0, -1), 0).rgb);
-    vec3 down  = display_eotf(texelFetch(sampler, texel + ivec2(0,  1), 0).rgb);
-
-    vec3 neighborhood = 0.25 * (left + right + up + down);
-    vec3 detail = center - neighborhood;
-    vec3 sharpened = center + detail * (0.9 * amount);
-
-    vec3 lo = min(min(left, right), min(up, down));
-    vec3 hi = max(max(left, right), max(up, down));
-    return clamp(sharpened, lo, hi);
-}
-
-vec3 cas_filter(sampler2D sampler, ivec2 texel, const float sharpness) {
-#ifndef CAS
-    return display_eotf(texelFetch(sampler, texel, 0).rgb);
-#endif
-
-    // Fetch 3x3 neighborhood
-    // a b c
-    // d e f
-    // g h i
-    vec3 a = texelFetch(sampler, texel + ivec2(-1, -1), 0).rgb;
-    vec3 b = texelFetch(sampler, texel + ivec2(0, -1), 0).rgb;
-    vec3 c = texelFetch(sampler, texel + ivec2(1, -1), 0).rgb;
-    vec3 d = texelFetch(sampler, texel + ivec2(-1, 0), 0).rgb;
-    vec3 e = texelFetch(sampler, texel, 0).rgb;
-    vec3 f = texelFetch(sampler, texel + ivec2(1, 0), 0).rgb;
-    vec3 g = texelFetch(sampler, texel + ivec2(-1, 1), 0).rgb;
-    vec3 h = texelFetch(sampler, texel + ivec2(0, 1), 0).rgb;
-    vec3 i = texelFetch(sampler, texel + ivec2(1, 1), 0).rgb;
-
-    // Convert to sRGB before performing CAS
-    a = display_eotf(a);
-    b = display_eotf(b);
-    c = display_eotf(c);
-    d = display_eotf(d);
-    e = display_eotf(e);
-    f = display_eotf(f);
-    g = display_eotf(g);
-    h = display_eotf(h);
-    i = display_eotf(i);
-
-    // Soft min and max. These are 2x bigger (factored out the extra multiply)
-    vec3 min_color = min_of(d, e, f, b, h);
-    min_color += min_of(min_color, a, c, g, i);
-
-    vec3 max_color = max_of(d, e, f, b, h);
-    max_color += max_of(max_color, a, c, g, i);
-
-    // Smooth minimum distance to the signal limit divided by smooth max
-    vec3 w = clamp01(min(min_color, 2.0 - max_color) / max_color);
-    w = 1.0 - sqr(1.0 - w); // Shaping amount of sharpening
-    w *= -1.0 / mix(8.0, 5.0, sharpness);
-
-    // Filter shape:
-    // 0 w 0
-    // w 1 w
-    // 0 w 0
-    vec3 weight_sum = 1.0 + 4.0 * w;
-    return clamp01((b + d + f + h) * w + e) / weight_sum;
-}
-
 
 void main() {
     ivec2 texel = ivec2(gl_FragCoord.xy);

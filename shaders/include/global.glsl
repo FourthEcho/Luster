@@ -114,6 +114,14 @@ float min_of(vec3 v) { return min(v.x, min(v.y, v.z)); }
 
 float min_of(vec4 v) { return min(v.x, min(v.y, min(v.z, v.w))); }
 
+vec3 min_of(vec3 a, vec3 b, vec3 c, vec3 d, vec3 f) {
+    return min(a, min(b, min(c, min(d, f))));
+}
+
+vec3 max_of(vec3 a, vec3 b, vec3 c, vec3 d, vec3 f) {
+    return max(a, max(b, max(c, max(d, f))));
+}
+
 float length_squared(vec2 v) { return dot(v, v); }
 
 float length_squared(vec3 v) { return dot(v, v); }

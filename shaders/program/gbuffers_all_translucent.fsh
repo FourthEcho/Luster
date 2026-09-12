@@ -210,6 +210,12 @@ const float lod_bias = log2(taau_render_scale);
       texture(samp, texcoord, lod_bias)
 #endif
 
+// Water surface color/absorption (needs read_tex_anisotropic_or_plain above)
+// and the fancy nether portal effect (needs position_tangent/atlas varyings
+// in the water-program variant).
+#include "/include/surface/water_material.glsl"
+#include "/include/misc/fancy_nether_portal.glsl"
+
 #if TEXTURE_FORMAT == TEXTURE_FORMAT_LAB
 void decode_normal_map(vec3 normal_map, out vec3 normal, out float ao) {
     normal.xy = normal_map.xy * 2.0 - 1.0;
@@ -221,178 +227,6 @@ void decode_normal_map(vec3 normal_map, out vec3 normal, out float ao) {
     normal = normal_map * 2.0 - 1.0;
     ao = length(normal);
     normal *= rcp(ao);
-}
-#endif
-
-#if defined PROGRAM_GBUFFERS_WATER
-Material get_water_material(
-    vec3 direction_world,
-    vec3 normal,
-    float layer_dist,
-    out float alpha
-) {
-    Material material = water_material;
-    alpha = 0.01;
-
-    // Water texture
-
-#if WATER_TEXTURE == WATER_TEXTURE_HIGHLIGHT \
-    || WATER_TEXTURE == WATER_TEXTURE_HIGHLIGHT_UNDERGROUND
-    vec4 base_color = read_tex_anisotropic_or_plain(gtexture, uv);
-    // WATER_TEXTURE_INTENSITY scales the contribution of the vanilla water
-    // texture (the bright "noise" pattern on the surface). At 0 the texture
-    // is invisible; at 1 it matches the previous default brightness.
-    float texture_highlight = dampen(
-        0.5 * sqr(linear_step(0.63, 1.0, base_color.r)) + 0.03 * base_color.r
-    ) * WATER_TEXTURE_INTENSITY;
-#if WATER_TEXTURE == WATER_TEXTURE_HIGHLIGHT_UNDERGROUND
-    texture_highlight *= 1.0 - cube(linear_step(0.0, 0.5, light_levels.y));
-#endif
-
-    material.albedo
-        = clamp01(0.5 * exp(-2.0 * water_absorption_coeff) * texture_highlight);
-    material.roughness += 0.3 * texture_highlight;
-    alpha += texture_highlight;
-#elif WATER_TEXTURE == WATER_TEXTURE_VANILLA
-    vec4 base_color = read_tex_anisotropic_or_plain(gtexture, uv) * tint;
-    material.albedo = srgb_eotf_inv(base_color.rgb * base_color.a)
-        * rec709_to_working_color;
-    alpha = base_color.a;
-#endif
-
-    // Water edge highlight
-
-#ifdef WATER_EDGE_HIGHLIGHT
-    float dist = layer_dist * max(abs(direction_world.y), eps);
-
-#if WATER_TEXTURE == WATER_TEXTURE_HIGHLIGHT \
-    || WATER_TEXTURE == WATER_TEXTURE_HIGHLIGHT_UNDERGROUND
-    float edge_highlight
-        = cube(max0(1.0 - 2.0 * dist)) * (1.0 + 8.0 * texture_highlight);
-#else
-    float edge_highlight = cube(max0(1.0 - 2.0 * dist));
-#endif
-    edge_highlight *= WATER_EDGE_HIGHLIGHT_INTENSITY * max0(normal.y)
-        * (1.0 - 0.5 * sqr(light_levels.y));
-    ;
-
-    material.albedo += 0.1 * edge_highlight
-        / mix(1.0,
-              max(dot(ambient_color, luminance_weights_rec2020), 0.5),
-              light_levels.y);
-    material.albedo = clamp01(material.albedo);
-    alpha += edge_highlight;
-#endif
-
-    return material;
-}
-
-vec4 water_absorption_approx(
-    vec4 color,
-    float sss_depth,
-    float layer_dist,
-    float LoV,
-    float NoV,
-    float cloud_shadows
-) {
-    // BIOME_WATER_COLOR_INTENSITY scales how strongly the per-biome water
-    // tint (swamp brown, moat blue, etc.) drives the underwater absorption
-    // coefficients. At 0 the absorption falls back to a neutral grey
-    // baseline; at 1 it matches the previous behaviour (full biome tint).
-    // We blend the biome tint toward neutral grey (0.5) by the inverse of
-    // the slider — this preserves luminance while letting the slider dial
-    // the colour saturation up or down without affecting overall density.
-    vec3 biome_water_color = srgb_eotf_inv(tint.rgb) * rec709_to_working_color;
-    biome_water_color = mix(
-        vec3(dot(biome_water_color, luminance_weights_rec2020)),
-        biome_water_color,
-        BIOME_WATER_COLOR_INTENSITY
-    );
-    vec3 absorption_coeff = biome_water_coeff(biome_water_color);
-    float dist = layer_dist * float(isEyeInWater != 1 || NoV >= 0.0);
-
-    mat2x3 water_fog = water_fog_simple(
-        light_color * cloud_shadows,
-        ambient_color,
-        absorption_coeff,
-        light_levels,
-        dist,
-        -LoV,
-        sss_depth
-    );
-
-    float brightness_control = 1.0 - exp(-0.33 * layer_dist);
-    brightness_control *= max(light_levels.x, light_levels.y);
-
-    return vec4(
-        color.rgb
-            + water_fog[0] * (1.0 + 6.0 * sqr(water_fog[1]))
-                * brightness_control,
-        1.0 - water_fog[1].x
-    );
-}
-
-// Parallax nether portal effect inspired by Complementary Reimagined Shaders by
-// EminGT Thanks to Emin for letting me use his idea!
-
-vec2 get_uv_from_local_coord(vec2 local_coord) {
-    return atlas_tile_offset + atlas_tile_scale * fract(local_coord);
-}
-
-vec2 get_local_coord_from_uv(vec2 uv) {
-    return (uv - atlas_tile_offset) * rcp(atlas_tile_scale);
-}
-
-vec4 draw_nether_portal(vec3 direction_world, float layer_dist) {
-    const int step_count = 20;
-    const float parallax_depth = 0.2;
-        const float density_threshold = 0.6;
-    const float depth_step = rcp(float(step_count));
-
-    float dither = interleaved_gradient_noise(gl_FragCoord.xy, frameCounter);
-
-    vec3 direction_tangent = -normalize(position_tangent);
-    mat2 uv_gradient = mat2(dFdx(uv), dFdy(uv));
-
-    vec3 ray_step
-        = vec3(
-              direction_tangent.xy * rcp(-direction_tangent.z) * parallax_depth,
-              1.0
-          )
-        * depth_step;
-    vec3 pos = vec3(atlas_tile_coord + ray_step.xy * dither, 0.0);
-
-    vec4 result = vec4(0.0);
-
-    for (uint i = 0; i < step_count; ++i) {
-        vec4 col = textureGrad(
-            gtexture,
-            get_uv_from_local_coord(pos.xy),
-            uv_gradient[0],
-            uv_gradient[1]
-        );
-
-        float density = dot(col.rgb, luminance_weights_rec709);
-        density = linear_step(0.0, density_threshold, density);
-        density = max(density, 0.23);
-        density *= 1.0 - depth_step * (i + dither);
-
-        result += col * density;
-
-        pos += ray_step;
-    }
-
-    // Edge highlight
-    float dist = layer_dist * max_of(abs(direction_world));
-    float edge_highlight = cube(max0(1.0 - 2.0 * dist));
-    result *= 1.0 + 2.0 * edge_highlight;
-
-    return clamp01(result * NETHER_PORTAL_INTENSITY * depth_step);
-}
-
-#else
-vec4 draw_nether_portal(vec3 direction_world, float layer_dist) {
-    return vec4(0.0);
 }
 #endif
 
