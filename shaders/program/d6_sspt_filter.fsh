@@ -46,7 +46,19 @@ uniform sampler2D colortex17; // sspt color + sigma
 uniform sampler2D colortex18; // sspt history frames
 uniform sampler2D colortex19; // sspt gbuffer data
 
-uniform sampler2D depthtex1;  // geometry depth (non-DH path, via combined_depth_tex)
+uniform sampler2D depthtex1; // vanilla geometry depth
+
+// SVGF pass only needs combined depth; avoid full LoD include because Voxy's
+// patched deferred programs don't expose required projection uniforms.
+#if defined DISTANT_HORIZONS || defined VOXY
+#ifndef LUSTER_COLORTEX15_DECLARED
+#define LUSTER_COLORTEX15_DECLARED
+uniform sampler2D colortex15; // merged vanilla + LoD/Voxy depth
+#endif
+#define SSPT_FILTER_DEPTH_TEX colortex15
+#else
+#define SSPT_FILTER_DEPTH_TEX depthtex1
+#endif
 
 uniform vec2 view_res;
 
@@ -55,7 +67,6 @@ uniform vec2 view_res;
 // ------------
 
 #include "/include/lighting/sspt/temporal.glsl"
-#include "/include/misc/lod_mod_support.glsl"
 #include "/include/utility/color.glsl"
 #include "/include/utility/fast_math.glsl"
 
@@ -162,7 +173,7 @@ void main() {
     ivec2 texel = ivec2(gl_FragCoord.xy);
     ivec2 gbuffer_texel = ivec2(uv * view_res * taau_render_scale);
 
-    float depth = texelFetch(combined_depth_tex, gbuffer_texel, 0).x;
+    float depth = texelFetch(SSPT_FILTER_DEPTH_TEX, gbuffer_texel, 0).x;
 
     if (depth < 1.0) {
         filtered = atrousSVGF(texel, SVGF_SIZE);
