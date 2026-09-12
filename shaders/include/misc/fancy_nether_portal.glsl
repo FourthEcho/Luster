@@ -22,10 +22,6 @@ vec2 get_uv_from_local_coord(vec2 local_coord) {
     return atlas_tile_offset + atlas_tile_scale * fract(local_coord);
 }
 
-vec2 get_local_coord_from_uv(vec2 uv) {
-    return (uv - atlas_tile_offset) * rcp(atlas_tile_scale);
-}
-
 vec4 draw_nether_portal(vec3 direction_world, float layer_dist) {
     const int step_count = 20;
     const float parallax_depth = 0.2;

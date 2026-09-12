@@ -19,7 +19,7 @@ Atmosphere · lighting · clouds · water · image quality — built with Iris a
 
 ## About
 
-Luster is a heavily reworked shader pack built on the [Photon](https://github.com/sixthsurge/photon) codebase by SixthSurge. It's designed around modular rendering systems rather than a single visual gimmick — dynamic atmosphere, layered volumetric clouds, configurable lighting and reflections, detailed water, labPBR material support, temporal reconstruction, and a full post-processing stack — all exposed through Iris' in-game settings menu.
+(WIP) Luster is a heavily reworked shader pack built on the [Photon](https://github.com/sixthsurge/photon) codebase by SixthSurge. It's designed around modular rendering systems rather than a single visual gimmick — dynamic atmosphere, layered volumetric clouds, configurable lighting and reflections, detailed water, labPBR material support, temporal reconstruction, and a full post-processing stack — all exposed through Iris' in-game settings menu.
 
 A dedicated **Mac Compatible** profile makes Luster one of the few shader packs built to actually run well on Apple Silicon through Iris' OpenGL 4.1 compatibility path.
 
@@ -68,7 +68,7 @@ Some features are conditional on shader loader, Minecraft version, GPU, and sele
 
 ## Configuration
 
-Settings are organized into: **World** (weather, moon phase, foliage) · **Lighting** (colored lights, IBL, shadows, AO) · **Sky** (atmosphere, clouds, stars, aurora) · **Fog** (scattering, volumetrics, biome variants) · **Materials** (PBR, POM, SSS, reflections) · **Water** (waves, caustics, puddles) · **Post-Processing** (exposure, AA, bloom, grading) · **Misc** and **Mods**.
+Settings are organized into: **World** (weather, moon phase, foliage) · **Lighting** (Direct Lighting, Indirect Lighting, SH Skylight) · **Sky** (atmosphere, clouds, stars, aurora) · **Fog** (scattering, volumetrics, biome variants) · **Materials** (PBR, POM, SSS, reflections) · **Water** (waves, caustics, puddles) · **Post-Processing** (exposure, AA, bloom, grading) · **Misc** and **Mods**.
 
 ## Development
 

@@ -62,6 +62,14 @@ uniform sampler2D colortex15; // merged vanilla + LoD/Voxy depth
 
 uniform vec2 view_res;
 
+// Declared for "/include/misc/lod_mod_support.glsl": its VOXY branch builds
+// the combined projection at global scope from these. Standard Iris uniforms,
+// always available to composite passes.
+uniform float near;
+
+uniform mat4 gbufferProjection;
+uniform mat4 gbufferProjectionInverse;
+
 // ------------
 //   Includes
 // ------------
