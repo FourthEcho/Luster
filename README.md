@@ -68,7 +68,7 @@ Some features are conditional on shader loader, Minecraft version, GPU, and sele
 
 ## Configuration
 
-Settings are organized into: **World** (weather, moon phase, foliage) · **Lighting** (colored lights, IBL, shadows, AO) · **Sky** (atmosphere, clouds, stars, aurora) · **Fog** (scattering, volumetrics, biome variants) · **Materials** (PBR, POM, SSS, reflections) · **Water** (waves, caustics, puddles) · **Post-Processing** (exposure, AA, bloom, grading) · **Misc** and **Mods**.
+Settings are organized into: **World** (weather, moon phase, foliage) · **Lighting** (Direct Lighting, Indirect Lighting, SH Skylight) · **Sky** (atmosphere, clouds, stars, aurora) · **Fog** (scattering, volumetrics, biome variants) · **Materials** (PBR, POM, SSS, reflections) · **Water** (waves, caustics, puddles) · **Post-Processing** (exposure, AA, bloom, grading) · **Misc** and **Mods**.
 
 ## Development
 
