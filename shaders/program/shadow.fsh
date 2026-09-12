@@ -59,13 +59,11 @@ uniform float rainStrength;
 uniform vec2 taa_offset;
 uniform vec3 light_dir;
 
+#include "/include/surface/refraction.glsl"
 #include "/include/surface/water_normal.glsl"
 #include "/include/fog/water_absorption.glsl"
 #include "/include/utility/color.glsl"
 #include "/include/utility/encoding.glsl"
-
-const float air_n = 1.000293; // for 0°C and 1 atm
-const float water_n = 1.333; // for 20°C
 
 const vec3 water_absorption_coeff
     = vec3(WATER_ABSORPTION_R, WATER_ABSORPTION_G, WATER_ABSORPTION_B)
@@ -75,18 +73,6 @@ const vec3 water_extinction_coeff
     = water_absorption_coeff + water_scattering_coeff;
 
 const float distance_through_water = 5.0; // m
-
-// using the built-in GLSL refract() seems to cause NaNs on Intel drivers, but
-// with this function, which does the exact same thing, it's fine
-vec3 refract_safe(vec3 I, vec3 N, float eta) {
-    float NoI = dot(N, I);
-    float k = 1.0 - eta * eta * (1.0 - NoI * NoI);
-    if (k < 0.0) {
-        return vec3(0.0);
-    } else {
-        return eta * I - (eta * NoI + sqrt(k)) * N;
-    }
-}
 
 float get_water_caustics() {
 #ifndef WATER_CAUSTICS
@@ -114,7 +100,7 @@ float get_water_caustics() {
 
     vec3 old_pos = world_pos;
     vec3 new_pos = world_pos
-        + refract_safe(light_dir, normal, air_n / water_n)
+        + refract_safe(light_dir, normal, refraction_ior_air / refraction_ior_water)
             * (distance_through_water * WATER_CAUSTICS_INTENSITY);
 
     float old_area

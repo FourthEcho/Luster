@@ -140,6 +140,7 @@ uniform float time_midnight;
 #include "/include/misc/lightning_flash.glsl"
 #include "/include/misc/lod_mod_support.glsl"
 #include "/include/misc/material_masks.glsl"
+#include "/include/surface/refraction.glsl"
 #include "/include/utility/color.glsl"
 #include "/include/utility/encoding.glsl"
 #include "/include/utility/fast_math.glsl"
@@ -278,30 +279,118 @@ void main() {
         view_distance
     );
 
-    // Refraction
+    // Refraction: Snell bend through the slab (Filament `thin` style),
+    // roughness cone gather and spectral dispersion.
+    // See "/include/surface/refraction.glsl" for the documented design.
 
     vec2 refracted_uv = uv;
     float layer_dist = abs(view_distance - length(back_position_view));
 
 #if REFRACTION != REFRACTION_OFF
     if (is_translucent && refraction_data != vec4(0.0)) {
-        vec2 normal_tangent = vec2(
-            unsplit_2x8(refraction_data.xy) * 2.0 - 1.0,
-            unsplit_2x8(refraction_data.zw) * 2.0 - 1.0
-        );
+        vec3 refr_normal;
+        float refr_roughness;
+        decode_refraction_data(refraction_data, refr_normal, refr_roughness);
 
-        refracted_uv = uv
-            + normal_tangent.xy * rcp(max(view_distance, 1.0))
-                * min(layer_dist, 8.0) * (0.1 * REFRACTION_INTENSITY);
+        // Incident ray runs eye -> surface; face the normal against it
+        vec3 incident = direction_world;
+        if (dot(refr_normal, incident) > 0.0) refr_normal = -refr_normal;
+
+        // Entering the slab (eye in air) bends rays toward the normal;
+        // exiting (eye in water) bends them away, going totally internally
+        // reflected past the critical angle — the Snell's-window look —
+        // instead of refracting through.
+        float eta = isEyeInWater == 1
+            ? refraction_ior_water / refraction_ior_air
+            : refraction_ior_air / refraction_ior_water;
+        vec3 eta_rgb = eta * vec3(0.9975, 1.0, 1.0025);
+
+        // Slab exit = entry + refracted ray * thickness (REFRACTION_INTENSITY
+        // scales the effective thickness; 0 disables the effect).
+        // Exits behind the camera would mirror through the perspective
+        // divide and smear along the screen edges, so those pixels fall
+        // back to the unrefracted UV.
+        float refr_len = min(layer_dist, 8.0) * REFRACTION_INTENSITY;
+        mat3 scene_to_view_rot = mat3(gbufferModelView);
+
+        // Per-channel refracted directions. refract_safe returns zero on
+        // total internal reflection, which reads as the mirror-like
+        // Snell's-window surround, so TIR channels keep the unrefracted
+        // background instead of refracting.
+        vec3 refr_dir_r = refract_safe(incident, refr_normal, eta_rgb.r);
+        vec3 refr_dir_g = refract_safe(incident, refr_normal, eta_rgb.g);
+        vec3 refr_dir_b = refract_safe(incident, refr_normal, eta_rgb.b);
+
+        vec3 exit_view_r = front_position_view
+            + scene_to_view_rot * refr_dir_r * refr_len;
+        vec3 exit_view_g = front_position_view
+            + scene_to_view_rot * refr_dir_g * refr_len;
+        vec3 exit_view_b = front_position_view
+            + scene_to_view_rot * refr_dir_b * refr_len;
+
+        vec2 red_uv = refr_dir_r != vec3(0.0) && exit_view_r.z < -near
+            ? view_to_screen_space(exit_view_r, true).xy
+            : uv;
+        vec2 green_uv = refr_dir_g != vec3(0.0) && exit_view_g.z < -near
+            ? view_to_screen_space(exit_view_g, true).xy
+            : uv;
+        vec2 blue_uv = refr_dir_b != vec3(0.0) && exit_view_b.z < -near
+            ? view_to_screen_space(exit_view_b, true).xy
+            : uv;
+
+        // Refracted lookups outside the viewport would smear edge pixels,
+        // so off-frame results fall back to the unrefracted background.
+        if (clamp01(red_uv) != red_uv
+            || clamp01(green_uv) != green_uv
+            || clamp01(blue_uv) != blue_uv) {
+            red_uv = uv;
+            green_uv = uv;
+            blue_uv = uv;
+        }
+
+        refracted_uv = green_uv;
 
         // Make sure the refracted fragment is behind the fragment position
         float depth_refracted = texture(depthtex1, refracted_uv).x;
         refracted_uv
             = mix(refracted_uv, uv, float(depth_refracted < front_depth));
-    }
-#endif
 
+        // Roughness cone blur (Filament IOR-scaled roughness); water stays
+        // subpixel-sharp while rough ice/frosted glass visibly scatters
+        float refr_rough = refraction_roughness_scale(
+            refr_roughness,
+            refraction_ior_water
+        );
+        float blur_radius = clamp(
+            refr_rough * min(layer_dist, 8.0) * 0.01 * REFRACTION_INTENSITY,
+            0.0,
+            0.02
+        );
+
+        if (blur_radius < 0.25 * max(view_pixel_size.x, view_pixel_size.y)) {
+            fragment_color = vec3(
+                texture(colortex0, red_uv * taau_render_scale).r,
+                texture(colortex0, refracted_uv * taau_render_scale).g,
+                texture(colortex0, blue_uv * taau_render_scale).b
+            );
+        } else {
+            fragment_color = vec3(
+                texture(colortex0, red_uv * taau_render_scale).r,
+                refraction_blur(
+                    colortex0,
+                    refracted_uv,
+                    blur_radius,
+                    taau_render_scale
+                ).g,
+                texture(colortex0, blue_uv * taau_render_scale).b
+            );
+        }
+    } else {
+        fragment_color = texture(colortex0, refracted_uv * taau_render_scale).rgb;
+    }
+#else
     fragment_color = texture(colortex0, refracted_uv * taau_render_scale).rgb;
+#endif
 
 
     vec3 original_color = fragment_color;
