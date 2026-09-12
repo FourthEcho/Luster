@@ -6,8 +6,8 @@
 // and is pulled in here so programs only need this single include. The
 // ACES and AGX families already live under "aces/" and "agx/".
 
-#include "/include/post_processing/aces_fit/aces_fit.glsl"
-#include "/include/post_processing/aces_full/aces_full.glsl"
+#include "/include/post_processing/aces/aces_fit.glsl"
+#include "/include/post_processing/aces/aces_full.glsl"
 #include "/include/post_processing/lottes/lottes.glsl"
 #include "/include/post_processing/hejl_2015/hejl_2015.glsl"
 #include "/include/post_processing/hejl_burgess/hejl_burgess.glsl"
