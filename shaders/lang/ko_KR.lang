@@ -1215,7 +1215,6 @@ option.IMAGE_SHARPENING_INTENSITY.comment = Controls final edge-aware image shar
 
 
 screen.academy_color                    = Academy Color
-screen.agx_color                         = AGX Color
 option.ACADEMY_EXPOSURE                 = ACES Exposure
 option.ACADEMY_CONTRAST                = ACES Contrast
 option.ACADEMY_SATURATION              = ACES Saturation

@@ -343,7 +343,10 @@ void main() {
         vec4 i = texelFetch(colortex9, src_texel + ivec2(1, 1), 0);
         vec4 e = current;
 
-        // Soft minimum and maximum ("Hybrid Reconstruction Antialiasing")
+        // Soft minimum and maximum over the cross taps averaged with the
+        // soft minimum and maximum over the diagonal taps (neighborhood
+        // clamping family; cf. Yang et al., "A Survey of Temporal
+        // Antialiasing Techniques", 2020)
         //        b         a b c
         // (min d e f + min d e f) / 2
         //        h         g h i

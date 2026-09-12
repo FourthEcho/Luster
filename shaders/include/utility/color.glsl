@@ -17,11 +17,36 @@ const vec3 primary_wavelengths_ap1 = vec3(630.0, 530.0, 465.0);
 // -----------------------------------
 
 #define display_to_working_color rec709_to_rec2020
-#define working_to_display_color rec2020_to_rec709
 #define rec709_to_working_color rec709_to_rec2020
+// Working (Rec. 2020) to display-referred linear. The target gamut follows
+// DISPLAY_GAMUT from "/settings.glsl" (mirrors the Iris 1.6.4+ color
+// spaces); DCI-P3 additionally adapts D65 to the DCI white point.
+#if DISPLAY_GAMUT == DISPLAY_GAMUT_DCI_P3
+#define working_to_display_color rec2020_to_dci_p3
+#elif DISPLAY_GAMUT == DISPLAY_GAMUT_DISPLAY_P3
+#define working_to_display_color rec2020_to_display_p3
+#elif DISPLAY_GAMUT == DISPLAY_GAMUT_REC2020
+#define working_to_display_color mat3(1.0)
+#elif DISPLAY_GAMUT == DISPLAY_GAMUT_ADOBE_RGB
+#define working_to_display_color rec2020_to_adobe_rgb
+#else // DISPLAY_GAMUT_SRGB
+#define working_to_display_color rec2020_to_rec709
+#endif
 
-// Helper macro to convert sRGB colors to working space
-#define from_srgb(x) (pow(x, vec3(2.2)) * rec709_to_rec2020)
+// Helper macro to convert display-authored colors (fog tints, light colors,
+// sky accents picked against the selected output gamut) to working space.
+// The sRGB branch is exactly the old from_srgb formulation.
+#if DISPLAY_GAMUT == DISPLAY_GAMUT_DCI_P3
+#define from_display(x) (pow(x, vec3(2.6)) * display_p3_to_rec2020)
+#elif DISPLAY_GAMUT == DISPLAY_GAMUT_DISPLAY_P3
+#define from_display(x) (pow(x, vec3(2.2)) * display_p3_to_rec2020)
+#elif DISPLAY_GAMUT == DISPLAY_GAMUT_REC2020
+#define from_display(x) (pow(x, vec3(2.4)))
+#elif DISPLAY_GAMUT == DISPLAY_GAMUT_ADOBE_RGB
+#define from_display(x) (pow(x, vec3(2.2)) * adobe_rgb_to_rec2020)
+#else // DISPLAY_GAMUT_SRGB
+#define from_display(x) (pow(x, vec3(2.2)) * rec709_to_rec2020)
+#endif
 
 // Rec. 709 (sRGB primaries)
 const mat3 xyz_to_rec709 = mat3(
@@ -74,12 +99,77 @@ const mat3 rec2020_to_xyz = mat3(
 const mat3 rec709_to_rec2020 = rec709_to_xyz * xyz_to_rec2020;
 const mat3 rec2020_to_rec709 = rec2020_to_xyz * xyz_to_rec709;
 
+// Display P3 (D65 primaries)
+const mat3 display_p3_to_xyz = mat3(
+    0.4865709,
+    0.2656677,
+    0.1982173,
+    0.2289746,
+    0.6917385,
+    0.0792869,
+    0.0,
+    0.0451134,
+    1.0439444
+);
+const mat3 xyz_to_display_p3 = mat3(
+    2.4934969,
+    -0.9313836,
+    -0.4027108,
+    -0.8294889,
+    1.7626640,
+    0.0236247,
+    0.0358458,
+    -0.0761724,
+    0.9568845
+);
+
+// Adobe RGB (1998, D65)
+const mat3 adobe_rgb_to_xyz = mat3(
+    0.5767309,
+    0.1855540,
+    0.1881852,
+    0.2973769,
+    0.6273491,
+    0.0752741,
+    0.0270343,
+    0.0706872,
+    0.9911085
+);
+const mat3 xyz_to_adobe_rgb = mat3(
+    2.0413690,
+    -0.5649464,
+    -0.3446944,
+    -0.9692660,
+    1.8760108,
+    0.0415560,
+    0.0134474,
+    -0.1183897,
+    1.0154096
+);
+
+const mat3 rec2020_to_display_p3 = rec2020_to_xyz * xyz_to_display_p3;
+const mat3 display_p3_to_rec2020 = display_p3_to_xyz * xyz_to_rec2020;
+const mat3 rec2020_to_adobe_rgb = rec2020_to_xyz * xyz_to_adobe_rgb;
+const mat3 adobe_rgb_to_rec2020 = adobe_rgb_to_xyz * xyz_to_rec2020;
+
+// Bradford chromatic adaptation D65 -> DCI-P3 theater white (0.314, 0.351)
+const mat3 d65_to_dci_p3_white = mat3(
+    0.976537,
+    -0.015456,
+    -0.016647,
+    -0.025716,
+    1.028549,
+    -0.003772,
+    -0.005699,
+    0.011067,
+    0.871363
+);
+const mat3 rec2020_to_dci_p3
+    = rec2020_to_display_p3 * d65_to_dci_p3_white;
+
 // ------------------------------
 //   Transfer functions (gamma)
 // ------------------------------
-
-#define display_eotf srgb_eotf
-#define display_eotf_inv srgb_eotf_inv
 
 vec3 srgb_eotf(vec3 linear) { // linear -> sRGB
     return 1.14374
@@ -91,6 +181,37 @@ vec3 srgb_eotf_inv(vec3 srgb) { // sRGB -> linear
         * (srgb * (srgb * 0.305306011 + 0.682171111)
            + 0.012522878); // https://chilliant.blogspot.com/2012/08/srgb-approximations-for-hlsl.html
 }
+
+// DCI-P3 theater transfer (gamma 2.6 power law)
+vec3 dci_p3_eotf(vec3 linear) { return pow(linear, vec3(1.0 / 2.6)); }
+
+vec3 dci_p3_eotf_inv(vec3 encoded) { return pow(encoded, vec3(2.6)); }
+
+// Rec. 2020 SDR transfer (BT.1886 gamma 2.4 approximation)
+vec3 rec2020_eotf(vec3 linear) { return pow(linear, vec3(1.0 / 2.4)); }
+
+vec3 rec2020_eotf_inv(vec3 encoded) { return pow(encoded, vec3(2.4)); }
+
+// Adobe RGB (1998) transfer (gamma 2.2 power law)
+vec3 adobe_rgb_eotf(vec3 linear) { return pow(linear, vec3(1.0 / 2.2)); }
+
+vec3 adobe_rgb_eotf_inv(vec3 encoded) { return pow(encoded, vec3(2.2)); }
+
+// Display encoding follows DISPLAY_GAMUT (Display P3 shares the sRGB
+// transfer function, so it needs no dedicated EOTF)
+#if DISPLAY_GAMUT == DISPLAY_GAMUT_DCI_P3
+#define display_eotf dci_p3_eotf
+#define display_eotf_inv dci_p3_eotf_inv
+#elif DISPLAY_GAMUT == DISPLAY_GAMUT_REC2020
+#define display_eotf rec2020_eotf
+#define display_eotf_inv rec2020_eotf_inv
+#elif DISPLAY_GAMUT == DISPLAY_GAMUT_ADOBE_RGB
+#define display_eotf adobe_rgb_eotf
+#define display_eotf_inv adobe_rgb_eotf_inv
+#else // DISPLAY_GAMUT_SRGB / DISPLAY_GAMUT_DISPLAY_P3
+#define display_eotf srgb_eotf
+#define display_eotf_inv srgb_eotf_inv
+#endif
 
 // -------------------------------------------------
 //   Transformations between color representations

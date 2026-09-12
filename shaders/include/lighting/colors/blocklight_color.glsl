@@ -17,7 +17,7 @@ vec3 get_blocklight_temperature_color() {
 }
 
 #define blocklight_color \
-    (from_srgb(vec3(BLOCKLIGHT_R, BLOCKLIGHT_G, BLOCKLIGHT_B)) * BLOCKLIGHT_I \
+    (from_display(vec3(BLOCKLIGHT_R, BLOCKLIGHT_G, BLOCKLIGHT_B)) * BLOCKLIGHT_I \
      * get_blocklight_temperature_color())
 
 #endif // INCLUDE_LIGHTING_COLORS_BLOCKLIGHT_COLOR

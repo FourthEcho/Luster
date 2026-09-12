@@ -1084,6 +1084,18 @@ option.WHITE_WORLD_BRIGHTNESS             = White World Brightness
 option.WHITE_WORLD_BRIGHTNESS.comment     = Adjusts the brightness of the white-world material debug view.
 option.TONEMAP_COMPARISON              = Tonemap Comparison
 option.TONEMAP_COMPARISON.comment      = Compare two different tonemapping operators side-by-side. Helps evaluate the visual differences between modes.
+option.DISPLAY_GAMUT                   = Display Gamut
+option.DISPLAY_GAMUT.comment           = Output color gamut handled natively by the shader (requires Iris 1.6.4+ with supportsColorCorrection). sRGB matches standard displays; Display P3 / Rec.2020 / Adobe RGB target wide-gamut displays. Leave the Iris client color space on sRGB — this pack converts from its Rec.2020 working space itself, including fog, light and sky accent colors.
+option.DISPLAY_GAMUT_SRGB              = sRGB
+option.DISPLAY_GAMUT_DCI_P3            = DCI-P3
+option.DISPLAY_GAMUT_DISPLAY_P3        = Display P3
+option.DISPLAY_GAMUT_REC2020           = Rec.2020
+option.DISPLAY_GAMUT_ADOBE_RGB         = Adobe RGB
+value.DISPLAY_GAMUT.DISPLAY_GAMUT_SRGB       = sRGB
+value.DISPLAY_GAMUT.DISPLAY_GAMUT_DCI_P3     = DCI-P3
+value.DISPLAY_GAMUT.DISPLAY_GAMUT_DISPLAY_P3 = Display P3
+value.DISPLAY_GAMUT.DISPLAY_GAMUT_REC2020    = Rec.2020
+value.DISPLAY_GAMUT.DISPLAY_GAMUT_ADOBE_RGB  = Adobe RGB
 option.tonemap_left                    = Left Tonemap
 option.tonemap_left.comment            = Selects the tonemap operator for the left screen half. Use with Tonemap Comparison to evaluate different modes.
 option.tonemap_right                   = Right Tonemap
@@ -1427,7 +1439,6 @@ option.IMAGE_SHARPENING_INTENSITY.comment = Controls final edge-aware image shar
 
 
 screen.academy_color                    = Academy Color
-screen.agx_color                         = AGX Color
 option.COLOR_GRADING                    = Color Grading
 option.COLOR_GRADING.comment            = Enables the full color grading pipeline. When on: applies brightness/contrast/saturation, white balance, ASC CDL three-way lift/gamma/gain, perceptual Oklab contrast, selective hue/saturation per color range, shadow and highlight tints, and black/white point. When off: the tonemapper output is used as-is with no further grading.
 option.ACADEMY_EXPOSURE                 = ACES Exposure

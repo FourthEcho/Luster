@@ -13,7 +13,7 @@ vec3 get_ambient_color() {
     nether_color *= 0.05 * NETHER_I;
 #else
     vec3 nether_color
-        = from_srgb(vec3(NETHER_R, NETHER_G, NETHER_B)) * 0.1 * NETHER_I;
+        = from_display(vec3(NETHER_R, NETHER_G, NETHER_B)) * 0.1 * NETHER_I;
 #endif
 
     return nether_color;

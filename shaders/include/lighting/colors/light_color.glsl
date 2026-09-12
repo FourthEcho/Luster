@@ -36,9 +36,9 @@ vec3 get_sun_tint() {
 
     // User tint
 
-    const vec3 tint_morning = from_srgb(vec3(SUN_MR, SUN_MG, SUN_MB));
-    const vec3 tint_noon = from_srgb(vec3(SUN_NR, SUN_NG, SUN_NB));
-    const vec3 tint_evening = from_srgb(vec3(SUN_ER, SUN_EG, SUN_EB));
+    const vec3 tint_morning = from_display(vec3(SUN_MR, SUN_MG, SUN_MB));
+    const vec3 tint_noon = from_display(vec3(SUN_NR, SUN_NG, SUN_NB));
+    const vec3 tint_evening = from_display(vec3(SUN_ER, SUN_EG, SUN_EB));
 
     vec3 user_tint = mix(tint_noon, tint_morning, time_sunrise);
     user_tint = mix(user_tint, tint_evening, time_sunset);
@@ -55,7 +55,7 @@ float get_moon_exposure() {
 }
 
 vec3 get_moon_tint() {
-    const vec3 base_tint = from_srgb(vec3(MOON_R, MOON_G, MOON_B));
+    const vec3 base_tint = from_display(vec3(MOON_R, MOON_G, MOON_B));
 
     return base_tint;
 }

@@ -588,6 +588,18 @@ const float wetnessHalflife         = 70.0;
 
   #define tonemap tonemap_lottes // [tonemap_aces_fit tonemap_aces_full tonemap_lottes tonemap_hejl_2015 tonemap_hejl_burgess tonemap_tech tonemap_uncharted_2 tonemap_ozius tonemap_reinhard tonemap_reinhard_jodie tonemap_agx tonemap_agx_punchy tonemap_agx_golden]
 
+  // Display output gamut. Mirrors the Iris 1.6.4+ color spaces (see the
+  // "Color Spaces" ShaderDoc entry): with supportsColorCorrection = true in
+  // shaders.properties, Iris leaves output conversion to the shader, so the
+  // pack converts its Rec. 2020 working space to the selected gamut natively
+  // (matrix + transfer function) instead of assuming sRGB.
+  #define DISPLAY_GAMUT_SRGB 0
+  #define DISPLAY_GAMUT_DCI_P3 1
+  #define DISPLAY_GAMUT_DISPLAY_P3 2
+  #define DISPLAY_GAMUT_REC2020 3
+  #define DISPLAY_GAMUT_ADOBE_RGB 4
+  #define DISPLAY_GAMUT DISPLAY_GAMUT_SRGB // [DISPLAY_GAMUT_SRGB DISPLAY_GAMUT_DCI_P3 DISPLAY_GAMUT_DISPLAY_P3 DISPLAY_GAMUT_REC2020 DISPLAY_GAMUT_ADOBE_RGB]
+
   #define COLOR_GRADING
 
   // HDR / global grading

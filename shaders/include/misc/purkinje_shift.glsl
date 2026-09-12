@@ -1,7 +1,8 @@
 #if !defined INCLUDE_MISC_PURKINJE_SHIFT
 #define INCLUDE_MISC_PURKINJE_SHIFT
 
-// http://www.diva-portal.org/smash/get/diva2:24136/FULLTEXT01.pdf
+// Purkinje effect: mesopic shift toward rod (scotopic) peak sensitivity.
+// https://en.wikipedia.org/wiki/Purkinje_effect
 vec3 purkinje_shift(vec3 rgb, vec2 light_levels) {
 #if !(defined PURKINJE_SHIFT && defined WORLD_OVERWORLD)
     return rgb;

@@ -56,7 +56,10 @@ void main() {
     h = rgb_to_ycocg(reinhard(h));
     i = rgb_to_ycocg(reinhard(i));
 
-    // Soft minimum and maximum ("Hybrid Reconstruction Antialiasing")
+    // Soft minimum and maximum over the cross taps averaged with the soft
+    // minimum and maximum over the diagonal taps (neighborhood clamping
+    // family; cf. Yang et al., "A Survey of Temporal Antialiasing
+    // Techniques", 2020)
     //        b         a b c
     // (min d e f + min d e f) / 2
     //        h         g h i

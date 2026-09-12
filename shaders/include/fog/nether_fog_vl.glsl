@@ -28,11 +28,11 @@ vec3 nether_fog_emission(vec3 world_pos) {
     main_col /= max(dot(main_col, luminance_weights_rec2020), eps);
     main_col = mix(vec3(1.0), main_col, NETHER_S);
 #else
-    main_col = from_srgb(vec3(NETHER_R, NETHER_G, NETHER_B));
+    main_col = from_display(vec3(NETHER_R, NETHER_G, NETHER_B));
 #endif
     main_col *= NETHER_I;
 
-    const vec3 alt_col = from_srgb(vec3(NETHER_R * 0.65, NETHER_G * 0.18, max(NETHER_B * 0.10, 0.002)));
+    const vec3 alt_col = from_display(vec3(NETHER_R * 0.65, NETHER_G * 0.18, max(NETHER_B * 0.10, 0.002)));
     const vec3 wind0 = vec3(1.0, 0.1, 0.5) * 0.01;
     const vec3 wind1 = vec3(-0.7, -0.1, -0.1) * 0.05;
 
@@ -75,7 +75,7 @@ mat2x3 raymarch_nether_fog(
     nether_color /= max(dot(nether_color, luminance_weights_rec2020), eps);
     nether_color = mix(vec3(1.0), nether_color, NETHER_S);
 #else
-    nether_color = from_srgb(vec3(NETHER_R, NETHER_G, NETHER_B));
+    nether_color = from_display(vec3(NETHER_R, NETHER_G, NETHER_B));
 #endif
     const float density_scale = 0.01;
     vec3 absorption_coeff = exp2(-nether_color) * density_scale;

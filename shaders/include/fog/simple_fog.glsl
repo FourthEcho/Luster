@@ -12,11 +12,11 @@
 
 const float lava_fog_start = 0.33;
 const float lava_fog_density = 1.0;
-const vec3 lava_fog_color = from_srgb(vec3(0.839, 0.373, 0.075)) * 2.0;
+const vec3 lava_fog_color = from_display(vec3(0.839, 0.373, 0.075)) * 2.0;
 
 const float snow_fog_start = 0.5;
 const float snow_fog_density = 1.0;
-const vec3 snow_fog_color = from_srgb(vec3(0.957, 0.988, 0.988)) * 0.3;
+const vec3 snow_fog_color = from_display(vec3(0.957, 0.988, 0.988)) * 0.3;
 
 const float cave_fog_start = 1.0;
 // CAVE_FOG_INTENSITY scales the cave fog density. At 1.0 it matches the
@@ -47,7 +47,7 @@ vec3 get_nether_fog_color() {
     color /= max(dot(color, luminance_weights_rec2020), eps);
     return mix(vec3(1.0), color, NETHER_S);
 #else
-    return from_srgb(vec3(NETHER_R, NETHER_G, NETHER_B));
+    return from_display(vec3(NETHER_R, NETHER_G, NETHER_B));
 #endif
 }
 

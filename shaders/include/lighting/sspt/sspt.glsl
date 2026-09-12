@@ -316,11 +316,11 @@ vec3 sunRadiance() {
     tint *= mix(vec3(1.0), vec3(0.95, 0.80, 1.0), blue_hour);
 
     vec3 user_tint = mix(
-        from_srgb(vec3(SUN_NR, SUN_NG, SUN_NB)),
-        from_srgb(vec3(SUN_MR, SUN_MG, SUN_MB)),
+        from_display(vec3(SUN_NR, SUN_NG, SUN_NB)),
+        from_display(vec3(SUN_MR, SUN_MG, SUN_MB)),
         time_sunrise
     );
-    user_tint = mix(user_tint, from_srgb(vec3(SUN_ER, SUN_EG, SUN_EB)), time_sunset);
+    user_tint = mix(user_tint, from_display(vec3(SUN_ER, SUN_EG, SUN_EB)), time_sunset);
 
     return exposure * tint * user_tint;
 }
@@ -330,7 +330,7 @@ vec3 sunRadiance() {
 vec3 moonRadiance() {
     float night_boost = 1.0 + 0.33 * rcp(clamp01(1.25 * max(-sun_dir.y, 0.1)));
     float exposure = 0.66 * MOON_I * moon_phase_brightness * night_boost;
-    return exposure * from_srgb(vec3(MOON_R, MOON_G, MOON_B));
+    return exposure * from_display(vec3(MOON_R, MOON_G, MOON_B));
 }
 #endif // DIRECT_SUN_BOUNCE
 
