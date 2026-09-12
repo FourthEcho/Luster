@@ -23,6 +23,7 @@ screen.water                           = Water
 screen.post                            = Post-Processing
 screen.camera                          = Camera
 screen.lens_flare                      = Lens Flare
+screen.agx_color                         = AGX Color
 screen.misc                            = Misc
 screen.tonemap_comparison              = Tonemap Comparison
 screen.mods                            = Mod Options
