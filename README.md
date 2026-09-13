@@ -72,7 +72,7 @@ Settings are organized into: **World** · **Lighting** · **Sky** · **Fog** · 
 
 ## Development
 
-Luster is actively developed. The source tree is organized into reusable modules under `shaders/include/`, rendering programs under `shaders/program/`, and world-specific passes under the `world*` directories. Bug reports and Luster-specific issues go in the [issue tracker](https://github.com/shashankpgowda/Luster/issues). If you have trouble in earlier version e.g 1.21.11 thats because of Macbook sampler limits just turn off cloud shadows or SSR and it will work again. I suggest you use the latest versions because iris has more samplers availble for these later versions e.g 26.2 allowing you to have more features at once.
+Luster is actively developed. The source tree is organized into reusable modules under `shaders/include/`, rendering programs under `shaders/program/`, and world-specific passes under the `world*` directories. Bug reports and Luster-specific issues go in the [issue tracker](https://github.com/shashankpgowda/Luster/issues). If you have trouble in earlier versions e.g 1.21.11 thats because of Macbook's sampler limits just turn off cloud shadows or SSR and it will work again. I suggest you use the latest versions because iris has more samplers availble for these later versions e.g 26.2 allowing you to have more features on at once.
 
 ## Acknowledgements
 
