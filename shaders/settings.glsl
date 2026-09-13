@@ -129,8 +129,6 @@ const float wetnessHalflife         = 70.0;
   #define SHADOW
   #define SHADOW_SSRT
   #define SHADOW_SSRT_STEPS 10 // [4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24]
-  #define CONTACT_SHADOWS
-  #define CONTACT_SHADOW_QUALITY 8 // [4 5 6 7 8 9 10 11 12 13 14 15 16]
   #define SHADOW_PCF
   //#define SHADOW_COLOR
   //#define SHADOW_VPS

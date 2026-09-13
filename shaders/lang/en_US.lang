@@ -166,10 +166,6 @@ option.SHADOW_SSRT                     = Distant Shadows
 option.SHADOW_SSRT.comment = Extends shadows beyond the shadow map distance using screen-space ray tracing. Fills in far shadows without increasing shadow map size. Moderate performance cost.
 option.SHADOW_SSRT_STEPS               = Distant Shadow Quality
 option.SHADOW_SSRT_STEPS.comment = Adjusts the number of ray steps for screen-space distant shadows. Higher = more accurate, less noisy far shadows at higher GPU cost.
-option.CONTACT_SHADOWS                 = Contact Shadows
-option.CONTACT_SHADOWS.comment = Short-range screen-space shadow check near every surface, catching fine self-shadowing (thin blocks, foliage, small overhangs) that the shadow map's resolution misses. Independent of Distant Shadows above, which only extends shadows beyond the shadow map's render distance.
-option.CONTACT_SHADOW_QUALITY          = Contact Shadow Quality
-option.CONTACT_SHADOW_QUALITY.comment = Adjusts the number of ray steps for contact shadows. Higher = more accurate, less noisy close-range shadows at a small GPU cost.
 option.SHADOW_COLOR                    = Colored Shadows
 option.SHADOW_COLOR.comment            = Translucent blocks cast tinted shadows
 option.SHADOW_VPS                      = Variable Penumbra Shadows

@@ -540,12 +540,6 @@ void main() {
                 clamp01(shadow_distance_fade)
             );
 
-#ifdef CONTACT_SHADOWS
-            // Independent of SHADOW_SSRT (distant-shadow extension above) -
-            // this only narrows down fine, close-range self-shadowing
-            shadows *= get_contact_shadows(uv, position_view, depth);
-#endif
-
             sss_depth = mix(
                 sss_depth_near,
                 sss_depth_distant,
