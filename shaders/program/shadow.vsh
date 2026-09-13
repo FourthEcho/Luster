@@ -78,6 +78,9 @@ void main() {
 
 #if defined WORLD_NETHER
     // No shadows, discard vertices now
+#ifdef WATER_CAUSTICS
+    scene_pos = vec3(0.0);
+#endif
     gl_Position = vec4(-1.0);
     return;
 #endif
