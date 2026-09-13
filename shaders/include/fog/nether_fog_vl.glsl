@@ -57,6 +57,72 @@ vec3 nether_fog_emission(vec3 world_pos) {
         * (density * fade_near * fade_far * fade_height);
 }
 
+// ------------------------------------------------------------------
+// Nether Smoke v2 - domain-warped turbulent smoke with proximity glow
+// ------------------------------------------------------------------
+// Feeds noise samples back into the sampling position (domain warping)
+// instead of a single flat noise tap, giving genuinely billowing/curling
+// shapes rather than a scrolled texture. Also adds a proximity-based
+// inner glow so smoke near the camera reads as lit from within by
+// nearby embers/lava, fading out with distance and height like real
+// smoke dispersing.
+#ifdef NETHER_SMOKE
+vec3 nether_smoke_v2_emission(vec3 world_pos, vec3 world_start_pos) {
+    vec3 main_col;
+#ifdef NETHER_USE_BIOME_COLOR
+    main_col = srgb_eotf_inv(clamp(fogColor, 0.0, 1.0)) * rec709_to_working_color;
+    main_col /= max(dot(main_col, luminance_weights_rec2020), eps);
+    main_col = mix(vec3(1.0), main_col, NETHER_S);
+#else
+    main_col = from_display(vec3(NETHER_R, NETHER_G, NETHER_B));
+#endif
+    main_col *= NETHER_I;
+
+    // Warm ember color the glow blends toward as smoke gets closer/thicker
+    const vec3 ember_col = from_display(vec3(1.0, 0.35, 0.05));
+
+    const vec3 wind0 = vec3(1.0, 0.1, 0.5) * 0.01;
+    const vec3 wind1 = vec3(-0.7, -0.1, -0.1) * 0.05;
+
+    // Domain warping: sample noise, use it to offset the position for the
+    // next sample, repeat. This is what gives real smoke its curling/
+    // billowing look instead of a flat scrolled texture. The warp offset
+    // is kept small relative to the base coordinate scale (unlike a first
+    // attempt at this that used offsets far larger than the noise
+    // frequency, which caused the sample position to jump incoherently
+    // frame-to-frame and read as flickery noise instead of smooth motion).
+    vec3 warp_pos = world_pos * 0.02;
+    warp_pos += (texture(colortex0, warp_pos * 2.0 + wind0 * frameTimeCounter).x * 2.0 - 1.0) * 0.03;
+    warp_pos += (texture(colortex0, warp_pos * 4.0 + wind1 * frameTimeCounter).x * 2.0 - 1.0) * 0.015;
+
+    float base_noise = texture(colortex0, warp_pos + wind0 * frameTimeCounter).x;
+    float detail_noise
+        = texture(colortex0, warp_pos * 2.0 + wind1 * frameTimeCounter).x * 0.8 - 0.4;
+
+    float height_fade = sqr(1.0 - linear_step(128.0, 256.0, world_pos.y))
+        * (exp2(-max0(world_pos.y - 32.0) * 0.02) * 0.6 + 0.4)
+        * linear_step(0.0, 64.0, world_pos.y);
+
+    float density = max0(linear_step(0.55, 0.85, base_noise) + detail_noise) * height_fade;
+
+    // Proximity glow: smoke near the camera brightens toward the ember
+    // color, mimicking nearby lava/lit particulate lighting the smoke
+    // from within. Falls off with distance like Kappa's glowProximity,
+    // but additionally scales with local smoke density (height_fade)
+    // instead of a flat multiplier, so thin/high smoke doesn't glow.
+    float dist_to_camera = distance(world_pos, world_start_pos);
+    float glow_proximity = sqrt(clamp01(linear_step(24.0, 4.0, dist_to_camera)));
+    float glow = clamp01((glow_proximity * (0.3 + cube(height_fade) * 0.15) - detail_noise) * pi)
+        * height_fade;
+
+    float fade_near = 1.0 - exp2(-0.1 * dist_to_camera);
+    float fade_far = exp2(-0.05 * dist_to_camera);
+
+    vec3 col = mix(main_col, ember_col, glow) * density;
+    return col * (fade_near * fade_far);
+}
+#endif
+
 mat2x3 raymarch_nether_fog(
     vec3 world_start_pos,
     vec3 world_end_pos,
@@ -193,8 +259,14 @@ mat2x3 raymarch_nether_fog(
 
 #if defined NETHER_FOG_GLOW || defined END_GLOW
         // Emission
+#ifdef NETHER_SMOKE
+        scattering
+            += 4.0 * nether_smoke_v2_emission(world_pos, world_start_pos)
+                * step_length * transmittance * NETHER_SMOKE_INTENSITY;
+#else
         scattering
             += 4.0 * nether_fog_emission(world_pos) * step_length * transmittance;
+#endif
 #endif
 
         transmittance *= step_transmittance;

@@ -1274,6 +1274,10 @@ option.FOG_SMOOTHING=Fog Smoothing
 option.FOG_SMOOTHING.comment = When enabled, applies an edge-aware Gaussian blur to the fog buffer each frame to reduce blocky/noisy fog artifacts. Current-frame only (no temporal blending), so it won't smear or ghost on fast camera movement. Small performance cost.
 option.FOG_SMOOTHING_RADIUS=Fog Blur Radius
 option.FOG_SMOOTHING_RADIUS.comment = Adjusts the radius of the Gaussian blur kernel used for fog smoothing. Higher = softer, more blended fog at higher cost. The blur still respects hard fog-density edges (e.g. cave mouths, fog banks) so it won't bleed across them.
+option.NETHER_SMOKE=Nether Smoke
+option.NETHER_SMOKE.comment = When enabled, the Nether's fog glow is replaced with a domain-warped turbulent smoke model with a proximity-based inner glow (smoke near the camera brightens toward an ember color). When disabled, falls back to the original flat noise-tinted nether fog glow.
+option.NETHER_SMOKE_INTENSITY=Nether Smoke Intensity
+option.NETHER_SMOKE_INTENSITY.comment = Brightness multiplier for the Nether Smoke v2 glow/emission. Only has an effect when Nether Smoke is enabled.
 
 option.CLOUD_LIGHTING_BOUNCES=Cloud Light Bounces
 option.CLOUD_LIGHTING_BOUNCES.comment = Adjusts how many times light bounces inside clouds. Higher = more realistic multiple scattering but higher cost. 0 = single scattering only.

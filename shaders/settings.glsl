@@ -861,6 +861,14 @@ const float wetnessHalflife         = 70.0;
 #define FOG_SMOOTHING
   #define FOG_SMOOTHING_RADIUS 2 // [1 2 3 4 5 6 8 10]
 
+// ---- Nether Smoke ----
+// When enabled, the Nether's fog glow uses a domain-warped turbulent
+// smoke model with proximity-based inner glow instead of the original
+// flat noise-tinted glow. When disabled, falls back to the existing
+// nether fog/glow system unchanged.
+#define NETHER_SMOKE
+  #define NETHER_SMOKE_INTENSITY 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.40 1.50 1.60 1.70 1.80 1.90 2.00 2.50 3.00 4.00]
+
 // ---- Cloud Lighting Bounces ----
   #define CLOUD_LIGHTING_BOUNCES 1 // [0 1 2 3 4]
 
