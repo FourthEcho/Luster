@@ -10,7 +10,11 @@
 //   Distant Horizons
 // --------------------
 
+// Avoid duplicate declaration when already defined by program
+#ifndef LUSTER_COLORTEX15_DECLARED
+#define LUSTER_COLORTEX15_DECLARED
 uniform sampler2D colortex15;
+#endif
 
 uniform sampler2D dhDepthTex;
 uniform sampler2D dhDepthTex1;
@@ -64,7 +68,10 @@ uniform vec4 combined_projection_matrix_inverse_3;
 //   Voxy
 // --------
 
+#ifndef LUSTER_COLORTEX15_DECLARED
+#define LUSTER_COLORTEX15_DECLARED
 uniform sampler2D colortex15;
+#endif
 
 uniform sampler2D vxDepthTexOpaque;
 uniform sampler2D vxDepthTexTrans;

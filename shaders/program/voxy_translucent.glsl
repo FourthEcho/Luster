@@ -15,6 +15,9 @@
 
 uniform float desert_sandstorm;
 
+// simple_fog needs fogColor, Voxy patch doesn't expose it by default
+uniform vec3 fogColor;
+
 vec3 ambient_color;
 vec3 light_color;
 

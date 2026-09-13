@@ -10,9 +10,10 @@
 #include "tonescales.glsl"
 #include "utility.glsl"
 
-// Constants
+// Constants (RRT fine controls come from ACADEMY_RRT_* in "/settings.glsl";
+// each default reproduces the value below it)
 
-const float rrt_glow_gain = 0.1; // default: 0.05
+const float rrt_glow_gain = ACADEMY_RRT_GLOW; // default: 0.10 (ref: 0.05)
 const float rrt_glow_mid = 0.08; // default: 0.08
 
 const float rrt_red_scale = 1.0; // default: 0.82
@@ -20,10 +21,10 @@ const float rrt_red_pivot = 0.03; // default: 0.03
 const float rrt_red_hue = 0.0; // default: 0.0
 const float rrt_red_width = 135.0; // default: 135.0
 
-const float rrt_sat_factor = 0.96; // default: 0.96
-const float odt_sat_factor = 1.0; // default: 0.93
+const float rrt_sat_factor = ACADEMY_RRT_SAT; // default: 0.96
+const float odt_sat_factor = ACADEMY_ODT_SAT; // default: 1.00 (ref: 0.93)
 
-const float rrt_gamma_curve = 0.96;
+const float rrt_gamma_curve = 0.96 * ACADEMY_RRT_GAMMA; // default gain: 1.00
 
 const float cinema_white = 48.0; // default: 48.0
 const float cinema_black = 0.02; // default: 10^log_10(0.02)
@@ -87,7 +88,7 @@ vec3 rrt_sweeteners(vec3 aces) {
 
     aces.r = aces.r
         + hue_weight * saturation * (rrt_red_pivot - aces.r)
-            * (1.0 - rrt_red_scale);
+            * (1.0 - rrt_red_scale * ACADEMY_RRT_RED);
 
     // ACES to RGB rendering space
     vec3 rgb_pre = max0(aces) * ap0_to_ap1;
@@ -184,8 +185,8 @@ vec3 rrt_and_odt_fit(vec3 rgb) {
 vec3 academy_color_controls(vec3 color) {
     color *= exp2(ACADEMY_EXPOSURE);
 
-    // Stable contrast around 18% middle grey in the post-ODT linear domain.
-    const float pivot = 0.18;
+    // Stable contrast around middle grey in the post-ODT linear domain.
+    const float pivot = ACADEMY_CONTRAST_PIVOT;
     color = exp2((log2(max(color, vec3(1e-6))) - log2(pivot))
         * ACADEMY_CONTRAST + log2(pivot));
 

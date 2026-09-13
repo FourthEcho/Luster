@@ -6,7 +6,7 @@
 
 // ACES RRT and ODT approximation
 vec3 tonemap_aces_fit(vec3 rgb) {
-    rgb *= 1.6; // Match the exposure to the RRT
+    rgb *= 1.6 * exp2(ACADEMY_RRT_EXPOSURE); // Match the exposure to the RRT
 
     rgb = rgb * rec2020_to_ap0;
 

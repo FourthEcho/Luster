@@ -67,7 +67,12 @@ uniform sampler2D colortex3; // OF damage overlay, armor glint
 
 #if defined WORLD_OVERWORLD && defined GALAXY
 uniform sampler2D colortex13;
+
+// Galaxy/LoD support can both declare colortex15
+#ifndef LUSTER_COLORTEX15_DECLARED
+#define LUSTER_COLORTEX15_DECLARED
 uniform sampler2D colortex15;
+#endif
 #define galaxy_sampler colortex13
 #endif
 

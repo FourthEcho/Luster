@@ -71,7 +71,7 @@ const mat3 agx_mat_inv = mat3(
 vec3 agx_color_controls(vec3 color) {
     color *= exp2(AGX_EXPOSURE);
 
-    const float pivot = 0.18;
+    const float pivot = AGX_CONTRAST_PIVOT;
     color = exp2((log2(max(color, vec3(1e-6))) - log2(pivot))
         * AGX_CONTRAST + log2(pivot));
 
@@ -82,6 +82,18 @@ vec3 agx_color_controls(vec3 color) {
     float high = smoothstep(0.45, 1.0, clamp(luma, 0.0, 1.0));
     color /= 1.0 + max(AGX_HIGHLIGHT_ROLLOFF, 0.0) * high
         * max(color - vec3(pivot), vec3(0.0));
+
+    // Filmic highlight desaturation toward neutral grey. Neutral at zero.
+    color = mix(
+        color,
+        vec3(luma),
+        clamp01(AGX_HIGHLIGHT_DESAT) * smoothstep(0.5, 1.0, luma)
+    );
+
+    // Controlled toe lift, preserving the neutral result at zero.
+    float shadow = 1.0 - smoothstep(0.0, 0.24, clamp(luma, 0.0, 1.0));
+    float toe = max(AGX_SHADOW_TOE, 0.0) * shadow;
+    color += toe * vec3(0.045) * (1.0 - color);
 
     // Punch: contrast about the perceptual midrange, symmetric around zero.
     if (AGX_PUNCH != 0.0) {

@@ -1454,6 +1454,20 @@ option.ACADEMY_SHADOW_TOE              = ACES Shadow Toe
 option.ACADEMY_SHADOW_TOE.comment      = Lifts the bottom of the ACES curve, preventing pure black and adding a subtle shadow lift. Higher = more lifted blacks with visible shadow detail, filmic look.
 option.ACADEMY_COLORFULNESS            = ACES Colorfulness
 option.ACADEMY_COLORFULNESS.comment    = Shifts the ACES color appearance model toward more vivid (+) or more neutral (-) rendering. Positive values increase apparent chroma in midtones without affecting luminance.
+option.ACADEMY_RRT_EXPOSURE            = ACES RRT Exposure
+option.ACADEMY_RRT_EXPOSURE.comment    = Exposure bias in stops applied before the RRT (reference rendering transform). Unlike ACES Exposure, which grades after the curve, this moves where the scene lands on the filmic S-curve itself.
+option.ACADEMY_RRT_GLOW                = ACES RRT Glow
+option.ACADEMY_RRT_GLOW.comment        = Strength of the RRT glow module that lifts dim saturated colors. Higher = dreamier highlights with more halation around bright saturated sources. 0.10 matches the pack default.
+option.ACADEMY_RRT_SAT                 = ACES RRT Saturation
+option.ACADEMY_RRT_SAT.comment         = Global desaturation inside the RRT sweeteners. Lower = more filmic muted response before the tonescale. 0.96 matches the reference fit.
+option.ACADEMY_ODT_SAT                 = ACES ODT Saturation
+option.ACADEMY_ODT_SAT.comment         = Desaturation in the output device transform compensating luminance differences. Lower tames oversaturated brights after the tonescale.
+option.ACADEMY_RRT_GAMMA               = ACES RRT Gamma
+option.ACADEMY_RRT_GAMMA.comment       = Gamma shaping applied inside the RRT before the tonescale. Above 1.0 darkens midtones into the curve, below 1.0 lifts them.
+option.ACADEMY_RRT_RED                 = ACES RRT Red Modifier
+option.ACADEMY_RRT_RED.comment         = Strength of the RRT red modifier that pulls red hues toward the pivot. Higher = stronger classic ACES red rendering. 1.0 is the pack default.
+option.ACADEMY_CONTRAST_PIVOT          = ACES Contrast Pivot
+option.ACADEMY_CONTRAST_PIVOT.comment  = Middle-grey anchor the ACES contrast curve rotates around. Lower pivots protect shadows and let highlights stretch, higher pivots do the opposite. 0.18 is the reference 18% grey.
 option.AGX_EXPOSURE                    = AGX Exposure
 option.AGX_EXPOSURE.comment            = Pre-tonemap exposure offset in stops fed into the AGX curve. +1 = twice as bright entering the curve. Shifts where highlights begin to compress.
 option.AGX_CONTRAST                    = AGX Contrast
@@ -1466,3 +1480,9 @@ option.AGX_PUNCH                      = AGX Punch
 option.AGX_PUNCH.comment               = Boosts midtone contrast and saturation for a punchier, more vivid look. Positive = more pop and color intensity in midtones. Negative = flatter, more muted and filmic output.
 option.AGX_GOLDEN                     = AGX Golden
 option.AGX_GOLDEN.comment              = Shifts the AGX output toward a warm golden tint. Positive = warmer, more cinematic golden grade. Negative = cooler, more neutral or bluish output.
+option.AGX_SHADOW_TOE                  = AGX Shadow Toe
+option.AGX_SHADOW_TOE.comment          = Lifts the bottom of the AGX curve, the mirror of highlight rolloff for shadows. Higher = more lifted blacks with visible shadow detail, filmic look.
+option.AGX_HIGHLIGHT_DESAT             = AGX Highlight Desat
+option.AGX_HIGHLIGHT_DESAT.comment     = Desaturates highlights toward neutral grey above the shoulder. Higher = more filmic white clipping on bright saturated sources instead of colored clipping.
+option.AGX_CONTRAST_PIVOT              = AGX Contrast Pivot
+option.AGX_CONTRAST_PIVOT.comment      = Middle-grey anchor the AGX contrast curve rotates around. Lower pivots protect shadows and let highlights stretch, higher pivots do the opposite. 0.18 is the reference 18% grey.
