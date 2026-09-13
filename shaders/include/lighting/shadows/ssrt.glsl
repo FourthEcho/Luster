@@ -30,10 +30,16 @@ bool raymarch_shadow(
         - ray_origin_screen
     );
 
-    float ray_length = min_of(
-        abs(sign(ray_dir_screen) - ray_origin_screen)
-        / max(abs(ray_dir_screen), eps)
+    // Distance to the screen edge along the ray: per component, the
+    // distance to the 0-edge for negative dirs, to the 1-edge otherwise.
+    // (sign(dir) - origin) / |dir| is wrong for negative dirs (gives
+    // (1 + origin) / |dir| instead of origin / |dir|).
+    vec3 inv_dir = 1.0 / (ray_dir_screen + vec3(1e-9));
+    vec3 t_to_edge = max(
+        (vec3(0.0) - ray_origin_screen) * inv_dir,
+        (vec3(1.0) - ray_origin_screen) * inv_dir
     );
+    float ray_length = min_of(max(t_to_edge, vec3(0.0)));
     ray_length = min(
         ray_length,
         max(0.1, exp(-max0(length(ray_origin_view) * 0.025 - 1.0)))
@@ -49,11 +55,11 @@ bool raymarch_shadow(
     bool hit = false;
     bool hit_after_sss = false;
     bool sss_raymarch = has_sss;
-    vec3 exit_pos = ray_origin_view;
+    vec3 exit_pos = ray_origin_screen;
 
     for (int i = 0; i < step_count; ++i) {
-        step_length *= step_ratio;
         vec3 ray_step = ray_dir_screen * step_length;
+        step_length *= step_ratio;
         vec3 dithered_pos = ray_pos + dither * ray_step;
         ray_pos += ray_step;
 
@@ -129,10 +135,12 @@ float raymarch_contact_shadow(vec3 ray_origin_screen, vec3 ray_origin_view, floa
 
     vec3 ray_dir_screen = normalize(radius_end_screen - ray_origin_screen);
 
-    float ray_length = min_of(
-        abs(sign(ray_dir_screen) - ray_origin_screen)
-        / max(abs(ray_dir_screen), eps)
+    vec3 inv_dir = 1.0 / (ray_dir_screen + vec3(1e-9));
+    vec3 t_to_edge = max(
+        (vec3(0.0) - ray_origin_screen) * inv_dir,
+        (vec3(1.0) - ray_origin_screen) * inv_dir
     );
+    float ray_length = min_of(max(t_to_edge, vec3(0.0)));
     // Cap to the fixed contact radius in screen space so this never
     // marches farther than intended, regardless of view distance
     ray_length = min(ray_length, distance(radius_end_screen, ray_origin_screen));

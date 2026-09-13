@@ -60,8 +60,6 @@ void main() {
     }
 
     vec2 velocity = uv - reproject(vec3(uv, depth)).xy;
-    ;
-    vec2 pos = uv;
     // Physical shutter: the velocity spans one frame at the reference
     // 60Hz capture, so the trail length scales with exposure time
     // (1/CAM_SHUTTER_SPEED), times the user scale. 1/60s at 1.00 scale
@@ -70,6 +68,9 @@ void main() {
         = (0.5 * camera_shutter_trail_factor() * MOTION_BLUR_SCALE
             / float(MOTION_BLUR_SAMPLES))
         * velocity;
+
+    // Centered gather: span uv -/+ trail/2 instead of smearing one way
+    vec2 pos = uv - increment * (0.5 * float(MOTION_BLUR_SAMPLES));
 
     vec3 color_sum = vec3(0.0);
     float weight_sum = 0.0;
@@ -86,5 +87,6 @@ void main() {
         weight_sum += weight;
     }
 
-    scene_color = color_sum * rcp(weight_sum);
+    scene_color = weight_sum > eps ? color_sum * rcp(weight_sum)
+                                   : texelFetch(colortex0, texel, 0).rgb;
 }

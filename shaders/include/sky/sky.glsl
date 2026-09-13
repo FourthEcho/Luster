@@ -64,14 +64,14 @@ vec4 draw_moon(vec3 ray_dir) {
     float dist = clamp01(fast_acos(MoV) / moon_angular_radius);
 
     // Transform the coordinate space such that z is parallel to moon_dir
-    vec3 tangent = moon_dir.y == 1.0
+    vec3 tangent = abs(moon_dir.y) == 1.0
         ? vec3(1.0, 0.0, 0.0)
         : normalize(cross(vec3(0.0, 1.0, 0.0), moon_dir));
     vec3 bitangent = normalize(cross(tangent, moon_dir));
     mat3 tbn = mat3(tangent, bitangent, moon_dir);
 
     // Vector from ray dir to moon dir.
-    vec2 offset = ((ray_dir - sun_dir) * tbn).xy;
+    vec2 offset = ((ray_dir - moon_dir) * tbn).xy;
     offset = fract(offset + 0.5);
 
     vec3 noise = texture(noisetex, 2.0 * offset).xyz;
@@ -83,10 +83,13 @@ vec4 draw_moon(vec3 ray_dir) {
         = intersect_sphere(-moon_dir, ray_dir, moon_angular_radius).x;
     vec3 moon_normal = normalize(ray_dir * moon_dist - moon_dir);
 
-    // Get light direction which orbits around moon
+    // Get light direction which orbits around moon. Anchored to the fixed
+    // moon frame so the phase terminator does not swim with the view ray.
     float light_angle = 0.125 * tau * float(moonPhase);
-    vec3 left_dir = normalize(cross(vec3(0.0, 1.0, 0.0), ray_dir));
-    vec3 light_dir = cos(light_angle) * -ray_dir + sin(light_angle) * left_dir;
+    vec3 left_dir = abs(moon_dir.y) == 1.0
+        ? vec3(1.0, 0.0, 0.0)
+        : normalize(cross(vec3(0.0, 1.0, 0.0), moon_dir));
+    vec3 light_dir = cos(light_angle) * -moon_dir + sin(light_angle) * left_dir;
     float moon_shadow = dampen(max0(dot(moon_normal, light_dir)));
 
     float edge_glow = sqr(sqr(sqr(dist)));

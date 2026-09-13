@@ -24,7 +24,8 @@ vec2 project_cloud_shadow_map(vec3 scene_pos) {
 
 vec3 unproject_cloud_shadow_map(vec2 cloud_shadow_pos) {
     cloud_shadow_pos = cloud_shadow_pos * 2.0 - 1.0;
-    cloud_shadow_pos /= 1.0 - length(cloud_shadow_pos);
+    cloud_shadow_pos
+        /= max(1.0 - length(cloud_shadow_pos), 1e-3); // div-by-zero at |c| = 1
 
     vec3 shadow_view_pos = vec3(cloud_shadow_pos * cloud_shadow_extent, 1.0);
 

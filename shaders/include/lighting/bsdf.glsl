@@ -10,6 +10,8 @@ float f0_to_ior(float f0) {
 
 // https://www.gdcvault.com/play/1024478/PBR-Diffuse-Lighting-for-GGX
 float distribution_ggx(float NoH_sq, float alpha_sq) {
+    // Clamp: a perfect mirror (alpha = 0) gives 0/0 = NaN at NoH = 1
+    alpha_sq = max(alpha_sq, 1e-6);
     return alpha_sq / (pi * sqr(1.0 - NoH_sq + NoH_sq * alpha_sq));
 }
 

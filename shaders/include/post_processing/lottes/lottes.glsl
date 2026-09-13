@@ -6,6 +6,7 @@
 // Parameters are Lottes' reference defaults; GLSL port follows
 // https://github.com/dmnsgn/shaders-tone-map (MIT, see LICENSE.md)
 vec3 tonemap_lottes(vec3 rgb) {
+    rgb = max(rgb, vec3(0.0)); // pow() of negatives is NaN
     const vec3 a = vec3(1.6); // Contrast
     const vec3 d = vec3(0.977); // Shoulder contrast
     const vec3 hdr_max = vec3(8.0); // White point

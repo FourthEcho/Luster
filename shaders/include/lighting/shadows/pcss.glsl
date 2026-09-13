@@ -45,6 +45,10 @@ vec2 blocker_search(vec3 scene_pos, float dither, bool has_sss) {
         uv /= get_distortion_factor(uv);
         uv = uv * 0.5 + 0.5;
 
+        if (clamp01(uv) != uv) {
+            continue; // out of shadow map: undefined texelFetch
+        }
+
         float depth = texelFetch(shadowtex0, ivec2(uv * shadow_map_res), 0).x;
         float weight = step(depth, ref_z);
 
@@ -54,7 +58,9 @@ vec2 blocker_search(vec3 scene_pos, float dither, bool has_sss) {
     }
 
     float blocker_depth = weight_sum == 0.0 ? 0.0 : depth_sum / weight_sum;
-    float sss_depth = -shadowProjectionInverse[2].z * depth_sum_sss
+    // Ortho chain: d_view = d_clip / proj[2].z and d_clip = 2 * d_ref /
+    // SHADOW_DEPTH_SCALE, hence the factor 2
+    float sss_depth = -2.0 * shadowProjectionInverse[2].z * depth_sum_sss
         * rcp(SHADOW_DEPTH_SCALE * float(step_count));
 
     return vec2(blocker_depth, sss_depth);
@@ -131,7 +137,7 @@ vec3 shadow_pcf(
         uv /= get_distortion_factor(uv);
         uv = uv * 0.5 + 0.5;
 
-        ivec2 texel = ivec2(uv * shadow_map_res);
+        ivec2 texel = ivec2(clamp(uv, vec2(0.0), vec2(1.0)) * shadow_map_res);
 
         float depth = texelFetch(shadowtex0, texel, 0).x;
 
@@ -229,8 +235,13 @@ vec3 get_filtered_shadows(
     dither = r1(frameCounter, dither);
 
 #ifdef SHADOW_VPS
-    vec2 blocker_search_result
-        = blocker_search(scene_pos, dither, sss_amount > eps);
+    // Test blockers from the same biased position as the receiver so the
+    // reference depth matches the PCF comparison depth
+    vec2 blocker_search_result = blocker_search(
+        scene_pos + bias + edge_factor,
+        dither,
+        sss_amount > eps
+    );
 
     sss_depth = blocker_search_result.y;
 

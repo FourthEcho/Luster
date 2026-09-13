@@ -114,7 +114,9 @@ void main() {
         camera_coc_height_fraction(focal_mm, sensor_h, focus_lin, dist_lin),
         DOF_MAX_RADIUS
     );
-    CoC = coc * vec2(1.0, aspectRatio);
+    // coc is a fraction of screen height: for circular bokeh in UV space
+    // the horizontal radius must be divided by the aspect ratio
+    CoC = coc * vec2(rcp(aspectRatio), 1.0);
 #ifdef BLOOM_ANAMORPHIC
     // Anamorphic squeeze: horizontal CoC stretch for oval bokeh
     CoC.x *= BLOOM_ANAMORPHIC_STRETCH;

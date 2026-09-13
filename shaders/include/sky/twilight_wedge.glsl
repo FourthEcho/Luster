@@ -39,7 +39,7 @@ vec3 draw_twilight_wedge(vec3 ray_dir) {
     float shadow_band = exp(-sqr((ray_dir.y - 0.01) / 0.045));
     vec3 shadow = shadow_band * vec3(0.10, 0.14, 0.30);
 
-    return (pink - shadow) * align * dusk
+    return max(pink - shadow, vec3(0.0)) * align * dusk
         * (0.05 * TWILIGHT_WEDGE_INTENSITY) * (1.0 - rainStrength);
 #endif
 }

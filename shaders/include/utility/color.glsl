@@ -217,10 +217,15 @@ vec3 adobe_rgb_eotf_inv(vec3 encoded) { return pow(encoded, vec3(2.2)); }
 //   Transformations between color representations
 // -------------------------------------------------
 
-// RGB <-> HSL
+// RGB <-> HSV
+//
+// NOTE: these were historically misnamed rgb_to_hsl/hsl_to_rgb. The forward
+// transform returns HSV (V = max, S = chroma/max); the inverse below is the
+// matching HSV->RGB so round-trips are exact. A true HSL inverse here would
+// be wrong (e.g. S=1, L=1 must be white in HSL, vivid in HSV).
 
 // from https://gist.github.com/983/e170a24ae8eba2cd174f
-vec3 rgb_to_hsl(vec3 c) {
+vec3 rgb_to_hsv(vec3 c) {
     const vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
 
     vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
@@ -232,14 +237,16 @@ vec3 rgb_to_hsl(vec3 c) {
     return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
 }
 
-vec3 hsl_to_rgb(vec3 c) {
-    const vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
-
+vec3 hsv_to_rgb(vec3 c) {
     c.yz = clamp01(c.yz);
 
-    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+    vec3 rgb = clamp(
+        abs(mod(c.x * 6.0 + vec3(0.0, 4.0, 2.0), 6.0) - 3.0) - 1.0,
+        0.0,
+        1.0
+    );
 
-    return c.z * mix(K.xxx, clamp01(p - K.xxx), c.y);
+    return c.z * mix(vec3(1.0), rgb, c.y);
 }
 
 // RGB <-> YCoCg
@@ -300,12 +307,12 @@ vec3 blackbody(float temperature) {
     return min_of(rgb) / rgb;
 }
 
-// Isolate a range of hues
-float isolate_hue(vec3 hsl, float center, float width) {
-    if (hsl.y < 1e-2 || hsl.z < 1e-2) {
+// Isolate a range of hues (takes an HSV vector: hue, saturation, value)
+float isolate_hue(vec3 hsv, float center, float width) {
+    if (hsv.y < 1e-2 || hsv.z < 1e-2) {
         return 0.0; // black/gray colors with no hue
     }
-    return pulse(hsl.x * 360.0, center, width, 360.0);
+    return pulse(hsv.x * 360.0, center, width, 360.0);
 }
 
 #endif // INCLUDE_UTILITY_COLOR

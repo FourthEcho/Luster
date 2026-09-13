@@ -71,6 +71,12 @@ float compute_ssao(
               )
             - position_view;
 
+        // Self-sample (or coincident geometry): zero offset would make
+        // rcp_length diverge and poison AO with NaN
+        if (length_squared(offset_view) < eps) {
+            continue;
+        }
+
         float rlen = rcp_length(offset_view);
         float cos_theta = clamp01(dot(offset_view, normal_view) * rlen);
         float distance_falloff = rcp(1.0 + rcp(rlen) * rcp(float(SSAO_RADIUS)));

@@ -112,15 +112,15 @@ vec3 color_grade_output(vec3 rgb) {
 
     // Convert the perceptual pass back to RGB, then apply selective HSL accents.
     vec3 perceptual_rgb = grade_oklab_to_rgb(lab);
-    vec3 hsl = rgb_to_hsl(perceptual_rgb);
-    float orange = isolate_hue(hsl, 30.0, 20.0);
-    float teal = isolate_hue(hsl, 210.0, 20.0);
-    float green = isolate_hue(hsl, 90.0, 44.0);
-    hsl.y = clamp(hsl.y * (1.0 + GRADE_ORANGE_SAT_BOOST * orange), 0.0, 1.0);
-    hsl.y = clamp(hsl.y * (1.0 + GRADE_TEAL_SAT_BOOST * teal), 0.0, 1.0);
-    hsl.y = clamp(hsl.y * (1.0 + GRADE_GREEN_SAT_BOOST * green), 0.0, 1.0);
-    hsl.x = fract(hsl.x + (GRADE_GREEN_HUE_SHIFT / 360.0) * green);
-    vec3 selective_rgb = hsl_to_rgb(hsl);
+    vec3 hsv = rgb_to_hsv(perceptual_rgb);
+    float orange = isolate_hue(hsv, 30.0, 20.0);
+    float teal = isolate_hue(hsv, 210.0, 20.0);
+    float green = isolate_hue(hsv, 90.0, 44.0);
+    hsv.y = clamp(hsv.y * (1.0 + GRADE_ORANGE_SAT_BOOST * orange), 0.0, 1.0);
+    hsv.y = clamp(hsv.y * (1.0 + GRADE_TEAL_SAT_BOOST * teal), 0.0, 1.0);
+    hsv.y = clamp(hsv.y * (1.0 + GRADE_GREEN_SAT_BOOST * green), 0.0, 1.0);
+    hsv.x = fract(hsv.x + (GRADE_GREEN_HUE_SHIFT / 360.0) * green);
+    vec3 selective_rgb = hsv_to_rgb(hsv);
     rgb = mix(perceptual_rgb, selective_rgb, clamp(GRADE_SELECTIVE_BLEND, 0.0, 1.0));
 
     // Black/white point control, applied last to avoid fighting the tonemapper.

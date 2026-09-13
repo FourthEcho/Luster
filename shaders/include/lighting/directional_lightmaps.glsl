@@ -19,7 +19,9 @@ vec2 get_directional_lightmaps(vec3 position_scene, vec3 normal) {
         lightmap_mul.x = (clamp01(dot(normalize(lightmap_dir), normal) + 0.8)
                               * DIRECTIONAL_LIGHTMAPS_INTENSITY
                           + (1.0 - DIRECTIONAL_LIGHTMAPS_INTENSITY))
-            * inversesqrt(sqrt(light_levels.x) + eps);
+            // Clamp the renormalization: near-zero lightmaps would
+            // otherwise boost noise up to ~1000x (fireflies in caves)
+            * inversesqrt(sqrt(max(light_levels.x, 0.0625)) + eps);
     }
 
     // Skylight
@@ -31,7 +33,9 @@ vec2 get_directional_lightmaps(vec3 position_scene, vec3 normal) {
         lightmap_mul.y = (clamp01(dot(normalize(lightmap_dir), normal) + 0.8)
                               * DIRECTIONAL_LIGHTMAPS_INTENSITY
                           + (1.0 - DIRECTIONAL_LIGHTMAPS_INTENSITY))
-            * inversesqrt(sqrt(light_levels.y) + eps);
+            // Clamp the renormalization: near-zero lightmaps would
+            // otherwise boost noise up to ~1000x (fireflies in caves)
+            * inversesqrt(sqrt(max(light_levels.y, 0.0625)) + eps);
     }
 
     return lightmap_mul;

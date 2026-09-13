@@ -72,7 +72,7 @@ void main() {
         base_color.rgb = vec3(BOX_COLOR_R, BOX_COLOR_G, BOX_COLOR_B);
 #else // BOX_MODE_RAINBOW
         vec2 uv = gl_FragCoord.xy * view_pixel_size;
-        base_color.rgb = hsl_to_rgb(
+        base_color.rgb = hsv_to_rgb(
             vec3(fract(uv.y + uv.x * uv.y + frameTimeCounter * 0.1), 1.0, 1.0)
         );
 #endif

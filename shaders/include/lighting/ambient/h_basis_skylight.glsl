@@ -159,15 +159,18 @@ vec3 get_h_basis_skylight(
 #ifndef SH_SKYLIGHT
     return vec3(0.0);
 #else
-    vec3 effective_normal = normalize(bent_normal);
+    vec3 effective_normal = normalize_safe(bent_normal);
 
     vec3 irradiance = evaluate_h_basis_irradiance(h_in, effective_normal);
 
     vec3 baseline = h_in[0] * pi;
 
+    // ao shapes the ambient like the baked skylight path (which uses
+    // ambient_color * ao); without it occlusion leaks skylight
     irradiance = max0(irradiance - baseline * 0.80)
         * skylight
-        * intensity;
+        * intensity
+        * ao;
 
     vec3 kd = (vec3(1.0) - material.f0) * float(!material.is_metal);
     return irradiance * material.albedo * kd;

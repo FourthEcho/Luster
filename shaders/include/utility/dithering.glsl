@@ -3,14 +3,16 @@
 
 float bayer2(vec2 a) {
     a = floor(a);
-    return fract(dot(a, vec2(0.5, a.y * 0.75)));
+    return fract(dot(a, vec2(0.5, 0.75)));
 }
 
-float bayer4(vec2 a) { return 0.25 * bayer2(0.5 * a) + bayer2(a); }
+// Ordered Bayer cascade: each level adds the coarse pattern plus the fine
+// pattern weighted so the sum stays in [0, 1) with mean ~= 0.5
+float bayer4(vec2 a) { return bayer2(0.5 * a) + 0.25 * bayer2(a); }
 
-float bayer8(vec2 a) { return 0.25 * bayer4(0.5 * a) + bayer2(a); }
+float bayer8(vec2 a) { return bayer4(0.5 * a) + 0.0625 * bayer2(a); }
 
-float bayer16(vec2 a) { return 0.25 * bayer8(0.5 * a) + bayer2(a); }
+float bayer16(vec2 a) { return bayer8(0.5 * a) + 0.015625 * bayer2(a); }
 
 float interleaved_gradient_noise(vec2 pos) {
     return fract(52.9829189 * fract(0.06711056 * pos.x + (0.00583715 * pos.y)));

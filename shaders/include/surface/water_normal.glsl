@@ -164,7 +164,9 @@ vec3 get_water_normal(
     ); // prevent noise when looking horizontally
     normal_influence *= WATER_WAVE_STRENGTH;
 
-    vec3 normal = vec3(wave1 - wave0, wave2 - wave0, h);
+    // Heightfield normal: n = (-dh/du, -dh/dv, 1). Positive gradients
+    // tilt the normal away from the slope, not towards it.
+    vec3 normal = vec3(wave0 - wave1, wave0 - wave2, h);
     normal.xy *= normal_influence;
 
     return normalize(normal);

@@ -136,7 +136,9 @@ vec4 draw_crepuscular_rays(
     transmittance
         = mix(vec3(1.0), transmittance, clouds_params.crepuscular_rays_amount);
 
-    return vec4(scattering, 1.0);
+    // Return the volume transmittance so callers attenuate the background
+    // behind the shafts instead of only adding light (energy gain)
+    return vec4(scattering, clamp01(dot(transmittance, vec3(1.0 / 3.0))));
 }
 
 #endif // INCLUDE_SKY_CREPUSCULAR_RAYS

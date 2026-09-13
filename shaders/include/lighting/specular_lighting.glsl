@@ -372,13 +372,14 @@ vec3 get_specular_reflections(
             float NoV = max(1e-2, dot(flat_normal, -world_dir));
             float MoV = max(1e-2, dot(microfacet_normal, -world_dir));
 
+            // Microfacet Fresnel takes V.H (MoV), not the geometric NoV
             vec3 fresnel;
             if (material.is_hardcoded_metal) {
-                fresnel = fresnel_conductor(NoV, material.f0, material.f82);
+                fresnel = fresnel_conductor(MoV, material.f0, material.f82);
             } else if (material.is_metal) {
-                fresnel = fresnel_schlick(NoV, material.albedo);
+                fresnel = fresnel_schlick(MoV, material.albedo);
             } else {
-                fresnel = fresnel_dielectric(NoV, material.f0.x);
+                fresnel = fresnel_dielectric(MoV, material.f0.x);
             }
 
             float v1 = v1_smith_ggx(NoV, alpha_squared);

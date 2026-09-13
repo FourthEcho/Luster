@@ -79,7 +79,7 @@ vec4 draw_noctilucent_clouds(
         return vec4(0.0, 0.0, 0.0, 1.0);
     }
 
-    float distance_to_sphere = (r < clouds_cirrus_radius) ? dists.y : dists.x;
+    float distance_to_sphere = (r < clouds_noctilucent_radius) ? dists.y : dists.x;
     vec3 sphere_pos = air_viewer_pos + ray_dir * distance_to_sphere;
 
     // ------------------

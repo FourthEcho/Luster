@@ -139,7 +139,7 @@ float clouds_cirrus_optical_depth(vec3 ray_origin, vec3 ray_dir, float dither) {
 
     float ray_length
         = (inner_sphere.y >= 0.0) ? inner_sphere.x : outer_sphere.y;
-    ray_length = min(ray_length, max_ray_length);
+    ray_length = clamp(ray_length, 0.0, max_ray_length);
 
     // Find initial step length a so that Σ(ar^i) = rayLength
     float step_coeff = (step_growth - 1.0)

@@ -235,7 +235,7 @@ Material material_from(
     // Using binary split search to minimise branches per fragment (TODO:
     // measure impact)
 
-    vec3 hsl = rgb_to_hsl(albedo_srgb);
+    vec3 hsv = rgb_to_hsv(albedo_srgb);
     vec3 albedo_sqrt = sqrt(material.albedo);
 
     if (material_mask < 32u) { // 0-32
@@ -247,7 +247,7 @@ Material material_from(
 #ifdef HARDCODED_SPECULAR
                             // Default
                             float smoothness
-                                = 0.33 * smoothstep(0.2, 0.6, hsl.z);
+                                = 0.33 * smoothstep(0.2, 0.6, hsv.z);
                             material.roughness = sqr(1.0 - smoothness);
                             material.f0 = vec3(0.02);
 #endif
@@ -286,7 +286,7 @@ Material material_from(
 // Leaves
 #ifdef HARDCODED_SPECULAR
                             float smoothness
-                                = 0.5 * smoothstep(0.16, 0.5, hsl.z);
+                                = 0.5 * smoothstep(0.16, 0.5, hsv.z);
                             material.roughness = sqr(1.0 - smoothness);
                             material.f0 = vec3(0.02);
                             material.sheen_amount = 0.5;
@@ -309,7 +309,7 @@ Material material_from(
 // Sand
 #ifdef HARDCODED_SPECULAR
                             float smoothness
-                                = 0.8 * linear_step(0.81, 0.96, hsl.z);
+                                = 0.8 * linear_step(0.81, 0.96, hsv.z);
                             material.roughness = sqr(1.0 - smoothness);
                             material.f0 = vec3(0.02);
 #endif
@@ -329,7 +329,7 @@ Material material_from(
 // Ice
 #ifdef HARDCODED_SPECULAR
                             float smoothness
-                                = pow4(linear_step(0.4, 0.8, hsl.z)) * 0.6;
+                                = pow4(linear_step(0.4, 0.8, hsv.z)) * 0.6;
                             material.roughness = sqr(1.0 - smoothness);
                             material.f0 = vec3(0.02);
                             material.ssr_multiplier = 1.0;
@@ -343,7 +343,7 @@ Material material_from(
 // Red sand, birch planks
 #ifdef HARDCODED_SPECULAR
                             float smoothness
-                                = 0.4 * linear_step(0.61, 0.85, hsl.z);
+                                = 0.4 * linear_step(0.61, 0.85, hsv.z);
                             material.roughness = sqr(1.0 - smoothness);
                             material.f0 = vec3(0.02);
 #endif
@@ -358,7 +358,7 @@ Material material_from(
 // Oak, jungle and acacia planks, granite and diorite
 #ifdef HARDCODED_SPECULAR
                             float smoothness
-                                = 0.5 * linear_step(0.4, 0.8, hsl.z);
+                                = 0.5 * linear_step(0.4, 0.8, hsv.z);
                             material.roughness = sqr(1.0 - smoothness);
                             material.f0 = vec3(0.02);
 #endif
@@ -369,7 +369,7 @@ Material material_from(
                         } else { // 11
 // Obsidian, nether bricks
 #ifdef HARDCODED_SPECULAR
-                            float smoothness = linear_step(0.02, 0.4, hsl.z);
+                            float smoothness = linear_step(0.02, 0.4, hsv.z);
                             material.roughness = sqr(1.0 - smoothness);
                             material.f0 = vec3(0.02);
                             material.ssr_multiplier = 1.0;
@@ -382,7 +382,7 @@ Material material_from(
 // Metals
 #ifdef HARDCODED_SPECULAR
                             float smoothness
-                                = sqrt(linear_step(0.1, 0.9, hsl.z));
+                                = sqrt(linear_step(0.1, 0.9, hsv.z));
                             material.roughness
                                 = max(sqr(1.0 - smoothness), 0.04);
                             material.f0 = material.albedo;
@@ -393,7 +393,7 @@ Material material_from(
 // Gems
 #ifdef HARDCODED_SPECULAR
                             float smoothness
-                                = sqrt(linear_step(0.1, 0.9, hsl.z));
+                                = sqrt(linear_step(0.1, 0.9, hsv.z));
                             material.roughness
                                 = max(sqr(1.0 - smoothness), 0.04);
                             material.f0 = vec3(0.25);
@@ -432,13 +432,13 @@ Material material_from(
 #ifdef HARDCODED_EMISSION
                             // Chorus plant
                             material.emission
-                                = 0.25 * albedo_sqrt * pow4(hsl.z);
+                                = 0.25 * albedo_sqrt * pow4(hsv.z);
 #endif
                         } else { // 17
 #ifdef HARDCODED_SPECULAR
                             // End stone
                             float smoothness
-                                = 0.4 * linear_step(0.61, 0.85, hsl.z);
+                                = 0.4 * linear_step(0.61, 0.85, hsv.z);
                             material.roughness = sqr(1.0 - smoothness);
                             material.f0 = vec3(0.02);
                             material.ssr_multiplier = 1.0;
@@ -449,7 +449,7 @@ Material material_from(
 // Metals
 #ifdef HARDCODED_SPECULAR
                             float smoothness
-                                = sqrt(linear_step(0.1, 0.9, hsl.z));
+                                = sqrt(linear_step(0.1, 0.9, hsv.z));
                             material.roughness
                                 = max(sqr(1.0 - smoothness), 0.04);
                             material.f0 = material.albedo;
@@ -467,9 +467,9 @@ Material material_from(
                                 ))),
                                 step(0.5, abs(normal.x))
                             );
-                            float blue = isolate_hue(hsl, 200.0, 60.0);
+                            float blue = isolate_hue(hsv, 200.0, 60.0);
                             material.emission
-                                = albedo_sqrt * hsl.y * blue * emission_amount;
+                                = albedo_sqrt * hsv.y * blue * emission_amount;
 #endif
                         }
                     }
@@ -486,9 +486,9 @@ Material material_from(
                                 ))),
                                 step(0.5, abs(normal.y))
                             );
-                            float blue = isolate_hue(hsl, 200.0, 60.0);
+                            float blue = isolate_hue(hsv, 200.0, 60.0);
                             material.emission
-                                = albedo_sqrt * hsl.y * blue * emission_amount;
+                                = albedo_sqrt * hsv.y * blue * emission_amount;
 #endif
                         } else { // 21
 // Warped stem
@@ -501,17 +501,17 @@ Material material_from(
                                 ))),
                                 step(0.5, abs(normal.z))
                             );
-                            float blue = isolate_hue(hsl, 200.0, 60.0);
+                            float blue = isolate_hue(hsv, 200.0, 60.0);
                             material.emission
-                                = albedo_sqrt * hsl.y * blue * emission_amount;
+                                = albedo_sqrt * hsv.y * blue * emission_amount;
 #endif
                         }
                     } else { // 22-24
                         if (material_mask == 22u) { // 22
 // Warped hyphae
 #ifdef HARDCODED_EMISSION
-                            float blue = isolate_hue(hsl, 200.0, 60.0);
-                            material.emission = albedo_sqrt * hsl.y * blue;
+                            float blue = isolate_hue(hsv, 200.0, 60.0);
+                            material.emission = albedo_sqrt * hsv.y * blue;
 #endif
                         } else { // 23
 // Crimson stem
@@ -525,7 +525,7 @@ Material material_from(
                                 step(0.5, abs(normal.x))
                             );
                             material.emission = albedo_sqrt
-                                * linear_step(0.33, 0.5, hsl.z)
+                                * linear_step(0.33, 0.5, hsv.z)
                                 * emission_amount;
 #endif
                         }
@@ -546,7 +546,7 @@ Material material_from(
                                 step(0.5, abs(normal.y))
                             );
                             material.emission = albedo_sqrt
-                                * linear_step(0.33, 0.5, hsl.z)
+                                * linear_step(0.33, 0.5, hsv.z)
                                 * emission_amount;
 #endif
                         } else { // 25
@@ -561,7 +561,7 @@ Material material_from(
                                 step(0.5, abs(normal.z))
                             );
                             material.emission = albedo_sqrt
-                                * linear_step(0.33, 0.5, hsl.z)
+                                * linear_step(0.33, 0.5, hsv.z)
                                 * emission_amount;
 #endif
                         }
@@ -570,12 +570,12 @@ Material material_from(
 // Crimson hyphae
 #ifdef HARDCODED_EMISSION
                             material.emission
-                                = albedo_sqrt * linear_step(0.33, 0.5, hsl.z);
+                                = albedo_sqrt * linear_step(0.33, 0.5, hsv.z);
 #endif
                         } else { // 27
 // Copper
 #ifdef HARDCODED_SPECULAR
-                            vec3 hsl = rgb_to_hsl(albedo_srgb);
+                            vec3 hsv = rgb_to_hsv(albedo_srgb);
 
                             material.roughness = 0.5;
                             material.f0 = vec3(0.01);
@@ -585,9 +585,9 @@ Material material_from(
                             float is_oxidized = step(
                                 0.25,
                                 max(
-                                    isolate_hue(hsl, 120.0, 90.0), // Green
+                                    isolate_hue(hsv, 120.0, 90.0), // Green
                                                                    // range
-                                    isolate_hue(hsl, 180.0, 60.0) // Blue range
+                                    isolate_hue(hsv, 180.0, 60.0) // Blue range
                                 )
                             );
                             if (is_oxidized > 0.5) {
@@ -603,7 +603,7 @@ Material material_from(
                         if (material_mask == 28u) { // 28
 // Copper
 #ifdef HARDCODED_SPECULAR
-                            vec3 hsl = rgb_to_hsl(albedo_srgb);
+                            vec3 hsv = rgb_to_hsv(albedo_srgb);
 
                             material.roughness = 0.5;
                             material.f0 = vec3(0.01);
@@ -613,9 +613,9 @@ Material material_from(
                             float is_oxidized = step(
                                 0.25,
                                 max(
-                                    isolate_hue(hsl, 120.0, 90.0), // Green
+                                    isolate_hue(hsv, 120.0, 90.0), // Green
                                                                    // range
-                                    isolate_hue(hsl, 180.0, 60.0) // Blue range
+                                    isolate_hue(hsv, 180.0, 60.0) // Blue range
                                 )
                             );
                             if (is_oxidized > 0.5) {
@@ -628,7 +628,7 @@ Material material_from(
 // Wood
 #ifdef HARDCODED_SPECULAR
                             float smoothness
-                                = 0.25 * linear_step(0.4, 0.8, hsl.z);
+                                = 0.25 * linear_step(0.4, 0.8, hsv.z);
                             material.roughness
                                 = max(sqr(1.0 - smoothness), 0.4);
                             material.f0 = vec3(0.03);
@@ -643,7 +643,7 @@ Material material_from(
                         if (material_mask == 30u) { // 30
 #ifdef HARDCODED_SPECULAR
                             float smoothness
-                                = 0.25 * linear_step(0.4, 0.8, hsl.z);
+                                = 0.25 * linear_step(0.4, 0.8, hsv.z);
                             material.roughness
                                 = max(sqr(1.0 - smoothness), 0.4);
                             material.f0 = vec3(0.03);
@@ -668,13 +668,13 @@ Material material_from(
 #ifdef HARDCODED_EMISSION
                             // Strong white light
                             material.emission = 1.00 * albedo_sqrt
-                                * (0.1 + 0.9 * cube(hsl.z));
+                                * (0.1 + 0.9 * cube(hsv.z));
 #endif
                         } else { // 33
 #ifdef HARDCODED_EMISSION
                             // Medium white light
                             material.emission = 0.66 * albedo_sqrt
-                                * linear_step(0.75, 0.9, hsl.z);
+                                * linear_step(0.75, 0.9, hsv.z);
 #endif
                         }
                     } else { // 34-36
@@ -682,15 +682,15 @@ Material material_from(
 #ifdef HARDCODED_EMISSION
                             // Weak white light
                             material.emission
-                                = 0.2 * albedo_sqrt * (0.1 + 0.9 * pow4(hsl.z));
+                                = 0.2 * albedo_sqrt * (0.1 + 0.9 * pow4(hsv.z));
 #endif
                         } else { // 35
 #ifdef HARDCODED_EMISSION
                             // Strong golden light
-                            material.emission = 0.85 * albedo_sqrt * hsl.z
+                            material.emission = 0.85 * albedo_sqrt * hsv.z
                                 * linear_step(0.4,
                                               0.6,
-                                              0.2 * hsl.y + 0.55 * hsl.z);
+                                              0.2 * hsv.y + 0.55 * hsv.z);
 #endif
                         }
                     }
@@ -700,16 +700,16 @@ Material material_from(
 #ifdef HARDCODED_EMISSION
                             // Medium golden light
                             material.emission = 0.85 * albedo_sqrt
-                                * linear_step(0.78, 0.85, hsl.z);
+                                * linear_step(0.78, 0.85, hsv.z);
 #endif
                         } else { // 37
 #ifdef HARDCODED_EMISSION
                             // Weak golden light
-                            float blue = isolate_hue(hsl, 200.0, 30.0);
+                            float blue = isolate_hue(hsv, 200.0, 30.0);
                             material.emission = 0.8 * albedo_sqrt
                                 * linear_step(0.47,
                                               0.50,
-                                              0.2 * hsl.y + 0.5 * hsl.z
+                                              0.2 * hsv.y + 0.5 * hsv.z
                                                   + 0.1 * blue);
 #endif
                         }
@@ -727,8 +727,8 @@ Material material_from(
 #ifdef HARDCODED_EMISSION
                             // Lava
                             material.emission = 2.0 * albedo_sqrt
-                                * (0.2 + 0.8 * isolate_hue(hsl, 30.0, 15.0))
-                                * step(0.4, hsl.y) * hsl.z;
+                                * (0.2 + 0.8 * isolate_hue(hsv, 30.0, 15.0))
+                                * step(0.4, hsv.y) * hsv.z;
 #endif
                         }
                     }
@@ -740,13 +740,13 @@ Material material_from(
 #ifdef HARDCODED_EMISSION
                             // Medium orange emissives
                             material.emission = 0.60 * albedo_sqrt
-                                * (0.1 + 0.9 * cube(hsl.z));
+                                * (0.1 + 0.9 * cube(hsv.z));
 #endif
                         } else { // 41
 #ifdef HARDCODED_EMISSION
                             // Brewing stand
                             material.emission = 0.85 * albedo_sqrt
-                                * linear_step(0.77, 0.85, hsl.z);
+                                * linear_step(0.77, 0.85, hsv.z);
 #endif
                         }
                     } else { // 42-44
@@ -754,14 +754,14 @@ Material material_from(
 #ifdef HARDCODED_EMISSION
                             // Jack o' Lantern
                             material.emission
-                                = 0.80 * albedo_sqrt * step(0.73, 0.8 * hsl.z);
+                                = 0.80 * albedo_sqrt * step(0.73, 0.8 * hsv.z);
 #endif
                         } else { // 43
 #ifdef HARDCODED_EMISSION
                             // Soul lights
-                            float blue = isolate_hue(hsl, 200.0, 30.0);
+                            float blue = isolate_hue(hsv, 200.0, 30.0);
                             material.emission = 0.66 * albedo_sqrt
-                                * linear_step(0.8, 1.0, blue + hsl.z);
+                                * linear_step(0.8, 1.0, blue + hsv.z);
 #endif
                         }
                     }
@@ -770,14 +770,14 @@ Material material_from(
                         if (material_mask == 44u) { // 44
 #ifdef HARDCODED_EMISSION
                             // Beacon
-                            material.emission = step(0.2, hsl.z) * albedo_sqrt
+                            material.emission = step(0.2, hsv.z) * albedo_sqrt
                                 * step(max_of(abs(block_pos - 0.5)), 0.4);
 #endif
                         } else { // 45
 #ifdef HARDCODED_EMISSION
                             // End portal frame
                             material.emission = 0.33 * material.albedo
-                                * isolate_hue(hsl, 120.0, 50.0);
+                                * isolate_hue(hsv, 120.0, 50.0);
 #endif
                         }
                     } else { // 46-48
@@ -785,8 +785,8 @@ Material material_from(
 #ifdef HARDCODED_EMISSION
                             // Sculk
                             material.emission = 0.2 * material.albedo
-                                * isolate_hue(hsl, 200.0, 40.0)
-                                * smoothstep(0.5, 0.7, hsl.z)
+                                * isolate_hue(hsv, 200.0, 40.0)
+                                * smoothstep(0.5, 0.7, hsv.z)
                                 * (1.0
                                    - linear_step(
                                        0.0,
@@ -798,7 +798,7 @@ Material material_from(
 #ifdef HARDCODED_EMISSION
                             // Pink glow
                             material.emission
-                                = vec3(0.75) * isolate_hue(hsl, 310.0, 50.0);
+                                = vec3(0.75) * isolate_hue(hsv, 310.0, 50.0);
 #endif
                         }
                     }
@@ -810,12 +810,12 @@ Material material_from(
                     if (material_mask < 50u) { // 48-50
                         if (material_mask == 48u) { // 48
                             material.emission = 0.5 * albedo_sqrt
-                                * linear_step(0.5, 0.6, hsl.z);
+                                * linear_step(0.5, 0.6, hsv.z);
                         } else { // 49
 #ifdef HARDCODED_EMISSION
                             // Nether mushrooms
                             material.emission = 0.80 * albedo_sqrt
-                                * step(0.73, 0.1 * hsl.y + 0.7 * hsl.z);
+                                * step(0.73, 0.1 * hsv.y + 0.7 * hsv.z);
 #endif
                         }
                     } else { // 50-52
@@ -829,7 +829,7 @@ Material material_from(
 #ifdef HARDCODED_EMISSION
                             // Ochre froglight
                             material.emission = 0.40 * albedo_sqrt
-                                * (0.1 + 0.9 * cube(hsl.z));
+                                * (0.1 + 0.9 * cube(hsv.z));
 #endif
                         }
                     }
@@ -839,13 +839,13 @@ Material material_from(
 #ifdef HARDCODED_EMISSION
                             // Verdant froglight
                             material.emission = 0.40 * albedo_sqrt
-                                * (0.1 + 0.9 * cube(hsl.z));
+                                * (0.1 + 0.9 * cube(hsv.z));
 #endif
                         } else { // 53
 #ifdef HARDCODED_EMISSION
                             // Pearlescent froglight
                             material.emission = 0.40 * albedo_sqrt
-                                * (0.1 + 0.9 * cube(hsl.z));
+                                * (0.1 + 0.9 * cube(hsv.z));
 #endif
                         }
                     } else { // 54-56
@@ -853,13 +853,13 @@ Material material_from(
 #ifdef HARDCODED_EMISSION
                             // Enchanting table
                             material.emission
-                                = vec3(0.20) * (0.1 + 0.9 * hsl.z);
+                                = vec3(0.20) * (0.1 + 0.9 * hsv.z);
 #endif
                         } else { // 55
 #ifdef HARDCODED_EMISSION
                             // Amethyst cluster
                             material.emission
-                                = vec3(0.20) * (0.1 + 0.9 * hsl.z);
+                                = vec3(0.20) * (0.1 + 0.9 * hsv.z);
 #endif
                         }
                     }
@@ -871,8 +871,8 @@ Material material_from(
 #ifdef HARDCODED_EMISSION
                             // Calibrated sculk sensor
                             material.emission = 0.2 * material.albedo
-                                * isolate_hue(hsl, 200.0, 40.0)
-                                * smoothstep(0.5, 0.7, hsl.z)
+                                * isolate_hue(hsv, 200.0, 40.0)
+                                * smoothstep(0.5, 0.7, hsv.z)
                                 * (1.0
                                    - linear_step(
                                        0.0,
@@ -880,16 +880,16 @@ Material material_from(
                                        distance(world_pos, cameraPosition)
                                    ));
                             material.emission += vec3(0.20)
-                                * (0.1 + 0.9 * hsl.z)
+                                * (0.1 + 0.9 * hsv.z)
                                 * step(0.5,
-                                       isolate_hue(hsl, 270.0, 50.0)
-                                           + 0.55 * hsl.z);
+                                       isolate_hue(hsv, 270.0, 50.0)
+                                           + 0.55 * hsv.z);
 #endif
                         } else { // 57
 #ifdef HARDCODED_EMISSION
                             // Active sculk sensor
                             material.emission
-                                = vec3(0.20) * (0.1 + 0.9 * hsl.z);
+                                = vec3(0.20) * (0.1 + 0.9 * hsv.z);
 #endif
                         }
                     } else { // 58-60
@@ -909,7 +909,7 @@ Material material_from(
 #ifdef HARDCODED_EMISSION
                             // Open eyeblossom
                             material.emission
-                                = 0.9 * albedo_sqrt * step(0.5, hsl.y);
+                                = 0.9 * albedo_sqrt * step(0.5, hsv.y);
 #endif
                         }
                     }
@@ -921,7 +921,7 @@ Material material_from(
                             // (same hue the handheld table uses). Gated on
                             // bright texels so the copper casing stays dark.
                             material.emission = vec3(0.55, 1.00, 0.70)
-                                * linear_step(0.50, 0.70, hsl.z);
+                                * linear_step(0.50, 0.70, hsv.z);
 #endif
                         } else { // 61
 #ifdef HARDCODED_EMISSION
@@ -931,7 +931,7 @@ Material material_from(
                             // the albedo hue gated on brightness. (Gating on
                             // orange alone zeroed oxidized bulbs entirely.)
                             material.emission = 0.85 * albedo_sqrt
-                                * linear_step(0.3, 0.7, hsl.z);
+                                * linear_step(0.3, 0.7, hsv.z);
 #endif
                         }
                     } else { // 62-64
@@ -957,7 +957,7 @@ Material material_from(
         // one hue per mask). Their textures are the glow color, gated on
         // brightness so frames and casings stay dark. (Glass lives at
         // 80+, handled below by the specular/SSS terms, not here.)
-        material.emission = albedo_sqrt * linear_step(0.40, 0.60, hsl.z);
+        material.emission = albedo_sqrt * linear_step(0.40, 0.60, hsv.z);
 #endif
 #ifdef HARDCODED_SPECULAR
         material.f0 = vec3(0.04);

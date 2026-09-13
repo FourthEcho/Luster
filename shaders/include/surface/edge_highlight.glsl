@@ -63,9 +63,11 @@ float get_edge_highlight(
     // Calculate tangent and bitangent
     mat3 tbn = get_tbn_matrix(world_normal) * pixel_size;
 
-    // Calculate depth gradient using screen-space partial derivatives
+    // Calculate depth gradient using screen-space partial derivatives.
+    // Must differentiate the linearized depth: raw 0..1 depth has a
+    // different scale and would corrupt the planar prediction.
     float depth_linear = linearize_depth_fast(depth);
-    vec2 depth_gradient = vec2(dFdx(depth), dFdy(depth));
+    vec2 depth_gradient = vec2(dFdx(depth_linear), dFdy(depth_linear));
 
     float rcp_NoV = abs(rcp(dot(normalize(scene_pos), world_normal)));
 

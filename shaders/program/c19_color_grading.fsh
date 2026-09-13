@@ -82,7 +82,8 @@ void main() {
     vec3 bloom = get_bloom();
     float bloom_intensity = 0.12 * BLOOM_INTENSITY;
 
-    scene_color = mix(scene_color, bloom, bloom_intensity);
+    // Additive bloom: lerping towards bloom would dim the base image
+    scene_color += bloom * bloom_intensity;
 
 #ifdef BLOOMY_FOG
     float fog_transmittance = texture(colortex3, uv * taau_render_scale).x;

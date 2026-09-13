@@ -12,8 +12,8 @@ float linearize_depth(float near, float far, float depth) {
 float linearize_depth(float depth) { return linearize_depth(near, far, depth); }
 
 float reverse_linear_depth(float near, float far, float linear_z) {
-    return (far + near) / (far - near)
-        + (2.0 * far * near) / (linear_z * (far - near));
+    // Exact inverse of linearize_depth: z = n*f / (d*(n-f) + f)
+    return far * (near - linear_z) / (linear_z * (near - far));
 }
 
 float reverse_linear_depth(float linear_z) {
@@ -145,7 +145,7 @@ vec3 scene_to_view_space(vec3 scene_pos) {
 }
 
 mat3 get_tbn_matrix(vec3 normal) {
-    vec3 tangent = normal.y == 1.0
+    vec3 tangent = abs(normal.y) == 1.0
         ? vec3(1.0, 0.0, 0.0)
         : normalize(cross(vec3(0.0, 1.0, 0.0), normal));
     vec3 bitangent = normalize(cross(tangent, normal));

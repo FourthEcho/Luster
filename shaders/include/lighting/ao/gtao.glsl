@@ -36,7 +36,7 @@ float compute_maximum_horizon_angle(
 
     for (int i = 0; i < GTAO_HORIZON_STEPS; ++i, ray_pos += ray_step) {
         ivec2 texel
-            = ivec2(clamp01(ray_pos) * view_res * taau_render_scale - 0.5);
+            = ivec2(clamp01(ray_pos) * view_res * taau_render_scale + 0.5);
         float depth = texelFetch(combined_depth_tex, texel, 0).x;
 
         if (depth == 1.0 || depth < hand_depth || depth == screen_pos.z) {
@@ -51,6 +51,12 @@ float compute_maximum_horizon_angle(
             - view_pos;
 
         float len_sq = length_squared(offset);
+
+        // Self-sample: zero offset would make inversesqrt diverge
+        if (len_sq < eps) {
+            continue;
+        }
+
         float norm = inversesqrt(len_sq);
 
         float distance_falloff = linear_step(

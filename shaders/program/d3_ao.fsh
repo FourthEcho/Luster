@@ -123,7 +123,8 @@ void main() {
     );
     vec3 scene_pos = view_to_scene_space(view_pos);
 
-    vec3 previous_screen_pos = reproject_scene_space(scene_pos, false, false);
+    vec3 previous_screen_pos
+        = reproject_scene_space(scene_pos, is_hand, false);
 
     if (depth == 1.0) {
         ambient = vec4(1.0, 0.0, 0.0, 0.0);

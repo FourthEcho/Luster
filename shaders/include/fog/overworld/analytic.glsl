@@ -20,6 +20,13 @@ vec2 air_fog_analytic_airmass(
     vec2 p1 = exp2(ray_length * ray_direction_world.y * mul + a);
     vec2 p2 = exp2(a);
 
+    // Horizontal rays: the closed form is 0/0 (NaN). Use the limit
+    // d -> 0 of (exp2(L*d*m + a) - exp2(a)) / (ln2*m*d) = L * exp2(a).
+    if (abs(ray_direction_world.y) < 1e-4) {
+        return clamp(ray_length * exp2(a), 0.0, ray_length)
+            * (0.5 * OVERWORLD_FOG_INTENSITY);
+    }
+
     return clamp(
                (p1 - p2) * rcp(log(2.0) * mul * ray_direction_world.y),
                0.0,
