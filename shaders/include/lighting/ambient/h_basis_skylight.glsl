@@ -54,6 +54,7 @@
 #include "/include/surface/material.glsl"
 #include "/include/sky/projection.glsl"
 #include "/include/utility/fast_math.glsl"
+#include "/include/utility/random.glsl"
 
 #ifndef H_BASIS_SKY_SAMPLES
   #define H_BASIS_SKY_SAMPLES SH_SKYLIGHT_QUALITY
