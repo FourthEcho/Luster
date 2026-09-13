@@ -21,6 +21,17 @@ float nether_fog_density(vec3 world_pos) {
     return density;
 }
 
+// Gusting wind offset for nether smoke/fog. The old constant winds drifted
+// at ~0.01 noise-units/sec, slow enough to read as nearly static. This
+// drifts ~3.5x faster with slow gust cycles (~27 s and ~88 s periods) so
+// the smoke breathes instead of scrolling at a constant rate. Written as
+// base*t + bounded sines (not t * gust(t)) so the gust phase never makes
+// the drift speed grow without bound over long sessions.
+vec3 nether_wind_offset(vec3 wind, float t) {
+    float gust_phase = 2.2 * sin(t * 0.23 + 1.3) + 3.5 * sin(t * 0.071 + 0.5);
+    return wind * (3.5 * t + gust_phase);
+}
+
 vec3 nether_fog_emission(vec3 world_pos) {
     vec3 main_col;
 #ifdef NETHER_USE_BIOME_COLOR
@@ -35,14 +46,22 @@ vec3 nether_fog_emission(vec3 world_pos) {
     const vec3 alt_col = from_display(vec3(NETHER_R * 0.65, NETHER_G * 0.18, max(NETHER_B * 0.10, 0.002)));
     const vec3 wind0 = vec3(1.0, 0.1, 0.5) * 0.01;
     const vec3 wind1 = vec3(-0.7, -0.1, -0.1) * 0.05;
+    const vec3 wind2 = vec3(0.3, 0.05, -0.4) * 0.01;
 
-    float base_noise
-        = texture(colortex0, 0.02 * world_pos + wind0 * frameTimeCounter).x;
-    float detail_noise
-        = texture(colortex0, 0.04 * world_pos + wind1 * frameTimeCounter).x
+    float base_noise = texture(
+        colortex0,
+        0.02 * world_pos + nether_wind_offset(wind0, frameTimeCounter)
+    ).x;
+    float detail_noise = texture(
+        colortex0,
+        0.04 * world_pos + nether_wind_offset(wind1, frameTimeCounter)
+    ).x
             * 0.8
         - 0.4;
-    float color_noise = texture(colortex0, 0.02 * world_pos + 0.2).x;
+    float color_noise = texture(
+        colortex0,
+        0.02 * world_pos + 0.2 + nether_wind_offset(wind2, frameTimeCounter)
+    ).x;
 
     float density = max0(linear_step(0.6, 0.9, base_noise) + detail_noise);
     float color_mix = linear_step(0.5, 0.7, color_noise);
@@ -92,12 +111,23 @@ vec3 nether_smoke_v2_emission(vec3 world_pos, vec3 world_start_pos) {
     // frequency, which caused the sample position to jump incoherently
     // frame-to-frame and read as flickery noise instead of smooth motion).
     vec3 warp_pos = world_pos * 0.02;
-    warp_pos += (texture(colortex0, warp_pos * 2.0 + wind0 * frameTimeCounter).x * 2.0 - 1.0) * 0.03;
-    warp_pos += (texture(colortex0, warp_pos * 4.0 + wind1 * frameTimeCounter).x * 2.0 - 1.0) * 0.015;
+    warp_pos += (texture(
+        colortex0,
+        warp_pos * 2.0 + nether_wind_offset(wind0, frameTimeCounter)
+    ).x * 2.0 - 1.0) * 0.03;
+    warp_pos += (texture(
+        colortex0,
+        warp_pos * 4.0 + nether_wind_offset(wind1, frameTimeCounter)
+    ).x * 2.0 - 1.0) * 0.015;
 
-    float base_noise = texture(colortex0, warp_pos + wind0 * frameTimeCounter).x;
-    float detail_noise
-        = texture(colortex0, warp_pos * 2.0 + wind1 * frameTimeCounter).x * 0.8 - 0.4;
+    float base_noise = texture(
+        colortex0,
+        warp_pos + nether_wind_offset(wind0, frameTimeCounter)
+    ).x;
+    float detail_noise = texture(
+        colortex0,
+        warp_pos * 2.0 + nether_wind_offset(wind1, frameTimeCounter)
+    ).x * 0.8 - 0.4;
 
     float height_fade = sqr(1.0 - linear_step(128.0, 256.0, world_pos.y))
         * (exp2(-max0(world_pos.y - 32.0) * 0.02) * 0.6 + 0.4)
@@ -229,7 +259,24 @@ mat2x3 raymarch_nether_fog(
 #define shadow 1.0
 #endif
 
-        float density = nether_fog_density(world_pos) * step_length;
+        // Gusting billow: the base density is height-only (static), so
+        // modulate the fog body with the same animated noise field that
+        // drives the smoke glow. Mean-preserving (~1.0 average) so the
+        // overall fog amount is unchanged, but transmittance now billows
+        // instead of sitting still.
+        float billow = mix(
+            0.55,
+            1.45,
+            texture(
+                colortex0,
+                0.02 * world_pos
+                    + nether_wind_offset(
+                          vec3(0.8, 0.15, 0.4) * 0.01,
+                          frameTimeCounter
+                      )
+            ).x
+        );
+        float density = nether_fog_density(world_pos) * billow * step_length;
 
         vec3 step_optical_depth = extinction_coeff * density;
         vec3 step_transmittance = exp(-step_optical_depth);
