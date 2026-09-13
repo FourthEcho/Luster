@@ -753,6 +753,8 @@ value.REFRACTION.REFRACTION_ALL        = Everything
 value.REFRACTION.REFRACTION_WATER_ONLY = Water Only
 option.REFRACTION_INTENSITY            = Refraction Intensity
 option.REFRACTION_INTENSITY.comment    = Adjusts the intensity of refractions on water
+option.REFRACTION_DISPERSION_INTENSITY         = Refraction Dispersion
+option.REFRACTION_DISPERSION_INTENSITY.comment = Adds chromatic dispersion (RGB fringing) to refracted water/glass, like light splitting through a prism
 
 suffix.POM_DEPTH                       = m
 suffix.POM_DISTANCE                    = m

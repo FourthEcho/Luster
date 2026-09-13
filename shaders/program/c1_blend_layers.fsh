@@ -145,6 +145,7 @@ uniform float time_midnight;
 #include "/include/utility/fast_math.glsl"
 #include "/include/utility/sampling.glsl"
 #include "/include/utility/space_conversion.glsl"
+#include "/include/surface/refraction.glsl"
 
 #ifdef WORLD_OVERWORLD
 #include "/include/fog/overworld/analytic.glsl"
@@ -280,28 +281,19 @@ void main() {
 
     // Refraction
 
-    vec2 refracted_uv = uv;
     float layer_dist = abs(view_distance - length(back_position_view));
+    vec2 refracted_uv;
 
-#if REFRACTION != REFRACTION_OFF
-    if (is_translucent && refraction_data != vec4(0.0)) {
-        vec2 normal_tangent = vec2(
-            unsplit_2x8(refraction_data.xy) * 2.0 - 1.0,
-            unsplit_2x8(refraction_data.zw) * 2.0 - 1.0
-        );
-
-        refracted_uv = uv
-            + normal_tangent.xy * rcp(max(view_distance, 1.0))
-                * min(layer_dist, 8.0) * (0.1 * REFRACTION_INTENSITY);
-
-        // Make sure the refracted fragment is behind the fragment position
-        float depth_refracted = texture(depthtex1, refracted_uv).x;
+    fragment_color = apply_refraction(
+        uv,
+        refraction_data,
+        is_translucent,
+        view_distance,
+        layer_dist,
+        front_depth,
+        isEyeInWater == 1,
         refracted_uv
-            = mix(refracted_uv, uv, float(depth_refracted < front_depth));
-    }
-#endif
-
-    fragment_color = texture(colortex0, refracted_uv * taau_render_scale).rgb;
+    );
 
 
     vec3 original_color = fragment_color;
