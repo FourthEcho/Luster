@@ -3,7 +3,9 @@
 
   program/d4_sspt:
   Trace one frame of screen-space path traced emission + colored lighting
-  (emission + shadowed sun/moon and handheld bounce from
+  (cosine-lobe emission + shadowed sun/moon and handheld bounce, plus an
+  emissive-guided NEE lobe that picks random screen texels, tests them for
+  emission, and evaluates an occlusion-checked next-event estimator — see
   include/lighting/sspt/sspt.glsl).
   Raw, noisy output — program/d5_sspt_accumulate and the SVGF filter passes
   (program/d6_sspt_filter, sizes 32/16/8/4/2) denoise it. Runs at half

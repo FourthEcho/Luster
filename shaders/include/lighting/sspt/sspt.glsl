@@ -4,10 +4,24 @@
 // ============================================================================
 //  Screen-space path traced emission + colored lighting
 // ----------------------------------------------------------------------------
-//  Each shaded pixel casts cosine-weighted diffuse rays into the depth
-//  buffer and gathers emission plus one bounce of direct light at the hits
-//  (hash dithers, cosine-vector sampling, screenspace RT, Hammon BRDF,
-//  single/multibounce contribution logic, cubic emission falloff).
+//  Each shaded pixel gathers indirect light with a two-lobe mixture:
+//
+//    - COSINE lobe: cosine-weighted diffuse rays into the depth buffer,
+//      gathering emission plus one bounce of direct light at the hits
+//      (hash dithers, cosine-vector sampling, screenspace RT, Hammon BRDF,
+//      single/multibounce contribution logic, cubic emission falloff).
+//    - NEE lobe (emissive-guided): picks a uniformly random screen texel,
+//      cheap-tests it for emission (gbuffer mask ranges + labPBR emission
+//      map alpha, no material_from call), reconstructs its view position,
+//      marches an occlusion segment toward it, and evaluates an unbiased
+//      next-event estimator: E * cosX * falloff * 4d^2 / (P00*P11*r^2).
+//      This finds sparse emitters (torches, lava, glowstone) that cosine
+//      rays at 1 SPP almost never hit. Fragment-only, Mac-safe.
+//
+//  The lobes are stratified per pixel/frame by hash (SSPT_GUIDE_RATIO) and
+//  averaged, so the emission integral stays unbiased; the direct-light
+//  bounce is gathered on cosine-lobe candidates only (large smooth sources
+//  need no guiding) and normalized by the cosine count, not the total.
 //
 //  Bounce lighting gathered per hit:
 //    - shadowed sun/moon bounce (hitDirectLight, Overworld/End with SHADOW),
@@ -435,6 +449,116 @@ float brdfWeight(vec3 normal, vec3 incoming, vec3 outgoing) {
 }
 
 // ----------------------------------------------------------------------------
+/* EMISSIVE-GUIDED NEE */
+// ----------------------------------------------------------------------------
+//  Fraction of single-bounce candidates drawn from the NEE lobe instead of
+//  the cosine lobe. Plain const (not a #define option) so it stays out of
+//  the Iris settings GUI.
+const float SSPT_GUIDE_RATIO = 0.5;
+
+//  Cheap "might this texel emit?" test for NEE guide probes. Mask ranges
+//  mirror the hardcoded emission blocks in material_from() (16, 19-26
+//  warped/crimson flora, 32-63 lamps/lava/ore-bulbs/portals, 64-79 modded
+//  colored lights; 48/62/63 emit unconditionally), plus any labPBR/old
+//  emission map texel via the specular buffer. False positives are harmless
+//  (the full hitEmission() call below resolves them to zero); false
+//  negatives would bias the estimator, so the test errs on the wide side.
+bool is_emissive_guide_texel(vec4 gbuffer_data_0, ivec2 texel) {
+    uint mask = uint(255.0 * unpack_unorm_2x8(gbuffer_data_0.y).y);
+
+    if (mask == 48u || mask == 62u || mask == 63u) return true;
+    if (mask >= 16u && mask <= 26u) return true;
+    if (mask >= 32u && mask <= 61u) return true;
+    if (mask >= 64u && mask <= 79u) return true;
+
+#ifdef SPECULAR_MAPPING
+    vec4 spec_raw = texelFetch(colortex2, texel, 0);
+#if TEXTURE_FORMAT == TEXTURE_FORMAT_LAB
+    // labPBR: specular alpha < 1 means an emission multiplier is present.
+    if (unpack_unorm_2x8(spec_raw.w).y < 254.5 / 255.0) return true;
+#elif TEXTURE_FORMAT == TEXTURE_FORMAT_OLD
+    // Old format: specular.b carries emission directly.
+    if (unpack_unorm_2x8(spec_raw.z).y > 0.5 / 255.0) return true;
+#endif
+#endif
+
+    return false;
+}
+
+//  Next-event estimator toward one uniformly picked screen texel.
+//  Returns emission gathered at the picked emitter, or zero on any early
+//  out (sky pick, cheap test fail, backface, occluded, non-emissive).
+//  The 4d^2/(P00*P11*r^2) solid-angle factor comes from the texel footprint
+//  (the 1/N pick probability cancels against the N texels), so no extra
+//  uniforms are needed beyond the existing TRACE_* macros. Inherits the
+//  trace-range limits of the screenspace march and the cubic emission
+//  falloff for a consistent look with the cosine lobe.
+vec3 traceEmissionNEE(vec3 view_pos, vec3 view_normal, vec2 pick_hash) {
+    vec2 gbuffer_res = view_res * taau_render_scale;
+
+    ivec2 pick_texel = ivec2(pick_hash * gbuffer_res);
+    pick_texel = clamp(pick_texel, ivec2(0), ivec2(gbuffer_res) - ivec2(1));
+
+    float pick_depth = texelFetch(TRACE_DEPTH, pick_texel, 0).x;
+    if (pick_depth >= 1.0) return vec3(0.0);
+
+    vec4 pick_data = texelFetch(colortex1, pick_texel, 0);
+    if (!is_emissive_guide_texel(pick_data, pick_texel)) return vec3(0.0);
+
+    vec3 pick_view = screen_to_view_space(
+        TRACE_PROJ_INV,
+        vec3((vec2(pick_texel) + 0.5) / gbuffer_res, pick_depth),
+        true
+    );
+
+    vec3 to_pick = pick_view - view_pos;
+    float r2 = dot(to_pick, to_pick);
+    if (r2 < 1e-6) return vec3(0.0);
+
+    float r = sqrt(r2);
+    vec3 omega = to_pick / r;
+
+    float cos_x = dot(view_normal, omega);
+    if (cos_x <= 0.0) return vec3(0.0);
+
+    // Full emission resolve before the occlusion march: genuine emitters
+    // pass the cheap test, so a zero here is a cheap exit for conditional
+    // (HSV/position-gated) false positives.
+    vec3 emitter_radiance = hitEmission(pick_data, pick_texel, pick_view);
+    if (dot(emitter_radiance, vec3(1.0)) <= 0.0) return vec3(0.0);
+
+    // Occlusion march toward the pick (10 steps over the exact segment, so
+    // the pick surface itself can never be stepped over). Any hit well
+    // short of r means something blocks the path.
+    const uint occl_steps = 10u;
+    for (uint k = 0u; k < occl_steps; ++k) {
+        vec3 probe = view_pos
+            + to_pick * ((float(k) + pick_hash.y) / float(occl_steps));
+        vec3 probe_screen = view_to_screen_space(TRACE_PROJ, probe, true);
+        if (clamp01(probe_screen.xy) != probe_screen.xy) continue;
+
+        vec3 occl = rayHit(probe_screen);
+        if (occl.z < 1.0) {
+            vec3 occl_view = screen_to_view_space(TRACE_PROJ_INV, occl, true);
+            float occl_dist = distance(occl_view, view_pos);
+            if (occl_dist < r * 0.9 && occl_dist > 0.05) return vec3(0.0);
+        }
+    }
+
+    float emission_falloff = 1.0 - linear_step(
+        ssptEmissionDistance * rcp_pi,
+        ssptEmissionDistance,
+        r
+    );
+    emission_falloff = cube(emission_falloff);
+
+    float solid_angle = 4.0 * sqr(pick_view.z)
+        / (abs(TRACE_PROJ[0][0]) * abs(TRACE_PROJ[1][1]) * r2);
+
+    return emitter_radiance * (cos_x * emission_falloff * solid_angle);
+}
+
+// ----------------------------------------------------------------------------
 /* INDIRECT TRACER */
 // ----------------------------------------------------------------------------
 //  Returns emission + direct-light bounce for this pixel (raw,
@@ -451,6 +575,9 @@ vec3 traceIndirect(vec3 view_pos, vec3 scene_normal, vec2 dither, bool hand) {
 
 #if defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE
     vec3 bounce = vec3(0.0);
+    // Cosine-lobe candidate count for bounce normalization (the NEE lobe
+    // gathers emission only, so bounce must not divide by ssptSPP).
+    float bounce_samples = 0.0;
 #endif
 
     // R2-sequence constants: 1/rho and 1/rho^2 (plastic constant)
@@ -460,6 +587,10 @@ vec3 traceIndirect(vec3 view_pos, vec3 scene_normal, vec2 dither, bool hand) {
     #if ssptBounces <= 1
 
     /* ------ SINGLE BOUNCE ------ */
+    //  Stratified two-lobe mixture: each candidate is either an
+    //  emissive-guided NEE sample or a cosine ray, picked by hash over
+    //  pixel + frame + candidate index so 1-SPP frames alternate the lobes
+    //  and temporal accumulation blends them.
 
     vec2 quasirandom_curr = 0.5 + fract(vec2(a1, a2) * float(frameCounter) + 0.5);
 
@@ -470,6 +601,24 @@ vec3 traceIndirect(vec3 view_pos, vec3 scene_normal, vec2 dither, bool hand) {
         noise_curr += hash22(
             vec2(gl_FragCoord.xy + vec2(cos(quasirandom_curr.x), sin(quasirandom_curr.y)))
         );
+
+        float lobe_pick = hash1(
+            float(frameCounter) * 17.0 + float(i) * 7.0
+                + gl_FragCoord.x + gl_FragCoord.y * 131.0
+        );
+
+        if (lobe_pick < SSPT_GUIDE_RATIO) {
+            // NEE lobe: emission only (no direct-light bounce term; large
+            // smooth sources need no guiding and stay on the cosine lobe).
+            vec2 texel_pick = hash2(
+                gl_FragCoord.xy + vec2(
+                    float(frameCounter) * 1.37 + float(i) * 7.31,
+                    float(frameCounter) * 2.11 - float(i) * 3.70
+                )
+            );
+            emission += traceEmissionNEE(view_pos, view_normal, texel_pick);
+            continue;
+        }
 
         vec2 vector_xy = fract(sqrt(2.0) * quasirandom_curr + noise_curr);
 
@@ -502,6 +651,7 @@ vec3 traceIndirect(vec3 view_pos, vec3 scene_normal, vec2 dither, bool hand) {
 #if defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE
             // Direct-light bounce: no distance falloff, BRDF-weighted.
             bounce += hitDirectLight(unpackHit(hit_data_0), hit_view_pos) * brdf;
+            bounce_samples += 1.0;
 #endif
         }
     }
@@ -516,6 +666,12 @@ vec3 traceIndirect(vec3 view_pos, vec3 scene_normal, vec2 dither, bool hand) {
 
     for (uint i = 0; i < ssptSPP; ++i) {
         int frame_counter_new = frameCounter + int(i) * 31;
+
+#if defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE
+        // Multibounce samples are all cosine-lobe: count every sample so
+        // the shared normalization below reproduces the old average.
+        bounce_samples += 1.0;
+#endif
 
         vec2 quasirandom_curr = 0.5 + fract(vec2(a1, a2) * float(frame_counter_new) + 0.5);
 
@@ -590,7 +746,10 @@ vec3 traceIndirect(vec3 view_pos, vec3 scene_normal, vec2 dither, bool hand) {
     emission /= float(ssptSPP);
 
 #if defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE
-    bounce /= float(ssptSPP);
+    // Bounce is gathered on cosine-lobe candidates only, so it normalizes
+    // by the cosine count — dividing by ssptSPP would dim it by the NEE
+    // share.
+    if (bounce_samples > 0.5) bounce /= bounce_samples;
 #endif
 
     emission *= float(!hand); // hand geometry gets no emission
