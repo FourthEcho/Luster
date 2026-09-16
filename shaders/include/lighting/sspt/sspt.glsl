@@ -31,7 +31,11 @@
 //      primary pass's exact falloff/color, so held light is genuinely path
 //      traced — not a flat add-on
 //    - SSPT_INTENSITY scales both emission and bounce
-//  Skylight bounce stays out by design (owned by SH_SKYLIGHT).
+//  Skylight bounce: the hit surface's own sky exposure (light_levels.y)
+//  sampled directionally from the sky map at the hit normal (colortex4,
+//  DIRECT_SKY_BOUNCE, always on under SSPT). SH_SKYLIGHT remains the sole
+//  owner of primary-surface ambient (the direct-view flat/SH term) --
+//  this is bounce only, at traced hits.
 //
 //  Porting notes:
 //    - View-space raytracing through Luster's space_conversion.glsl
@@ -45,7 +49,7 @@
 //      screen-space effects.
 //
 //  Required uniforms (declared by the including program before this file):
-//    colortex1, colortex2, depth via TRACE_DEPTH,
+//    colortex1, colortex2, colortex4 (sky map, sky bounce), depth via TRACE_DEPTH,
 //    gbufferModelView{,Inverse}, cameraPosition, view_res, view_pixel_size,
 //    taau_render_scale, near, far, frameCounter
 //    + for the retained bounce: shadowtex0/shadowtex1[/shadowcolor0],
@@ -70,6 +74,7 @@
 #include "/include/utility/random.glsl"
 #include "/include/utility/space_conversion.glsl"
 #include "/include/surface/material.glsl"
+#include "/include/sky/projection.glsl"
 
 // ----------------------------------------------------------------------------
 // Resolution bookkeeping
@@ -310,8 +315,14 @@ vec3 hitEmission(vec4 hit_data_0, ivec2 hit_texel, vec3 hit_view_pos) {
 #ifdef HANDHELD_LIGHTING
 #define DIRECT_HANDHELD_BOUNCE 1
 #endif
+// Skylight bounce: the hit surface's own sky exposure (light_levels.y),
+// sampled directionally from the live sky map at the hit normal. Always
+// on under SSPT (no separate toggle) -- this is what lets light passing
+// through a cave opening bounce off the sunlit wall onto its neighbors
+// instead of just lighting the one surface directly under the hole.
+#define DIRECT_SKY_BOUNCE 1
 
-#if defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE
+#if defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE || defined DIRECT_SKY_BOUNCE
 
 // Sun radiance, evaluated locally so the trace pass does not drag in the
 // full atmosphere include chain. Same evaluation as the primary shading
@@ -390,6 +401,18 @@ vec3 hitDirectLight(HitData hit, vec3 hit_view_pos) {
     }
 #endif // DIRECT_SUN_BOUNCE
 
+#ifdef DIRECT_SKY_BOUNCE
+    // Skylight bounce: the hit surface's own sky exposure, sampled
+    // directionally from the live sky map (same map H_BASIS_SKYLIGHT's
+    // projection samples) at the hit's flat normal. No shadow/occlusion
+    // tap needed -- light_levels.y already encodes the block-light-engine's
+    // sky visibility at the hit, and the directional sample means a hit
+    // facing away from open sky still gets a dim/tinted contribution
+    // rather than a flat ambient add.
+    vec3 sky_radiance = texture(colortex4, project_sky(hit.scene_normal)).rgb;
+    direct += sky_radiance * hit.light_levels.y;
+#endif // DIRECT_SKY_BOUNCE
+
 #ifdef DIRECT_HANDHELD_BOUNCE
     // Held light source as traced bounce light: evaluated at the hit with
     // the exact falloff and color the primary pass uses
@@ -404,7 +427,7 @@ vec3 hitDirectLight(HitData hit, vec3 hit_view_pos) {
     return hit.albedo * (direct * SSPT_INTENSITY);
 }
 
-#endif // defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE
+#endif // defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE || defined DIRECT_SKY_BOUNCE
 
 // ----------------------------------------------------------------------------
 /* HAMMON DIFFUSE BRDF */
@@ -573,7 +596,7 @@ vec3 traceIndirect(vec3 view_pos, vec3 scene_normal, vec2 dither, bool hand) {
 
     vec3 emission = vec3(0.0);
 
-#if defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE
+#if defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE || defined DIRECT_SKY_BOUNCE
     vec3 bounce = vec3(0.0);
     // Cosine-lobe candidate count for bounce normalization (the NEE lobe
     // gathers emission only, so bounce must not divide by ssptSPP).
@@ -648,7 +671,7 @@ vec3 traceIndirect(vec3 view_pos, vec3 scene_normal, vec2 dither, bool hand) {
             emission += hitEmission(hit_data_0, hit_texel, hit_view_pos)
                       * emission_falloff * brdf;
 
-#if defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE
+#if defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE || defined DIRECT_SKY_BOUNCE
             // Direct-light bounce: no distance falloff, BRDF-weighted.
             bounce += hitDirectLight(unpackHit(hit_data_0), hit_view_pos) * brdf;
             bounce_samples += 1.0;
@@ -667,7 +690,7 @@ vec3 traceIndirect(vec3 view_pos, vec3 scene_normal, vec2 dither, bool hand) {
     for (uint i = 0; i < ssptSPP; ++i) {
         int frame_counter_new = frameCounter + int(i) * 31;
 
-#if defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE
+#if defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE || defined DIRECT_SKY_BOUNCE
         // Multibounce samples are all cosine-lobe: count every sample so
         // the shared normalization below reproduces the old average.
         bounce_samples += 1.0;
@@ -727,7 +750,7 @@ vec3 traceIndirect(vec3 view_pos, vec3 scene_normal, vec2 dither, bool hand) {
                 emission += hitEmission(hit_data_0, hit_texel, hit_view_pos)
                           * emission_falloff * contribution;
 
-#if defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE
+#if defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE || defined DIRECT_SKY_BOUNCE
                 // Direct-light bounce on every path vertex.
                 bounce += hitDirectLight(unpackHit(hit_data_0), hit_view_pos)
                         * contribution;
@@ -745,7 +768,7 @@ vec3 traceIndirect(vec3 view_pos, vec3 scene_normal, vec2 dither, bool hand) {
 
     emission /= float(ssptSPP);
 
-#if defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE
+#if defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE || defined DIRECT_SKY_BOUNCE
     // Bounce is gathered on cosine-lobe candidates only, so it normalizes
     // by the cosine count — dividing by ssptSPP would dim it by the NEE
     // share.
@@ -759,7 +782,7 @@ vec3 traceIndirect(vec3 view_pos, vec3 scene_normal, vec2 dither, bool hand) {
     // primary shading pass applies, so a bounced photon and a directly
     // viewed emitter already agree on brightness — the values here are
     // final radiance, not raw.
-#if defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE
+#if defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE || defined DIRECT_SKY_BOUNCE
     return emission + bounce;
 #else
     return emission;

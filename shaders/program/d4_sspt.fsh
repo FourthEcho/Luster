@@ -32,6 +32,7 @@ uniform sampler2D noisetex;
 
 uniform sampler2D colortex1; // gbuffer 0
 uniform sampler2D colortex2; // gbuffer 1
+uniform sampler2D colortex4; // sky map (skylight bounce sampling)
 uniform sampler2D colortex6; // ambient occlusion (same resolution)
 
 uniform sampler2D depthtex1; // geometry depth (non-DH path)
