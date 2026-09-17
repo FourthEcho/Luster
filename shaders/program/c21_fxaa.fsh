@@ -11,6 +11,7 @@ http://blog.simonrodriguez.fr/articles/2016/07/implementing_fxaa.html
 */
 
 #include "/include/global.glsl"
+#include "/include/utility/color.glsl"
 
 layout(location = 0) out vec3 scene_color;
 
@@ -37,8 +38,8 @@ const float edge_threshold_max = 0.125;
 const float subpixel_quality = 0.75 * FXAA_INTENSITY;
 
 float get_luma(vec3 rgb) {
-    const vec3 luminance_weights_r_709 = vec3(0.2126, 0.7152, 0.0722);
-    return sqrt(dot(rgb, luminance_weights_r_709));
+    // FXAA runs on display-linear color (working == display here).
+    return sqrt(dot(rgb, luminance_weights));
 }
 
 float min_of(float a, float b, float c, float d, float e) {

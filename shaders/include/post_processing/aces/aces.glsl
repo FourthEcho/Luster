@@ -190,8 +190,8 @@ vec3 academy_color_controls(vec3 color) {
     color = exp2((log2(max(color, vec3(1e-6))) - log2(pivot))
         * ACADEMY_CONTRAST + log2(pivot));
 
-    // Saturation + optional colorfulness shaping.
-    float luma = dot(color, vec3(0.2126, 0.7152, 0.0722));
+    // Saturation + optional colorfulness shaping (post-ODT working space).
+    float luma = dot(color, luminance_weights);
     float sat = max(ACADEMY_SATURATION + ACADEMY_COLORFULNESS * (1.0 - clamp(luma, 0.0, 1.0)), 0.0);
     color = mix(vec3(luma), color, sat);
 

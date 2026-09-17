@@ -169,7 +169,7 @@ vec3 get_sky_lighting(
     skylight += ambient_sss * skylight_up * material.sss_amount * 2.0;
 
     skylight = 16.0 * directional_lighting
-        * mix(skylight, vec3(dot(skylight, luminance_weights_rec2020)), 0.5);
+        * mix(skylight, vec3(dot(skylight, luminance_weights)), 0.5);
 
     lighting += skylight * get_skylight_falloff(light_levels.y);
 #else

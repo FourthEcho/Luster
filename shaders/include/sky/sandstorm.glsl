@@ -83,7 +83,7 @@ vec3 sandstorm_transmittance(float mu) {
 
 // Warm tint of dust-scattered light, for mist and ambient coupling.
 vec3 sandstorm_tint() {
-    return normalize(vec3(1.0, 0.78, 0.55) + 1e-6);
+    return gamut_expand(normalize(vec3(1.0, 0.78, 0.55) + 1e-6));
 }
 #else
 float sandstorm_strength() { return 0.0; }

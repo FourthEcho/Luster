@@ -11,10 +11,11 @@
 // weight based on luminance difference (so the blur doesn't bleed across
 // hard fog-density edges, e.g. cave mouths or fog-bank boundaries).
 
+#include "/include/utility/color.glsl"
 #include "/include/utility/fast_math.glsl"
 
 float luminance(vec3 c) {
-    return dot(c, vec3(0.2126, 0.7152, 0.0722));
+    return dot(c, luminance_weights);
 }
 
 vec3 fog_spatial_filter(

@@ -4,49 +4,112 @@
 const vec3 luminance_weights_rec709 = vec3(0.2126, 0.7152, 0.0722);
 const vec3 luminance_weights_rec2020 = vec3(0.2627, 0.6780, 0.0593);
 const vec3 luminance_weights_ap1 = vec3(0.2722, 0.6741, 0.0537);
+const vec3 luminance_weights_display_p3 = vec3(0.2289746, 0.6917385, 0.0792869);
+const vec3 luminance_weights_adobe_rgb = vec3(0.2973769, 0.6273491, 0.0752741);
+// Working space follows DISPLAY_GAMUT directly (working == display):
+// sRGB -> Rec.709 luma, Display P3 / DCI-P3 -> P3 luma,
+// Rec.2020 -> Rec.2020 luma, Adobe RGB -> Adobe luma.
+#if DISPLAY_GAMUT == DISPLAY_GAMUT_DCI_P3 || DISPLAY_GAMUT == DISPLAY_GAMUT_DISPLAY_P3
+#define luminance_weights luminance_weights_display_p3
+#elif DISPLAY_GAMUT == DISPLAY_GAMUT_REC2020
 #define luminance_weights luminance_weights_rec2020
+#elif DISPLAY_GAMUT == DISPLAY_GAMUT_ADOBE_RGB
+#define luminance_weights luminance_weights_adobe_rgb
+#else // DISPLAY_GAMUT_SRGB
+#define luminance_weights luminance_weights_rec709
+#endif
 
 // closest wavelengths to RGB primaries
 const vec3 primary_wavelengths_rec709 = vec3(660.0, 550.0, 440.0);
 const vec3 primary_wavelengths_rec2020 = vec3(660.0, 550.0, 440.0);
 const vec3 primary_wavelengths_ap1 = vec3(630.0, 530.0, 465.0);
+const vec3 primary_wavelengths_display_p3 = vec3(660.0, 550.0, 440.0);
+const vec3 primary_wavelengths_adobe_rgb = vec3(660.0, 550.0, 440.0);
+#if DISPLAY_GAMUT == DISPLAY_GAMUT_SRGB
+#define primary_wavelengths primary_wavelengths_rec709
+#elif DISPLAY_GAMUT == DISPLAY_GAMUT_ADOBE_RGB
+#define primary_wavelengths primary_wavelengths_adobe_rgb
+#elif DISPLAY_GAMUT == DISPLAY_GAMUT_DCI_P3 || DISPLAY_GAMUT == DISPLAY_GAMUT_DISPLAY_P3
+#define primary_wavelengths primary_wavelengths_display_p3
+#else // REC2020
 #define primary_wavelengths primary_wavelengths_rec2020
+#endif
 
 // -----------------------------------
 //   Color space conversion matrices
 // -----------------------------------
 
-#define display_to_working_color rec709_to_rec2020
-#define rec709_to_working_color rec709_to_rec2020
-// Working (Rec. 2020) to display-referred linear. The target gamut follows
-// DISPLAY_GAMUT from "/settings.glsl" (mirrors the Iris 1.6.4+ color
-// spaces); DCI-P3 additionally adapts D65 to the DCI white point.
+// Working == display, so display<->working is identity. Vanilla Rec.709
+// (sRGB) content still needs conversion into the active working gamut.
 #if DISPLAY_GAMUT == DISPLAY_GAMUT_DCI_P3
-#define working_to_display_color rec2020_to_dci_p3
+#define xyz_to_working_color (xyz_to_display_p3 * d65_to_dci_p3_white)
+#define working_to_xyz_color (dci_p3_white_to_d65 * display_p3_to_xyz)
+#define rec709_to_working_color (rec709_to_xyz * xyz_to_working_color)
+#define display_to_working_color mat3(1.0)
 #elif DISPLAY_GAMUT == DISPLAY_GAMUT_DISPLAY_P3
-#define working_to_display_color rec2020_to_display_p3
+#define xyz_to_working_color xyz_to_display_p3
+#define working_to_xyz_color display_p3_to_xyz
+#define rec709_to_working_color (rec709_to_xyz * xyz_to_display_p3)
+#define display_to_working_color mat3(1.0)
 #elif DISPLAY_GAMUT == DISPLAY_GAMUT_REC2020
-#define working_to_display_color mat3(1.0)
+#define xyz_to_working_color xyz_to_rec2020
+#define working_to_xyz_color rec2020_to_xyz
+#define rec709_to_working_color rec709_to_rec2020
+#define display_to_working_color mat3(1.0)
 #elif DISPLAY_GAMUT == DISPLAY_GAMUT_ADOBE_RGB
-#define working_to_display_color rec2020_to_adobe_rgb
+#define xyz_to_working_color xyz_to_adobe_rgb
+#define working_to_xyz_color adobe_rgb_to_xyz
+#define rec709_to_working_color (rec709_to_xyz * xyz_to_adobe_rgb)
+#define display_to_working_color mat3(1.0)
 #else // DISPLAY_GAMUT_SRGB
-#define working_to_display_color rec2020_to_rec709
+#define xyz_to_working_color xyz_to_rec709
+#define working_to_xyz_color rec709_to_xyz
+#define rec709_to_working_color mat3(1.0)
+#define display_to_working_color mat3(1.0)
 #endif
+// Working (== display) to display-referred linear is always identity now.
+// The target gamut follows DISPLAY_GAMUT from "/settings.glsl" (mirrors
+// the Iris 1.6.4+ color spaces); DCI-P3 additionally adapts D65 to the
+// DCI white point inside xyz_to_working_color above.
+#define working_to_display_color mat3(1.0)
+// Working back to linear sRGB (for tonemap cores fitted to sRGB, e.g. AgX).
+// Generic via XYZ so every branch stays exact; constant-folds at compile.
+#define working_to_rec709_color (working_to_xyz_color * xyz_to_rec709)
 
 // Helper macro to convert display-authored colors (fog tints, light colors,
 // sky accents picked against the selected output gamut) to working space.
-// The sRGB branch is exactly the old from_srgb formulation.
+// Since working == display, this is decode-only (transfer function), no matrix.
 #if DISPLAY_GAMUT == DISPLAY_GAMUT_DCI_P3
-#define from_display(x) (pow(x, vec3(2.6)) * display_p3_to_rec2020)
+#define from_display(x) (pow(x, vec3(2.6)))
 #elif DISPLAY_GAMUT == DISPLAY_GAMUT_DISPLAY_P3
-#define from_display(x) (pow(x, vec3(2.2)) * display_p3_to_rec2020)
+#define from_display(x) (pow(x, vec3(2.2)))
 #elif DISPLAY_GAMUT == DISPLAY_GAMUT_REC2020
 #define from_display(x) (pow(x, vec3(2.4)))
 #elif DISPLAY_GAMUT == DISPLAY_GAMUT_ADOBE_RGB
-#define from_display(x) (pow(x, vec3(2.2)) * adobe_rgb_to_rec2020)
+#define from_display(x) (pow(x, vec3(2.2)))
 #else // DISPLAY_GAMUT_SRGB
-#define from_display(x) (pow(x, vec3(2.2)) * rec709_to_rec2020)
+#define from_display(x) (pow(x, vec3(2.2)))
 #endif
+
+// Per-gamut chroma headroom: wide gamuts can carry more saturated fog /
+// light / sky accents than sRGB. gamut_expand() pushes a working-space
+// color away from its luminance axis so fog (Rayleigh, lava, nether, end,
+// sandstorm, mist) actually uses the extra colors each gamut supports.
+#if DISPLAY_GAMUT == DISPLAY_GAMUT_REC2020
+const float working_gamut_chroma = 1.35;
+#elif DISPLAY_GAMUT == DISPLAY_GAMUT_DCI_P3 || DISPLAY_GAMUT == DISPLAY_GAMUT_DISPLAY_P3
+const float working_gamut_chroma = 1.18;
+#elif DISPLAY_GAMUT == DISPLAY_GAMUT_ADOBE_RGB
+const float working_gamut_chroma = 1.12;
+#else // DISPLAY_GAMUT_SRGB
+const float working_gamut_chroma = 1.0;
+#endif
+// A macro (not a function) so it stays a constant expression built only
+// from builtin ops — usable in const/global initializers like from_display.
+// Clamped at zero: pushing chroma can drive weak channels (e.g. noon
+// Rayleigh red) negative, and a negative scattering coefficient makes
+// transmittance grow with distance (red fog/water far away, normal up close).
+#define gamut_expand(c) max(mix(vec3(dot((c), luminance_weights)), (c), working_gamut_chroma), vec3(0.0))
 
 // Rec. 709 (sRGB primaries)
 const mat3 xyz_to_rec709 = mat3(
@@ -152,6 +215,35 @@ const mat3 display_p3_to_rec2020 = display_p3_to_xyz * xyz_to_rec2020;
 const mat3 rec2020_to_adobe_rgb = rec2020_to_xyz * xyz_to_adobe_rgb;
 const mat3 adobe_rgb_to_rec2020 = adobe_rgb_to_xyz * xyz_to_rec2020;
 
+// OKLab works on absolute LMS (device independent). sRGB<->LMS matrices
+// below use the vec*mat row-vector convention like the rest of this file;
+// xyz_to_lms / lms_to_xyz sandwich any working gamut through XYZ so the
+// output color grade stays correct when working != sRGB.
+const mat3 srgb_to_lms = mat3(
+    0.4122214708,
+    0.5363325363,
+    0.0514459929,
+    0.2119034982,
+    0.6806995451,
+    0.1073969566,
+    0.0883024619,
+    0.2817188376,
+    0.6299787005
+);
+const mat3 lms_to_srgb = mat3(
+    4.0767416621,
+    -3.3077115913,
+    0.2309699292,
+    -1.2684380046,
+    2.6097574011,
+    -0.3413193965,
+    -0.0041960863,
+    -0.7034186147,
+    1.7076147010
+);
+const mat3 xyz_to_lms = xyz_to_rec709 * srgb_to_lms;
+const mat3 lms_to_xyz = lms_to_srgb * rec709_to_xyz;
+
 // Bradford chromatic adaptation D65 -> DCI-P3 theater white (0.314, 0.351)
 const mat3 d65_to_dci_p3_white = mat3(
     0.976537,
@@ -163,6 +255,18 @@ const mat3 d65_to_dci_p3_white = mat3(
     -0.005699,
     0.011067,
     0.871363
+);
+// Inverse (DCI theater white -> D65) for working==display DCI-P3 round-trips.
+const mat3 dci_p3_white_to_d65 = mat3(
+    1.024541,
+    0.015184,
+    0.019639,
+    0.025639,
+    0.972578,
+    0.004700,
+    0.006375,
+    -0.012253,
+    1.147696
 );
 const mat3 rec2020_to_dci_p3
     = rec2020_to_display_p3 * d65_to_dci_p3_white;
@@ -291,7 +395,7 @@ vec3 lab_to_xyz(vec3 lab) {
 // Original source:
 // https://github.com/Jessie-LC/open-source-utility-code/blob/main/advanced/blackbody.glsl
 vec3 blackbody(float temperature) {
-    const vec3 lambda = primary_wavelengths_rec2020;
+    const vec3 lambda = primary_wavelengths;
     const vec3 lambda2 = lambda * lambda;
     const vec3 lambda5 = lambda2 * lambda2 * lambda;
 

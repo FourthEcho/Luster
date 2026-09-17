@@ -3,7 +3,9 @@
 
 // AGX tonemapper for Luster.
 // Best-practice minimal AgX without LUT, matching Blender 4.0+ / Filament /
-// Godot / three.js. Input and output are linear Rec.709 (linear sRGB).
+// Godot / three.js. The fitted inset/outset core below expects linear
+// Rec.709 (linear sRGB); working-space color is converted in and out so the
+// core behaves identically in every DISPLAY_GAMUT (working == display).
 // Source chain: bWFuanVzYWth/AgX (minimal sigmoid) + EaryChow/AgX_LUT_Gen
 // (log formulation) + Filament ToneMapper.cpp (matrices) + Godot tonemap.glsl
 // (combined Rec.709->Rec.2020 inset). MIT - see license.md.
@@ -75,7 +77,7 @@ vec3 agx_color_controls(vec3 color) {
     color = exp2((log2(max(color, vec3(1e-6))) - log2(pivot))
         * AGX_CONTRAST + log2(pivot));
 
-    float luma = dot(color, vec3(0.2126, 0.7152, 0.0722));
+    float luma = dot(color, luminance_weights);
     color = mix(vec3(luma), color, max(AGX_SATURATION, 0.0));
 
     // Additional highlight compression, neutral at zero.
@@ -120,6 +122,10 @@ vec3 tonemap_agx(vec3 color) {
     // Guard against log2(0). 2e-10 is ~ -32 EV, negligible.
     color = max(color, vec3(2e-10));
 
+    // Fitted core runs in linear sRGB: convert working -> sRGB in,
+    // sRGB -> working out. Identity in sRGB mode.
+    color = color * working_to_rec709_color;
+
     // Inset: linear sRGB -> log AgX domain (combined with Rec.2020).
     color = agx_srgb_to_rec2020_inset * color;
 
@@ -134,6 +140,7 @@ vec3 tonemap_agx(vec3 color) {
     // parity with Blender's display transform.
     color = pow(color, vec3(2.4));
     color = agx_outset_rec2020_to_srgb * color;
+    color = color * rec709_to_working_color;
     return agx_color_controls(agx_saturate(color));
 }
 
@@ -147,7 +154,7 @@ vec3 agx_apply_look(vec3 color, vec3 slope, vec3 offset, vec3 power, float satur
     // Slope/offset/power as in three.js agxCdl.
     color = pow(max(color + offset, vec3(0.0)), power);
     color = color * slope;
-    float luma = dot(color, vec3(0.2126, 0.7152, 0.0722));
+    float luma = dot(color, luminance_weights);
     color = luma + saturation * (color - luma);
     return color;
 }

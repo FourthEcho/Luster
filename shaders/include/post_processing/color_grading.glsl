@@ -37,12 +37,11 @@ vec3 color_grade_input(vec3 rgb, mat3 white_balance_matrix) {
     return max(rgb, vec3(0.0));
 }
 
-// sRGB-like display-linear -> OKLab.
+// Working-linear -> OKLab via absolute LMS, so the perceptual grade stays
+// correct in every working gamut (working == display). In sRGB mode this
+// round-trips to the classic formulation up to float rounding.
 vec3 grade_rgb_to_oklab(vec3 c) {
-    float l = 0.4122214708 * c.r + 0.5363325363 * c.g + 0.0514459929 * c.b;
-    float m = 0.2119034982 * c.r + 0.6806995451 * c.g + 0.1073969566 * c.b;
-    float s = 0.0883024619 * c.r + 0.2817188376 * c.g + 0.6299787005 * c.b;
-    vec3 lms = vec3(l, m, s);
+    vec3 lms = c * working_to_xyz_color * xyz_to_lms;
     lms = sign(lms) * pow(abs(lms), vec3(1.0 / 3.0));
     return vec3(
         0.2104542553 * lms.x + 0.7936177850 * lms.y - 0.0040720468 * lms.z,
@@ -57,11 +56,7 @@ vec3 grade_oklab_to_rgb(vec3 c) {
     float s = c.x - 0.0894841775 * c.y - 1.2914855480 * c.z;
     vec3 lms = vec3(l, m, s);
     lms = lms * lms * lms;
-    return max(vec3(
-        4.0767416621 * lms.x - 3.3077115913 * lms.y + 0.2309699292 * lms.z,
-       -1.2684380046 * lms.x + 2.6097574011 * lms.y - 0.3413193965 * lms.z,
-       -0.0041960863 * lms.x - 0.7034186147 * lms.y + 1.7076147010 * lms.z
-    ), vec3(0.0));
+    return max((lms * lms_to_xyz) * xyz_to_working_color, vec3(0.0));
 }
 
 vec2 grade_rotate(vec2 v, float radians_angle) {

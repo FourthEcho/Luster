@@ -589,9 +589,11 @@ const float wetnessHalflife         = 70.0;
 
   // Display output gamut. Mirrors the Iris 1.6.4+ color spaces (see the
   // "Color Spaces" ShaderDoc entry): with supportsColorCorrection = true in
-  // shaders.properties, Iris leaves output conversion to the shader, so the
-  // pack converts its Rec. 2020 working space to the selected gamut natively
-  // (matrix + transfer function) instead of assuming sRGB.
+  // shaders.properties, Iris leaves output conversion to the shader. The
+  // working space follows this setting directly (working == display), so
+  // sRGB stays sRGB end-to-end, Display P3 works in Display P3, etc.
+  // Authored colors are display-native and fog accents use gamut_expand()
+  // to actually reach the extra colors wide gamuts support.
   #define DISPLAY_GAMUT_SRGB 0
   #define DISPLAY_GAMUT_DCI_P3 1
   #define DISPLAY_GAMUT_DISPLAY_P3 2
@@ -682,7 +684,7 @@ const float wetnessHalflife         = 70.0;
   #define AUTO_EXPOSURE_HISTOGRAM 2
 
   #define AUTO_EXPOSURE AUTO_EXPOSURE_OFF // [AUTO_EXPOSURE_OFF AUTO_EXPOSURE_SIMPLE AUTO_EXPOSURE_HISTOGRAM]
-  #define LOCAL_EXPOSURE
+//#define LOCAL_EXPOSURE
   #define AUTO_EXPOSURE_MIN -1.0 // [-2.0 -1.9 -1.8 -1.7 -1.6 -1.5 -1.4 -1.3 -1.2 -1.1 -1.0 -0.9 -0.8 -0.7 -0.6 -0.5 -0.4 -0.3 -0.2 -0.1 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
   #define AUTO_EXPOSURE_MAX 0.0 // [-2.0 -1.9 -1.8 -1.7 -1.6 -1.5 -1.4 -1.3 -1.2 -1.1 -1.0 -0.9 -0.8 -0.7 -0.6 -0.5 -0.4 -0.3 -0.2 -0.1 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
   #define AUTO_EXPOSURE_RATE_DIM_TO_BRIGHT 2.0 // [0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0 5.5 6.0]

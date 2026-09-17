@@ -17,7 +17,7 @@ const float bufferScale = 0.5;
 
 // Relative luminance in the pack's working color space (Rec. 2020).
 float getLuma(vec3 c) {
-    return dot(c, luminance_weights_rec2020);
+    return dot(c, luminance_weights);
 }
 
 vec2 bufferSize() {

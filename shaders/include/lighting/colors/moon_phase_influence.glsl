@@ -36,7 +36,7 @@ vec3 apply_moon_phase_influence(
     color *= brightness_mul;
 
     float sat_mul = mix(1.0, phase, clamp01(saturation));
-    float lum = dot(color, luminance_weights_rec2020);
+    float lum = dot(color, luminance_weights);
     color = mix(vec3(lum), color, sat_mul);
 
     return color;

@@ -90,5 +90,35 @@ const mat3 ap1_to_rec2020 = ap1_to_xyz * d60_to_d65 * xyz_to_rec2020;
 // albedo. These take the white point of the light source
 const mat3 rec709_to_ap1_unlit = rec709_to_xyz * xyz_to_ap1;
 const mat3 rec2020_to_ap1_unlit = rec2020_to_xyz * xyz_to_ap1;
+const mat3 display_p3_to_ap1_unlit = display_p3_to_xyz * xyz_to_ap1;
+const mat3 adobe_rgb_to_ap1_unlit = adobe_rgb_to_xyz * xyz_to_ap1;
+
+// Working (== display) <-> ACES. Lit variants go through the D65<->D60
+// Bradford adapt like rec709/rec2020 above; unlit variants skip it.
+#if DISPLAY_GAMUT == DISPLAY_GAMUT_DCI_P3 || DISPLAY_GAMUT == DISPLAY_GAMUT_DISPLAY_P3
+#define working_to_ap0 (working_to_xyz_color * d65_to_d60 * xyz_to_ap0)
+#define ap0_to_working (ap0_to_xyz * d60_to_d65 * xyz_to_working_color)
+#define working_to_ap1 (working_to_xyz_color * d65_to_d60 * xyz_to_ap1)
+#define ap1_to_working (ap1_to_xyz * d60_to_d65 * xyz_to_working_color)
+#define working_to_ap1_unlit (working_to_xyz_color * xyz_to_ap1)
+#elif DISPLAY_GAMUT == DISPLAY_GAMUT_REC2020
+#define working_to_ap0 rec2020_to_ap0
+#define ap0_to_working ap0_to_rec2020
+#define working_to_ap1 rec2020_to_ap1
+#define ap1_to_working ap1_to_rec2020
+#define working_to_ap1_unlit rec2020_to_ap1_unlit
+#elif DISPLAY_GAMUT == DISPLAY_GAMUT_ADOBE_RGB
+#define working_to_ap0 (working_to_xyz_color * d65_to_d60 * xyz_to_ap0)
+#define ap0_to_working (ap0_to_xyz * d60_to_d65 * xyz_to_working_color)
+#define working_to_ap1 (working_to_xyz_color * d65_to_d60 * xyz_to_ap1)
+#define ap1_to_working (ap1_to_xyz * d60_to_d65 * xyz_to_working_color)
+#define working_to_ap1_unlit adobe_rgb_to_ap1_unlit
+#else // DISPLAY_GAMUT_SRGB
+#define working_to_ap0 rec709_to_ap0
+#define ap0_to_working ap0_to_rec709
+#define working_to_ap1 rec709_to_ap1
+#define ap1_to_working ap1_to_rec709
+#define working_to_ap1_unlit rec709_to_ap1_unlit
+#endif
 
 #endif // INCLUDE_ACES_MATRICES

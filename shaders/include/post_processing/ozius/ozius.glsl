@@ -11,7 +11,7 @@ vec3 tonemap_ozius(vec3 rgb) {
 
     rgb *= 1.6;
 
-    vec3 cr = mix(vec3(dot(rgb, luminance_weights_ap1)), rgb, 0.5) + 1.0;
+    vec3 cr = mix(vec3(dot(rgb, luminance_weights)), rgb, 0.5) + 1.0;
 
     rgb = pow(rgb / (1.0 + rgb), a);
     return pow(rgb * rgb * (-2.0 * rgb + 3.0), cr / b);

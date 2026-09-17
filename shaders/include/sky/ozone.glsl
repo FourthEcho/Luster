@@ -58,7 +58,7 @@ const float ozone_layer_width = OZONE_THICKNESS * 1e3;   // m
 // primaries transformed to the working color space.
 const vec3 ozone_absorption_coefficient
     = vec3(8.304280072e-07, 1.314911970e-06, 5.440679729e-08)
-    * rec709_to_rec2020;
+    * rec709_to_working_color;
 
 // Vertical column of the Gaussian layer in unit-density metres, scaled
 // by the user amount. A Gaussian with standard deviation w integrates to

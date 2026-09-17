@@ -3,8 +3,9 @@
 
   Photon Shader by SixthSurge
 
-  program/c19_color_grading:
-  Apply bloom, color grading and tone mapping then convert to rec. 709
+   program/c19_color_grading:
+   Apply bloom, color grading and tone mapping in the active working
+   (== display) gamut; working_to_display is identity.
 
 --------------------------------------------------------------------------------
 */

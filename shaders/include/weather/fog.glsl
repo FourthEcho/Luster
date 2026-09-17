@@ -187,6 +187,13 @@ OverworldFogParameters get_fog_parameters(Weather weather) {
         += desert_sandstorm * desert_sandstorm_extinction;
 #endif
 
+    // Let wide gamuts carry more saturated air fog: the authored
+    // AIR_FOG_RAYLEIGH_* values are display-native, so the same numbers
+    // resolve to richer hues in P3/Rec.2020/Adobe; push chroma further to
+    // actually use each gamut's headroom (identity in sRGB).
+    params.rayleigh_scattering_coeff
+        = gamut_expand(params.rayleigh_scattering_coeff);
+
     return params;
 }
 

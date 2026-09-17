@@ -70,7 +70,7 @@ Material get_water_material(
 
     material.albedo += 0.1 * edge_highlight
         / mix(1.0,
-              max(dot(ambient_color, luminance_weights_rec2020), 0.5),
+              max(dot(ambient_color, luminance_weights), 0.5),
               light_levels.y);
     material.albedo = clamp01(material.albedo);
     alpha += edge_highlight;
@@ -96,7 +96,7 @@ vec4 water_absorption_approx(
     // the colour saturation up or down without affecting overall density.
     vec3 biome_water_color = srgb_eotf_inv(tint.rgb) * rec709_to_working_color;
     biome_water_color = mix(
-        vec3(dot(biome_water_color, luminance_weights_rec2020)),
+        vec3(dot(biome_water_color, luminance_weights)),
         biome_water_color,
         BIOME_WATER_COLOR_INTENSITY
     );

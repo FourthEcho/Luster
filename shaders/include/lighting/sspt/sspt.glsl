@@ -577,6 +577,13 @@ vec3 traceEmissionNEE(vec3 view_pos, vec3 view_normal, vec2 pick_hash) {
 
     float solid_angle = 4.0 * sqr(pick_view.z)
         / (abs(TRACE_PROJ[0][0]) * abs(TRACE_PROJ[1][1]) * r2);
+    // Clamp: A_screen grows with camera distance (z^2) while the pick
+    // probability of a distant emitter shrinks — the estimate stays
+    // unbiased on average, but single hits near the emitter explode
+    // (100000+ at 60 m vs ~5000 at 5 m) into fireflies the half-res SVGF
+    // smears into pulsing blobs around far emitters. The cosine lobe has
+    // no camera-distance term and keeps carrying near-field emission.
+    solid_angle = min(solid_angle, 4.0 * pi);
 
     return emitter_radiance * (cos_x * emission_falloff * solid_angle);
 }
@@ -767,6 +774,22 @@ vec3 traceIndirect(vec3 view_pos, vec3 scene_normal, vec2 dither, bool hand) {
     #endif
 
     emission /= float(ssptSPP);
+
+    // Filmic-style soft ceiling on gathered emission. Normalized emitters
+    // are ~100x HDR (emission_scale x SSPT_INTENSITY), so an unsheltered
+    // pool converges to 30-100+ near any lamp while the tonemap saturates
+    // everything past ~2: an unsheltered pool blows out white and the
+    // light's actual color never survives. Compress the hot tail so the
+    // pool lands where hue is preserved (0.3 -> 0.27, 1.0 -> 0.75,
+    // 9 -> 2.25, 50 -> 2.8), then a gentle chroma lift around its own
+    // luminance so the tint reads through the tonemap without changing
+    // brightness. Hue-preserving (luminance-anchored). Bounce lighting
+    // below is separate and unaffected, as are directly viewed emitters
+    // in the primary pass.
+    float emission_luma = dot(max0(emission), luminance_weights);
+    emission *= rcp(1.0 + emission_luma * rcp(3.0));
+    float compressed_luma = dot(max0(emission), luminance_weights);
+    emission = mix(vec3(compressed_luma), emission, 1.25);
 
 #if defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE || defined DIRECT_SKY_BOUNCE
     // Bounce is gathered on cosine-lobe candidates only, so it normalizes

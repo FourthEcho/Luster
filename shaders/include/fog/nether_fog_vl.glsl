@@ -36,14 +36,14 @@ vec3 nether_fog_emission(vec3 world_pos) {
     vec3 main_col;
 #ifdef NETHER_USE_BIOME_COLOR
     main_col = srgb_eotf_inv(clamp(fogColor, 0.0, 1.0)) * rec709_to_working_color;
-    main_col /= max(dot(main_col, luminance_weights_rec2020), eps);
+    main_col /= max(dot(main_col, luminance_weights), eps);
     main_col = mix(vec3(1.0), main_col, NETHER_S);
 #else
-    main_col = from_display(vec3(NETHER_R, NETHER_G, NETHER_B));
+    main_col = gamut_expand(from_display(vec3(NETHER_R, NETHER_G, NETHER_B)));
 #endif
     main_col *= NETHER_I;
 
-    const vec3 alt_col = from_display(vec3(NETHER_R * 0.65, NETHER_G * 0.18, max(NETHER_B * 0.10, 0.002)));
+    const vec3 alt_col = gamut_expand(from_display(vec3(NETHER_R * 0.65, NETHER_G * 0.18, max(NETHER_B * 0.10, 0.002))));
     const vec3 wind0 = vec3(1.0, 0.1, 0.5) * 0.01;
     const vec3 wind1 = vec3(-0.7, -0.1, -0.1) * 0.05;
     const vec3 wind2 = vec3(0.3, 0.05, -0.4) * 0.01;
@@ -90,15 +90,15 @@ vec3 nether_smoke_v2_emission(vec3 world_pos, vec3 world_start_pos) {
     vec3 main_col;
 #ifdef NETHER_USE_BIOME_COLOR
     main_col = srgb_eotf_inv(clamp(fogColor, 0.0, 1.0)) * rec709_to_working_color;
-    main_col /= max(dot(main_col, luminance_weights_rec2020), eps);
+    main_col /= max(dot(main_col, luminance_weights), eps);
     main_col = mix(vec3(1.0), main_col, NETHER_S);
 #else
-    main_col = from_display(vec3(NETHER_R, NETHER_G, NETHER_B));
+    main_col = gamut_expand(from_display(vec3(NETHER_R, NETHER_G, NETHER_B)));
 #endif
     main_col *= NETHER_I;
 
     // Warm ember color the glow blends toward as smoke gets closer/thicker
-    const vec3 ember_col = from_display(vec3(1.0, 0.35, 0.05));
+    const vec3 ember_col = gamut_expand(from_display(vec3(1.0, 0.35, 0.05)));
 
     const vec3 wind0 = vec3(1.0, 0.1, 0.5) * 0.01;
     const vec3 wind1 = vec3(-0.7, -0.1, -0.1) * 0.05;
@@ -168,10 +168,10 @@ mat2x3 raymarch_nether_fog(
     vec3 nether_color;
 #ifdef NETHER_USE_BIOME_COLOR
     nether_color = srgb_eotf_inv(clamp(fogColor, 0.0, 1.0)) * rec709_to_working_color;
-    nether_color /= max(dot(nether_color, luminance_weights_rec2020), eps);
+    nether_color /= max(dot(nether_color, luminance_weights), eps);
     nether_color = mix(vec3(1.0), nether_color, NETHER_S);
 #else
-    nether_color = from_display(vec3(NETHER_R, NETHER_G, NETHER_B));
+    nether_color = gamut_expand(from_display(vec3(NETHER_R, NETHER_G, NETHER_B)));
 #endif
     const float density_scale = 0.01;
     vec3 absorption_coeff = exp2(-nether_color) * density_scale;

@@ -118,7 +118,7 @@ vec3 draw_galaxy(vec3 ray_dir, out float galaxy_luminance) {
 
     galaxy *= galaxy_intensity * galaxy_tint;
 
-    galaxy_luminance = dot(galaxy, luminance_weights_rec709);
+    galaxy_luminance = dot(galaxy, luminance_weights);
 
     galaxy = mix(vec3(galaxy_luminance), galaxy, 2.0);
 
