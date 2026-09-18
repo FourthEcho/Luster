@@ -787,9 +787,9 @@ vec3 traceIndirect(vec3 view_pos, vec3 scene_normal, vec2 dither, bool hand) {
     // below is separate and unaffected, as are directly viewed emitters
     // in the primary pass.
     float emission_luma = dot(max0(emission), luminance_weights);
-    emission *= rcp(1.0 + emission_luma * rcp(3.0));
+    emission *= rcp(1.0 + emission_luma * rcp(8.0));
     float compressed_luma = dot(max0(emission), luminance_weights);
-    emission = mix(vec3(compressed_luma), emission, 1.25);
+    emission = mix(vec3(compressed_luma), emission, 1.4);
 
 #if defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE || defined DIRECT_SKY_BOUNCE
     // Bounce is gathered on cosine-lobe candidates only, so it normalizes

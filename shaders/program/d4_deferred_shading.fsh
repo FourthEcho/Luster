@@ -602,7 +602,12 @@ void main() {
 
             // Same application as the vanilla blocklight path:
             // diffuse modulation by albedo, AO, and metal diffuse amount.
-            sspt_light *= material.albedo * rcp_pi * ao;
+            // NOTE: no extra rcp_pi here -- traceIndirect() already draws
+            // its rays with cosine-weighted importance sampling, which
+            // bakes that pi-normalization into the Monte Carlo estimator
+            // itself. Re-applying rcp_pi on top double-counted it and
+            // dimmed colored SSPT light by ~3x for no physical reason.
+            sspt_light *= material.albedo * ao;
             sspt_light *= mix(1.0, metal_diffuse_amount, float(material.is_metal));
 
 #ifdef CLOUD_SHADOWS
