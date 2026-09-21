@@ -17,6 +17,9 @@ screen.materials                       = Materjalid
 screen.water                           = Vesi
 screen.post                            = Järeltöötlus
 screen.misc                            = Muu
+screen.misc_handheld                  = Handheld Light
+screen.misc_dimensions                = Portals & Sky
+screen.misc_dither                    = Dithered Translucency
 screen.tonemap_comparison              = Toonikaartide võrdlus
 
 screen.weather                         = Ilm

@@ -17,6 +17,9 @@ screen.materials                       = 材质
 screen.water                           = 水
 screen.post                            = 后处理
 screen.misc                            = 杂项
+screen.misc_handheld                  = Handheld Light
+screen.misc_dimensions                = Portals & Sky
+screen.misc_dither                    = Dithered Translucency
 screen.tonemap_comparison              = 色调对比
 
 screen.weather                         = 天气变化

@@ -809,9 +809,8 @@ const float wetnessHalflife         = 70.0;
 #ifdef CREPUSCULAR_RAYS 
 #endif
 
-#if MC_VERSION > 12111
+// Separate entity draws are always on (former GUI toggle removed)
   #define USE_SEPARATE_ENTITY_DRAWS
-#endif
 
 #ifndef ATMOSPHERE_RAIN_DESATURATION
   #undef ATMOSPHERE_RAIN_DESATURATION_INTENSITY

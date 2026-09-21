@@ -17,6 +17,9 @@ screen.materials                       = Materialen
 screen.water                           = Water
 screen.post                            = Filters & Effecten
 screen.misc                            = Overig
+screen.misc_handheld                  = Handheld Light
+screen.misc_dimensions                = Portals & Sky
+screen.misc_dither                    = Dithered Translucency
 screen.tonemap_comparison              = Tonemap Vergelijking
 
 screen.weather                         = Weer

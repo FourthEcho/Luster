@@ -17,6 +17,9 @@ screen.materials                       = Materiales
 screen.water                           = Agua
 screen.post                            = Postprocesado
 screen.misc                            = Opciones varias
+screen.misc_handheld                  = Handheld Light
+screen.misc_dimensions                = Portals & Sky
+screen.misc_dither                    = Dithered Translucency
 screen.tonemap_comparison              = Comparación de mapeo de tonos
 
 screen.weather                         = Clima 

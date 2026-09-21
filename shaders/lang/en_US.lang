@@ -32,6 +32,9 @@ screen.camera                          = Camera
 screen.lens_flare                      = Lens Flare
 screen.agx_color                         = AGX Color
 screen.misc                            = Misc
+screen.misc_handheld                  = Handheld Light
+screen.misc_dimensions                = Portals & Sky
+screen.misc_dither                    = Dithered Translucency
 screen.tonemap_comparison              = Tonemap Comparison
 screen.mods                            = Mod Options
 
@@ -1063,11 +1066,11 @@ option.PURKINJE_SHIFT                  = Purkinje Shift
 option.PURKINJE_SHIFT.comment          = Simulates the Purkinje effect - the human eye's increased sensitivity to blue-green wavelengths in low light. Desaturates colors and shifts brightness perception toward cooler tones.
 option.PURKINJE_SHIFT_INTENSITY        = Purkinje Shift Intensity
 option.PURKINJE_SHIFT_INTENSITY.comment = Controls the strength of the Purkinje effect. Higher values increase the shift toward blue-green sensitivity and desaturation in low light.
-option.PURKINJE_SHIFT_R                = Purkinje Red Response
+option.PURKINJE_SHIFT_R                = §c▍ §fPurkinje Response — Red
 option.PURKINJE_SHIFT_R.comment         = Red channel weight of the scotopic tint. Lower values push night vision cooler.
-option.PURKINJE_SHIFT_G                = Purkinje Green Response
+option.PURKINJE_SHIFT_G                = §a▍ §fPurkinje Response — Green
 option.PURKINJE_SHIFT_G.comment         = Green channel weight of the scotopic tint. Rods peak in blue-green, so this dominates the night hue.
-option.PURKINJE_SHIFT_B                = Purkinje Blue Response
+option.PURKINJE_SHIFT_B                = §9▍ §fPurkinje Response — Blue
 option.PURKINJE_SHIFT_B.comment         = Blue channel weight of the scotopic tint. Higher values deepen the classic blue night shift.
 
 # Exposure
