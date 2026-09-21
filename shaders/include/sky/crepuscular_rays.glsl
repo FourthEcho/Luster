@@ -90,15 +90,20 @@ vec4 draw_crepuscular_rays(
 
         float d = step_length * (float(i) + dither);
 
-        float cloud_shadow = dot(
-            texture(
-                cloud_shadow_map,
-                shadow_view_to_cloud_shadow_space(ray_position_shadow)
-
-            )
-                .xy,
-            vec2(0.5)
-        );
+        // 4-tap rotated average of the shadow signal: blurs march noise
+        // into soft shafts (the kernel rotates per step via golden-ratio
+        // phase so it can't imprint rings of its own)
+        vec2 shadow_uv
+            = shadow_view_to_cloud_shadow_space(ray_position_shadow);
+        vec2 shadow_texel = 1.5 / vec2(textureSize(cloud_shadow_map, 0));
+        float tap_angle = (dither + float(i) * 0.618034) * 6.2831853;
+        vec2 tap_x = vec2(cos(tap_angle), sin(tap_angle)) * shadow_texel;
+        vec2 tap_y = vec2(-tap_x.y, tap_x.x) * shadow_texel;
+        vec2 shadow_taps = texture(cloud_shadow_map, shadow_uv + tap_x).xy
+            + texture(cloud_shadow_map, shadow_uv - tap_x).xy
+            + texture(cloud_shadow_map, shadow_uv + tap_y).xy
+            + texture(cloud_shadow_map, shadow_uv - tap_y).xy;
+        float cloud_shadow = dot(shadow_taps, vec2(0.125));
         float a = linear_step(
             sqr(planet_radius - underground_light_fade_distance),
             sqr(planet_radius),
@@ -106,7 +111,10 @@ vec4 draw_crepuscular_rays(
         );
         float b = 1.0 - exp2(-0.002 * d);
 
-        scattering += cube(cloud_shadow) * transmittance * a * b;
+        // Squared (not cubed) shadow response: keeps the ray-vs-gap shape
+        // but no longer triples the contrast of march/shadow-map noise,
+        // which is what made the shafts look grainy instead of smooth
+        scattering += sqr(cloud_shadow) * transmittance * a * b;
         transmittance *= step_transmittance;
     }
 

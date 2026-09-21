@@ -112,6 +112,7 @@ uniform float time_midnight;
 #include "/include/fog/water_fog_vl.glsl"
 #include "/include/fog/nether_fog_vl.glsl"
 #include "/include/misc/lod_mod_support.glsl"
+#include "/include/utility/dithering.glsl"
 #include "/include/utility/encoding.glsl"
 #include "/include/utility/random.glsl"
 #include "/include/utility/space_conversion.glsl"
@@ -161,8 +162,11 @@ void main() {
     vec3 scene_back_pos = view_to_scene_space(view_back_pos);
     vec3 world_back_pos = scene_back_pos + cameraPosition;
 
-    float dither = texelFetch(noisetex, fog_texel & 511, 0).b;
-    dither = r1(frameCounter, dither);
+    // Animated interleaved gradient noise (same treatment as the cloud
+    // pass): high-frequency error the eye ignores + temporal coverage so
+    // residual march noise converges instead of sitting as static grain.
+    // Replaces the old white-noise noisetex tap.
+    float dither = interleaved_gradient_noise(vec2(fog_texel), frameCounter);
 
     vec3 world_start_pos = gbufferModelViewInverse[3].xyz + cameraPosition;
     vec3 world_end_pos = world_pos;

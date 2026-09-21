@@ -128,6 +128,7 @@ uniform float biome_humidity;
 
 #include "/include/misc/lod_mod_support.glsl"
 #include "/include/utility/checkerboard.glsl"
+#include "/include/utility/dithering.glsl"
 #include "/include/utility/random.glsl"
 #include "/include/utility/space_conversion.glsl"
 
@@ -213,14 +214,16 @@ void main() {
         /* use_klein_nishina_phase */ false
     );
 
-    // Do not key the ray start directly from the checkerboard phase. That
-    // creates a subtle repeating stripe/grid when temporal samples are
-    // reconstructed. Use a decorrelated screen-space sequence instead.
-    ivec2 noise_pos = (texel * ivec2(5, 7)
-        + ivec2(frameCounter, frameCounter * 3)) & 511;
-    float dither_2d = texelFetch(noisetex, noise_pos, 0).b;
-    dither_2d = r1(frameCounter / checkerboard_area, dither_2d);
-    float dither = dither_2d;
+    // Animated interleaved gradient noise: pushes march error into high
+    // spatial frequencies the eye ignores, with low-discrepancy temporal
+    // coverage so the history buffer converges instead of boiling.
+    // (Replaces the old white-noise noisetex tap, whose clumps never
+    // averaged out while the camera moved.) Kept decorrelated from the
+    // checkerboard phase to avoid reconstructing a stripe/grid.
+    float dither = interleaved_gradient_noise(
+        vec2(texel) + vec2(frameCounter % 16, (frameCounter * 3) % 16),
+        frameCounter
+    );
 
 #ifndef BLOCKY_CLOUDS
     CloudsResult result = draw_clouds(

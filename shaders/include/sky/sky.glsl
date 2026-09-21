@@ -265,7 +265,7 @@ vec4 get_clouds_and_aurora(
 
 #if defined CREPUSCULAR_RAYS && !defined BLOCKY_CLOUDS
     vec4 crepuscular_rays
-        = draw_crepuscular_rays(colortex8, ray_dir, false, 0.5);
+        = draw_crepuscular_rays(colortex8, ray_dir, false, dither);
     clouds_and_aurora *= crepuscular_rays.w;
     clouds_and_aurora.rgb += crepuscular_rays.xyz;
 #endif

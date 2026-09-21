@@ -18,7 +18,8 @@ screen.water                           = 물
 screen.post                            = 후처리
 screen.misc                            = 기타
 screen.misc_handheld                  = Handheld Light
-screen.misc_dimensions                = Portals & Sky
+screen.misc_dimensions                = Portals
+screen.misc_environment               = Environment & Sky
 screen.misc_dither                    = Dithered Translucency
 screen.tonemap_comparison              = 톤매핑 비교
 

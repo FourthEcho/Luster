@@ -84,6 +84,15 @@ float clouds_powder_effect(float density, float cos_theta) {
     return powder;
 }
 
+// Ground reflectance for tinting cloud ground-bounce. Kept neutral on
+// purpose: the biome uniforms are declared per-program (not in this shared
+// include), and programs like prepare compile this file without them -
+// referencing them here breaks compilation. Sunset/moon tint still flows
+// through light_color at each layer's combine.
+vec3 clouds_ground_albedo() {
+    return vec3(0.40, 0.40, 0.38);
+}
+
 vec3 clouds_aerial_perspective(
     vec3 clouds_scattering,
     float clouds_transmittance,

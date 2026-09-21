@@ -224,16 +224,16 @@ float clouds_cumulus_optical_depth(
     return optical_depth;
 }
 
-vec2 clouds_cumulus_scattering(
+vec3 clouds_cumulus_scattering(
     float density,
     float light_optical_depth,
     float sky_optical_depth,
     float ground_optical_depth,
     float step_transmittance,
     float cos_theta,
-    vec2 bounced_light
+    vec3 bounced_light
 ) {
-    vec2 scattering = vec2(0.0);
+    vec3 scattering = vec3(0.0);
     float scatter_amount = clouds_params.l0_scattering_coeff;
     float extinct_amount = clouds_params.l0_extinction_coeff;
     float scattering_integral_times_density
@@ -254,6 +254,8 @@ vec2 clouds_cumulus_scattering(
             * (1.0 - 0.5 * clouds_params.l0_shadow);
         scattering.x += scatter_amount
             * isotropic_phase * bounced_light.x;
+        scattering.z += scatter_amount
+            * isotropic_phase * bounced_light.z;
         scattering.y += scatter_amount
             * isotropic_phase * bounced_light.y;
         scattering.y += scatter_amount
@@ -285,7 +287,6 @@ CloudsResult draw_cumulus_clouds(
     const uint ambient_steps = CLOUDS_CUMULUS_AMBIENT_STEPS;
     const float max_ray_length = 2e4;
     const float min_transmittance = 0.075;
-    const float planet_albedo = 0.4;
     const vec3 sky_dir = vec3(0.0, 1.0, 0.0);
     if (clouds_params.l0_coverage.y < eps) {
         return clouds_not_hit;
@@ -325,7 +326,7 @@ CloudsResult draw_cumulus_clouds(
     vec3 ray_step = ray_dir * step_length;
     vec3 ray_origin
         = air_viewer_pos + ray_dir * (dists.x + step_length * dither);
-    vec2 scattering = vec2(0.0);
+    vec3 scattering = vec3(0.0);
     float transmittance = 1.0;
     float distance_sum = 0.0;
     float distance_weight_sum = 0.0;
@@ -376,15 +377,14 @@ CloudsResult draw_cumulus_clouds(
         float ground_optical_depth
             = mix(density, 1.0, clamp01(altitude_fraction * 2.0 - 1.0))
             * altitude_fraction * clouds_cumulus_thickness;
-        vec2 bounced_light = clouds_multiple_scattering_bounce(
+        vec3 bounced_light = clouds_multiple_scattering_bounce(
             clouds_params.l0_extinction_coeff,
             clouds_params.l0_scattering_coeff,
             light_optical_depth,
             sky_optical_depth,
             ground_optical_depth,
             altitude_fraction,
-            light_dir,
-            planet_albedo
+            light_dir
         );
         scattering
             += clouds_cumulus_scattering(
@@ -408,7 +408,8 @@ CloudsResult draw_cumulus_clouds(
     float clouds_transmittance
         = linear_step(min_transmittance, 1.0, transmittance);
     vec3 clouds_scattering
-        = scattering.x * light_color + scattering.y * sky_color;
+        = scattering.x * light_color + scattering.y * sky_color
+        + scattering.z * light_color * clouds_ground_albedo();
     clouds_scattering = clouds_aerial_perspective(
         clouds_scattering,
         clouds_transmittance,

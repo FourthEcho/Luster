@@ -18,7 +18,8 @@ screen.water                           = Agua
 screen.post                            = Postprocesado
 screen.misc                            = Opciones varias
 screen.misc_handheld                  = Handheld Light
-screen.misc_dimensions                = Portals & Sky
+screen.misc_dimensions                = Portals
+screen.misc_environment               = Environment & Sky
 screen.misc_dither                    = Dithered Translucency
 screen.tonemap_comparison              = Comparación de mapeo de tonos
 

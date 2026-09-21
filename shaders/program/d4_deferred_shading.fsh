@@ -241,9 +241,9 @@ void main() {
     vec3 direction_world
         = normalize(position_scene - gbufferModelViewInverse[3].xyz);
 
-    // Shared stochastic offset used by cloud lighting.
-    float dither = texelFetch(noisetex, texel & 511, 0).b;
-    dither = r1(frameCounter, dither);
+    // Shared stochastic offset used by cloud lighting. Animated IGN so
+    // residual noise converges instead of sitting as static grain.
+    float dither = interleaved_gradient_noise(vec2(texel), frameCounter);
 
 #if defined WORLD_OVERWORLD
     // Atmosphere
