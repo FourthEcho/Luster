@@ -11,6 +11,8 @@ screen.world                           = Мир
 screen.lighting                        = Освещение
 screen.sky                             = Небо
 screen.fog                             = Туман
+screen.fog_general                      = Общее
+screen.fog_environment                  = Туман Окружения
 screen.materials                       = Материалы
 screen.water                           = Вода
 screen.post                            = Пост-обработка
@@ -22,12 +24,21 @@ screen.colored_lights                  = Цветное освещение
 screen.colored_lights_settings         = Настройки цветного освещения
 screen.purkinje_shift                 = Сдвиг Пуркинье
 screen.rp_settings                     = Настройки ресурс-пака
+screen.rp_parallax                      = Параллакс-окклюзия
+screen.rp_lightmaps                     = Направленные Карты Света
+screen.rp_porosity                      = Пористость / Влажность
+screen.rp_sss                           = Подповерхностное Рассеивание
 screen.reflections                     = Отражения
 screen.refraction                      = Преломления
 screen.light_sources                   = Источники света
 screen.shadows                         = Тени
 screen.ao                              = Окружающая окклюзия
 screen.color_grading                   = Цветовая гамма
+screen.grading_basic                    = Основное
+screen.grading_wheels                   = Тени · Полутона · Света
+screen.grading_curve                    = Тоновая Кривая
+screen.grading_split_tone               = Раздельное Тонирование
+screen.grading_selective                = Выборочный Цвет
 screen.exposure                        = Экспозиция
 screen.lpv_vl                          = Освещение тумана цветным светом
 screen.box                             = Контур блоков
@@ -48,6 +59,8 @@ screen.clouds_noctilucent              = Настройки серебристы
 screen.fog_rlh                         = Коэффициент Рэлея
 screen.fog_mie                         = Коэффициент Ми
 screen.fog_ozone                    = Озон
+screen.ozone_layer                      = Озоновый Слой
+screen.sandstorm_layer                  = Песчаная Буря
 screen.mist                         = Туман у земли
 screen.sunlight_color                  = Цвет солнечного света
 screen.moonlight_color                 = Цвет лунного света
@@ -65,6 +78,10 @@ screen.fog_rlh_taiga                   = Цвет тайги
 screen.fog_rlh_jungle                  = Джунглевый цвет
 screen.fog_rlh_swamp                   = Болотный цвет
 screen.water_waves                     = Волны
+screen.water_surface                    = Эффекты Поверхности
+screen.water_appearance                 = Внешний Вид
+screen.water_fog_surface                = Над Водой
+screen.water_fog_underwater             = Под Водой
 screen.water_fog_coeff                 = Коэффициенты водяного тумана
 
 screen.end_light_color                 = Цвет света
@@ -105,6 +122,8 @@ option.DESERT_SANDSTORM                = Песчаная буря в пусты
 option.DESERT_SANDSTORM.comment        = Песчаная буря во время дождя в пустынном биоме
 option.END_GLOW                        = Свечение в крае
 option.END_GLOW.comment                = Колеблющийся эффект свечения в Крае. Необходимо включённое объемное освещение.
+option.END_GLOW_INTENSITY              = End Glow Intensity
+option.END_GLOW_INTENSITY.comment      = Adjusts the brightness of the wavy End glow emission. Higher = stronger glow; 0 disables the emission visually while keeping the toggle.
 # Weather
 option.RANDOM_WEATHER_VARIATION            = Случайная
 option.RANDOM_WEATHER_VARIATION.comment = Controls random variation.
@@ -155,12 +174,16 @@ option.SHADOW                          = Shadows
 option.SHADOW.comment = Enables shadows cast by the sun and moon onto the world. Disable for maximum performance — no shadows will be rendered.
 option.SHADOW_PCF                      = Shadowmap Filtering
 option.SHADOW_PCF.comment = Softens shadow edges using percentage-closer filtering. When enabled, shadows look smoother and less pixelated.
+option.SHADOW_PCF_STEPS_SCALE            = Filter Quality
+option.SHADOW_PCF_STEPS_SCALE.comment    = Scales how many filter taps the shadowmap filtering uses. Higher = smoother, less noisy soft shadows at higher GPU cost.
 option.SHADOW_SSRT                     = Distant Shadows
 option.SHADOW_SSRT.comment = Extends shadows beyond the shadow map distance using screen-space ray tracing. Fills in far shadows without increasing shadow map size. Moderate performance cost.
 option.SHADOW_SSRT_STEPS               = Distant Shadow Quality
 option.SHADOW_SSRT_STEPS.comment = Adjusts the number of ray steps for screen-space distant shadows. Higher = more accurate, less noisy far shadows at higher GPU cost.
 option.SHADOW_COLOR                    = Цветные тени
 option.SHADOW_COLOR.comment            = Полупрозрачные блоки отбрасывают цветные тени
+option.SHADOW_COLOR_INTENSITY            = Tint Strength
+option.SHADOW_COLOR_INTENSITY.comment    = Adjusts how strongly translucent blocks tint the shadows behind them. Higher = deeper, more saturated color bleed; 0 = plain white shadows.
 option.SHADOW_VPS                      = Изменяющиеся тени полутени
 option.SHADOW_VPS.comment              = Тени становятся мягче по мере удаления от поверхности того, кто их отбрасывает
 option.shadowMapResolution             = Shadow Resolution
@@ -1060,6 +1083,8 @@ screen.mods                            = Mod Options
 screen.moon_phase_influence             = Moon Phase Influence
 option.VANILLA_AO_INTENSITY            = Vanilla AO Intensity
 option.VANILLA_AO_INTENSITY.comment    = Adjusts the intensity of minecraft's built in ambient occlusion
+option.VANILLA_AO_LIFT                   = Vanilla AO Lift
+option.VANILLA_AO_LIFT.comment           = Lifts the darkest vanilla AO shadows toward flat lighting. Higher = shallower, more washed-out crevices; 0 = full-depth vanilla AO.
 option.SSAO_RADIUS.comment             = Adjusts the radius of SSAO -  the distance from which objects can occlude each other
 option.SSAO_STEPS.comment              = Controls how noisy the SSAO appears
 option.GTAO_RADIUS.comment             = Adjusts the radius of GTAO - the distance from which objects can occlude each other
@@ -1167,10 +1192,6 @@ option.RAINBOWS_INTENSITY=Rainbow Visibility
 option.RAINBOWS_INTENSITY.comment = Adjusts the opacity and vividness of rainbows during/after rain. Higher = brighter, more saturated rainbow.
 option.END_SUN_EFFECT_INTENSITY=End Sun Effect Intensity
 option.END_SUN_EFFECT_INTENSITY.comment = Controls end sun effect intensity.
-option.TWILIGHT_WEDGE_INTENSITY=Twilight Wedge Intensity
-option.TWILIGHT_WEDGE_INTENSITY.comment = Adjusts the strength of the Belt of Venus arch and Earth's shadow at dusk. Higher = more vivid pink band; 0 disables the effect visually.
-option.AIRGLOW_INTENSITY=Night Airglow Intensity
-option.AIRGLOW_INTENSITY.comment = Adjusts the brightness of the night airglow band. Higher = stronger green horizon glow; 0 disables the effect visually.
 value.ANISOTROPIC_FILTERING_MODE.ANISOTROPIC_FILTERING_OFF=Off
 value.ANISOTROPIC_FILTERING_MODE.ANISOTROPIC_FILTERING_2=2x
 value.ANISOTROPIC_FILTERING_MODE.ANISOTROPIC_FILTERING_4=4x

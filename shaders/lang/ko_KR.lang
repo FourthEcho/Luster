@@ -11,6 +11,8 @@ screen.world                           = 월드
 screen.lighting                        = 조명
 screen.sky                             = 하늘
 screen.fog                             = 안개
+screen.fog_general                      = 일반
+screen.fog_environment                  = 환경 안개
 screen.materials                       = 재질
 screen.water                           = 물
 screen.post                            = 후처리
@@ -22,12 +24,21 @@ screen.colored_lights                  = 유색 조명
 screen.colored_lights_settings         = 유색 조명 설정
 screen.purkinje_shift                 = 푸르키네 이동
 screen.rp_settings                     = 리소스팩 설정
+screen.rp_parallax                      = 시차 폐색 매핑
+screen.rp_lightmaps                     = 방향성 라이트맵
+screen.rp_porosity                      = 다공성 / 젖음
+screen.rp_sss                           = 표면하 산란
 screen.reflections                     = 반사
 screen.refraction                      = 굴절
 screen.light_sources                   = 광원
 screen.shadows                         = 그림자
 screen.ao                              = 주변광 차폐 (AO)
 screen.color_grading                   = 색 보정
+screen.grading_basic                    = 기본
+screen.grading_wheels                   = 쉐도우 · 미드톤 · 하이라이트
+screen.grading_curve                    = 톤 커브
+screen.grading_split_tone               = 스플릿 토닝
+screen.grading_selective                = 선택적 색상
 screen.exposure                        = 노출
 screen.lpv_vl                          = 유색 조명 안개 산란
 screen.box                             = 선택 상자
@@ -48,6 +59,8 @@ screen.clouds_noctilucent              = 야광운 설정
 screen.fog_rlh                         = 레일리 안개
 screen.fog_mie                         = 미 산란 안개
 screen.fog_ozone                    = 오존
+screen.ozone_layer                      = 오존층
+screen.sandstorm_layer                  = 사막 모래폭풍
 screen.mist                         = 지면 안개
 screen.sunlight_color                  = 햇빛 색상
 screen.moonlight_color                 = 달빛 색상
@@ -65,6 +78,10 @@ screen.fog_rlh_taiga                   = 타이가 색상
 screen.fog_rlh_jungle                  = 정글 색상
 screen.fog_rlh_swamp                   = 늪 색상
 screen.water_waves                     = 물결
+screen.water_surface                    = 표면 효과
+screen.water_appearance                 = 외형
+screen.water_fog_surface                = 수면 위
+screen.water_fog_underwater             = 수중
 screen.water_fog_coeff                 = 수중 안개 계수
 
 screen.end_light_color                 = 조명 색상
@@ -102,6 +119,8 @@ option.DESERT_SANDSTORM                = 사막 모래폭풍
 option.DESERT_SANDSTORM.comment        = 사막 생물균계에서 비가 올 때 모래폭풍이 발생합니다
 option.END_GLOW                        = 엔드 발광 효과
 option.END_GLOW.comment                = 엔드에서 일렁이는 발광 효과. 볼류메트릭 안개가 필요합니다
+option.END_GLOW_INTENSITY              = End Glow Intensity
+option.END_GLOW_INTENSITY.comment      = Adjusts the brightness of the wavy End glow emission. Higher = stronger glow; 0 disables the emission visually while keeping the toggle.
 
 # Weather
 option.RANDOM_WEATHER_VARIATION            = 무작위 변화
@@ -153,12 +172,16 @@ option.SHADOW                          = Shadows
 option.SHADOW.comment = Enables shadows cast by the sun and moon onto the world. Disable for maximum performance — no shadows will be rendered.
 option.SHADOW_PCF                      = Shadowmap Filtering
 option.SHADOW_PCF.comment = Softens shadow edges using percentage-closer filtering. When enabled, shadows look smoother and less pixelated.
+option.SHADOW_PCF_STEPS_SCALE            = Filter Quality
+option.SHADOW_PCF_STEPS_SCALE.comment    = Scales how many filter taps the shadowmap filtering uses. Higher = smoother, less noisy soft shadows at higher GPU cost.
 option.SHADOW_SSRT                     = Distant Shadows
 option.SHADOW_SSRT.comment = Extends shadows beyond the shadow map distance using screen-space ray tracing. Fills in far shadows without increasing shadow map size. Moderate performance cost.
 option.SHADOW_SSRT_STEPS               = Distant Shadow Quality
 option.SHADOW_SSRT_STEPS.comment = Adjusts the number of ray steps for screen-space distant shadows. Higher = more accurate, less noisy far shadows at higher GPU cost.
 option.SHADOW_COLOR                    = 유색 그림자
 option.SHADOW_COLOR.comment            = 반투명 블록이 색조가 입혀진 그림자를 드리웁니다
+option.SHADOW_COLOR_INTENSITY            = Tint Strength
+option.SHADOW_COLOR_INTENSITY.comment    = Adjusts how strongly translucent blocks tint the shadows behind them. Higher = deeper, more saturated color bleed; 0 = plain white shadows.
 option.SHADOW_VPS                      = 가변 반영(Penumbra) 그림자
 option.SHADOW_VPS.comment              = 광원에서 멀어질수록 그림자가 부드러워집니다
 option.shadowMapResolution             = Shadow Resolution
@@ -1057,6 +1080,8 @@ screen.moon_phase_influence             = Moon Phase Influence
 option.RAIN_OPACITY.comment            = Adjust the opacity of rain particles
 option.VANILLA_AO_INTENSITY            = Vanilla AO Intensity
 option.VANILLA_AO_INTENSITY.comment    = Adjusts the intensity of minecraft's built in ambient occlusion
+option.VANILLA_AO_LIFT                   = Vanilla AO Lift
+option.VANILLA_AO_LIFT.comment           = Lifts the darkest vanilla AO shadows toward flat lighting. Higher = shallower, more washed-out crevices; 0 = full-depth vanilla AO.
 option.ATMOSPHERE_RAIN_DESATURATION                   = Atmosphere Rain Desaturation
 option.ATMOSPHERE_RAIN_DESATURATION.comment           = Desaturates the atmosphere during rain, making for colder looking rain
 option.ATMOSPHERE_RAIN_DESATURATION_INTENSITY         = Desaturation Intensity
@@ -1159,10 +1184,6 @@ option.RAINBOWS_INTENSITY=Rainbow Visibility
 option.RAINBOWS_INTENSITY.comment = Adjusts the opacity and vividness of rainbows during/after rain. Higher = brighter, more saturated rainbow.
 option.END_SUN_EFFECT_INTENSITY=End Sun Effect Intensity
 option.END_SUN_EFFECT_INTENSITY.comment = Controls end sun effect intensity.
-option.TWILIGHT_WEDGE_INTENSITY=Twilight Wedge Intensity
-option.TWILIGHT_WEDGE_INTENSITY.comment = Adjusts the strength of the Belt of Venus arch and Earth's shadow at dusk. Higher = more vivid pink band; 0 disables the effect visually.
-option.AIRGLOW_INTENSITY=Night Airglow Intensity
-option.AIRGLOW_INTENSITY.comment = Adjusts the brightness of the night airglow band. Higher = stronger green horizon glow; 0 disables the effect visually.
 value.ANISOTROPIC_FILTERING_MODE.ANISOTROPIC_FILTERING_OFF=Off
 value.ANISOTROPIC_FILTERING_MODE.ANISOTROPIC_FILTERING_2=2x
 value.ANISOTROPIC_FILTERING_MODE.ANISOTROPIC_FILTERING_4=4x

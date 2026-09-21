@@ -15,9 +15,16 @@ profile.mac_compatible                 = §cMac Compatible
 # Screens
 
 screen.world                           = World
+screen.world_vegetation                 = Vegetation
+screen.world_weather_fx                 = Weather Effects
 screen.lighting                        = Lighting
 screen.sky                             = Sky
+screen.sky_celestial_bodies             = Sun & Moon
+screen.sky_phenomena                    = Sky Phenomena
+screen.sky_atmosphere                   = Atmosphere Color
 screen.fog                             = Atmospherics & Fog
+screen.fog_general                      = General
+screen.fog_environment                  = Environment Fog
 screen.materials                       = Materials
 screen.water                           = Water
 screen.post                            = Post-Processing
@@ -32,12 +39,24 @@ screen.weather                         = Weather
 screen.moon_phase_influence             = Moon Phase Influence
 screen.purkinje_shift                 = Purkinje Shift
 screen.rp_settings                     = Resource Pack Settings
+screen.rp_parallax                      = Parallax Occlusion Mapping
+screen.rp_lightmaps                     = Directional Lightmaps
+screen.rp_porosity                      = Porosity / Wetness
+screen.rp_sss                           = Subsurface Scattering
 screen.reflections                     = Reflections
 screen.refraction                      = Refraction
 screen.light_sources                   = Light Sources
 screen.shadows                         = Direct Lighting
+screen.shadows_quality                  = Shadow Quality
+screen.shadows_coverage                 = Shadow Coverage
+screen.shadows_style                    = Shadow Style
 screen.ao                              = Ambient Occlusion
 screen.color_grading                   = Color Grading
+screen.grading_basic                    = Basic
+screen.grading_wheels                   = Lift · Gamma · Gain
+screen.grading_curve                    = Tone Curve
+screen.grading_split_tone               = Split Toning
+screen.grading_selective                = Selective Color
 screen.exposure                        = Exposure
 screen.box                             = Selection Box
 screen.developer                       = Developer Options
@@ -58,6 +77,8 @@ screen.clouds_noctilucent              = Noctilucent Clouds Settings
 screen.fog_rlh                         = Rayleigh Fog
 screen.fog_mie                         = Mie Fog
 screen.fog_ozone                    = Ozone
+screen.ozone_layer                      = Ozone Layer
+screen.sandstorm_layer                  = Desert Sandstorm
 screen.mist                         = Ground Mist
 screen.sunlight_color                  = Sunlight Color
 screen.moonlight_color                 = Moonlight Color
@@ -75,6 +96,10 @@ screen.fog_rlh_taiga                   = Taiga Color
 screen.fog_rlh_jungle                  = Jungle Color
 screen.fog_rlh_swamp                   = Swamp Color
 screen.water_waves                     = Water Waves
+screen.water_surface                    = Surface Effects
+screen.water_appearance                 = Appearance
+screen.water_fog_surface                = Above Water
+screen.water_fog_underwater             = Underwater
 screen.water_fog_coeff                 = Water Fog Coefficients
 
 screen.end_light_color                 = Light Color
@@ -113,6 +138,8 @@ option.DESERT_SANDSTORM                = Desert Sandstorm
 option.DESERT_SANDSTORM.comment        = Sandstorm during rain in desert biome
 option.END_GLOW                        = End Glow
 option.END_GLOW.comment                = Wavery glowing effect in the End. Requires Volumetric Fog
+option.END_GLOW_INTENSITY              = End Glow Intensity
+option.END_GLOW_INTENSITY.comment      = Adjusts the brightness of the wavy End glow emission. Higher = stronger glow; 0 disables the emission visually while keeping the toggle.
 
 # Weather
 option.RANDOM_WEATHER_VARIATION            = Random Variation
@@ -162,12 +189,16 @@ option.SHADOW                          = Shadow Mapping
 option.SHADOW.comment = Enables shadows cast by the sun and moon onto the world. Disable for maximum performance — no shadows will be rendered.
 option.SHADOW_PCF                      = Shadowmap Filtering
 option.SHADOW_PCF.comment = Softens shadow edges using percentage-closer filtering. When enabled, shadows look smoother and less pixelated.
+option.SHADOW_PCF_STEPS_SCALE            = Filter Quality
+option.SHADOW_PCF_STEPS_SCALE.comment    = Scales how many filter taps the shadowmap filtering uses. Higher = smoother, less noisy soft shadows at higher GPU cost.
 option.SHADOW_SSRT                     = Distant Shadows
 option.SHADOW_SSRT.comment = Extends shadows beyond the shadow map distance using screen-space ray tracing. Fills in far shadows without increasing shadow map size. Moderate performance cost.
 option.SHADOW_SSRT_STEPS               = Distant Shadow Quality
 option.SHADOW_SSRT_STEPS.comment = Adjusts the number of ray steps for screen-space distant shadows. Higher = more accurate, less noisy far shadows at higher GPU cost.
 option.SHADOW_COLOR                    = Colored Shadows
 option.SHADOW_COLOR.comment            = Translucent blocks cast tinted shadows
+option.SHADOW_COLOR_INTENSITY            = Tint Strength
+option.SHADOW_COLOR_INTENSITY.comment    = Adjusts how strongly translucent blocks tint the shadows behind them. Higher = deeper, more saturated color bleed; 0 = plain white shadows.
 option.SHADOW_VPS                      = Variable Penumbra Shadows
 option.SHADOW_VPS.comment              = Shadows grow softer further from their caster
 option.shadowMapResolution             = Shadow Resolution
@@ -198,6 +229,16 @@ option.VANILLA_AO                      = Vanilla AO
 option.VANILLA_AO.comment              = Minecraft's built-in ambient occlusion
 option.VANILLA_AO_INTENSITY            = Vanilla AO Intensity
 option.VANILLA_AO_INTENSITY.comment    = Adjusts the intensity of minecraft's built in ambient occlusion
+option.VANILLA_AO_LIFT                   = Vanilla AO Lift
+option.VANILLA_AO_LIFT.comment           = Lifts the darkest vanilla AO shadows toward flat lighting. Higher = shallower, more washed-out crevices; 0 = full-depth vanilla AO.
+option.SSAO_STEPS                        = SSAO Samples
+option.SSAO_STEPS.comment                = Sample count for screen-space ambient occlusion. Higher = smoother, less noisy AO at higher GPU cost.
+option.SSAO_RADIUS                       = SSAO Radius
+option.SSAO_RADIUS.comment               = Occlusion radius for screen-space AO in blocks. Larger = wider, softer contact shadows.
+option.GTAO_RADIUS                       = GTAO Radius
+option.GTAO_RADIUS.comment               = Occlusion radius for horizon-based AO in blocks. Larger = wider, softer crevice shading.
+option.GTAO_HORIZON_STEPS                = GTAO Horizon Steps
+option.GTAO_HORIZON_STEPS.comment        = Steps per horizon line for GTAO. Higher = more accurate horizon search at higher GPU cost.
 
 option.SUN_NR                          = §c▍ §fRed — Noon
 option.SUN_NR.comment = Adjusts the red tint of sunlight at noon. Higher = warmer midday sun.
@@ -333,10 +374,6 @@ option.RAINBOWS                        = Rainbows
 option.RAINBOWS.comment = When enabled, a faint rainbow appears opposite the sun during and just after rain.
 option.END_SUN_EFFECT                  = End Sun Effect
 option.END_SUN_EFFECT.comment = Controls end sun effect.
-option.TWILIGHT_WEDGE                    = Twilight Wedge
-option.TWILIGHT_WEDGE.comment = Pink Belt of Venus arch opposite the sun just after sunset, with the dark Earth's-shadow band beneath it. Most visible looking away from the sunset on clear evenings.
-option.AIRGLOW                          = Night Airglow
-option.AIRGLOW.comment = Faint green oxygen emission hugging the horizon on clear nights. Lifts the night horizon out of pure black; most visible far from rain and moonlight.
 option.ATMOSPHERE_SATURATION_BOOST                    = Atmosphere Saturation Boost
 option.ATMOSPHERE_SATURATION_BOOST.comment            = Increases the saturation of the sky and sunlight color depending on the time of day
 option.ATMOSPHERE_SATURATION_BOOST_INTENSITY          = Saturation Boost Intensity
@@ -1195,6 +1232,8 @@ option.NOISE_ON_DH_TERRAIN.comment = Controls whether noise is applied to Distan
 
 screen.directional_ambient_lighting=Directional Ambient Lighting
 screen.indirect_lighting=Indirect Lighting
+screen.indirect_sspt                    = SSPT Settings
+screen.indirect_ao                      = Ambient Occlusion
 screen.aa=Anti-Aliasing
 screen.motion_blur=Motion Blur
 screen.dof=Depth of field
@@ -1366,10 +1405,6 @@ option.RAINBOWS_INTENSITY=Rainbow Visibility
 option.RAINBOWS_INTENSITY.comment = Adjusts the opacity and vividness of rainbows during/after rain. Higher = brighter, more saturated rainbow.
 option.END_SUN_EFFECT_INTENSITY=End Sun Effect Intensity
 option.END_SUN_EFFECT_INTENSITY.comment = Controls end sun effect intensity.
-option.TWILIGHT_WEDGE_INTENSITY=Twilight Wedge Intensity
-option.TWILIGHT_WEDGE_INTENSITY.comment = Adjusts the strength of the Belt of Venus arch and Earth's shadow at dusk. Higher = more vivid pink band; 0 disables the effect visually.
-option.AIRGLOW_INTENSITY=Night Airglow Intensity
-option.AIRGLOW_INTENSITY.comment = Adjusts the brightness of the night airglow band. Higher = stronger green horizon glow; 0 disables the effect visually.
 option.PLANET_BOUNCE_INTENSITY=Planet Bounce Intensity
 option.PLANET_BOUNCE_INTENSITY.comment = Adjusts the strength of ground-bounced light re-entering the sky. Higher = brighter, warmer horizon glow; 0 disables the contribution entirely.
 

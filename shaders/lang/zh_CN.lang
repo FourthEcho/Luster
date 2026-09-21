@@ -11,6 +11,8 @@ screen.world                           = 世界
 screen.lighting                        = 照明
 screen.sky                             = 天空
 screen.fog                             = 雾气
+screen.fog_general                      = 通用
+screen.fog_environment                  = 环境雾
 screen.materials                       = 材质
 screen.water                           = 水
 screen.post                            = 后处理
@@ -22,12 +24,21 @@ screen.colored_lights                  = 彩色光源
 screen.colored_lights_settings         = 彩色光源设置
 screen.purkinje_shift                 = 普尔金耶位移
 screen.rp_settings                     = 资源包设置
+screen.rp_parallax                      = 视差遮蔽映射
+screen.rp_lightmaps                     = 方向性光照贴图
+screen.rp_porosity                      = 孔隙度/湿润
+screen.rp_sss                           = 次表面散射
 screen.reflections                     = 反射
 screen.refraction                      = 折射
 screen.light_sources                   = 光源
 screen.shadows                         = 阴影
 screen.ao                              = 环境光遮蔽
 screen.color_grading                   = 颜色分级
+screen.grading_basic                    = 基础
+screen.grading_wheels                   = 暗部·中间调·高光
+screen.grading_curve                    = 色调曲线
+screen.grading_split_tone               = 分离色调
+screen.grading_selective                = 选择性颜色
 screen.exposure                        = 曝光
 screen.lpv_vl                          = 彩色光源雾气散射
 screen.box                             = 选择框
@@ -49,6 +60,8 @@ screen.clouds_noctilucent              = 夜光云设置
 screen.fog_rlh                         = 瑞利系数
 screen.fog_mie                         = 米氏系数
 screen.fog_ozone                    = 臭氧
+screen.ozone_layer                      = 臭氧层
+screen.sandstorm_layer                  = 沙尘暴
 screen.mist                         = 地面雾
 screen.sunlight_color                  = 阳光颜色
 screen.moonlight_color                 = 月光颜色
@@ -66,6 +79,10 @@ screen.fog_rlh_taiga                   = 针叶林群系 雾气颜色
 screen.fog_rlh_jungle                  = 丛林群系 雾气颜色
 screen.fog_rlh_swamp                   = 沼泽群系 雾气颜色
 screen.water_waves                     = 水波
+screen.water_surface                    = 水面效果
+screen.water_appearance                 = 外观
+screen.water_fog_surface                = 水上
+screen.water_fog_underwater             = 水下
 screen.water_fog_coeff                 = 水雾系数
 
 screen.end_light_color                 = 末地光照颜色
@@ -103,6 +120,8 @@ option.DESERT_SANDSTORM                = 沙漠群系沙尘暴
 option.DESERT_SANDSTORM.comment        = 沙漠群系在雨天时候刮起的沙尘暴.
 option.END_GLOW                        = 末地辉光雾
 option.END_GLOW.comment                = 在末地维度摇曳的辉光效果. 需要启用体积雾.
+option.END_GLOW_INTENSITY              = End Glow Intensity
+option.END_GLOW_INTENSITY.comment      = Adjusts the brightness of the wavy End glow emission. Higher = stronger glow; 0 disables the emission visually while keeping the toggle.
 
 # Weather
 option.RANDOM_WEATHER_VARIATION            = 随机变化
@@ -154,11 +173,15 @@ option.SHADOW                          = Shadows
 option.SHADOW.comment = Enables shadows cast by the sun and moon onto the world. Disable for maximum performance — no shadows will be rendered.
 option.SHADOW_PCF                      = Shadowmap Filtering
 option.SHADOW_PCF.comment = Softens shadow edges using percentage-closer filtering. When enabled, shadows look smoother and less pixelated.
+option.SHADOW_PCF_STEPS_SCALE            = Filter Quality
+option.SHADOW_PCF_STEPS_SCALE.comment    = Scales how many filter taps the shadowmap filtering uses. Higher = smoother, less noisy soft shadows at higher GPU cost.
 option.SHADOW_SSRT                     = Distant Shadows
 option.SHADOW_SSRT_STEPS               = Distant Shadow Quality
 option.SHADOW_SSRT_STEPS.comment = Adjusts the number of ray steps for screen-space distant shadows. Higher = more accurate, less noisy far shadows at higher GPU cost.
 option.SHADOW_COLOR                    = 阴影着色
 option.SHADOW_COLOR.comment            = 使半透明方块可投射有色的阴影.
+option.SHADOW_COLOR_INTENSITY            = Tint Strength
+option.SHADOW_COLOR_INTENSITY.comment    = Adjusts how strongly translucent blocks tint the shadows behind them. Higher = deeper, more saturated color bleed; 0 = plain white shadows.
 option.SHADOW_VPS                      = 可变半阴影
 option.SHADOW_VPS.comment              = 阴影距离投射点越远越柔和.
 option.shadowMapResolution             = Shadow Resolution
@@ -1043,6 +1066,8 @@ screen.moon_phase_influence             = Moon Phase Influence
 option.RAIN_OPACITY.comment            = Adjust the opacity of rain particles
 option.VANILLA_AO_INTENSITY            = Vanilla AO Intensity
 option.VANILLA_AO_INTENSITY.comment    = Adjusts the intensity of minecraft's built in ambient occlusion
+option.VANILLA_AO_LIFT                   = Vanilla AO Lift
+option.VANILLA_AO_LIFT.comment           = Lifts the darkest vanilla AO shadows toward flat lighting. Higher = shallower, more washed-out crevices; 0 = full-depth vanilla AO.
 option.ATMOSPHERE_RAIN_DESATURATION                   = Atmosphere Rain Desaturation
 option.ATMOSPHERE_RAIN_DESATURATION.comment           = Desaturates the atmosphere during rain, making for colder looking rain
 option.ATMOSPHERE_RAIN_DESATURATION_INTENSITY         = Desaturation Intensity
@@ -1168,10 +1193,6 @@ option.RAINBOWS_INTENSITY=Rainbow Visibility
 option.RAINBOWS_INTENSITY.comment = Adjusts the opacity and vividness of rainbows during/after rain. Higher = brighter, more saturated rainbow.
 option.END_SUN_EFFECT_INTENSITY=End Sun Effect Intensity
 option.END_SUN_EFFECT_INTENSITY.comment = Controls end sun effect intensity.
-option.TWILIGHT_WEDGE_INTENSITY=Twilight Wedge Intensity
-option.TWILIGHT_WEDGE_INTENSITY.comment = Adjusts the strength of the Belt of Venus arch and Earth's shadow at dusk. Higher = more vivid pink band; 0 disables the effect visually.
-option.AIRGLOW_INTENSITY=Night Airglow Intensity
-option.AIRGLOW_INTENSITY.comment = Adjusts the brightness of the night airglow band. Higher = stronger green horizon glow; 0 disables the effect visually.
 value.ANISOTROPIC_FILTERING_MODE.ANISOTROPIC_FILTERING_OFF=Off
 value.ANISOTROPIC_FILTERING_MODE.ANISOTROPIC_FILTERING_2=2x
 value.ANISOTROPIC_FILTERING_MODE.ANISOTROPIC_FILTERING_4=4x

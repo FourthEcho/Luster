@@ -150,7 +150,7 @@ void main() {
             discard;
         }
 
-        shadowcolor0_out = mix(vec3(1.0), base_color.rgb * tint, base_color.a);
+        shadowcolor0_out = mix(vec3(1.0), base_color.rgb * tint, clamp01(base_color.a * SHADOW_COLOR_INTENSITY));
         shadowcolor0_out
             = 0.25 * srgb_eotf_inv(shadowcolor0_out) * rec709_to_working_color;
         shadowcolor0_out *= step(base_color.a, 1.0 - rcp(255.0));

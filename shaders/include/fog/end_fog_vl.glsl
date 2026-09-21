@@ -181,7 +181,7 @@ mat2x3 raymarch_end_fog(
 #ifdef END_GLOW
         // Emission
         scattering
-            += 4.0 * end_fog_emission(world_pos) * step_length * transmittance;
+            += 4.0 * end_fog_emission(world_pos) * step_length * transmittance * END_GLOW_INTENSITY;
 #endif
 
         transmittance *= step_transmittance;

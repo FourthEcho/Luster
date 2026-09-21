@@ -11,6 +11,8 @@ screen.world                           = Wereld
 screen.lighting                        = Licht
 screen.sky                             = Lucht
 screen.fog                             = Mist
+screen.fog_general                      = Algemeen
+screen.fog_environment                  = Omgevingsmist
 screen.materials                       = Materialen
 screen.water                           = Water
 screen.post                            = Filters & Effecten
@@ -22,12 +24,21 @@ screen.colored_lights                  = Gekleurde Lichten
 screen.colored_lights_settings         = Gekleurde Lichten Instellingen
 screen.purkinje_shift                 = Purkinje Verschuiving
 screen.rp_settings                     = Bronpakket-instellingen
+screen.rp_parallax                      = Parallax Occlusion Mapping
+screen.rp_lightmaps                     = Directionele Lightmaps
+screen.rp_porosity                      = Porositeit / Nattigheid
+screen.rp_sss                           = Subsurface Scattering
 screen.reflections                     = Reflecties
 screen.refraction                      = Refracties
 screen.light_sources                   = Lichtbronnen
 screen.shadows                         = Schaduwen
 screen.ao                              = Omgevingsocclusie (AO)
 screen.color_grading                   = Kleur-instellingen
+screen.grading_basic                    = Basis
+screen.grading_wheels                   = Schaduw · Midden · Highlight
+screen.grading_curve                    = Toonkromme
+screen.grading_split_tone               = Split Toning
+screen.grading_selective                = Selectieve Kleur
 screen.exposure                        = Belichting
 screen.lpv_vl                          = Gekleurde Lichten Mist-verstrooing
 screen.box                             = Selectievak
@@ -47,6 +58,8 @@ screen.clouds_noctilucent              = Nachtschemerende wolk Instellingen
 screen.fog_rlh                         = Rayleigh Mist
 screen.fog_mie                         = Mie Mist
 screen.fog_ozone                    = Ozon
+screen.ozone_layer                      = Ozonlaag
+screen.sandstorm_layer                  = Zandstorm
 screen.mist                         = Bodemnevel
 screen.sunlight_color                  = Zonlicht Kleur
 screen.moonlight_color                 = Maanlicht Kleur
@@ -64,6 +77,10 @@ screen.fog_rlh_taiga                   = Taiga Kleur
 screen.fog_rlh_jungle                  = Jungle Kleur
 screen.fog_rlh_swamp                   = Moeras Kleur
 screen.water_waves                     = Water Golven
+screen.water_surface                    = Oppervlakte-effecten
+screen.water_appearance                 = Uiterlijk
+screen.water_fog_surface                = Boven Water
+screen.water_fog_underwater             = Onder Water
 screen.water_fog_coeff                 = Water Mist Coëfficiënten
 
 screen.end_light_color                 = Lichtkleur
@@ -101,6 +118,8 @@ option.DESERT_SANDSTORM                = Dor/Woestijn Zandstorm
 option.DESERT_SANDSTORM.comment        = Vervangt de droge woestijn tijdens regen met een zandstorm.
 option.END_GLOW                        = End Gloei
 option.END_GLOW.comment                = Gloeiend effect in De End. Vereist Volumetrische Mist.
+option.END_GLOW_INTENSITY              = End Glow Intensity
+option.END_GLOW_INTENSITY.comment      = Adjusts the brightness of the wavy End glow emission. Higher = stronger glow; 0 disables the emission visually while keeping the toggle.
 
 # Weather
 option.RANDOM_WEATHER_VARIATION            = Willekeurige Variatie
@@ -151,12 +170,16 @@ option.SHADOW                          = Shadows
 option.SHADOW.comment = Enables shadows cast by the sun and moon onto the world. Disable for maximum performance — no shadows will be rendered.
 option.SHADOW_PCF                      = Shadowmap Filtering
 option.SHADOW_PCF.comment = Softens shadow edges using percentage-closer filtering. When enabled, shadows look smoother and less pixelated.
+option.SHADOW_PCF_STEPS_SCALE            = Filter Quality
+option.SHADOW_PCF_STEPS_SCALE.comment    = Scales how many filter taps the shadowmap filtering uses. Higher = smoother, less noisy soft shadows at higher GPU cost.
 option.SHADOW_SSRT                     = Distant Shadows
 option.SHADOW_SSRT.comment = Extends shadows beyond the shadow map distance using screen-space ray tracing. Fills in far shadows without increasing shadow map size. Moderate performance cost.
 option.SHADOW_SSRT_STEPS               = Distant Shadow Quality
 option.SHADOW_SSRT_STEPS.comment = Adjusts the number of ray steps for screen-space distant shadows. Higher = more accurate, less noisy far shadows at higher GPU cost.
 option.SHADOW_COLOR                    = Gekleurde Schaduwen
 option.SHADOW_COLOR.comment            = Doorzichtige blokken werpen gekleurde schaduwen.
+option.SHADOW_COLOR_INTENSITY            = Tint Strength
+option.SHADOW_COLOR_INTENSITY.comment    = Adjusts how strongly translucent blocks tint the shadows behind them. Higher = deeper, more saturated color bleed; 0 = plain white shadows.
 option.SHADOW_VPS                      = Bijschaduwen
 option.SHADOW_VPS.comment              = Schaduwen krijgen zachtere randen naarmate de oppervlakte verder van het schaduw-werpende voorwerp is.
 option.shadowMapResolution             = Shadow Resolution
@@ -1037,6 +1060,8 @@ option.RAIN_OPACITY.comment            = Adjust the opacity of rain particles
 option.SSS_INTENSITY                   = SSS Intensity
 option.VANILLA_AO_INTENSITY            = Vanilla AO Intensity
 option.VANILLA_AO_INTENSITY.comment    = Adjusts the intensity of minecraft's built in ambient occlusion
+option.VANILLA_AO_LIFT                   = Vanilla AO Lift
+option.VANILLA_AO_LIFT.comment           = Lifts the darkest vanilla AO shadows toward flat lighting. Higher = shallower, more washed-out crevices; 0 = full-depth vanilla AO.
 option.ATMOSPHERE_RAIN_DESATURATION                   = Atmosphere Rain Desaturation
 option.ATMOSPHERE_RAIN_DESATURATION.comment           = Desaturates the atmosphere during rain, making for colder looking rain
 option.ATMOSPHERE_RAIN_DESATURATION_INTENSITY         = Desaturation Intensity
@@ -1169,10 +1194,6 @@ option.RAINBOWS_INTENSITY=Rainbow Visibility
 option.RAINBOWS_INTENSITY.comment = Adjusts the opacity and vividness of rainbows during/after rain. Higher = brighter, more saturated rainbow.
 option.END_SUN_EFFECT_INTENSITY=End Sun Effect Intensity
 option.END_SUN_EFFECT_INTENSITY.comment = Controls end sun effect intensity.
-option.TWILIGHT_WEDGE_INTENSITY=Twilight Wedge Intensity
-option.TWILIGHT_WEDGE_INTENSITY.comment = Adjusts the strength of the Belt of Venus arch and Earth's shadow at dusk. Higher = more vivid pink band; 0 disables the effect visually.
-option.AIRGLOW_INTENSITY=Night Airglow Intensity
-option.AIRGLOW_INTENSITY.comment = Adjusts the brightness of the night airglow band. Higher = stronger green horizon glow; 0 disables the effect visually.
 value.ANISOTROPIC_FILTERING_MODE.ANISOTROPIC_FILTERING_OFF=Off
 value.ANISOTROPIC_FILTERING_MODE.ANISOTROPIC_FILTERING_2=2x
 value.ANISOTROPIC_FILTERING_MODE.ANISOTROPIC_FILTERING_4=4x

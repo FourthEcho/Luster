@@ -11,6 +11,8 @@ screen.world                           = Mundo
 screen.lighting                        = Iluminación
 screen.sky                             = Cielo
 screen.fog                             = Niebla
+screen.fog_general                      = General
+screen.fog_environment                  = Niebla Ambiental
 screen.materials                       = Materiales
 screen.water                           = Agua
 screen.post                            = Postprocesado
@@ -22,12 +24,21 @@ screen.colored_lights                  = Luces de colores
 screen.colored_lights_settings         = Configuración de las luces de colores
 screen.purkinje_shift                 = Desplazamiento de Purkinje
 screen.rp_settings                     = Configuración de paquetes de recursos
+screen.rp_parallax                      = Mapeo de Oclusión Parallax
+screen.rp_lightmaps                     = Mapas de Luz Direccionales
+screen.rp_porosity                      = Porosidad / Humedad
+screen.rp_sss                           = Dispersión Subsuperficial
 screen.reflections                     = Reflexiones
 screen.refraction                      = Refracción
 screen.light_sources                   = Fuentes de luz
 screen.shadows                         = Sombras
 screen.ao                              = Oclusión ambiental
 screen.color_grading                   = Gradación de color
+screen.grading_basic                    = Básico
+screen.grading_wheels                   = Sombras · Medios · Altas Luces
+screen.grading_curve                    = Curva de Tono
+screen.grading_split_tone               = Tono Dividido
+screen.grading_selective                = Color Selectivo
 screen.exposure                        = Exposición
 screen.lpv_vl                          = Luces de colores que dispersan la niebla
 screen.box                             = Caja de selección
@@ -49,6 +60,8 @@ screen.clouds_noctilucent              = Configuración de nubes noctilucentes
 screen.fog_rlh                         = Niebla Rayleigh
 screen.fog_mie                         = Niebla Mie
 screen.fog_ozone                    = Ozono
+screen.ozone_layer                      = Capa de Ozono
+screen.sandstorm_layer                  = Tormenta de Arena
 screen.mist                         = Niebla del Suelo
 screen.sunlight_color                  = Color de la luz solar
 screen.moonlight_color                 = Color de la luz lunar
@@ -66,6 +79,10 @@ screen.fog_rlh_taiga                   = Color de la taiga
 screen.fog_rlh_jungle                  = Color de la selva
 screen.fog_rlh_swamp                   = Color del pantano
 screen.water_waves                     = Ondas de agua
+screen.water_surface                    = Efectos de Superficie
+screen.water_appearance                 = Apariencia
+screen.water_fog_surface                = Sobre el Agua
+screen.water_fog_underwater             = Bajo el Agua
 screen.water_fog_coeff                 = Coeficientes de la niebla del agua
 
 screen.end_light_color                 = Color claro
@@ -104,6 +121,8 @@ option.DESERT_SANDSTORM                = Tormenta de arena del desierto
 option.DESERT_SANDSTORM.comment        = Tormenta de arena durante la lluvia en el bioma del desierto.
 option.END_GLOW                        = Resplandor del End
 option.END_GLOW.comment                = Efecto de brillo ondulante en el End. Requiere niebla volumétrica.
+option.END_GLOW_INTENSITY              = End Glow Intensity
+option.END_GLOW_INTENSITY.comment      = Adjusts the brightness of the wavy End glow emission. Higher = stronger glow; 0 disables the emission visually while keeping the toggle.
 
 # Weather
 option.RANDOM_WEATHER_VARIATION            = Variación aleatoria
@@ -155,8 +174,12 @@ option.SHADOW                          = Shadows
 option.SHADOW.comment = Enables shadows cast by the sun and moon onto the world. Disable for maximum performance — no shadows will be rendered.
 option.SHADOW_PCF                      = Shadowmap Filtering
 option.SHADOW_PCF.comment = Softens shadow edges using percentage-closer filtering. When enabled, shadows look smoother and less pixelated.
+option.SHADOW_PCF_STEPS_SCALE            = Filter Quality
+option.SHADOW_PCF_STEPS_SCALE.comment    = Scales how many filter taps the shadowmap filtering uses. Higher = smoother, less noisy soft shadows at higher GPU cost.
 option.SHADOW_COLOR                    = Sombras de colores
 option.SHADOW_COLOR.comment            = Los bloques translúcidos proyectan sombras teñidas
+option.SHADOW_COLOR_INTENSITY            = Tint Strength
+option.SHADOW_COLOR_INTENSITY.comment    = Adjusts how strongly translucent blocks tint the shadows behind them. Higher = deeper, more saturated color bleed; 0 = plain white shadows.
 option.SHADOW_VPS                      = Sombras de penumbra variables
 option.SHADOW_VPS.comment              = Las sombras se vuelven más suaves a medida que se alejan de su lanzador
 option.shadowMapResolution             = Shadow Resolution
@@ -1038,6 +1061,8 @@ option.SHADOW_SSRT_STEPS               = Distant Shadow Quality
 option.SHADOW_SSRT_STEPS.comment = Adjusts the number of ray steps for screen-space distant shadows. Higher = more accurate, less noisy far shadows at higher GPU cost.
 option.VANILLA_AO_INTENSITY            = Vanilla AO Intensity
 option.VANILLA_AO_INTENSITY.comment    = Adjusts the intensity of minecraft's built in ambient occlusion
+option.VANILLA_AO_LIFT                   = Vanilla AO Lift
+option.VANILLA_AO_LIFT.comment           = Lifts the darkest vanilla AO shadows toward flat lighting. Higher = shallower, more washed-out crevices; 0 = full-depth vanilla AO.
 option.ATMOSPHERE_RAIN_DESATURATION                   = Atmosphere Rain Desaturation
 option.ATMOSPHERE_RAIN_DESATURATION.comment           = Desaturates the atmosphere during rain, making for colder looking rain
 option.ATMOSPHERE_RAIN_DESATURATION_INTENSITY         = Desaturation Intensity
@@ -1170,10 +1195,6 @@ option.RAINBOWS_INTENSITY=Rainbow Visibility
 option.RAINBOWS_INTENSITY.comment = Adjusts the opacity and vividness of rainbows during/after rain. Higher = brighter, more saturated rainbow.
 option.END_SUN_EFFECT_INTENSITY=End Sun Effect Intensity
 option.END_SUN_EFFECT_INTENSITY.comment = Controls end sun effect intensity.
-option.TWILIGHT_WEDGE_INTENSITY=Twilight Wedge Intensity
-option.TWILIGHT_WEDGE_INTENSITY.comment = Adjusts the strength of the Belt of Venus arch and Earth's shadow at dusk. Higher = more vivid pink band; 0 disables the effect visually.
-option.AIRGLOW_INTENSITY=Night Airglow Intensity
-option.AIRGLOW_INTENSITY.comment = Adjusts the brightness of the night airglow band. Higher = stronger green horizon glow; 0 disables the effect visually.
 value.ANISOTROPIC_FILTERING_MODE.ANISOTROPIC_FILTERING_OFF=Off
 value.ANISOTROPIC_FILTERING_MODE.ANISOTROPIC_FILTERING_2=2x
 value.ANISOTROPIC_FILTERING_MODE.ANISOTROPIC_FILTERING_4=4x
