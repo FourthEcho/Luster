@@ -1,4 +1,4 @@
-#if !defined INCLUDE_SKY_SKYsky
+#if !defined INCLUDE_SKY_SKY
 #define INCLUDE_SKY_SKY
 
 #include "/include/utility/color.glsl"
@@ -38,7 +38,7 @@ vec3 draw_sun(vec3 ray_dir) {
     // Limb darkening model from
     // http://www.physics.hmc.edu/faculty/esin/a101/limbdarkening.pdf
     const vec3 alpha = vec3(0.429, 0.522, 0.614);
-    float center_to_edge = max0(sun_angular_radius - fast_acos(nu));
+    float center_to_edge = max0(sun_angular_radius - fast_acos(clamp(nu, -1.0, 1.0)));
     vec3 limb_darkening
         = pow(vec3(1.0 - sqr(1.0 - center_to_edge)), 0.5 * alpha);
 
@@ -59,7 +59,7 @@ vec4 draw_moon(vec3 ray_dir) {
     }
 
     // Find distance from center to edge.
-    float dist = clamp01(fast_acos(MoV) / moon_angular_radius);
+    float dist = clamp01(fast_acos(clamp(MoV, -1.0, 1.0)) / moon_angular_radius);
 
     // Transform the coordinate space such that z is parallel to moon_dir
     vec3 tangent = abs(moon_dir.y) == 1.0
@@ -106,7 +106,7 @@ vec3 draw_galaxy(vec3 ray_dir, out float galaxy_luminance) {
     float galaxy_intensity = 0.05 + 1.0 * linear_step(-0.1, 0.25, -sun_dir.y);
 
     float lon = atan(ray_dir.x, ray_dir.z);
-    float lat = fast_acos(-ray_dir.y);
+    float lat = fast_acos(clamp(-ray_dir.y, -1.0, 1.0));
 
     vec3 galaxy
         = texture(galaxy_sampler, vec2(lon * rcp(tau) + 0.5, lat * rcp(pi)))
@@ -161,7 +161,7 @@ vec3 draw_sky(
 #if defined PROGRAM_DEFERRED11
     vec3 skytextured_output
         = texelFetch(colortex0, ivec2(gl_FragCoord.xy), 0).rgb;
-    sky += texelFetch(colortex0, ivec2(gl_FragCoord.xy), 0).rgb;
+    sky += skytextured_output;
 
 #ifdef STARS
     // Stars
@@ -261,7 +261,7 @@ vec4 get_clouds_and_aurora(
         result.transmittance
     );
 
-    // Crepuscular rays
+    // Crepuscular rays (sky-map ambient path only)
 
 #if defined CREPUSCULAR_RAYS && !defined BLOCKY_CLOUDS
     vec4 crepuscular_rays
@@ -311,7 +311,7 @@ const vec3 end_sun_color = vec3(1.0, 0.5, 0.25);
 
 vec3 draw_sun(vec3 ray_dir) {
     float nu = dot(ray_dir, sun_dir);
-    float r = fast_acos(nu);
+    float r = fast_acos(clamp(nu, -1.0, 1.0));
 
     // Sun disk
 

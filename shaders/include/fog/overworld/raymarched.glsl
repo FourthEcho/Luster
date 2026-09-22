@@ -76,7 +76,7 @@ mat2x3 raymarch_air_fog(
         // Above volume
         distance_to_volume_start = distance_to_upper_plane;
         distance_to_volume_end
-            = world_dir.y < 0.0 ? distance_to_upper_plane : -1.0;
+            = world_dir.y < 0.0 ? distance_to_lower_plane : -1.0;
     }
 
 #ifdef LOD_MOD_ACTIVE
@@ -136,6 +136,9 @@ mat2x3 raymarch_air_fog(
         shadow = (clamp01(shadow_screen_pos) == shadow_screen_pos)
             ? shadow
             : vec3(1.0);
+        // Scalar sun visibility for mist below: float(vec3 > 0.0) is
+        // illegal GLSL, so reduce explicitly (this branch is rgb).
+        float shadow_binary = step(eps, max_of(shadow));
 #else
         float depth1 = texelFetch(shadowtex1, shadow_texel, 0).x;
         float shadow = step(
@@ -143,9 +146,11 @@ mat2x3 raymarch_air_fog(
                 * shadow_screen_pos.z,
             depth1
         );
+        float shadow_binary = shadow;
 #endif
 #else
 #define shadow 1.0
+#define shadow_binary 1.0
 #endif
 
         vec2 density = air_fog_density(world_pos) * step_length;
@@ -178,10 +183,10 @@ mat2x3 raymarch_air_fog(
             float mist_od  = mist_shadow_od(world_pos, mist_d / step_length);
             // Power-law self-extinction keeps dense mist from glowing
             // through itself, plus cloud occlusion above the mist layer
-            float mist_sun_shadow = pow(1.0 + 0.7 * mist_od, -1.0 / 0.7) * float(shadow > 0.0);
+            float mist_sun_shadow = pow(1.0 + 0.7 * mist_od, -1.0 / 0.7) * shadow_binary;
             float mist_phase_val  = mist_phase(LoV, mist_d / step_length);
 #else
-            float mist_sun_shadow = float(shadow > 0.0);
+            float mist_sun_shadow = shadow_binary;
             float mist_phase_val  = mist_phase(LoV, mist_d / step_length);
 #endif
 

@@ -24,74 +24,14 @@ struct Material {
 // Keep every emissive surface at one common luminance while preserving its
 // color. This makes hardcoded blocks and labPBR emissive texels feed the same
 // brightness into the primary pass and the SSPT light gather.
-void normalize_emission(inout Material material, float target_strength) {
+void normalize_emission(inout Material material) {
     float emission_luminance = dot(
         material.emission,
         luminance_weights
     );
     if (emission_luminance > 1e-4) {
-        material.emission *= target_strength / emission_luminance;
+        material.emission *= EMISSION_STRENGTH / emission_luminance;
     }
-}
-
-void normalize_emission(inout Material material) {
-    normalize_emission(material, EMISSION_STRENGTH);
-}
-
-// Reads emissive data for a texel. WHO ASKS decides the source:
-//   - SSPT hit resolve (PROGRAM_DEFERRED4/5): EMISSION_MODE from the SSPT
-//     Emission Mode screen.
-//   - Everywhere else (direct lighting): HARDCODED_EMISSION toggle from
-//     the Resource Pack Emissions screen. ON = built-in baseline only,
-//     OFF = the pack's map channel per TEXTURE_FORMAT. The two screens
-//     never interact.
-// Map sources are exclusive: texels without map data emit nothing
-// (no hardcoded fallback). Hardcoded keeps the per-block baseline only.
-void decode_emission(vec4 specular_map, inout Material material) {
-#if defined PROGRAM_DEFERRED4 || defined PROGRAM_DEFERRED5
-    #if EMISSION_MODE == EMISSION_MODE_LABPBR
-        float has_emission_map = step(specular_map.a, 254.5 / 255.0);
-        float emission_value = (specular_map.a * 255.0 - 1.0) / 254.0;
-        // Exclusive: unmapped texels emit nothing (no hardcoded fallback).
-        material.emission = material.albedo * emission_value * has_emission_map;
-        material.emission = pow(max(material.emission, vec3(0.0)), vec3(SSPT_EMISSION_CURVE));
-        normalize_emission(material, SSPT_EMISSION_INTENSITY);
-    #elif EMISSION_MODE == EMISSION_MODE_OLDPBR
-        float has_emission_map = step(0.5 / 255.0, specular_map.b);
-        // Exclusive: unmapped texels emit nothing (no hardcoded fallback).
-        material.emission = material.albedo * specular_map.b * has_emission_map;
-        material.emission = pow(max(material.emission, vec3(0.0)), vec3(SSPT_EMISSION_CURVE));
-        normalize_emission(material, SSPT_EMISSION_INTENSITY);
-    #else
-        // EMISSION_MODE_HARDCODED: baseline only, shaped like map sources.
-        material.emission = pow(max(material.emission, vec3(0.0)), vec3(SSPT_EMISSION_CURVE));
-        normalize_emission(material, SSPT_EMISSION_INTENSITY);
-    #endif
-#else
-    // Direct lighting: HARDCODED_EMISSION toggle. ON = baseline only
-    // (maps ignored); OFF = the pack's map channel per TEXTURE_FORMAT,
-    // exclusively (unmapped texels emit nothing).
-    #ifdef HARDCODED_EMISSION
-        // Baseline only, shaped like map sources.
-        material.emission = pow(max(material.emission, vec3(0.0)), vec3(GLOBAL_EMISSION_CURVE));
-        normalize_emission(material, GLOBAL_EMISSION_INTENSITY);
-    #else
-        #if TEXTURE_FORMAT == TEXTURE_FORMAT_LAB
-        float has_emission_map = step(specular_map.a, 254.5 / 255.0);
-        float emission_value = (specular_map.a * 255.0 - 1.0) / 254.0;
-        // Exclusive: unmapped texels emit nothing (no hardcoded fallback).
-        material.emission = material.albedo * emission_value * has_emission_map;
-        material.emission = pow(max(material.emission, vec3(0.0)), vec3(GLOBAL_EMISSION_CURVE));
-        normalize_emission(material, GLOBAL_EMISSION_INTENSITY);
-        #else
-        float has_emission_map = step(0.5 / 255.0, specular_map.b);
-        // Exclusive: unmapped texels emit nothing (no hardcoded fallback).
-        material.emission = material.albedo * specular_map.b * has_emission_map;
-        material.emission = pow(max(material.emission, vec3(0.0)), vec3(GLOBAL_EMISSION_CURVE));
-        normalize_emission(material, GLOBAL_EMISSION_INTENSITY);
-        #endif
-    #endif
-#endif
 }
 
 const Material water_material = Material(
@@ -138,10 +78,25 @@ void decode_specular_map(vec4 specular_map, inout Material material) {
     material.roughness = sqr(1.0 - specular_map.r);
 
     // ---- Emission ----
-    // See decode_emission(): SSPT hit resolve uses EMISSION_MODE, direct
-    // lighting uses the HARDCODED_EMISSION toggle. LabPBR/OldPBR read only
-    // their map channel (no fallback); Hardcoded keeps the baseline only.
-    decode_emission(specular_map, material);
+    // labPBR encodes emission strength in the specular alpha channel.
+    // Convention used by resource packs:
+    //   alpha == 1.0  -> this texel has no labPBR emission data
+    //                    (fall back to whatever the hardcoded mask set)
+    //   alpha <  1.0  -> emission multiplier, brightness = albedo * alpha
+    // When the texel declares an emission multiplier it overrides the
+    // hardcoded emission rather than combining with it, so a resource pack
+    // can fully describe its own emissive surfaces. EMISSION_STRENGTH has
+    // already been applied to the hardcoded emission inside material_from,
+    // so we apply it to the map emission too here.
+    float has_emission_map = step(specular_map.a, 254.5 / 255.0);
+    // labPBR 1.3: alpha 1/255..254/255 encodes emission; remap to 0..1
+    float emission_value = (specular_map.a * 255.0 - 1.0) / 254.0;
+    vec3 map_emission = material.albedo * emission_value * EMISSION_STRENGTH;
+    material.emission = mix(
+        material.emission,
+        map_emission,
+        has_emission_map
+    );
 
     if (specular_map.g < 229.5 / 255.0) {
         // Dielectrics
@@ -205,7 +160,7 @@ void decode_specular_map(vec4 specular_map, inout Material material) {
         material.is_metal = true;
     }
 
-    // decode_emission() already normalized material.emission above.
+    normalize_emission(material);
     material.ssr_multiplier = step(
         0.01,
         (material.f0.x
@@ -218,11 +173,19 @@ void decode_specular_map(vec4 specular_map, inout Material material) {
     material.is_metal = specular_map.g > 0.5;
     material.f0 = material.is_metal ? material.albedo : material.f0;
 
-    // Old format encodes emission directly in specular.b. See
-    // decode_emission() for the full mode logic (SSPT vs global paths).
-    decode_emission(specular_map, material);
+    // Old format encodes emission directly in specular.b. Same override
+    // semantics as labPBR: a non-zero emission value from the pack wins
+    // over the hardcoded mask emission. EMISSION_STRENGTH has already
+    // been applied to the hardcoded emission inside material_from.
+    float has_emission_map = step(0.5 / 255.0, specular_map.b);
+    vec3 map_emission = material.albedo * specular_map.b * EMISSION_STRENGTH;
+    material.emission = mix(
+        material.emission,
+        map_emission,
+        has_emission_map
+    );
 
-    // decode_emission() already normalized material.emission above.
+    normalize_emission(material);
     material.ssr_multiplier = step(
         0.01,
         (material.f0.x
@@ -756,7 +719,7 @@ Material material_from(
                             // Redstone components
                             vec3 ap1 = material.albedo * working_to_ap1_unlit;
                             float l = 0.5 * (min_of(ap1) + max_of(ap1));
-                            float redness = ap1.r * rcp(max(ap1.g + ap1.b, 1e-4));
+                            float redness = ap1.r * rcp(ap1.g + ap1.b);
                             material.emission = 0.33 * material.albedo
                                 * step(0.45, redness * l);
 #endif
@@ -1013,9 +976,14 @@ Material material_from(
 #endif
     }
 
-    // ---- Unify the hardcoded baseline brightness first ----
-    // (Per-path curve + intensity shaping happens in decode_emission()
-    // right below this.)
+    // ---- Apply global multipliers to the hardcoded values ----
+    // EMISSION_STRENGTH scales the hardcoded mask emission (so the user
+    // can globally tame or boost emissive blocks even when no resource
+    // pack specular map is bound). When a labPBR specular map is later
+    // decoded by decode_specular_map(), the map value will fully override
+    // this scaled hardcoded value where the pack declares an emissive
+    // texel.
+    material.emission *= EMISSION_STRENGTH;
     normalize_emission(material);
 
 #ifdef POROSITY

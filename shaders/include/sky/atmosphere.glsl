@@ -238,7 +238,7 @@ vec3 atmosphere_density(float r) {
 vec3 atmosphere_scattering_uv(float nu, float mu, float mu_s) {
     // Improved mapping for nu from Spectrum by Zombye
 
-    float half_range_nu = sqrt((1.0 - mu * mu) * (1.0 - mu_s * mu_s));
+    float half_range_nu = sqrt(max((1.0 - mu * mu) * (1.0 - mu_s * mu_s), 0.0));
     float nu_min = mu * mu_s - half_range_nu;
     float nu_max = mu * mu_s + half_range_nu;
 
@@ -441,7 +441,7 @@ vec3 atmosphere_scattering(
 
     float half_range_nu, nu_min, nu_max;
 
-    half_range_nu = sqrt((1.0 - mu * mu) * (1.0 - mu_sun * mu_sun));
+    half_range_nu = sqrt(max((1.0 - mu * mu) * (1.0 - mu_sun * mu_sun), 0.0));
     nu_min = mu * mu_sun - half_range_nu;
     nu_max = mu * mu_sun + half_range_nu;
 
@@ -449,7 +449,7 @@ vec3 atmosphere_scattering(
         = (nu_min == nu_max) ? nu_min : (nu_sun - nu_min) / (nu_max - nu_min);
     u_nu_sun = get_uv_from_unit_range(u_nu_sun, scattering_res.x);
 
-    half_range_nu = sqrt((1.0 - mu * mu) * (1.0 - mu_moon * mu_moon));
+    half_range_nu = sqrt(max((1.0 - mu * mu) * (1.0 - mu_moon * mu_moon), 0.0));
     nu_min = mu * mu_moon - half_range_nu;
     nu_max = mu * mu_moon + half_range_nu;
 

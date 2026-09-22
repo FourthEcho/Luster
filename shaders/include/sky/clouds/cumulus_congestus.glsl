@@ -254,10 +254,16 @@ CloudsResult draw_cumulus_congestus_clouds(
               .y
         >= 0.0;
 
+    // Cull only when terrain sits IN FRONT of the cloud volume (same
+    // rule as the other layers); the old test culled towers behind any
+    // terrain hit, even distant mountains far behind the clouds.
+    bool terrain_intersected = distance_to_terrain >= 0.0
+        && length(air_viewer_pos) < clouds_cumulus_congestus_radius
+        && distance_to_terrain < dists.x;
     if (dists.y < 0.0
         || planet_intersected
             && length(air_viewer_pos) < clouds_cumulus_congestus_radius
-        || distance_to_terrain > 0.0) {
+        || terrain_intersected) {
         return clouds_not_hit;
     }
 

@@ -465,7 +465,12 @@ void main() {
 
     normal = tbn * normal;
 
-    adjusted_light_levels *= mix(0.7, 1.0, material_ao);
+#ifdef TEXTURE_AO
+    // Material AO from the resource pack's normal map (blue channel in
+    // LabPBR, normal length in OldPBR): crevices in the normal texture
+    // occlude the lightmap. Off by default.
+    adjusted_light_levels *= mix(0.7, 1.0, clamp01(material_ao));
+#endif
 
 #ifdef DIRECTIONAL_LIGHTMAPS
     adjusted_light_levels *= get_directional_lightmaps(scene_pos, normal);

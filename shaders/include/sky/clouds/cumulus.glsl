@@ -277,8 +277,8 @@ CloudsResult draw_cumulus_clouds(
     float dither
 ) {
 #if defined PROGRAM_DEFERRED0
-    const uint primary_steps_horizon = CLOUDS_CUMULUS_PRIMARY_STEPS_H / 2;
-    const uint primary_steps_zenith = CLOUDS_CUMULUS_PRIMARY_STEPS_Z / 2;
+    const uint primary_steps_horizon = max(1u, CLOUDS_CUMULUS_PRIMARY_STEPS_H / 2);
+    const uint primary_steps_zenith = max(1u, CLOUDS_CUMULUS_PRIMARY_STEPS_Z / 2);
 #else
     const uint primary_steps_horizon = CLOUDS_CUMULUS_PRIMARY_STEPS_H;
     const uint primary_steps_zenith = CLOUDS_CUMULUS_PRIMARY_STEPS_Z;

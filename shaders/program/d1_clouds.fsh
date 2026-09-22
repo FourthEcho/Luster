@@ -244,19 +244,6 @@ void main() {
     clouds_data.y = 0.0;
 #endif
 
-    // Crepuscular rays
-
-#if defined CREPUSCULAR_RAYS && !defined BLOCKY_CLOUDS
-    vec4 crepuscular_rays = draw_crepuscular_rays(
-        colortex8,
-        ray_dir,
-        distance_to_terrain > 0.0,
-        dither
-    );
-    clouds *= crepuscular_rays.w;
-    clouds.rgb += crepuscular_rays.xyz;
-#endif
-
     // Aurora
 
     clouds.xyz += draw_aurora(ray_dir, dither) * clouds.w;

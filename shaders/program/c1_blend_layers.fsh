@@ -57,14 +57,6 @@ uniform sampler2D colortex11; // clouds history
 uniform sampler2D colortex12; // clouds data
 uniform sampler2D colortex13; // rendered translucent layer
 
-#ifdef SHADOW
-#ifdef AIR_FOG_COLORED_LIGHT_SHAFTS
-uniform sampler2D shadowcolor0;
-uniform sampler2D shadowtex0;
-#endif
-uniform sampler2D shadowtex1;
-#endif
-
 #ifdef DISTANT_HORIZONS
 // colortex1 is declared above because GI and distant-water paths share the
 // same gbuffer texture.

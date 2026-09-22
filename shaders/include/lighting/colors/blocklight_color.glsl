@@ -4,7 +4,9 @@
 #include "/include/utility/color.glsl"
 
 const float blocklight_scale = 6.0;
-const float emission_scale = 40.0 * EMISSION_STRENGTH;
+// Decoupled from EMISSION_STRENGTH on purpose: the SSPT and global
+// emission screens must not scale thrown block light.
+const float emission_scale = 40.0;
 
 // Physical torch base: blackbody spectrum at the user temperature,
 // normalized to 1.0 at the reference temperature so the default look is

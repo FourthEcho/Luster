@@ -112,12 +112,14 @@ vec3 clouds_aerial_perspective(
         vec3 trans_0 = atmosphere_transmittance(ray_origin, ray_dir);
         vec3 trans_1 = atmosphere_transmittance(ray_end, ray_dir);
 
-        air_transmittance = clamp01(trans_0 / trans_1);
+        // Floored denominators: both can vanish together at night, and
+        // 0/0 is NaN (clamp01 can't cure it).
+        air_transmittance = clamp01(trans_0 / max(trans_1, vec3(1e-6)));
     } else {
         vec3 trans_0 = atmosphere_transmittance(ray_origin, -ray_dir);
         vec3 trans_1 = atmosphere_transmittance(ray_end, -ray_dir);
 
-        air_transmittance = clamp01(trans_1 / trans_0);
+        air_transmittance = clamp01(trans_1 / max(trans_0, vec3(1e-6)));
     }
 
     // Blend to rain color during rain

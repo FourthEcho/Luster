@@ -36,6 +36,7 @@ screen.reflections                     = 反射
 screen.refraction                      = 折射
 screen.light_sources                   = 光源
 screen.shadows                         = 陰影
+screen.shadows_general                 = General
 screen.ao                              = 環境光遮蔽
 screen.color_grading                   = 調色
 screen.grading_basic                    = 基礎
@@ -348,7 +349,7 @@ option.GALAXY                          = 銀河
 option.GALAXY.comment                  = 夜空中的銀河圖案
 option.GALAXY_INTENSITY                = 銀河亮度
 option.GALAXY_INTENSITY.comment        = 調整銀河亮度
-option.CREPUSCULAR_RAYS                = Sun Rays
+option.CREPUSCULAR_RAYS                = Crepuscular Rays
 option.CREPUSCULAR_RAYS.comment = Enables god rays (light shafts) visible when the sun is near the horizon through fog and clouds. Best seen at sunrise/sunset.
 option.CREPUSCULAR_RAYS_INTENSITY      = Ray Intensity
 option.CREPUSCULAR_RAYS_INTENSITY.comment = Adjusts the brightness and contrast of god rays. Higher = more visible light shafts.
@@ -721,6 +722,10 @@ option.HARDCODED_SPECULAR              = 硬編碼鏡面反射
 option.HARDCODED_SPECULAR.comment      = 部分方塊(如金屬)的硬編碼鏡面反射
 option.HARDCODED_EMISSION              = 硬編碼自發光
 option.HARDCODED_EMISSION.comment      = 部分方塊(如火把)的硬編碼自發光
+option.GLOBAL_EMISSION_CURVE=LabPBR Emission Curve
+option.GLOBAL_EMISSION_CURVE.comment=Reshapes direct-lighting emission response (1.0 = neutral). Lower lifts dim glow, higher crushes it toward bright cores.
+option.GLOBAL_EMISSION_INTENSITY=LabPBR Emission Intensity
+option.GLOBAL_EMISSION_INTENSITY.comment=Overall brightness of direct-lighting emission after the curve is applied.
 option.HARDCODED_SSS                   = 硬編碼次表面散射
 option.HARDCODED_SSS.comment           = 部分方塊(如樹葉)的硬編碼次表面散射
 option.RAIN_PUDDLES                    = 雨水水坑
@@ -1064,7 +1069,7 @@ option.SHADOW_SSRT.comment = Extends shadows beyond the shadow map distance usin
 option.SHADOW_SSRT_STEPS               = Distant Shadow Quality
 option.SHADOW_SSRT_STEPS.comment = Adjusts the number of ray steps for screen-space distant shadows. Higher = more accurate, less noisy far shadows at higher GPU cost.
 option.VANILLA_AO_INTENSITY            = Vanilla AO Intensity
-option.VANILLA_AO_INTENSITY.comment    = Adjusts the intensity of minecraft's built in ambient occlusion
+option.VANILLA_AO_INTENSITY.comment    = Adjusts the intensity of minecraft's built in ambient occlusion. Note: while a shader AO method is active the effect is softened (capped) so the two do not double-darken corners; intensity reads strongest with Shader AO off.
 option.VANILLA_AO_LIFT                   = Vanilla AO Lift
 option.VANILLA_AO_LIFT.comment           = Lifts the darkest vanilla AO shadows toward flat lighting. Higher = shallower, more washed-out crevices; 0 = full-depth vanilla AO.
 option.ATMOSPHERE_RAIN_DESATURATION                   = Atmosphere Rain Desaturation
@@ -1147,20 +1152,20 @@ option.POROSITY_MODE=Porosity Mode
 option.POROSITY_MODE.comment=Off disables wetness. Hardcoded uses built-in per-block porosity. Maps reads the labPBR specular B channel when a resource pack provides it, with no fallback on vanilla texels.
 value.POROSITY_OFF=Off
 value.POROSITY_HARDCODED=Hardcoded
-value.POROSITY_MAPS=Maps Only
+value.POROSITY_MAPS=LabPBR
 value.POROSITY_MODE.POROSITY_OFF=Off
 value.POROSITY_MODE.POROSITY_HARDCODED=Hardcoded
-value.POROSITY_MODE.POROSITY_MAPS=Maps Only
+value.POROSITY_MODE.POROSITY_MAPS=LabPBR
 option.POROSITY_STRENGTH=Porosity Strength
 option.POROSITY_STRENGTH.comment = Multiplier for the porosity darkening effect.
 option.SSS_MODE=Subsurface Scattering Mode
 option.SSS_MODE.comment=Off disables SSS. Hardcoded uses built-in scattering profiles for leaves and plants. Maps reads the labPBR specular B channel when a resource pack provides it, with no fallback on vanilla texels. Sheen follows the map automatically.
 value.SSS_OFF=Off
 value.SSS_HARDCODED=Hardcoded
-value.SSS_MAPS=Maps Only
+value.SSS_MAPS=LabPBR
 value.SSS_MODE.SSS_OFF=Off
 value.SSS_MODE.SSS_HARDCODED=Hardcoded
-value.SSS_MODE.SSS_MAPS=Maps Only
+value.SSS_MODE.SSS_MAPS=LabPBR
 option.SSS_SHEEN_INTENSITY=SSS Sheen Intensity
 option.SSS_SHEEN_INTENSITY.comment = Brightness multiplier for the subsurface sheen effect.
 option.TAA_INTENSITY=TAA Strength
@@ -1263,3 +1268,19 @@ option.AGX_SATURATION                  = AGX Saturation
 option.AGX_HIGHLIGHT_ROLLOFF           = AGX Highlight Rolloff
 option.AGX_PUNCH                      = AGX Punch
 option.AGX_GOLDEN                     = AGX Golden
+
+option.EMISSION_MODE=Emission Mode
+option.EMISSION_MODE.comment=Which emissive data SSPT reads: LabPBR or OldPBR from the resource pack specular map, or built-in Hardcoded block masks. Only affects SSPT when it is enabled; direct lighting is untouched.
+option.SSPT_EMISSION_CURVE=LabPBR Emission Curve
+option.SSPT_EMISSION_CURVE.comment=Reshapes SSPT emission response (1.0 = neutral). Lower lifts dim glow, higher crushes it toward bright cores.
+option.SSPT_EMISSION_INTENSITY=LabPBR Emission Intensity
+option.SSPT_EMISSION_INTENSITY.comment=Overall brightness of SSPT emission after the curve is applied.
+value.EMISSION_MODE.EMISSION_MODE_LABPBR=LabPBR
+value.EMISSION_MODE.EMISSION_MODE_OLDPBR=OldPBR
+value.EMISSION_MODE.EMISSION_MODE_HARDCODED=Hardcoded
+screen.indirect_emission                = Emission Mode
+
+screen.rp_emission                      = Emissions
+option.TEXTURE_AO=Texture AO
+option.TEXTURE_AO.comment=Occludes the lightmap using AO from the resource pack normal map (blue channel in LabPBR, normal length in OldPBR). Needs a normal-mapped pack; does nothing on vanilla textures. Off by default.
+

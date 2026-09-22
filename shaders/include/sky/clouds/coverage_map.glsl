@@ -85,8 +85,13 @@ vec2 project_clouds_cumulus_coverage_map(vec3 pos) {
 float render_clouds_cumulus_coverage_map(vec2 uv) {
     // Get clouds position
     vec2 pos = uv * 2.0 - 1.0;
+    // The distortion is only invertible inside |pos| < 1/d (1.25 here);
+    // corner texels sit outside that disc, where the raw formula divides
+    // by zero (or mirrors into garbage). Clamp the radius: outside the
+    // disc there is simply no local coverage.
+    float pos_len = min(length(pos), 1.2499);
     pos *= (1.0 - clouds_coverage_map_distortion)
-        / (1.0 - length(pos) * clouds_coverage_map_distortion);
+        / (1.0 - pos_len * clouds_coverage_map_distortion);
     pos *= 0.5 * clouds_cumulus_coverage_map_scale;
 
     return clouds_cumulus_local_coverage(pos);

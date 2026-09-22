@@ -34,8 +34,6 @@ uniform sampler2D noisetex;
 
 uniform sampler3D colortex0; // 3D worley noise
 uniform sampler2D colortex1; // gbuffer data
-uniform sampler2D colortex3; // translucent color
-uniform sampler2D colortex4; // sky map
 uniform sampler2D colortex8; // cloud shadow map
 
 uniform sampler2D depthtex0;
