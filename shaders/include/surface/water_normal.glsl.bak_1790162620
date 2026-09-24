@@ -2,7 +2,6 @@
 #define INCLUDE_MISC_WATER_NORMAL
 
 #include "/include/utility/space_conversion.glsl"
-#include "/include/surface/rain_ripples.glsl"
 
 float gerstner_wave(
     vec2 coord,
@@ -47,6 +46,7 @@ void water_waves_setup(
               cos(golden_angle)
           );
 }
+
 float get_water_height(vec2 coord, vec2 wave_dir, mat2 wave_rot, float t) {
     // Parameters
 
@@ -157,41 +157,17 @@ vec3 get_water_normal(
 #else
     float normal_influence = 0.04;
 #endif
-    float grazing_fade = smoothstep(
+    normal_influence *= smoothstep(
         0.0,
         0.15,
         abs(dot(flat_normal, normalize(world_pos - cameraPosition)))
     ); // prevent noise when looking horizontally
-    normal_influence *= grazing_fade;
     normal_influence *= WATER_WAVE_STRENGTH;
 
     // Photon-style wave normal (matches Photon exactly; note this tilts
     // towards the slope rather than away from it).
     vec3 normal = vec3(wave1 - wave0, wave2 - wave0, h);
     normal.xy *= normal_influence;
-
-#ifdef RAIN_RIPPLES
-    // Ripples only make sense on still water that's actually being
-    // rained on and exposed to open sky (fades out under overhangs and
-    // roofs rather than cutting off sharply). Applied as its own
-    // dedicated influence on top of the base wave normal rather than
-    // being baked into wave0/1/2 above, since normal_influence for calm
-    // water is deliberately tiny (0.01-0.19, meant to keep ponds looking
-    // nearly flat) and would otherwise crush the ripples to invisible.
-    float rain_ripple_mask
-        = float(!flowing_water) * rainStrength * smoothstep(0.85, 1.0, skylight);
-
-    if (rain_ripple_mask > 0.001) {
-        // Analytic ring normals (Eclipse-style, see rain_ripples.glsl):
-        // no finite differences needed.
-        vec2 ripple_gradient
-            = rain_ripple_normal(coord, frameTimeCounter).xy;
-        float ripple_influence
-            = 0.30 * RAIN_RIPPLE_STRENGTH * rain_ripple_mask * grazing_fade;
-
-        normal.xy += ripple_gradient * ripple_influence;
-    }
-#endif
 
     return normalize(normal);
 }

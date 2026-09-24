@@ -18,6 +18,11 @@ uniform float desert_sandstorm;
 // simple_fog needs fogColor, Voxy patch doesn't expose it by default
 uniform vec3 fogColor;
 
+// Declared for water_normal.glsl / rain_ripples.glsl, which sample noise
+// and animate by frame in every TU that includes them.
+uniform sampler2D noisetex;
+uniform float frameTimeCounter;
+
 vec3 ambient_color;
 vec3 light_color;
 

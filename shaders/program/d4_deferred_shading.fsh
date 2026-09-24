@@ -401,8 +401,7 @@ void main() {
         // Rain puddles
 
 #if defined WORLD_OVERWORLD && defined RAIN_PUDDLES
-#if RAIN_PUDDLES_MODE != RAIN_PUDDLES_OFF
-        if (wetness > eps && (RAIN_PUDDLES_MODE == RAIN_PUDDLES_EVERYWHERE || biome_may_rain > eps)) {
+        if (wetness > eps && biome_may_rain > eps) {
             bool puddle = get_rain_puddles(
                 position_world,
                 flat_normal,
@@ -417,7 +416,6 @@ void main() {
             );
         }
 #endif
-#endif
 
         // Wet-porosity albedo darkening (Kubelka-Munk)
         // Runs independently of puddle placement: any porous surface exposed
@@ -426,12 +424,10 @@ void main() {
         // rather than pool water).
 #if defined WORLD_OVERWORLD && defined POROSITY
         if (wetness > eps && material.porosity > eps) {
-            float biome_wet = (RAIN_PUDDLES_MODE == RAIN_PUDDLES_EVERYWHERE)
-                ? 1.0 : max0(biome_may_rain);
             material.albedo = apply_wet_porosity_darkening(
                 material.albedo,
                 material.porosity,
-                wetness * biome_wet
+                wetness * max0(biome_may_rain)
             );
         }
 #endif
