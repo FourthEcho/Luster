@@ -4,8 +4,9 @@
 #include "/include/utility/color.glsl"
 
 const float blocklight_scale = 6.0;
-// Decoupled from EMISSION_STRENGTH on purpose: the SSPT and global
-// emission screens must not scale thrown block light.
+// Decoupled from material emission controls on purpose: block light intensity
+// is the light field's scale, while the global emission system controls
+// emissive surface brightness separately.
 const float emission_scale = 40.0;
 
 // Physical torch base: blackbody spectrum at the user temperature,

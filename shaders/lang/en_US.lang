@@ -766,10 +766,10 @@ option.HARDCODED_SPECULAR              = Hardcoded Specular
 option.HARDCODED_SPECULAR.comment      = Hardcoded specular reflections for metallic blocks. Uses built-in values for metal-like surfaces instead of resource pack specular maps.
 option.HARDCODED_EMISSION              = Hardcoded Emission
 option.HARDCODED_EMISSION.comment      = Hardcoded emission for blocks like torches and glowstone. Provides built-in emissive lighting without requiring resource pack textures.
-option.GLOBAL_EMISSION_CURVE=LabPBR Emission Curve
-option.GLOBAL_EMISSION_CURVE.comment=Reshapes direct-lighting emission response (1.0 = neutral). Lower lifts dim glow, higher crushes it toward bright cores.
-option.GLOBAL_EMISSION_INTENSITY=LabPBR Emission Intensity
-option.GLOBAL_EMISSION_INTENSITY.comment=Overall brightness of direct-lighting emission after the curve is applied.
+option.GLOBAL_EMISSION_CURVE=Emission Curve
+option.GLOBAL_EMISSION_CURVE.comment=Reshapes emission response (1.0 = neutral). Lower lifts dim glow, higher crushes it toward bright cores.
+option.GLOBAL_EMISSION_INTENSITY=Emission Intensity
+option.GLOBAL_EMISSION_INTENSITY.comment=Overall emissive brightness after the curve is applied.
 option.HARDCODED_SSS                   = Hardcoded SSS
 option.HARDCODED_SSS.comment           = Hardcoded subsurface scattering for organic blocks like leaves and wax. Uses built-in scattering profiles instead of resource pack maps.
 option.RAIN_PUDDLES                    = Rain Puddles
@@ -1246,8 +1246,7 @@ option.NOISE_ON_DH_TERRAIN.comment = Controls whether noise is applied to Distan
 screen.directional_ambient_lighting=Directional Ambient Lighting
 screen.indirect_lighting=Indirect Lighting
 screen.indirect_sspt                    = SSPT Settings
-screen.indirect_emission                = SSPT Emission Mode
-screen.indirect_ao                      = Indirect Ambient Occlusion
+screen.indirect_ao                      = Indirect AO
 screen.aa=Anti-Aliasing
 screen.motion_blur=Motion Blur
 screen.dof=Depth of field
@@ -1306,15 +1305,6 @@ option.ssptLightmapBlend=Lightmap Blending
 option.ssptLightmapBlend.comment=How strongly the vanilla lightmap blocklight blends into the SSPT accumulation.
 option.SSPT_INTENSITY=SSPT Intensity
 option.SSPT_INTENSITY.comment=Global brightness multiplier for the SSPT indirect emission contribution.
-option.EMISSION_MODE=SSPT Emission Mode
-option.EMISSION_MODE.comment=Which emissive data the SSPT hit resolve reads: LabPBR or OldPBR from the resource pack specular map (unmapped texels emit nothing), or built-in Hardcoded block masks only. Only affects SSPT when it is enabled; direct lighting uses the Resource Pack Emissions screen instead.
-option.SSPT_EMISSION_CURVE=LabPBR Emission Curve
-option.SSPT_EMISSION_CURVE.comment=Reshapes SSPT emission response (1.0 = neutral). Lower lifts dim glow, higher crushes it toward bright cores.
-option.SSPT_EMISSION_INTENSITY=LabPBR Emission Intensity
-option.SSPT_EMISSION_INTENSITY.comment=Overall brightness of SSPT emission after the curve is applied.
-value.EMISSION_MODE.EMISSION_MODE_LABPBR=LabPBR
-value.EMISSION_MODE.EMISSION_MODE_OLDPBR=OldPBR
-value.EMISSION_MODE.EMISSION_MODE_HARDCODED=Hardcoded
 option.maxFrames=Max Accumulated Frames
 option.maxFrames.comment=Temporal history length. Higher = smoother, but more ghosting.
 option.minAccumMult=Accumulation Weight Mult

@@ -258,11 +258,10 @@ HitData unpackHit(vec4 gbuffer_data) {
 // ----------------------------------------------------------------------------
 /* HIT SURFACE EMISSION — material path */
 // ----------------------------------------------------------------------------
-//  material_from() reconstructs the hit emission (hardcoded emissive
-//  blocks AND labPBR emission maps) from the gbuffer, built on demand at
-//  the hit site. Pre-scaled by emission_scale, matching what the primary
-//  shading pass applies, so a bounced photon and a directly-viewed emitter
-//  agree on brightness. SSPT_INTENSITY is the user brightness multiplier.
+//  material_from() reconstructs hardcoded emission from the gbuffer, while
+//  the shared global emission decoder supplies resource-pack map emission.
+//  The same global curve/intensity controls both direct lighting and SSPT,
+//  while SSPT_INTENSITY remains the path-level bounce multiplier.
 
 vec3 hitEmission(vec4 hit_data_0, ivec2 hit_texel, vec3 hit_view_pos) {
     vec3 hit_albedo = vec3(
@@ -284,13 +283,15 @@ vec3 hitEmission(vec4 hit_data_0, ivec2 hit_texel, vec3 hit_view_pos) {
         hit_light_levels
     );
 
-#ifdef SPECULAR_MAPPING
+#ifdef HARDCODED_EMISSION
+    decode_emission(vec4(0.0), hit_material);
+#else
     vec4 hit_specular_map = texelFetch(colortex2, hit_texel, 0);
     vec4 map = vec4(
         unpack_unorm_2x8(hit_specular_map.z),
         unpack_unorm_2x8(hit_specular_map.w)
     );
-    decode_specular_map(map, hit_material);
+    decode_emission(map, hit_material);
 #endif
 
     return hit_material.emission * emission_scale * SSPT_INTENSITY;
@@ -510,13 +511,20 @@ bool is_emissive_guide_texel(vec4 gbuffer_data_0, ivec2 texel) {
 
 //  Next-event estimator toward one uniformly picked screen texel.
 //  Returns emission gathered at the picked emitter, or zero on any early
-//  out (sky pick, cheap test fail, backface, occluded, non-emissive).
+//  out (sky pick, cheap test fail, backface, occluded, non-emissive). The
+//  out hit flag is true whenever a visible emissive surface was found, even
+//  if its final contribution is tiny after falloff/solid-angle weighting.
 //  The 4d^2/(P00*P11*r^2) solid-angle factor comes from the texel footprint
 //  (the 1/N pick probability cancels against the N texels), so no extra
 //  uniforms are needed beyond the existing TRACE_* macros. Inherits the
 //  trace-range limits of the screenspace march and the cubic emission
 //  falloff for a consistent look with the cosine lobe.
-vec3 traceEmissionNEE(vec3 view_pos, vec3 view_normal, vec2 pick_hash) {
+vec3 traceEmissionNEE(vec3 view_pos, vec3 view_normal, vec2 pick_hash, out bool geometry_hit) {
+    // NEE can find a valid emissive surface directly, even though it does
+    // not use the cosine-lobe screenspaceRT hit path. Report that as a real
+    // SSPT geometry hit so AO fallback is not incorrectly enabled.
+    geometry_hit = false;
+
     vec2 gbuffer_res = view_res * taau_render_scale;
 
     ivec2 pick_texel = ivec2(pick_hash * gbuffer_res);
@@ -568,6 +576,12 @@ vec3 traceEmissionNEE(vec3 view_pos, vec3 view_normal, vec2 pick_hash) {
         }
     }
 
+    // The picked emitter is visible and therefore counts as a successful
+    // SSPT visibility event. This must happen before the radiance scaling
+    // below: a valid hit can have a very small contribution because of
+    // distance/falloff, but it is still not an SSPT miss.
+    geometry_hit = true;
+
     float emission_falloff = 1.0 - linear_step(
         ssptEmissionDistance * rcp_pi,
         ssptEmissionDistance,
@@ -598,10 +612,11 @@ vec3 traceEmissionNEE(vec3 view_pos, vec3 view_normal, vec2 pick_hash) {
 //  and is tinted by the hit albedo inside hitDirectLight. Multibounce
 //  tints deeper hits with every intervening surface's albedo.
 
-vec3 traceIndirect(vec3 view_pos, vec3 scene_normal, vec2 dither, bool hand) {
+vec3 traceIndirect(vec3 view_pos, vec3 scene_normal, vec2 dither, bool hand, out bool geometry_hit) {
     vec3 view_normal = mat3(gbufferModelView) * scene_normal;
 
     vec3 emission = vec3(0.0);
+    geometry_hit = false;
 
 #if defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE || defined DIRECT_SKY_BOUNCE
     vec3 bounce = vec3(0.0);
@@ -646,7 +661,15 @@ vec3 traceIndirect(vec3 view_pos, vec3 scene_normal, vec2 dither, bool hand) {
                     float(frameCounter) * 2.11 - float(i) * 3.70
                 )
             );
-            emission += traceEmissionNEE(view_pos, view_normal, texel_pick);
+            bool nee_geometry_hit;
+            vec3 nee_emission = traceEmissionNEE(
+                view_pos,
+                view_normal,
+                texel_pick,
+                nee_geometry_hit
+            );
+            emission += nee_emission;
+            geometry_hit = geometry_hit || nee_geometry_hit;
             continue;
         }
 
@@ -660,6 +683,7 @@ vec3 traceIndirect(vec3 view_pos, vec3 scene_normal, vec2 dither, bool hand) {
         vec3 hit_position = screenspaceRT(view_pos, ray_direction, dither.y);
 
         if (hit_position.z < 1.0) {
+            geometry_hit = true;
             ivec2 hit_texel = ivec2(hit_position.xy * view_res * taau_render_scale);
             vec4 hit_data_0 = texelFetch(colortex1, hit_texel, 0);
 
@@ -735,6 +759,7 @@ vec3 traceIndirect(vec3 view_pos, vec3 scene_normal, vec2 dither, bool hand) {
                 contribution *= brdf;
 
             if (hit_position.z < 1.0) {
+                geometry_hit = true;
                 ivec2 hit_texel = ivec2(hit_position.xy * view_res * taau_render_scale);
                 vec4 hit_data_0 = texelFetch(colortex1, hit_texel, 0);
 

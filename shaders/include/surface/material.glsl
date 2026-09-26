@@ -21,6 +21,20 @@ struct Material {
     bool is_hardcoded_metal;
 };
 
+const Material water_material = Material(
+    vec3(0.0),
+    vec3(0.0),
+    vec3(0.02),
+    vec3(0.0),
+    0.002,
+    1.0,
+    0.0,
+    0.0,
+    1.0,
+    false,
+    false
+);
+
 // Keep every emissive surface at one common luminance while preserving its
 // color. This makes hardcoded blocks and labPBR emissive texels feed the same
 // brightness into the primary pass and the SSPT light gather.
@@ -38,75 +52,32 @@ void normalize_emission(inout Material material) {
     normalize_emission(material, EMISSION_STRENGTH);
 }
 
-// Reads emissive data for a texel. WHO ASKS decides the source:
-//   - SSPT hit resolve (PROGRAM_DEFERRED4/5): EMISSION_MODE from the SSPT
-//     Emission Mode screen.
-//   - Everywhere else (direct lighting): HARDCODED_EMISSION toggle from
-//     the Resource Pack Emissions screen. ON = built-in baseline only,
-//     OFF = the pack's map channel per TEXTURE_FORMAT. The two screens
-//     never interact.
-// Map sources are exclusive: texels without map data emit nothing
-// (no hardcoded fallback). Hardcoded keeps the per-block baseline only.
+// Reads emissive data for a texel through the global emission system.
+// HARDCODED_EMISSION selects the built-in per-block baseline; otherwise the
+// resource-pack emission channel is used according to TEXTURE_FORMAT. The
+// same curve/intensity pair is shared by direct lighting and SSPT.
 void decode_emission(vec4 specular_map, inout Material material) {
-#if defined PROGRAM_DEFERRED4 || defined PROGRAM_DEFERRED5
-    #if EMISSION_MODE == EMISSION_MODE_LABPBR
-        float has_emission_map = step(specular_map.a, 254.5 / 255.0);
-        float emission_value = (specular_map.a * 255.0 - 1.0) / 254.0;
-        // Exclusive: unmapped texels emit nothing (no hardcoded fallback).
-        material.emission = material.albedo * emission_value * has_emission_map;
-        material.emission = pow(max(material.emission, vec3(0.0)), vec3(SSPT_EMISSION_CURVE));
-        normalize_emission(material, SSPT_EMISSION_INTENSITY);
-    #elif EMISSION_MODE == EMISSION_MODE_OLDPBR
-        float has_emission_map = step(0.5 / 255.0, specular_map.b);
-        // Exclusive: unmapped texels emit nothing (no hardcoded fallback).
-        material.emission = material.albedo * specular_map.b * has_emission_map;
-        material.emission = pow(max(material.emission, vec3(0.0)), vec3(SSPT_EMISSION_CURVE));
-        normalize_emission(material, SSPT_EMISSION_INTENSITY);
-    #else
-        // EMISSION_MODE_HARDCODED: baseline only, shaped like map sources.
-        material.emission = pow(max(material.emission, vec3(0.0)), vec3(SSPT_EMISSION_CURVE));
-        normalize_emission(material, SSPT_EMISSION_INTENSITY);
-    #endif
+#ifdef HARDCODED_EMISSION
+    // Hardcoded source was populated by material_from().
 #else
-    // Direct lighting: HARDCODED_EMISSION toggle. ON = baseline only
-    // (maps ignored); OFF = the pack's map channel per TEXTURE_FORMAT,
-    // exclusively (unmapped texels emit nothing).
-    #ifdef HARDCODED_EMISSION
-        // Baseline only, shaped like map sources.
-        material.emission = pow(max(material.emission, vec3(0.0)), vec3(GLOBAL_EMISSION_CURVE));
-        normalize_emission(material, GLOBAL_EMISSION_INTENSITY);
+    #if TEXTURE_FORMAT == TEXTURE_FORMAT_LAB
+    float has_emission_map = step(specular_map.a, 254.5 / 255.0);
+    float emission_value = (specular_map.a * 255.0 - 1.0) / 254.0;
+    // Exclusive: unmapped texels emit nothing (no hardcoded fallback).
+    material.emission = material.albedo * emission_value * has_emission_map;
     #else
-        #if TEXTURE_FORMAT == TEXTURE_FORMAT_LAB
-        float has_emission_map = step(specular_map.a, 254.5 / 255.0);
-        float emission_value = (specular_map.a * 255.0 - 1.0) / 254.0;
-        // Exclusive: unmapped texels emit nothing (no hardcoded fallback).
-        material.emission = material.albedo * emission_value * has_emission_map;
-        material.emission = pow(max(material.emission, vec3(0.0)), vec3(GLOBAL_EMISSION_CURVE));
-        normalize_emission(material, GLOBAL_EMISSION_INTENSITY);
-        #else
-        float has_emission_map = step(0.5 / 255.0, specular_map.b);
-        // Exclusive: unmapped texels emit nothing (no hardcoded fallback).
-        material.emission = material.albedo * specular_map.b * has_emission_map;
-        material.emission = pow(max(material.emission, vec3(0.0)), vec3(GLOBAL_EMISSION_CURVE));
-        normalize_emission(material, GLOBAL_EMISSION_INTENSITY);
-        #endif
+    float has_emission_map = step(0.5 / 255.0, specular_map.b);
+    // Exclusive: unmapped texels emit nothing (no hardcoded fallback).
+    material.emission = material.albedo * specular_map.b * has_emission_map;
     #endif
 #endif
-}
 
-const Material water_material = Material(
-    vec3(0.0),
-    vec3(0.0),
-    vec3(0.02),
-    vec3(0.0),
-    0.002,
-    1.0,
-    0.0,
-    0.0,
-    1.0,
-    false,
-    false
-);
+    material.emission = pow(
+        max(material.emission, vec3(0.0)),
+        vec3(GLOBAL_EMISSION_CURVE)
+    );
+    normalize_emission(material, GLOBAL_EMISSION_INTENSITY);
+}
 
 #if TEXTURE_FORMAT == TEXTURE_FORMAT_LAB
 void decode_specular_map(vec4 specular_map, inout Material material) {
@@ -138,9 +109,7 @@ void decode_specular_map(vec4 specular_map, inout Material material) {
     material.roughness = sqr(1.0 - specular_map.r);
 
     // ---- Emission ----
-    // See decode_emission(): SSPT hit resolve uses EMISSION_MODE, direct
-    // lighting uses the HARDCODED_EMISSION toggle. LabPBR/OldPBR read only
-    // their map channel (no fallback); Hardcoded keeps the baseline only.
+    // decode_emission() applies the shared global emission system.
     decode_emission(specular_map, material);
 
     if (specular_map.g < 229.5 / 255.0) {
@@ -218,8 +187,7 @@ void decode_specular_map(vec4 specular_map, inout Material material) {
     material.is_metal = specular_map.g > 0.5;
     material.f0 = material.is_metal ? material.albedo : material.f0;
 
-    // Old format encodes emission directly in specular.b. See
-    // decode_emission() for the full mode logic (SSPT vs global paths).
+    // Old format encodes emission directly in specular.b.
     decode_emission(specular_map, material);
 
     // decode_emission() already normalized material.emission above.

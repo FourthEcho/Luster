@@ -33,7 +33,6 @@ uniform sampler2D noisetex;
 uniform sampler2D colortex1; // gbuffer 0
 uniform sampler2D colortex2; // gbuffer 1
 uniform sampler2D colortex4; // sky map (skylight bounce sampling)
-uniform sampler2D colortex6; // ambient occlusion (same resolution)
 
 uniform sampler2D depthtex1; // geometry depth (non-DH path)
 
@@ -158,19 +157,19 @@ void main() {
     );
 
     // Emission + sun/moon + handheld bounce.
-    vec3 indirect_light = traceIndirect(view_pos, flat_normal, dither, is_hand);
+    // geometry_hit tells the accumulation pass whether SSPT found actual
+    // scene geometry. AO is only used as the miss fallback there.
+    bool geometry_hit;
+    vec3 indirect_light = traceIndirect(
+        view_pos,
+        flat_normal,
+        dither,
+        is_hand,
+        geometry_hit
+    );
 
-    // ---- blocklight lightmap weight ----
-    // pow5(lightmap) * sqr(ao) * ssptLightmapBlend. Consumed by
-    // program/d5_sspt_accumulate as the temporally-merged vanilla
-    // blocklight fallback.
-
-    vec2 light_levels = unpack_unorm_2x8(gbuffer_data_0.w);
-
-    float ao = texelFetch(colortex6, ivec2(gl_FragCoord.xy), 0).x;
-    if (is_hand) ao = 1.0;
-
-    float lightmap_weight = pow5(light_levels.x) * sqr(ao) * ssptLightmapBlend;
-
-    indirect = vec4(indirect_light, lightmap_weight);
+    // colortex17 alpha is a geometry-hit flag. This includes both cosine-ray
+    // surface hits and successful emissive NEE hits. d5 recomputes the
+    // lightmap fallback so AO is used only when every SSPT path misses.
+    indirect = vec4(indirect_light, float(geometry_hit));
 }

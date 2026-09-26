@@ -36,7 +36,8 @@ in vec2 uv;
 // ------------
 
 uniform sampler2D colortex1;  // gbuffer 0
-uniform sampler2D colortex17; // sspt raw color + lightmap weight
+uniform sampler2D colortex6;  // selected shader AO (SSAO/GTAO/none)
+uniform sampler2D colortex17; // sspt raw color + geometry-hit flag
 uniform sampler2D colortex18; // sspt history color + frames
 uniform sampler2D colortex19; // sspt gbuffer data
 uniform sampler2D colortex20; // sspt history gdata
@@ -226,14 +227,19 @@ void main() {
 
     float lightmap = pow5(lightmap_source.x);
 
+    float ao = texelFetch(colortex6, texel, 0).x;
+
     vec3 rt_light = vec3(0.0);
     float samples = 0.0;
     float variance = 0.0;
     vec2 variance_data = vec2(0.0);
 
-    // d4_sspt's lightmap blocklight weight (.a), read
-    // before this pass overwrites colortex17
-    float raw_lightmap_weight = texelFetch(colortex17, texel, 0).a;
+    // d4_sspt alpha is the SSPT geometry-hit flag. The vanilla lightmap
+    // fallback gets AO only on an SSPT miss; traced hits are not multiplied
+    // by a second AO term. With SHADER_AO_NONE, ao is 1.0 by construction.
+    float sspt_geometry_hit = texelFetch(colortex17, texel, 0).a;
+    float miss_ao = mix(ao, 1.0, sspt_geometry_hit);
+    float raw_lightmap_weight = lightmap * sqr(miss_ao) * ssptLightmapBlend;
 
     if (offscreen || world_age_changed) {
         // Offscreen / world-change path: spatial estimate only.
@@ -310,8 +316,7 @@ void main() {
     }
 
     // Merge the lightmap blocklight fallback into the accumulated color.
-    // The .a weight comes from d4_sspt (pow5 lightmap * ao^2 *
-    // ssptLightmapBlend).
+    // AO is deliberately used only when SSPT missed geometry.
     vec3 current = rt_light + raw_lightmap_weight * blocklight_color * rcp(tau);
 
     indirectCurrent = vec4(current, variance);

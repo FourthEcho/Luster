@@ -597,13 +597,16 @@ void main() {
             vec3 sspt_light = max0(texture(colortex17, uv).rgb);
 
             // Same application as the vanilla blocklight path:
-            // diffuse modulation by albedo, AO, and metal diffuse amount.
+            // diffuse modulation by albedo and metal diffuse amount. SSPT
+            // already accounts for visibility through its screen-space paths;
+            // applying the regular AO here would double-darken traced hits.
+            // AO is only used for the vanilla fallback on SSPT misses in d5.
             // NOTE: no extra rcp_pi here -- traceIndirect() already draws
             // its rays with cosine-weighted importance sampling, which
             // bakes that pi-normalization into the Monte Carlo estimator
             // itself. Re-applying rcp_pi on top double-counted it and
             // dimmed colored SSPT light by ~3x for no physical reason.
-            sspt_light *= material.albedo * ao;
+            sspt_light *= material.albedo;
             sspt_light *= mix(1.0, metal_diffuse_amount, float(material.is_metal));
 
 #ifdef CLOUD_SHADOWS

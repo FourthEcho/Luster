@@ -467,31 +467,16 @@ const float wetnessHalflife         = 70.0;
   #define TEXTURE_FORMAT TEXTURE_FORMAT_LAB // [TEXTURE_FORMAT_LAB TEXTURE_FORMAT_OLD]
   #define EMISSION_STRENGTH 1.00 // [0.00 0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.10 0.11 0.12 0.13 0.14 0.15 0.16 0.17 0.18 0.19 0.20 0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29 0.30 0.31 0.32 0.33 0.34 0.35 0.36 0.37 0.38 0.39 0.40 0.41 0.42 0.43 0.44 0.45 0.46 0.47 0.48 0.49 0.50 0.51 0.52 0.53 0.54 0.55 0.56 0.57 0.58 0.59 0.60 0.61 0.62 0.63 0.64 0.65 0.66 0.67 0.68 0.69 0.70 0.71 0.72 0.73 0.74 0.75 0.76 0.77 0.78 0.79 0.80 0.81 0.82 0.83 0.84 0.85 0.86 0.87 0.88 0.89 0.90 0.91 0.92 0.93 0.94 0.95 0.96 0.97 0.98 0.99 1.00 1.01 1.02 1.03 1.04 1.05 1.06 1.07 1.08 1.09 1.10 1.11 1.12 1.13 1.14 1.15 1.16 1.17 1.18 1.19 1.20 1.21 1.22 1.23 1.24 1.25 1.26 1.27 1.28 1.29 1.30 1.31 1.32 1.33 1.34 1.35 1.36 1.37 1.38 1.39 1.40 1.41 1.42 1.43 1.44 1.45 1.46 1.47 1.48 1.49 1.50 1.51 1.52 1.53 1.54 1.55 1.56 1.57 1.58 1.59 1.60 1.61 1.62 1.63 1.64 1.65 1.66 1.67 1.68 1.69 1.70 1.71 1.72 1.73 1.74 1.75 1.76 1.77 1.78 1.79 1.80 1.81 1.82 1.83 1.84 1.85 1.86 1.87 1.88 1.89 1.90 1.91 1.92 1.93 1.94 1.95 1.96 1.97 1.98 1.99 2.00]
 
-// ---- Emission mode: which source decode_emission() reads emissive data
-// from. LabPBR/OldPBR read the resource pack's specular emission channel
-// (independent of TEXTURE_FORMAT above, which only governs roughness/
-// metal/SSS/porosity decoding); Hardcoded ignores any resource pack map
-// and uses only the built-in per-block emission masks below. The selected
-// source is shaped by the SSPT curve/intensity pair just below (curve 1.0
-// and intensity 1.0 reproduce the legacy look). ----
-  #define EMISSION_MODE_LABPBR 0
-  #define EMISSION_MODE_OLDPBR 1
-  #define EMISSION_MODE_HARDCODED 2
-  #define EMISSION_MODE EMISSION_MODE_HARDCODED // [EMISSION_MODE_LABPBR EMISSION_MODE_OLDPBR EMISSION_MODE_HARDCODED]
-// ---- SSPT emission shaping: curve reshapes the selected source
-// (1.0 = neutral), intensity sets its final brightness. Same pair exists
-// for direct lighting below (GLOBAL_*); the two never interact. ----
-  #define SSPT_EMISSION_CURVE 1.00 // [0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.40 1.50 1.60 1.70 1.80 1.90 2.00 2.10 2.20 2.30 2.40 2.50 2.60 2.70 2.80 2.90 3.00]
-  #define SSPT_EMISSION_INTENSITY 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.40 1.50 1.60 1.70 1.80 1.90 2.00]
-// ---- Global emission strengths for direct lighting (gbuffers, DH,
-// voxy). HARDCODED_EMISSION (below, next to MATERIAL_MAPPING_MODE)
-// picks the source: ON = built-in per-block baseline only, OFF = the
-// pack's map channel per TEXTURE_FORMAT, exclusively (unmapped texels
-// emit nothing). The SSPT hit resolve (PROGRAM_DEFERRED4/5) always uses
-// EMISSION_MODE above, so the two screens never interact.
+// ---- Global emission system -------------------------------------------------
+// HARDCODED_EMISSION picks the emission source: ON = built-in per-block
+// baseline only, OFF = the resource pack's map channel per TEXTURE_FORMAT,
+// exclusively (unmapped texels emit nothing). The same global curve/intensity
+// pair is used by primary/direct lighting and SSPT so emissive surfaces stay
+// consistent across both paths.
 //#define DIRECTIONAL_LIGHTMAPS
-// ---- Global (direct lighting) emission shaping: same curve +
-// intensity pair as the SSPT side, independent values. ----
+// ---- Global emission shaping: curve reshapes the response (1.0 = neutral),
+// intensity sets final emissive brightness. EMISSION_STRENGTH controls the
+// hardcoded source normalization before this global shaping. ----
   #define GLOBAL_EMISSION_CURVE 1.00 // [0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.40 1.50 1.60 1.70 1.80 1.90 2.00 2.10 2.20 2.30 2.40 2.50 2.60 2.70 2.80 2.90 3.00]
   #define GLOBAL_EMISSION_INTENSITY 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.40 1.50 1.60 1.70 1.80 1.90 2.00]
   #define DIRECTIONAL_LIGHTMAPS_INTENSITY 0.20 // [0.00 0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.10 0.11 0.12 0.13 0.14 0.15 0.16 0.17 0.18 0.19 0.20 0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29 0.30 0.31 0.32 0.33 0.34 0.35 0.36 0.37 0.38 0.39 0.40 0.41 0.42 0.43 0.44 0.45 0.46 0.47 0.48 0.49 0.50 0.51 0.52 0.53 0.54 0.55 0.56 0.57 0.58 0.59 0.60 0.61 0.62 0.63 0.64 0.65 0.66 0.67 0.68 0.69 0.70 0.71 0.72 0.73 0.74 0.75 0.76 0.77 0.78 0.79 0.80 0.81 0.82 0.83 0.84 0.85 0.86 0.87 0.88 0.89 0.90 0.91 0.92 0.93 0.94 0.95 0.96 0.97 0.98 0.99 1.00]

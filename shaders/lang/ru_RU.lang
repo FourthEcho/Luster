@@ -745,10 +745,10 @@ option.HARDCODED_SPECULAR              = Зеркальные отражения
 option.HARDCODED_SPECULAR.comment      = Жестко запрограммированные зеркальные отражения для некоторых блоков (например, металлов)
 option.HARDCODED_EMISSION              = Свечение
 option.HARDCODED_EMISSION.comment      = Жестко запрограммированное свечение для некоторых блоков (например, факелов)
-option.GLOBAL_EMISSION_CURVE=LabPBR Emission Curve
-option.GLOBAL_EMISSION_CURVE.comment=Reshapes direct-lighting emission response (1.0 = neutral). Lower lifts dim glow, higher crushes it toward bright cores.
-option.GLOBAL_EMISSION_INTENSITY=LabPBR Emission Intensity
-option.GLOBAL_EMISSION_INTENSITY.comment=Overall brightness of direct-lighting emission after the curve is applied.
+option.GLOBAL_EMISSION_CURVE=Emission Curve
+option.GLOBAL_EMISSION_CURVE.comment=Reshapes emission response (1.0 = neutral). Lower lifts dim glow, higher crushes it toward bright cores.
+option.GLOBAL_EMISSION_INTENSITY=Emission Intensity
+option.GLOBAL_EMISSION_INTENSITY.comment=Overall emissive brightness after the curve is applied.
 option.HARDCODED_SSS                   = Подповерхностное рассеивание
 option.HARDCODED_SSS.comment           = Жестко запрограммированное подповерхностное рассеяние для некоторых блоков (например, листвы)
 option.RAIN_PUDDLES                    = Дождевые лужи
@@ -1256,16 +1256,6 @@ option.AGX_HIGHLIGHT_ROLLOFF           = AGX Highlight Rolloff
 option.AGX_PUNCH                      = AGX Punch
 option.AGX_GOLDEN                     = AGX Golden
 
-option.EMISSION_MODE=Emission Mode
-option.EMISSION_MODE.comment=Which emissive data SSPT reads: LabPBR or OldPBR from the resource pack specular map, or built-in Hardcoded block masks. Only affects SSPT when it is enabled; direct lighting is untouched.
-option.SSPT_EMISSION_CURVE=LabPBR Emission Curve
-option.SSPT_EMISSION_CURVE.comment=Reshapes SSPT emission response (1.0 = neutral). Lower lifts dim glow, higher crushes it toward bright cores.
-option.SSPT_EMISSION_INTENSITY=LabPBR Emission Intensity
-option.SSPT_EMISSION_INTENSITY.comment=Overall brightness of SSPT emission after the curve is applied.
-value.EMISSION_MODE.EMISSION_MODE_LABPBR=LabPBR
-value.EMISSION_MODE.EMISSION_MODE_OLDPBR=OldPBR
-value.EMISSION_MODE.EMISSION_MODE_HARDCODED=Hardcoded
-screen.indirect_emission                = Emission Mode
 
 screen.rp_emission                      = Emissions
 option.TEXTURE_AO=Texture AO

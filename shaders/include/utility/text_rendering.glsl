@@ -307,28 +307,12 @@ void print_bool(bool value) {
     }
 }
 
-void print_vec2(vec2 value) {
-    print_float(value.x);
-    print((_comma, _space));
-    print_float(value.y);
-}
-
 void print_vec3(vec3 value) {
     print_float(value.x);
     print((_comma, _space));
     print_float(value.y);
     print((_comma, _space));
     print_float(value.z);
-}
-
-void print_vec4(vec4 value) {
-    print_float(value.x);
-    print((_comma, _space));
-    print_float(value.y);
-    print((_comma, _space));
-    print_float(value.z);
-    print((_comma, _space));
-    print_float(value.w);
 }
 
 #endif // INCLUDE_UTILITY_TEXT_RENDERING

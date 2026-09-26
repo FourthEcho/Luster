@@ -224,6 +224,15 @@ vec3 get_diffuse_lighting(
     // evaluated separately from NoL and the shadow term below.
     float directional_lighting = 1.0;
 
+    // When SSPT is active, its screen-space visibility handles indirect
+    // occlusion. Keep the regular AO path out of the indirect ambient terms
+    // so traced hits are not double-darkened. d5_sspt_accumulate applies the
+    // selected SSAO/GTAO value only to the SSPT miss fallback.
+    float indirect_ao = ao;
+#ifdef ssptEnabled
+    indirect_ao = 1.0;
+#endif
+
     // Negative SSS depth => SSS blocked by occluder (SSRT SSS)
     bool sss_blocked = sss_depth < 0.0 || light_levels.y < 0.1;
     sss_depth = max0(sss_depth);
@@ -311,7 +320,7 @@ vec3 get_diffuse_lighting(
         material,
         bent_normal,
         light_levels,
-        ao,
+        indirect_ao,
         ambient_sss,
         directional_lighting
     );
@@ -325,7 +334,7 @@ vec3 get_diffuse_lighting(
         scene_pos,
         flat_normal,
         light_levels,
-        ao,
+        indirect_ao,
         directional_lighting
     );
 
@@ -335,10 +344,10 @@ vec3 get_diffuse_lighting(
     // Cave lighting: preserve a subtle underground ambient fill even when
     // skylight is zero. This matches the reference cave-lighting behavior
     // while remaining independent of the bounced-light fallback.
-    lighting += 0.15 * CAVE_LIGHTING_I * directional_lighting * ao
+    lighting += 0.15 * CAVE_LIGHTING_I * directional_lighting * indirect_ao
         * (1.0 - light_levels.y * light_levels.y)
         * (1.0 - 0.7 * darknessFactor);
-    lighting += nightVision * night_vision_scale * directional_lighting * ao;
+    lighting += nightVision * night_vision_scale * directional_lighting * indirect_ao;
 #endif
 
     return max0(lighting) * material.albedo * rcp_pi
