@@ -17,10 +17,6 @@ screen.materials                       = Materiali
 screen.water                           = Acqua
 screen.post                            = Post-Elaborazione
 screen.misc                            = Varie
-screen.misc_handheld                  = Handheld Light
-screen.misc_dimensions                = Portals
-screen.misc_environment               = Environment & Sky
-screen.misc_dither                    = Dithered Translucency
 screen.tonemap_comparison              = Confronto Tonemap
 
 screen.weather                         = Meteo 
@@ -963,12 +959,12 @@ option.TONEMAP_COMPARISON_SPLIT          = Divisione confronto
 option.TONEMAP_COMPARISON_SPLIT.comment  = Controlla la posizione del confine tra il tonemap sinistro e destro. 50% divide lo schermo a metà.
 option.FANCY_NETHER_PORTAL             = Portale Nether stiloso
 option.FANCY_NETHER_PORTAL.comment     = Effetto portale del Nether "Fancy" ispirato dalla shader Complementary Reimagined di EminGT, Ringrazio Emin per il permesso di usare la sua idea! potrebbe non funzionare in alcuni resource packs
-option.NETHER_PORTAL_INTENSITY             = Nether Portal Intensity
-option.NETHER_PORTAL_INTENSITY.comment     = Adjusts the brightness of the fancy Nether Portal effect.
 option.CUSTOM_SKY                      = Cielo personalizzato (Custom)
 option.CUSTOM_SKY.comment              = Attiva il cielo personalizzato delle resource packs
 option.CUSTOM_SKY_BRIGHTNESS           = Luminosità Cielo Custom
 option.CUSTOM_SKY_BRIGHTNESS.comment   = Modifica la luminosità del cielo Custom
+option.NETHER_PORTAL_INTENSITY             = Nether Portal Intensity
+option.NETHER_PORTAL_INTENSITY.comment     = Adjusts the brightness of the fancy Nether Portal effect.
 option.ENCHANTMENT_GLINT_BRIGHTNESS    = Luminosità luccicantezza Incantamenti
 option.ENCHANTMENT_GLINT_BRIGHTNESS.comment = Controls enchantment glint brightness.
 
