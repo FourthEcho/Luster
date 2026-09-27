@@ -11,13 +11,23 @@
 
 #include "/include/global.glsl"
 
+// Luster Mac all-on split: deferred11 = lighting, deferred12 = compose.
+// World stubs define LUSTER_D4_PASS before including; default is lighting.
+#ifndef LUSTER_D4_PASS
+#define LUSTER_D4_PASS 1
+#endif
+
 layout(location = 0) out vec3 fragment_color;
 
+#if LUSTER_D4_PASS == 1
 #ifdef USE_SEPARATE_ENTITY_DRAWS
 /* RENDERTARGETS: 0 */
 #else
 layout(location = 1) out vec4 colortex3_clear;
 /* RENDERTARGETS: 0,3 */
+#endif
+#else
+/* RENDERTARGETS: 0 */
 #endif
 
 in vec2 uv;
@@ -46,7 +56,7 @@ flat in float rainbow_amount;
 
 uniform sampler2D noisetex;
 
-uniform sampler2D colortex0; // skytextured output
+uniform sampler2D colortex0; // skytextured output / previous pass output
 uniform sampler2D colortex1; // gbuffer 0
 uniform sampler2D colortex2; // gbuffer 1
 uniform sampler2D colortex4; // sky map
@@ -198,7 +208,7 @@ const bool colortex11MipmapEnabled = true;
 #endif
 
 void main() {
-#if !defined USE_SEPARATE_ENTITY_DRAWS
+#if LUSTER_D4_PASS == 1 && !defined USE_SEPARATE_ENTITY_DRAWS
     colortex3_clear = vec4(0.0);
 #endif
 
@@ -211,7 +221,7 @@ void main() {
 #if defined NORMAL_MAPPING || defined SPECULAR_MAPPING
     vec4 gbuffer_data_1 = texelFetch(colortex2, texel, 0);
 #endif
-#if !defined USE_SEPARATE_ENTITY_DRAWS
+#if LUSTER_D4_PASS == 1 && !defined USE_SEPARATE_ENTITY_DRAWS
     vec4 overlays = texelFetch(colortex3, texel, 0);
 #endif
 
@@ -243,9 +253,12 @@ void main() {
 
     // Shared stochastic offset used by cloud lighting. Animated IGN so
     // residual noise converges instead of sitting as static grain.
+    // Compose pass only (sky, clouds, blocky and SSR live there).
+#if LUSTER_D4_PASS == 2
     float dither = interleaved_gradient_noise(vec2(texel), frameCounter);
+#endif
 
-#if defined WORLD_OVERWORLD
+#if LUSTER_D4_PASS == 2 && defined WORLD_OVERWORLD
     // Atmosphere
 
     vec3 atmosphere = atmosphere_scattering(
@@ -298,6 +311,10 @@ void main() {
 #endif
 
     if (depth == 1.0) { // Sky
+#if LUSTER_D4_PASS == 1
+        // Lighting pass: sky is drawn in the compose pass.
+        fragment_color = vec3(0.0);
+#else
 #if defined WORLD_OVERWORLD
         fragment_color = draw_sky(
             direction_world,
@@ -320,7 +337,9 @@ void main() {
 
         // Apply purkinje shift
         fragment_color = purkinje_shift(fragment_color, vec2(0.0, 1.0));
+#endif
     } else { // Terrain
+#if LUSTER_D4_PASS == 1
         // Sample ambient occlusion a while before using it (latency hiding)
 
         vec2 half_res_pos = gl_FragCoord.xy * (0.5 / taau_render_scale) - 0.5;
@@ -354,7 +373,7 @@ void main() {
         vec3 flat_normal = decode_unit_vector(data[2]);
         vec2 light_levels = data[3];
 
-#if !defined USE_SEPARATE_ENTITY_DRAWS
+#if LUSTER_D4_PASS == 1 && !defined USE_SEPARATE_ENTITY_DRAWS
         uint overlay_id = uint(255.0 * overlays.a);
         albedo = overlay_id == 0u ? albedo + overlays.rgb
                                   : albedo; // enchantment glint
@@ -642,6 +661,54 @@ void main() {
             += get_specular_highlight(material, NoL, NoV, NoH, LoV, LoH)
             * light_color * shadows * cloud_shadows * ao;
 #endif
+#else
+        // Compose pass: start from the lighting result and recompute the
+        // material (overlays excluded — negligible for reflections) so
+        // reflections/fog need no extra intermediates.
+        fragment_color = texelFetch(colortex0, texel, 0).rgb;
+
+        mat4x2 comp_data = mat4x2(
+            unpack_unorm_2x8(gbuffer_data_0.x),
+            unpack_unorm_2x8(gbuffer_data_0.y),
+            unpack_unorm_2x8(gbuffer_data_0.z),
+            unpack_unorm_2x8(gbuffer_data_0.w)
+        );
+
+        vec3 comp_albedo = vec3(comp_data[0], comp_data[1].x);
+        uint material_mask = uint(255.0 * comp_data[1].y);
+        vec3 flat_normal = decode_unit_vector(comp_data[2]);
+        vec2 light_levels = comp_data[3];
+
+        Material material = material_from(
+            comp_albedo,
+            material_mask,
+            position_world,
+            flat_normal,
+            light_levels
+        );
+
+        vec3 normal = flat_normal;
+
+#ifdef LOD_MOD_ACTIVE
+        if (!is_lod) {
+#endif
+
+#ifdef NORMAL_MAPPING
+            normal = decode_unit_vector(gbuffer_data_1.xy);
+#endif
+
+#ifdef SPECULAR_MAPPING
+            vec4 comp_specular_map = vec4(
+                unpack_unorm_2x8(gbuffer_data_1.z),
+                unpack_unorm_2x8(gbuffer_data_1.w)
+            );
+            bool comp_parallax = false;
+            decode_specular_map(comp_specular_map, material, comp_parallax);
+#endif
+
+#ifdef LOD_MOD_ACTIVE
+        }
+#endif
 
         // Specular reflections
 
@@ -740,5 +807,7 @@ void main() {
         // Apply purkinje shift
 
         fragment_color = purkinje_shift(fragment_color, light_levels);
+// end LUSTER_D4_PASS terrain split
+#endif
     }
 }

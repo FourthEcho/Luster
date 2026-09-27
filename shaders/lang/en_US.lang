@@ -1245,8 +1245,7 @@ option.NOISE_ON_DH_TERRAIN.comment = Controls whether noise is applied to Distan
 
 screen.directional_ambient_lighting=Directional Ambient Lighting
 screen.indirect_lighting=Indirect Lighting
-screen.indirect_sspt                    = SSPT Settings
-screen.indirect_ao                      = Ambient Occlusion
+screen.indirect_sspt                    = Settings
 screen.aa=Anti-Aliasing
 screen.motion_blur=Motion Blur
 screen.dof=Depth of field
@@ -1282,7 +1281,7 @@ option.SH_SKYLIGHT_INTENSITY.comment=Adjusts the brightness of the soft sky ligh
 option.SH_SKYLIGHT_QUALITY=Quality
 option.SH_SKYLIGHT_QUALITY.comment=Controls the quality of the live sky projection. Higher settings use more sky samples for smoother, more accurate skylight at higher GPU cost.
 
-screen.sspt_filter=SVGF Filter
+screen.sspt_filter=Filtering
 
 # ---- SSPT ----
 option.ssptEnabled=SSPT
