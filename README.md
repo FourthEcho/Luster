@@ -29,7 +29,7 @@ A dedicated **Mac Compatible** profile makes Luster one of the few shader packs 
 - **Sky & atmosphere** — dynamic Rayleigh/Mie scattering/Ozone/Mist, biome and weather-aware color, aurora, stars, galaxy, rainbows, god rays, and advanced Mist shading.
 - **Clouds** — Cumulus, AltoCumulus, Cumulus Congestus, Cirrus/Cirrocumulus, noctilucent, and optional blocky clouds, independently tunable per layer, with up to 16× temporal upscaling
 - **Water & materials** — physically-inspired absorption/scattering, procedural waves, parallax, caustics, Snell's window, biome-colored water, rain puddles, POM, subsurface scattering, full labPBR support
-- **Reflections** — environment, sky, and screen-space reflections, roughness-aware, tuned separately for water and other materials
+- **Reflections** — environment, sky, and screen-space reflections, optional off-screen reflection capture, roughness-aware, tuned separately for water and other materials
 - **Fog & volumetrics** — full atmospheric fog per biome, colored volumetric light shafts, cave/border fog, dedicated Nether and End fog paths
 - **Post-processing** — TAA/FXAA/CAS, TAAU, Purkinje shift, ACES and AGX tonemapping, full color grading
 - **Camera** - bloom, DOF, motion blur, vignette, multiple exposure modes, lens flare
@@ -72,7 +72,7 @@ Settings are organized into: **World** · **Lighting** · **Sky** · **Fog** · 
 
 ## Development
 
-Luster is actively developed. The source tree is organized into reusable modules under `shaders/include/`, rendering programs under `shaders/program/`, and world-specific passes under the `world*` directories. Bug reports and Luster-specific issues go in the [issue tracker](https://github.com/shashankpgowda/Luster/issues). If you have trouble in earlier versions e.g 1.21.11 thats because of Macbook's sampler limits just turn off cloud shadows or SSR and it will work again. I suggest you use the latest versions because iris has more samplers availble for these later versions e.g 26.2 allowing you to have more features on at once.
+Luster is actively developed. The source tree is organized into reusable modules under `shaders/include/`, rendering programs under `shaders/program/`, and world-specific passes under the `world*` directories. Bug reports and Luster-specific issues go in the [issue tracker](https://github.com/shashankpgowda/Luster/issues). 
 
 ## Acknowledgements
 
