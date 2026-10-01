@@ -5,22 +5,16 @@
 #include "/include/sky/clouds/parameters.glsl"
 #include "/include/weather/core.glsl"
 
-float clouds_turbulence(Weather weather) {
-    return clamp01(weather.turbulence) * CLOUDS_WEATHER_TURBULENCE;
-}
-
 float clouds_cumulus_congestus_blend(Weather weather, vec2 l0_coverage) {
     float temperature_weight = linear_step(0.5, 1.0, weather.temperature);
     float humidity_weight = linear_step(0.3, 0.9, weather.humidity);
     float wind_weight = sqr(weather.wind);
     float l0_high_coverage
         = linear_step(0.45, 0.5, dot(l0_coverage, vec2(0.66, 0.33)));
-    // Turbulent, energetic air grows towers faster
-    float turbulence_boost = 1.0 + 0.5 * clouds_turbulence(weather);
 
     return clamp01(
         1.5 * dampen(dampen(temperature_weight * humidity_weight * wind_weight))
-        * (1.0 - l0_high_coverage) * turbulence_boost
+        * (1.0 - l0_high_coverage)
     );
 }
 
@@ -28,13 +22,11 @@ float clouds_l0_cumulus_stratus_blend(Weather weather) {
     float temperature_weight
         = dampen(linear_step(0.5, 1.0, 1.0 - weather.temperature));
     float wind_weight = dampen(1.0 - weather.wind);
-    // Turbulence tears flat sheets into broken cloud
-    float turbulence_breakup = 1.0 - 0.35 * clouds_turbulence(weather);
 
-    return clamp01(temperature_weight * wind_weight * turbulence_breakup);
+    return clamp01(temperature_weight * wind_weight);
 }
 
-vec2 clouds_l0_coverage(Weather weather) {
+vec2 clouds_l0_coverage(Weather weather, float cumulus_congestus_blend) {
     // very high temperature -> lower coverage
     // higher humidity -> higher coverage
     float temperature_weight
@@ -42,9 +34,7 @@ vec2 clouds_l0_coverage(Weather weather) {
     float humidity_weight
         = 0.4 * weather.humidity + 0.5 * sqr(weather.humidity);
     float stratus_sheet = sqr(clouds_l0_cumulus_stratus_blend(weather));
-    float turbulence = clouds_turbulence(weather);
-    vec2 local_variation
-        = vec2(-0.1, 1.0) * (0.1 + 0.1 * weather.wind) * (1.0 + turbulence);
+    vec2 local_variation = vec2(-0.1, 1.0) * (0.1 + 0.1 * weather.wind);
 
     return clamp01(
                temperature_weight * humidity_weight + local_variation
@@ -56,20 +46,15 @@ vec2 clouds_l0_coverage(Weather weather) {
 vec2 clouds_l0_detail_weights(Weather weather, float cumulus_stratus_blend) {
     float wind_torn_factor
         = linear_step(0.66, 0.9, weather.wind) * (1.0 - cumulus_stratus_blend);
-    // Turbulence churns in small-scale detail and erodes smooth edges
-    float turbulence_detail = 1.0 + 0.75 * clouds_turbulence(weather);
 
     return mix(vec2(0.33, 0.40) * (1.0 + 0.5 * wind_torn_factor),
                vec2(0.07, 0.10),
                vec2(sqr(cumulus_stratus_blend), cumulus_stratus_blend))
-        * CLOUDS_CUMULUS_DETAIL_STRENGTH * turbulence_detail;
+        * CLOUDS_CUMULUS_DETAIL_STRENGTH;
 }
 
 vec2 clouds_l0_edge_sharpening(Weather weather, float cumulus_stratus_blend) {
-    float turbulence_softening
-        = 1.0 - 0.3 * clouds_turbulence(weather);
-    return mix(vec2(3.0, 12.0), vec2(2.0, 7.0), sqr(cumulus_stratus_blend))
-        * turbulence_softening;
+    return mix(vec2(3.0, 12.0), vec2(2.0, 7.0), sqr(cumulus_stratus_blend));
 }
 
 float clouds_l0_altitude_scale(Weather weather, vec2 coverage) {
@@ -105,14 +90,11 @@ float clouds_cirrus_amount(Weather weather) {
         + 0.4 * (1.0 - linear_step(0.0, 0.2, weather.temperature));
     float humidity_weight
         = 1.0 - 0.5 * linear_step(0.5, 0.75, weather.humidity);
-    float weather_driven
-        = clamp01(0.5 * temperature_weight * humidity_weight + 0.5 * rainStrength);
 
-    // Blend between a steady background veil and full weather coupling.
-    // At 1.0 this is exactly the previous behavior.
-    float amount = mix(0.5, weather_driven, CLOUDS_WEATHER_CIRRUS_BLEND);
-
-    return amount * CLOUDS_CIRRUS_COVERAGE;
+    return clamp01(
+               0.5 * temperature_weight * humidity_weight + 0.5 * rainStrength
+           )
+        * CLOUDS_CIRRUS_COVERAGE;
 }
 
 float clouds_cirrocumulus_amount(Weather weather) {
@@ -120,12 +102,9 @@ float clouds_cirrocumulus_amount(Weather weather) {
         = 1.0 - 0.3 * linear_step(0.5, 1.0, weather.temperature);
     float humidity_weight = 0.5 + 0.5 * linear_step(0.4, 1.0, weather.humidity);
     float wind_weight = pow1d5(weather.wind);
-    float weather_driven
-        = 0.8 * dampen(temperature_weight * humidity_weight * wind_weight);
 
-    float amount = mix(0.8, weather_driven, CLOUDS_WEATHER_CIRRUS_BLEND);
-
-    return amount * CLOUDS_CIRROCUMULUS_COVERAGE;
+    return 0.8 * dampen(temperature_weight * humidity_weight * wind_weight)
+        * CLOUDS_CIRROCUMULUS_COVERAGE;
 }
 
 float clouds_noctilucent_amount() {
@@ -142,7 +121,8 @@ CloudsParameters get_clouds_parameters(Weather weather) {
 
     // Volumetric layer 0 - cumulus/stratocumulus/stratus
     params.l0_cumulus_stratus_blend = clouds_l0_cumulus_stratus_blend(weather);
-    params.l0_coverage = clouds_l0_coverage(weather);
+    params.l0_coverage
+        = clouds_l0_coverage(weather, params.cumulus_congestus_blend);
     params.l0_detail_weights
         = clouds_l0_detail_weights(weather, params.l0_cumulus_stratus_blend);
     params.l0_edge_sharpening
@@ -162,9 +142,6 @@ CloudsParameters get_clouds_parameters(Weather weather) {
 
     params.cumulus_congestus_blend
         = clouds_cumulus_congestus_blend(weather, params.l0_coverage);
-
-    // Domain-warp driver for the coverage field, computed once per frame
-    params.l0_turbulence = clouds_turbulence(weather);
 
     // Lighting parameters
 

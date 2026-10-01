@@ -1,4 +1,3 @@
-#include "/include/sky/clouds/cloud_bounce.glsl"
 #if !defined INCLUDE_SKY_CLOUDS_ALTOCUMULUS
 #define INCLUDE_SKY_CLOUDS_ALTOCUMULUS
 
@@ -140,7 +139,7 @@ float clouds_altocumulus_optical_depth(
     return optical_depth;
 }
 
-vec3 clouds_altocumulus_scattering(
+vec2 clouds_altocumulus_scattering(
     float density,
     float light_optical_depth,
     float sky_optical_depth,
@@ -149,9 +148,9 @@ vec3 clouds_altocumulus_scattering(
     float scattering_coeff,
     float step_transmittance,
     float cos_theta,
-    vec3 bounced_light
+    float bounced_light
 ) {
-    vec3 scattering = vec3(0.0);
+    vec2 scattering = vec2(0.0);
 
     float scatter_amount = scattering_coeff;
     float extinct_amount = extinction_coeff;
@@ -171,13 +170,10 @@ vec3 clouds_altocumulus_scattering(
         scattering.x += scatter_amount
             * exp(-extinct_amount * light_optical_depth) * phase;
         scattering.x += scatter_amount
-            * isotropic_phase * bounced_light.x;
-        scattering.z += scatter_amount
-            * isotropic_phase * bounced_light.z;
+            * exp(-extinct_amount * ground_optical_depth) * isotropic_phase
+            * bounced_light;
         scattering.y += scatter_amount
             * exp(-extinct_amount * sky_optical_depth) * isotropic_phase;
-        scattering.y += scatter_amount
-            * isotropic_phase * bounced_light.y;
 
         scatter_amount *= 0.5
             * mix(lift(clamp01(scattering_coeff / 0.05), 0.33),
@@ -207,8 +203,8 @@ CloudsResult draw_altocumulus_clouds(
     // ---------------------
 
 #if defined PROGRAM_DEFERRED0
-    const uint primary_steps_horizon = max(1u, CLOUDS_ALTOCUMULUS_PRIMARY_STEPS_H / 2);
-    const uint primary_steps_zenith = max(1u, CLOUDS_ALTOCUMULUS_PRIMARY_STEPS_Z / 2);
+    const uint primary_steps_horizon = CLOUDS_ALTOCUMULUS_PRIMARY_STEPS_H / 2;
+    const uint primary_steps_zenith = CLOUDS_ALTOCUMULUS_PRIMARY_STEPS_Z / 2;
 #else
     const uint primary_steps_horizon = CLOUDS_ALTOCUMULUS_PRIMARY_STEPS_H;
     const uint primary_steps_zenith = CLOUDS_ALTOCUMULUS_PRIMARY_STEPS_Z;
@@ -217,6 +213,7 @@ CloudsResult draw_altocumulus_clouds(
     const uint ambient_steps = CLOUDS_ALTOCUMULUS_AMBIENT_STEPS;
     const float max_ray_length = 2e4;
     const float min_transmittance = 0.075;
+    const float planet_albedo = 0.4;
     const vec3 sky_dir = vec3(0.0, 1.0, 0.0);
 
     // Early exit if coverage is 0
@@ -265,7 +262,7 @@ CloudsResult draw_altocumulus_clouds(
     vec3 ray_origin
         = air_viewer_pos + ray_dir * (dists.x + step_length * dither);
 
-    vec3 scattering = vec3(0.0); // x: direct light, y: skylight, z: ground bounce
+    vec2 scattering = vec2(0.0); // x: direct light, y: skylight
     float transmittance = 1.0;
 
     float distance_sum = 0.0;
@@ -275,6 +272,8 @@ CloudsResult draw_altocumulus_clouds(
     //   Lighting Setup
     // ------------------
 
+    float high_coverage = linear_step(0.5, 0.6, clouds_params.l1_coverage.x);
+
     float extinction_coeff = mix(0.08, 0.16, day_factor)
         * CLOUDS_ALTOCUMULUS_DENSITY
         * (2.0 - 1.0 * clouds_params.l1_cumulus_stratus_blend);
@@ -283,6 +282,7 @@ CloudsResult draw_altocumulus_clouds(
     bool moonlit = sun_dir.y < -0.045;
     vec3 light_dir = moonlit ? moon_dir : sun_dir;
     float cos_theta = dot(ray_dir, light_dir);
+    float bounced_light = planet_albedo * light_dir.y * rcp_pi;
 
     // --------------------
     //   Raymarching Loop
@@ -335,19 +335,9 @@ CloudsResult draw_altocumulus_clouds(
         float ground_optical_depth
             = mix(density, 1.0, clamp01(altitude_fraction * 2.0 - 1.0))
             * altitude_fraction
-            * clouds_altocumulus_thickness;
-
-        vec3 bounced = clouds_multiple_scattering_bounce(
-            extinction_coeff,
-            scattering_coeff,
-            light_optical_depth,
-            sky_optical_depth,
-            ground_optical_depth,
-            altitude_fraction,
-            light_dir
-        );
-
-        vec3 bounced_light = bounced;
+            * clouds_altocumulus_thickness; // guess optical depth to the ground
+                                            // using altitude fraction and
+                                            // density from this sample
 
         scattering
             += clouds_altocumulus_scattering(
@@ -375,14 +365,14 @@ CloudsResult draw_altocumulus_clouds(
         = sunlight_color * atmosphere_transmittance(ray_origin, light_dir);
     light_color = atmosphere_post_processing(light_color);
     light_color *= moonlit ? moon_color : sun_color;
+    light_color *= 1.0 + 0.4 * high_coverage * dampen(time_noon);
 
     // Remap the transmittance so that min_transmittance is 0
     float clouds_transmittance
         = linear_step(min_transmittance, 1.0, transmittance);
 
     vec3 clouds_scattering
-        = scattering.x * light_color + scattering.y * sky_color
-        + scattering.z * light_color * clouds_ground_albedo();
+        = scattering.x * light_color + scattering.y * sky_color;
     clouds_scattering = clouds_aerial_perspective(
         clouds_scattering,
         clouds_transmittance,

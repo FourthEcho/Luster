@@ -18,12 +18,6 @@ layout(location = 1) out vec3 clouds_data;
 /* RENDERTARGETS: 11,12 */
 
 #ifdef LOD_MOD_ACTIVE
-// When LOD_MOD_ACTIVE is on, this pass also creates a combined depth buffer
-// (vanilla + Distant Horizons LoD depth merged into a single screen-space
-// depth texture) and writes it to colortex15. The combined_depth_tex macro
-// (defined in include/misc/lod_mod_support.glsl) expands to colortex15, and
-// is then sampled by d3_ao, d4_deferred_shading, gtao, ssao, ssrt, and
-// edge_highlight. So this write IS consumed — do NOT remove.
 layout(location = 2) out float combined_depth;
 
 /* RENDERTARGETS: 11,12,15 */
@@ -34,6 +28,8 @@ in vec2 uv;
 // ------------
 //   Uniforms
 // ------------
+
+
 
 uniform sampler2D colortex14; // previous frame depth
 uniform sampler2D colortex9; // low-res clouds
@@ -86,7 +82,6 @@ uniform bool world_age_changed;
 #include "/include/utility/fast_math.glsl"
 #include "/include/utility/geometry.glsl"
 #include "/include/utility/random.glsl"
-#include "/include/utility/sampling.glsl"
 #include "/include/utility/space_conversion.glsl"
 
 vec4 min_of(vec4 a, vec4 b, vec4 c, vec4 d, vec4 e) {
@@ -95,6 +90,20 @@ vec4 min_of(vec4 a, vec4 b, vec4 c, vec4 d, vec4 e) {
 
 vec4 max_of(vec4 a, vec4 b, vec4 c, vec4 d, vec4 e) {
     return max(a, max(b, max(c, max(d, e))));
+}
+
+vec4 smooth_filter(sampler2D sampler, vec2 coord) {
+    // from https://iquilezles.org/www/articles/texture/texture.htm
+    vec2 res = vec2(textureSize(sampler, 0));
+
+    coord = coord * res + 0.5;
+
+    vec2 i, f = modf(coord, i);
+    f = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
+    coord = i + f;
+
+    coord = (coord - 0.5) / res;
+    return texture(sampler, coord);
 }
 
 float texture_min_4x4(sampler2D s, vec2 coord) {
@@ -125,6 +134,7 @@ float texture_min_4x4(sampler2D s, vec2 coord) {
 
 vec3 reproject_clouds(vec2 uv, float distance_to_cloud) {
     const float planet_radius = 6371e3;
+    const float clouds_cumulus_radius = planet_radius + CLOUDS_CUMULUS_ALTITUDE;
     const float clouds_altocumulus_radius
         = planet_radius + CLOUDS_ALTOCUMULUS_ALTITUDE;
     const float clouds_cirrus_radius = planet_radius + CLOUDS_CIRRUS_ALTITUDE;
@@ -178,12 +188,6 @@ vec3 reproject_clouds(vec2 uv, float distance_to_cloud) {
 }
 
 void main() {
-    clouds_history = vec4(0.0, 0.0, 0.0, 1.0);
-    clouds_data = vec3(1e6, 0.0, 0.0);
-#ifdef LOD_MOD_ACTIVE
-    combined_depth = 1.0;
-#endif
-
     const int checkerboard_area
         = CLOUDS_TEMPORAL_UPSCALING * CLOUDS_TEMPORAL_UPSCALING;
 
@@ -215,11 +219,6 @@ void main() {
     float depth_linear_dh
         = screen_to_view_space_depth(lod_projection_matrix_inverse, depth_lod);
 
-    // Write the combined depth buffer to colortex15. This IS consumed —
-    // see the comment at the top of this file (the `combined_depth_tex`
-    // macro expands to colortex15 in include/misc/lod_mod_support.glsl
-    // and is sampled by d3_ao, d4_deferred_shading, gtao, ssao, ssrt,
-    // edge_highlight).
     combined_depth = is_lod
         ? view_to_screen_space_depth(
               combined_projection_matrix,
@@ -341,10 +340,7 @@ void main() {
         vec4 i = texelFetch(colortex9, src_texel + ivec2(1, 1), 0);
         vec4 e = current;
 
-        // Soft minimum and maximum over the cross taps averaged with the
-        // soft minimum and maximum over the diagonal taps (neighborhood
-        // clamping family; cf. Yang et al., "A Survey of Temporal
-        // Antialiasing Techniques", 2020)
+        // Soft minimum and maximum ("Hybrid Reconstruction Antialiasing")
         //        b         a b c
         // (min d e f + min d e f) / 2
         //        h         g h i

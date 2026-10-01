@@ -11,6 +11,9 @@
 
 #include "/include/global.glsl"
 
+// Declared before the atmosphere/sandstorm include so DESERT_SANDSTORM can use it.
+uniform float desert_sandstorm;
+
 layout(location = 0) out vec4 clouds;
 layout(location = 1) out vec2 clouds_data;
 
@@ -38,11 +41,8 @@ uniform sampler3D colortex6; // 3D bubbly worley noise
 #define SAMPLER_WORLEY_BUBBLY colortex6
 uniform sampler3D colortex7; // 3D swirley worley noise
 #define SAMPLER_WORLEY_SWIRLEY colortex7
-
-// 3D noise textures for cloud rendering (Alpha Piscium curl/detail).
-uniform sampler3D cumulus_curl;
-uniform sampler3D cumulus_detail1;
-uniform sampler3D cumulus_detail2;
+uniform sampler3D cumulusCurl;
+#define SAMPLER_CUMULUS_CURL cumulusCurl
 
 uniform sampler2D colortex8; // cloud shadow map
 
@@ -75,7 +75,6 @@ uniform float frameTimeCounter;
 uniform int isEyeInWater;
 uniform float eyeAltitude;
 uniform float rainStrength;
-uniform float desert_sandstorm;
 uniform float wetness;
 
 uniform vec3 light_dir;
@@ -128,7 +127,6 @@ uniform float biome_humidity;
 
 #include "/include/misc/lod_mod_support.glsl"
 #include "/include/utility/checkerboard.glsl"
-#include "/include/utility/dithering.glsl"
 #include "/include/utility/random.glsl"
 #include "/include/utility/space_conversion.glsl"
 
@@ -163,7 +161,6 @@ void main() {
     ivec2 texel = ivec2(gl_FragCoord.xy);
 
     clouds = vec4(0.0, 0.0, 0.0, 1.0);
-    clouds_data = vec2(1e6, 0.0);
 
 #if defined WORLD_OVERWORLD
     ivec2 checkerboard_pos = CLOUDS_TEMPORAL_UPSCALING * texel
@@ -214,16 +211,8 @@ void main() {
         /* use_klein_nishina_phase */ false
     );
 
-    // Animated interleaved gradient noise: pushes march error into high
-    // spatial frequencies the eye ignores, with low-discrepancy temporal
-    // coverage so the history buffer converges instead of boiling.
-    // (Replaces the old white-noise noisetex tap, whose clumps never
-    // averaged out while the camera moved.) Kept decorrelated from the
-    // checkerboard phase to avoid reconstructing a stripe/grid.
-    float dither = interleaved_gradient_noise(
-        vec2(texel) + vec2(frameCounter % 16, (frameCounter * 3) % 16),
-        frameCounter
-    );
+    float dither = texelFetch(noisetex, ivec2(checkerboard_pos & 511), 0).b;
+    dither = r1(frameCounter / checkerboard_area, dither);
 
 #ifndef BLOCKY_CLOUDS
     CloudsResult result = draw_clouds(
@@ -242,6 +231,19 @@ void main() {
     clouds = vec4(0.0, 0.0, 0.0, 1.0);
     clouds_data.x = 1e6;
     clouds_data.y = 0.0;
+#endif
+
+    // Crepuscular rays
+
+#if defined CREPUSCULAR_RAYS && !defined BLOCKY_CLOUDS
+    vec4 crepuscular_rays = draw_crepuscular_rays(
+        colortex8,
+        ray_dir,
+        distance_to_terrain > 0.0,
+        dither
+    );
+    clouds *= crepuscular_rays.w;
+    clouds.rgb += crepuscular_rays.xyz;
 #endif
 
     // Aurora

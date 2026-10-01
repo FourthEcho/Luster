@@ -294,7 +294,12 @@ vec3 hitEmission(vec4 hit_data_0, ivec2 hit_texel, vec3 hit_view_pos) {
     decode_emission(map, hit_material);
 #endif
 
-    return hit_material.emission * emission_scale * SSPT_INTENSITY;
+    // Match the primary Photon-style emissive response: the emitter's
+    // own albedo modulates its emitted source radiance. This keeps bright
+    // emissive blocks from becoming an independent white-hot HDR pool when
+    // SSPT is enabled, while preserving the source texture detail.
+    return hit_material.emission * hit_material.albedo
+        * emission_scale * SSPT_INTENSITY;
 }
 
 // ----------------------------------------------------------------------------
@@ -364,7 +369,8 @@ vec3 moonRadiance() {
 
 vec3 hitDirectLight(HitData hit, vec3 hit_view_pos) {
     vec3 hit_scene_pos = view_to_scene_space(hit_view_pos);
-    vec3 direct = vec3(0.0);
+    vec3 sun_moon_direct = vec3(0.0);
+    vec3 indirect_direct = vec3(0.0);
 
 #ifdef DIRECT_SUN_BOUNCE
     // Sun/moon contribution: conditional, so a sunless hit (facing away,
@@ -385,7 +391,7 @@ vec3 hitDirectLight(HitData hit, vec3 hit_view_pos) {
         float visibility = outside_shadow_map ? 1.0 : texture(shadowtex1, shadow_coords);
         if (visibility > 0.0) {
             vec3 radiance = sunAngle < 0.5 ? sunRadiance() : moonRadiance();
-            direct = radiance * (visibility * NoL);
+            sun_moon_direct = radiance * (visibility * NoL);
 
 #ifdef SHADOW_COLOR
             if (!outside_shadow_map) {
@@ -393,12 +399,12 @@ vec3 hitDirectLight(HitData hit, vec3 hit_view_pos) {
                 ivec2 shadow_texel = ivec2(shadow_coords.xy * vec2(textureSize(shadowtex0, 0)));
                 float blocker_depth = texelFetch(shadowtex0, shadow_texel, 0).x;
                 vec3 transmission = texelFetch(shadowcolor0, shadow_texel, 0).rgb;
-                direct *= mix(vec3(1.0), 4.0 * transmission, step(blocker_depth, shadow_coords.z));
+                sun_moon_direct *= mix(vec3(1.0), 4.0 * transmission, step(blocker_depth, shadow_coords.z));
             }
 #endif
 
 #if defined WORLD_OVERWORLD && defined CLOUD_SHADOWS
-            direct *= get_cloud_shadows(colortex8, hit_scene_pos);
+            sun_moon_direct *= get_cloud_shadows(colortex8, hit_scene_pos);
 #endif
         }
     }
@@ -413,7 +419,7 @@ vec3 hitDirectLight(HitData hit, vec3 hit_view_pos) {
     // facing away from open sky still gets a dim/tinted contribution
     // rather than a flat ambient add.
     vec3 sky_radiance = texture(colortex4, project_sky(hit.scene_normal)).rgb;
-    direct += sky_radiance * hit.light_levels.y;
+    indirect_direct += sky_radiance * hit.light_levels.y;
 #endif // DIRECT_SKY_BOUNCE
 
 #ifdef DIRECT_HANDHELD_BOUNCE
@@ -424,10 +430,15 @@ vec3 hitDirectLight(HitData hit, vec3 hit_view_pos) {
     // get_handheld_light_color). AO passes as 1.0 — the hit's own occlusion
     // is unknown here and the path throughput already shapes the result.
     // No shadow tap: bare falloff, like the primary pass.
-    direct += get_handheld_lighting(hit_scene_pos, 1.0);
+    indirect_direct += get_handheld_lighting(hit_scene_pos, 1.0);
 #endif
 
-    return hit.albedo * (direct * SSPT_INTENSITY);
+    // SSPT_INTENSITY controls traced secondary-light strength only.
+    // Direct sun/moon bounce is kept at the physical radiance calculated
+    // above so the SSPT control cannot accidentally amplify daylight/night
+    // lighting. Sky and handheld are still secondary-light paths and keep
+    // the SSPT intensity control.
+    return hit.albedo * (sun_moon_direct + indirect_direct * SSPT_INTENSITY);
 }
 
 #endif // defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE || defined DIRECT_SKY_BOUNCE

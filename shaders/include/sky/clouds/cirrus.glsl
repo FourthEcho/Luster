@@ -1,4 +1,3 @@
-#include "/include/sky/clouds/cloud_bounce.glsl"
 #if !defined INCLUDE_SKY_CLOUDS_CIRRUS
 #define INCLUDE_SKY_CLOUDS_CIRRUS
 
@@ -40,7 +39,7 @@ float clouds_cirrus_density(vec2 coord, float altitude_fraction) {
 
     vec2 detail_coord = coord;
 
-    float detail_amplitude = 0.2 * CLOUDS_CIRRUS_DETAIL_STRENGTH;
+    float detail_amplitude = 0.2;
     float detail_frequency = 0.00002;
     float curl_strength = 0.1 * CLOUDS_CIRRUS_CURL_STRENGTH;
 
@@ -139,7 +138,7 @@ float clouds_cirrus_optical_depth(vec3 ray_origin, vec3 ray_dir, float dither) {
 
     float ray_length
         = (inner_sphere.y >= 0.0) ? inner_sphere.x : outer_sphere.y;
-    ray_length = clamp(ray_length, 0.0, max_ray_length);
+    ray_length = min(ray_length, max_ray_length);
 
     // Find initial step length a so that Σ(ar^i) = rayLength
     float step_coeff = (step_growth - 1.0)
@@ -172,16 +171,13 @@ float clouds_cirrus_optical_depth(vec3 ray_origin, vec3 ray_dir, float dither) {
     return optical_depth;
 }
 
-vec3 clouds_cirrus_scattering(
+vec2 clouds_cirrus_scattering(
     float density,
     float view_transmittance,
     float light_optical_depth,
-    float sky_optical_depth,
-    float altitude_fraction,
-    vec3 light_dir,
     float cos_theta
 ) {
-    vec3 scattering = vec3(0.0);
+    vec2 scattering = vec2(0.0);
 
     float phase = clouds_phase_single(cos_theta);
     vec3 phase_g = vec3(0.6, 0.9, 0.3);
@@ -198,29 +194,13 @@ vec3 clouds_cirrus_scattering(
                    - smoothstep(0.5, 0.7, clouds_params.cirrus_amount)
                ));
 
-    float ground_optical_depth
-        = density * CLOUDS_CIRRUS_THICKNESS
-        * clamp01(altitude_fraction);
-    vec3 bounced_light = clouds_multiple_scattering_bounce(
-        extinct_amount,
-        scatter_amount,
-        light_optical_depth,
-        sky_optical_depth,
-        ground_optical_depth,
-        altitude_fraction,
-        light_dir
-    );
-
     for (uint i = 0u; i < 4u; ++i) {
         scattering.x += scatter_amount
             * exp(-extinct_amount * light_optical_depth) * phase
             * powder_effect; // direct light
-        scattering.x += scatter_amount * isotropic_phase * bounced_light.x;
-        scattering.z += scatter_amount * isotropic_phase * bounced_light.z;
         scattering.y += scatter_amount
-            * exp(-extinct_amount * sky_optical_depth)
+            * exp(-0.33 * CLOUDS_CIRRUS_THICKNESS * extinct_amount * density)
             * isotropic_phase; // sky light
-        scattering.y += scatter_amount * isotropic_phase * bounced_light.y;
 
         scatter_amount *= 0.5;
         extinct_amount *= 0.25;
@@ -293,25 +273,21 @@ CloudsResult draw_cirrus_clouds(
 
     float light_optical_depth
         = clouds_cirrus_optical_depth(sphere_pos, light_dir, dither);
-    float sky_optical_depth
-        = clouds_cirrus_optical_depth(sphere_pos, vec3(0.0, 1.0, 0.0), dither);
-    float altitude_fraction
-        = (r - clouds_cirrus_radius) * rcp(CLOUDS_CIRRUS_THICKNESS) + 0.5;
     float view_optical_depth = 0.5 * density * clouds_cirrus_extinction_coeff
         * CLOUDS_CIRRUS_THICKNESS * rcp(abs(ray_dir.y) + eps);
     float view_transmittance = exp(-view_optical_depth);
 
-    vec3 scattering = clouds_cirrus_scattering(
+    vec2 scattering = clouds_cirrus_scattering(
         density,
         view_transmittance,
         light_optical_depth,
-        sky_optical_depth,
-        altitude_fraction,
-        light_dir,
         cos_theta
     );
 
     // Get main light color for this layer
+    float r_sq = dot(sphere_pos, sphere_pos);
+    float rcp_r = inversesqrt(r_sq);
+    float mu = dot(sphere_pos, light_dir) * rcp_r;
 
     vec3 light_color
         = sunlight_color * atmosphere_transmittance(sphere_pos, light_dir);
@@ -320,8 +296,7 @@ CloudsResult draw_cirrus_clouds(
 
     // Remap the transmittance so that min_transmittance is 0
     vec3 clouds_scattering
-        = scattering.x * light_color + scattering.y * sky_color
-        + scattering.z * light_color * clouds_ground_albedo();
+        = scattering.x * light_color + scattering.y * sky_color * 1.41;
     clouds_scattering = clouds_aerial_perspective(
         clouds_scattering,
         view_transmittance,

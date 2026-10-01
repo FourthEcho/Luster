@@ -35,23 +35,6 @@ const Material water_material = Material(
     false
 );
 
-// Keep every emissive surface at one common luminance while preserving its
-// color. This makes hardcoded blocks and labPBR emissive texels feed the same
-// brightness into the primary pass and the SSPT light gather.
-void normalize_emission(inout Material material, float target_strength) {
-    float emission_luminance = dot(
-        material.emission,
-        luminance_weights
-    );
-    if (emission_luminance > 1e-4) {
-        material.emission *= target_strength / emission_luminance;
-    }
-}
-
-void normalize_emission(inout Material material) {
-    normalize_emission(material, EMISSION_STRENGTH);
-}
-
 // Reads emissive data for a texel through the global emission system.
 // HARDCODED_EMISSION selects the built-in per-block baseline; otherwise the
 // resource-pack emission channel is used according to TEXTURE_FORMAT. The
@@ -76,7 +59,10 @@ void decode_emission(vec4 specular_map, inout Material material) {
         max(material.emission, vec3(0.0)),
         vec3(GLOBAL_EMISSION_CURVE)
     );
-    normalize_emission(material, GLOBAL_EMISSION_INTENSITY);
+    // Match Photon: preserve the albedo-shaped emissive source instead of
+    // renormalizing it to a fixed luminance. GLOBAL_EMISSION_INTENSITY is a
+    // simple multiplier so darker emissive texels stay darker.
+    material.emission *= GLOBAL_EMISSION_INTENSITY;
 }
 
 #if TEXTURE_FORMAT == TEXTURE_FORMAT_LAB
@@ -981,10 +967,8 @@ Material material_from(
 #endif
     }
 
-    // ---- Unify the hardcoded baseline brightness first ----
-    // (Per-path curve + intensity shaping happens in decode_emission()
-    // right below this.)
-    normalize_emission(material);
+    // Emissive baseline remains albedo-shaped like Photon; decode_emission()
+    // applies the shared curve/intensity later when the material is finalized.
 
 #ifdef POROSITY
     // POROSITY_STRENGTH scales the hardcoded porosity. Same override

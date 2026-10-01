@@ -1,6 +1,5 @@
-#if !defined INCLUDE_SKY_CLOUDS_CUMULUS_CONGESTUS
+#if !defined INCLUDe_SKY_CLOUDS_CUMULUS_CONGESTUS
 #define INCLUDE_SKY_CLOUDS_CUMULUS_CONGESTUS
-#include "/include/sky/clouds/cloud_bounce.glsl"
 
 // Alternative 1st layer: distant cumulus congestus clouds
 
@@ -35,9 +34,9 @@ float clouds_cumulus_congestus_altitude_shaping(
 }
 
 float clouds_cumulus_congestus_density(vec3 pos) {
-    const float wind_angle = CLOUDS_CUMULUS_CONGESTUS_WIND_ANGLE * degree;
-    const vec2 wind_velocity = CLOUDS_CUMULUS_CONGESTUS_WIND_SPEED
-        * vec2(cos(wind_angle), sin(wind_angle));
+    const float wind_angle = CLOUDS_CUMULUS_WIND_ANGLE * degree;
+    const vec2 wind_velocity
+        = CLOUDS_CUMULUS_WIND_SPEED * vec2(cos(wind_angle), sin(wind_angle));
 
     float r = length(pos);
     if (r < clouds_cumulus_congestus_radius
@@ -81,7 +80,6 @@ float clouds_cumulus_congestus_density(vec3 pos) {
         = clouds_cumulus_congestus_altitude_shaping(density, altitude_fraction);
     density *= 4.0 * distance_fraction * (1.0 - distance_fraction);
     density *= linear_step(0.0, 0.3, clouds_params.cumulus_congestus_blend);
-    density *= CLOUDS_CUMULUS_CONGESTUS_DENSITY;
 
     if (density < eps) {
         return 0.0;
@@ -146,16 +144,16 @@ float clouds_cumulus_congestus_optical_depth(
     return optical_depth;
 }
 
-vec3 clouds_cumulus_congestus_scattering(
+vec2 clouds_cumulus_congestus_scattering(
     float density,
     float light_optical_depth,
     float sky_optical_depth,
     float ground_optical_depth,
     float step_transmittance,
     float cos_theta,
-    vec3 bounced_light
+    float bounced_light
 ) {
-    vec3 scattering = vec3(0.0);
+    vec2 scattering = vec2(0.0);
 
     float scatter_amount = clouds_cumulus_congestus_scattering_coeff;
     float extinct_amount = clouds_cumulus_congestus_extinction_coeff;
@@ -170,15 +168,12 @@ vec3 clouds_cumulus_congestus_scattering(
 
     for (uint i = 0u; i < 8u; ++i) {
         scattering.x += scatter_amount
-            * exp(-extinct_amount * light_optical_depth) * phase;
+            * exp(-extinct_amount * light_optical_depth * 0.33) * phase;
         scattering.x += scatter_amount
-            * isotropic_phase * bounced_light.x;
-        scattering.z += scatter_amount
-            * isotropic_phase * bounced_light.z;
+            * exp(-extinct_amount * ground_optical_depth * 0.33)
+            * isotropic_phase * bounced_light;
         scattering.y += scatter_amount
-            * exp(-extinct_amount * sky_optical_depth) * isotropic_phase;
-        scattering.y += scatter_amount
-            * isotropic_phase * bounced_light.y;
+            * exp(-extinct_amount * sky_optical_depth * 0.33) * isotropic_phase;
 
         scatter_amount *= 0.55
             * mix(lift(
@@ -210,22 +205,13 @@ CloudsResult draw_cumulus_congestus_clouds(
     //   Raymarching Setup
     // ---------------------
 
-#if defined PROGRAM_DEFERRED0
-    const uint primary_steps_horizon
-        = max(1u, CLOUDS_CUMULUS_CONGESTUS_PRIMARY_STEPS_H / 2);
-    const uint primary_steps_zenith
-        = max(1u, CLOUDS_CUMULUS_CONGESTUS_PRIMARY_STEPS_Z / 2);
-#else
-    const uint primary_steps_horizon
-        = CLOUDS_CUMULUS_CONGESTUS_PRIMARY_STEPS_H;
-    const uint primary_steps_zenith
-        = CLOUDS_CUMULUS_CONGESTUS_PRIMARY_STEPS_Z;
-#endif
+    const uint primary_steps = CLOUDS_CUMULUS_CONGESTUS_PRIMARY_STEPS;
     const uint lighting_steps = CLOUDS_CUMULUS_CONGESTUS_LIGHTING_STEPS;
     const uint ambient_steps = CLOUDS_CUMULUS_CONGESTUS_AMBIENT_STEPS;
 
     const float min_transmittance = 0.075;
 
+    const float planet_albedo = 0.4;
     const vec3 sky_dir = vec3(0.0, 1.0, 0.0);
 
     vec2 sphere_dists = intersect_spherical_shell(
@@ -254,22 +240,12 @@ CloudsResult draw_cumulus_congestus_clouds(
               .y
         >= 0.0;
 
-    // Cull only when terrain sits IN FRONT of the cloud volume (same
-    // rule as the other layers); the old test culled towers behind any
-    // terrain hit, even distant mountains far behind the clouds.
-    bool terrain_intersected = distance_to_terrain >= 0.0
-        && length(air_viewer_pos) < clouds_cumulus_congestus_radius
-        && distance_to_terrain < dists.x;
     if (dists.y < 0.0
         || planet_intersected
             && length(air_viewer_pos) < clouds_cumulus_congestus_radius
-        || terrain_intersected) {
+        || distance_to_terrain > 0.0) {
         return clouds_not_hit;
     }
-
-    uint primary_steps = uint(
-        mix(primary_steps_horizon, primary_steps_zenith, abs(ray_dir.y))
-    );
 
     float ray_length = dists.y - dists.x;
     float step_length = ray_length * rcp(float(primary_steps));
@@ -279,7 +255,7 @@ CloudsResult draw_cumulus_congestus_clouds(
     vec3 ray_origin
         = air_viewer_pos + ray_dir * (dists.x + step_length * dither);
 
-    vec3 scattering = vec3(0.0); // x: direct light, y: skylight, z: ground bounce
+    vec2 scattering = vec2(0.0); // x: direct light, y: skylight
     float transmittance = 1.0;
 
     float distance_sum = 0.0;
@@ -292,7 +268,7 @@ CloudsResult draw_cumulus_congestus_clouds(
     bool moonlit = sun_dir.y < -0.04;
     vec3 light_dir = moonlit ? moon_dir : sun_dir;
     float cos_theta = dot(ray_dir, light_dir);
-    // Full multi-order cloud bounce using the shared cloud medium model.
+    float bounced_light = planet_albedo * light_dir.y * rcp_pi;
 
     // --------------------
     //   Raymarching Loop
@@ -342,17 +318,10 @@ CloudsResult draw_cumulus_congestus_clouds(
         float ground_optical_depth
             = mix(density, 1.0, clamp01(altitude_fraction * 2.0 - 1.0))
             * altitude_fraction
-            * clouds_cumulus_congestus_thickness;
-
-        vec3 bounced_light = clouds_multiple_scattering_bounce(
-            clouds_cumulus_congestus_extinction_coeff,
-            clouds_cumulus_congestus_scattering_coeff,
-            light_optical_depth,
-            sky_optical_depth,
-            ground_optical_depth,
-            altitude_fraction,
-            light_dir
-        );
+            * clouds_cumulus_congestus_thickness; // guess optical depth to the
+                                                  // ground using altitude
+                                                  // fraction and density from
+                                                  // this sample
 
         scattering
             += clouds_cumulus_congestus_scattering(
@@ -385,8 +354,7 @@ CloudsResult draw_cumulus_congestus_clouds(
 
     // Aerial perspective
     vec3 clouds_scattering
-        = scattering.x * light_color + scattering.y * sky_color
-        + scattering.z * light_color * clouds_ground_albedo();
+        = scattering.x * light_color + scattering.y * sky_color;
     clouds_scattering = clouds_aerial_perspective(
         clouds_scattering,
         clouds_transmittance,
@@ -425,5 +393,4 @@ CloudsResult draw_cumulus_congestus_clouds(
     );
 }
 
-
-#endif // INCLUDE_SKY_CLOUDS_CUMULUS_CONGESTUS
+#endif

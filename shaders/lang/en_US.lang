@@ -1363,12 +1363,6 @@ option.NETHER_SMOKE.comment = Turbulent Nether smoke replacing the flat fog glow
 option.NETHER_SMOKE_INTENSITY=Nether Smoke Intensity
 option.NETHER_SMOKE_INTENSITY.comment = Brightness multiplier for the Nether Smoke v2 glow/emission. Only has an effect when Nether Smoke is enabled.
 
-option.CLOUD_LIGHTING_BOUNCES=Cloud Light Bounces
-option.CLOUD_LIGHTING_BOUNCES.comment = Adjusts how many times light bounces inside clouds. Higher = more realistic multiple scattering but higher cost. 0 = single scattering only.
-option.CLOUDS_WEATHER_TURBULENCE       = Weather Turbulence Amount
-option.CLOUDS_WEATHER_TURBULENCE.comment = Scales how strongly live weather turbulence warps cloud coverage, adds detail and grows storm towers. Higher = more churned, broken skies.
-option.CLOUDS_WEATHER_CIRRUS_BLEND     = Cirrus Weather Blend
-option.CLOUDS_WEATHER_CIRRUS_BLEND.comment = Couples high cirrus to weather. At 1.0 they follow temperature, humidity and rain; lower keeps a steady veil.
 
 option.ANISOTROPIC_FILTERING_MODE=Anisotropic Filtering Mode
 option.ANISOTROPIC_FILTERING_MODE.comment=Anisotropic filtering for surfaces at grazing angles. Higher levels sample more along the footprint axis.

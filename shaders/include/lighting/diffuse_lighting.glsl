@@ -357,8 +357,11 @@ vec3 get_diffuse_lighting(
         directional_lighting
     );
 
-    // Emission is added untinted at return (below): it is independent
-    // radiance, not diffuse reflection, so albedo/1-pi must not touch it.
+    // Emission enters the lighting accumulator before the final albedo
+    // modulation, matching Photon. This intentionally lets the emissive
+    // surface texture/albedo tame overly-hot source pixels while keeping
+    // the same response whether SSPT is enabled or disabled.
+    lighting += material.emission * emission_scale;
 
 #if defined WORLD_OVERWORLD
     // Cave lighting: preserve a subtle underground ambient fill even when
@@ -371,8 +374,7 @@ vec3 get_diffuse_lighting(
 #endif
 
     return max0(lighting) * material.albedo * rcp_pi
-        * mix(1.0, metal_diffuse_amount, float(material.is_metal))
-        + max0(material.emission * emission_scale);
+        * mix(1.0, metal_diffuse_amount, float(material.is_metal));
 }
 
 #endif // INCLUDE_LIGHTING_DIFFUSE_LIGHTING

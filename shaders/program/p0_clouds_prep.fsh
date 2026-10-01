@@ -11,6 +11,10 @@
 
 #include "/include/global.glsl"
 
+// The cloud parameter include reaches the atmosphere/sandstorm code before
+// any later program-local uniform declarations, so declare this first.
+uniform float desert_sandstorm;
+
 /* RENDERTARGETS: 8 */
 layout(location = 0) out vec3 fragment_color;
 
@@ -30,14 +34,6 @@ flat in CloudsParameters clouds_params;
 // ------------
 
 uniform sampler2D noisetex;
-
-// 3D cloud noise (global customTextures); the cloud-shadow includes pull in
-// cumulus.glsl, whose noise functions reference these.
-uniform sampler3D cumulus_curl;
-uniform sampler3D cumulus_detail1;
-uniform sampler3D cumulus_detail2;
-
-
 
 uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
@@ -65,7 +61,6 @@ uniform float frameTimeCounter;
 uniform int isEyeInWater;
 uniform float eyeAltitude;
 uniform float rainStrength;
-uniform float desert_sandstorm;
 uniform float blindness;
 
 uniform vec3 light_dir;

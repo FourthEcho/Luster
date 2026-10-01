@@ -14,20 +14,6 @@ float clouds_cumulus_local_coverage(vec2 pos) {
     pos += cameraPosition.xz * CLOUDS_SCALE;
     pos += wind_velocity * world_age;
 
-    // Turbulence domain warp: churn the coverage field with a large-scale
-    // curl-ish offset so gusty weather breaks clouds into streaks and
-    // cells instead of just fading them. Driven per-frame by the live
-    // weather turbulence (see weather/clouds.glsl).
-    float warp_amount = clouds_params.l0_turbulence;
-    if (warp_amount > eps) {
-        vec2 warp_uv = (0.0000007 / CLOUDS_CUMULUS_SIZE) * pos;
-        vec2 warp = vec2(
-            texture(noisetex, warp_uv).y - 0.5,
-            texture(noisetex, warp_uv + 0.37).z - 0.5
-        );
-        pos += warp * warp_amount * 9000.0;
-    }
-
     // Sample noise
     vec2 p1 = (0.000002 / CLOUDS_CUMULUS_SIZE) * pos;
     vec2 p2 = (0.000027 / CLOUDS_CUMULUS_SIZE) * pos;
@@ -85,13 +71,8 @@ vec2 project_clouds_cumulus_coverage_map(vec3 pos) {
 float render_clouds_cumulus_coverage_map(vec2 uv) {
     // Get clouds position
     vec2 pos = uv * 2.0 - 1.0;
-    // The distortion is only invertible inside |pos| < 1/d (1.25 here);
-    // corner texels sit outside that disc, where the raw formula divides
-    // by zero (or mirrors into garbage). Clamp the radius: outside the
-    // disc there is simply no local coverage.
-    float pos_len = min(length(pos), 1.2499);
     pos *= (1.0 - clouds_coverage_map_distortion)
-        / (1.0 - pos_len * clouds_coverage_map_distortion);
+        / (1.0 - length(pos) * clouds_coverage_map_distortion);
     pos *= 0.5 * clouds_cumulus_coverage_map_scale;
 
     return clouds_cumulus_local_coverage(pos);

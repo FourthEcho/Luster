@@ -16,13 +16,13 @@ struct CloudsParameters {
     // Volumetric layer 1
     vec2 l1_coverage;
     float l1_cumulus_stratus_blend;
+    float l1_shadow;
     // Planar clouds
     float cirrus_amount;
     float cirrocumulus_amount;
     float noctilucent_amount;
     // Other
     float crepuscular_rays_amount;
-    float l0_turbulence; // domain-warp amount for the coverage field
 };
 
 #endif // INCLUDE_SKY_CLOUDS_PARAMETERS

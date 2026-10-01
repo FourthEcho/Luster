@@ -45,10 +45,8 @@ uniform sampler3D colortex6; // 3D bubbly worley noise
 #define SAMPLER_WORLEY_BUBBLY colortex6
 uniform sampler3D colortex7; // 3D swirley worley noise
 #define SAMPLER_WORLEY_SWIRLEY colortex7
-
-uniform sampler3D cumulus_curl;
-uniform sampler3D cumulus_detail1;
-uniform sampler3D cumulus_detail2;
+uniform sampler3D cumulusCurl;
+#define SAMPLER_CUMULUS_CURL cumulusCurl
 
 #if defined WORLD_OVERWORLD && defined GALAXY
 uniform sampler2D colortex13;

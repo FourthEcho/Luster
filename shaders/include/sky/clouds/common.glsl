@@ -84,15 +84,6 @@ float clouds_powder_effect(float density, float cos_theta) {
     return powder;
 }
 
-// Ground reflectance for tinting cloud ground-bounce. Kept neutral on
-// purpose: the biome uniforms are declared per-program (not in this shared
-// include), and programs like prepare compile this file without them -
-// referencing them here breaks compilation. Sunset/moon tint still flows
-// through light_color at each layer's combine.
-vec3 clouds_ground_albedo() {
-    return vec3(0.40, 0.40, 0.38);
-}
-
 vec3 clouds_aerial_perspective(
     vec3 clouds_scattering,
     float clouds_transmittance,
@@ -112,14 +103,12 @@ vec3 clouds_aerial_perspective(
         vec3 trans_0 = atmosphere_transmittance(ray_origin, ray_dir);
         vec3 trans_1 = atmosphere_transmittance(ray_end, ray_dir);
 
-        // Floored denominators: both can vanish together at night, and
-        // 0/0 is NaN (clamp01 can't cure it).
-        air_transmittance = clamp01(trans_0 / max(trans_1, vec3(1e-6)));
+        air_transmittance = clamp01(trans_0 / trans_1);
     } else {
         vec3 trans_0 = atmosphere_transmittance(ray_origin, -ray_dir);
         vec3 trans_1 = atmosphere_transmittance(ray_end, -ray_dir);
 
-        air_transmittance = clamp01(trans_1 / max(trans_0, vec3(1e-6)));
+        air_transmittance = clamp01(trans_1 / trans_0);
     }
 
     // Blend to rain color during rain

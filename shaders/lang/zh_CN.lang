@@ -1137,8 +1137,6 @@ option.FOG_SMOOTHING=Fog Smoothing
 option.FOG_SMOOTHING.comment = When enabled, smoothly blends fog between frames to reduce flickering. Small performance cost.
 option.FOG_SMOOTHING_RADIUS=Fog Blur Radius
 option.FOG_SMOOTHING_RADIUS.comment = Adjusts the spatial blur radius for fog smoothing. Higher = softer, more blended fog at higher cost.
-option.CLOUD_LIGHTING_BOUNCES=Cloud Light Bounces
-option.CLOUD_LIGHTING_BOUNCES.comment = Adjusts how many times light bounces inside clouds. Higher = more realistic multiple scattering but higher cost. 0 = single scattering only.
 option.MATERIAL_MAPPING_MODE=Material Mapping Mode
 option.MATERIAL_MAPPING_MODE.comment = Controls how PBR material textures (specular/normal maps via labPBR or OldSchoolPBR conventions) are decoded from resource packs. OFF disables, HARDCODED uses built-in per-block values, SPECULAR_ONLY reads just the specular map, NORMALS_ONLY reads just the normal map, SPECULAR_NORMALS reads both.
 value.MATERIAL_MAPPING_OFF=Off
