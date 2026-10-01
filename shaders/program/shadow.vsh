@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shader by FourthEcho
 
   program/shadow:
   Render shadow map

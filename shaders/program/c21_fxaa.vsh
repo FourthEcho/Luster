@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shader by FourthEcho
 
   program/post/fxaa.fsh
   FXAA v3.11 from

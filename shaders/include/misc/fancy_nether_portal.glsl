@@ -3,16 +3,6 @@
 
 // Parallax nether portal effect inspired by Complementary Reimagined Shaders by
 // EminGT Thanks to Emin for letting me use his idea!
-//
-// Requires from the including program (water-program variant only):
-//   - gtexture sampler, frameCounter uniform
-//   - position_tangent, atlas_tile_coord, atlas_tile_offset, atlas_tile_scale
-//     varyings (declared when PROGRAM_GBUFFERS_WATER is defined)
-//   - interleaved_gradient_noise from "/include/utility/dithering.glsl"
-//     (usually already included transitively)
-//   - NETHER_PORTAL_INTENSITY setting.
-// When PROGRAM_GBUFFERS_WATER is not defined a stub returning vec4(0.0) is
-// declared instead so non-water translucent programs still compile.
 
 #include "/include/utility/color.glsl"
 #include "/include/utility/dithering.glsl"

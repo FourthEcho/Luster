@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shader by FourthEcho
 
   program/d2_clouds_upscaling:
   Temporal upscaling for clouds

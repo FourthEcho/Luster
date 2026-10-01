@@ -345,7 +345,7 @@ vec3 get_diffuse_lighting(
     );
 
 // Directional sky ambient arrives separately: traced sky inside sspt_light
-// under SSPT, nothing extra without it (Photon parity: baked base only).
+// under SSPT, nothing extra without it (Luster parity: baked base only).
 
     // Blocklight
 
@@ -358,7 +358,7 @@ vec3 get_diffuse_lighting(
     );
 
     // Emission enters the lighting accumulator before the final albedo
-    // modulation, matching Photon. This intentionally lets the emissive
+    // modulation, matching Luster. This intentionally lets the emissive
     // surface texture/albedo tame overly-hot source pixels while keeping
     // the same response whether SSPT is enabled or disabled.
     lighting += material.emission * emission_scale;

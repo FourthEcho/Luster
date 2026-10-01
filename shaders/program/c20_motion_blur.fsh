@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shader by FourthEcho
 
   program/c20_motion_blur:
   Apply motion blur

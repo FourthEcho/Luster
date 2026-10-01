@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shader by FourthEcho
 
   program/c5_c10_bloom_downsample
   Progressively downsample bloom tiles

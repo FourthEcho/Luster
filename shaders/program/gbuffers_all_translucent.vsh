@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shader by FourthEcho
 
   program/gbuffers_all_translucent:
   Handle translucent terrain, translucent entities (Iris), translucent handheld

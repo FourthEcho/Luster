@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shader by FourthEcho
 
   program/c23_capture:
   Rebuild the screen-space sphere capture used for off-screen reflections.

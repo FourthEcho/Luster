@@ -1,20 +1,6 @@
 #if !defined INCLUDE_CAMERA_LOCAL_EXPOSURE
 #define INCLUDE_CAMERA_LOCAL_EXPOSURE
 
-// HDR-aware local exposure (dodge and burn).
-//
-// A restrained spatially-varying correction around the photographic global
-// exposure. The neighborhood is measured in log luminance (stops) with a
-// center-luminance similarity term to avoid bleeding across strong
-// boundaries, plus a low-mip regional term for broad light/shadow areas.
-//
-// Requires from the including program:
-//   - colortex5 sampler (scene color) + view_pixel_size uniform
-//   - luminance_weights from "/include/utility/color.glsl"
-//   - LOCAL_EXPOSURE_DETAIL / LOCAL_EXPOSURE_RANGE / LOCAL_EXPOSURE_REGIONAL
-//     settings. compute_local_exposure_ev is only defined when
-//     LOCAL_EXPOSURE is enabled.
-
 #include "/include/utility/color.glsl"
 
 // HDR-aware local exposure.

@@ -1,19 +1,6 @@
 #if !defined INCLUDE_CAMERA_CAMERA
 #define INCLUDE_CAMERA_CAMERA
 
-// ---------------------------------------------------------------------------
-//   Physical camera: shared references and helpers
-//
-//   The exposure triangle (aperture N, shutter time t, sensitivity ISO) is
-//   split across three programs — aperture drives DoF (c2_dof), shutter
-//   drives motion blur (c20_motion_blur), ISO plus the full triangle drives
-//   exposure (c4_taa_exposure) — so the reference setup they all normalize
-//   against lives here, in one place: f/3.2, 1/60s, ISO 100. Change the
-//   look of "neutral" once, here, instead of hunting matching constants.
-//   User controls are CAM_SENSOR_WIDTH, CAM_FSTOPS, CAM_SHUTTER_SPEED,
-//   CAM_ISO and CAM_EXPOSURE_COMPENSATION (see settings.glsl).
-// ---------------------------------------------------------------------------
-
 // Reference setup: every triangle factor is normalized to these, so the
 // shipped defaults reproduce the pre-physical look exactly.
 const float camera_reference_fstops = 3.2;

@@ -1,14 +1,6 @@
 #if !defined INCLUDE_FOG_WATER_ABSORPTION
 #define INCLUDE_FOG_WATER_ABSORPTION
 
-// Water absorption coefficients shared by the fog system
-// ("/include/fog/simple_fog.glsl") and the shadow pass (which cannot
-// include the full fog file). Blends the neutral baseline with the
-// per-biome water tint.
-//
-// Requires: WATER_ABSORPTION_* settings, rec709_to_working_color from
-// "/include/utility/color.glsl", eps/max0 from "/include/global.glsl".
-
 #include "/include/utility/color.glsl"
 
 vec3 biome_water_coeff(vec3 biome_water_color) {

@@ -19,41 +19,6 @@
 
 #include "/include/utility/color.glsl"
 
-// ---------------------------------------------------------------------------
-//   Desert sandstorm sky coupling
-//
-//   The fog side of sandstorms already exists: weather/fog.glsl adds a warm
-//   dust density/extinction to the air-fog Mie terms while the storm is
-//   active (DESERT_SANDSTORM). But the sky, sunlight, ambient and mist never
-//   heard about it — the sun disk stayed white, the zenith stayed blue and
-//   the sky-map ambient only mixed toward the storm colour with rain, so a
-//   sandstorm looked like brown fog under a clear sky.
-//
-//   This file is the sky side, mirroring the structure of sky/ozone.glsl:
-//   a small analytic dust layer applied differentially on top of the
-//   precomputed scattering LUT and inside the analytic transmittance, so
-//   every system that asks the atmosphere for light (sunlight, moonlight,
-//   sky scattering, planet bounce, mist, sky-map ambient) sees the same
-//   warm filtering.
-//
-//   Integration points, each gated by its own setting:
-//    * atmosphere_transmittance() — dust airmass added to the analytic
-//      fallback path (DESERT_SANDSTORM + SANDSTORM_LAYER)
-//    * atmosphere_scattering() — first-order differential absorption on
-//      the precomputed sky LUT along the view and sun/moon light paths
-//      (DESERT_SANDSTORM + SANDSTORM_SKY)
-//    * sky view path — the pre-LUT celestial background (stars/galaxy/
-//      sun disk) is attenuated along the view ray (SANDSTORM_SKY)
-//    * mist — the mist tint blends toward the dust spectrum while the
-//      storm is active (DESERT_SANDSTORM + SANDSTORM_MIST)
-//    * planet bounce — bounced light is re-filtered through the dust on
-//      its way back up (DESERT_SANDSTORM + SANDSTORM_BOUNCE)
-//
-//   Live storm amount comes from the `desert_sandstorm` uniform (0..1),
-//   declared by each program — this file deliberately declares no uniforms,
-//   following the convention of weather/fog.glsl and atmosphere.glsl.
-// ---------------------------------------------------------------------------
-
 #ifdef DESERT_SANDSTORM
 // Low dust layer: well-mixed below ~2km, so a ground-level exponential
 // with a 1.5km scale height. Grazing rays accumulate much more dust than

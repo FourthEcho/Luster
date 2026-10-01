@@ -1,14 +1,6 @@
 #if !defined INCLUDE_CAMERA_LENS_FLARE
 #define INCLUDE_CAMERA_LENS_FLARE
 
-// ---------------------------------------------------------------------------
-//   Lens flare: ghosts + halo
-//
-//   Requires from the including program: colortex0 (bloom tiles) +
-//   colortex5 samplers, view_pixel_size + aspectRatio uniforms, and sun_dir,
-//   gbufferProjection, gbufferModelView, rainStrength uniforms.
-// ---------------------------------------------------------------------------
-
 #ifdef LENS_FLARE
 // Blurred bright source: bloom tile 2 is the full frame downsampled into a
 // Threshold is subtractive so sub-threshold sky contributes exactly zero.

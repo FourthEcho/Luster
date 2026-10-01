@@ -2,30 +2,7 @@
 #define INCLUDE_LIGHTING_AMBIENT_SH_SKYLIGHT
 
 // Second-order spherical-harmonics sky ambient lighting (9 coefficients).
-//
-// Replaces the old 6-coefficient H-Basis subset with the FULL second-order
-// basis including the cross terms (xy, yz, xz), so directional sky detail
-// the subset blurred away survives. The live sky map is projected once per
-// frame in the deferred vertex shader (uniform-sphere sampling) into nine
-// RGB coefficients, passed flat to the fragment stage, and evaluated in
-// closed form around the bent normal:
-//
-//   Y00     = 0.282095
-//   Y1x/y/z = 0.488603 * (x/y/z)
-//   Y20     = 0.315392 * (3y^2 - 1)
-//   Y2xy/yz/xz = 1.092548 * (xy/yz/xz)
-//   Y2xxzz  = 0.546274 * (x^2 - z^2)
-//
-// with y as the world-up axis. Cosine-weighted hemisphere irradiance is
-// reconstructed with the Ramamoorthi convolution factors (A0 = pi,
-// A1 = 2pi/3, A2 = pi/4). Application follows Photon: the result mixes
-// with the flat up-ambient by skylight^2, then takes intensity, AO and
-// the skylight falloff — the bent normal + AO carry the directional
-// response, so occluded areas sample the visible sky, not the wall.
 
-// material.glsl pulls in fragment-only uniforms (cameraPosition, ...), and only
-// the Material-aware wrapper needs it, so vertex stages (which just project
-// the sky) must not include it.
 #if !defined vsh
 #include "/include/surface/material.glsl"
 #endif
@@ -145,7 +122,7 @@ vec3 get_sh_skylight(
 
     vec3 irradiance = evaluate_sh_irradiance(sh, n);
 
-    // Photon application: cross-fade flat up-ambient against the
+    // Luster application: cross-fade flat up-ambient against the
     // directional evaluation by skylight^2, then intensity, AO and the
     // skylight falloff. No baked-base subtraction hacks: the baked base
     // yields wherever this term is active (see get_sky_lighting).

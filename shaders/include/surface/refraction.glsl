@@ -4,28 +4,6 @@
 // ============================================================================
 //  Translucent-layer refraction
 // ----------------------------------------------------------------------------
-//  Screen-space UV distortion of the opaque scene color buffer, driven by
-//  the translucent surface's packed tangent-space normal. Distance-scaled
-//  by both translucent-layer thickness (existing) and raw view distance
-//  (new), rejected if the offset sample would land in front of the
-//  surface, and optionally split into per-channel R/G/B offsets for a
-//  chromatic-dispersion look (new).
-//
-//  Ported/extracted from program/c1_blend_layers.fsh (original single-
-//  sample offset logic); dispersion + view-distance falloff added after
-//  studying Bliss Shader's doRefractionEffect() (dimensions/composite3.fsh)
-//  as a reference for the same screen-space-distortion technique.
-//
-//  Required uniforms (declared by the including program before this file):
-//    colortex0  - scene color (post-opaque)
-//    depthtex1  - solid depth, used for the behind-surface reject test
-//    taau_render_scale
-//  (isEyeInWater is read by the caller and passed in as eye_underwater,
-//   not read directly by this file.)
-//  Required macros (defined by settings.glsl before this file):
-//    REFRACTION, REFRACTION_OFF, REFRACTION_INTENSITY,
-//    REFRACTION_DISPERSION_INTENSITY
-// ============================================================================
 
 // Decodes the packed tangent-space refraction normal written by the
 // translucent gbuffer pass. Returns vec2(0.0) if there is no translucent
@@ -37,16 +15,6 @@ vec2 refraction_normal_from(vec4 refraction_data) {
     );
 }
 
-// Base UV offset amount, shared by both the single-sample and dispersion
-// paths. Combines the existing translucent-layer-thickness scale with a
-// raw view-distance falloff (mirrors Bliss's
-// 0.5 / (1.0 + pow(linearDistance, 0.8)) curve) so refraction visibly
-// weakens on distant water/glass instead of staying constant with depth.
-//
-// eye_underwater further dampens the falloff (matching Bliss's dedicated
-// underwater case): when the camera's own eye is submerged, it is looking
-// through the same medium the surface is made of, so the water-air
-// refraction distortion should read as weaker than when viewed from air.
 float refraction_amount(float view_distance, float layer_dist, bool eye_underwater) {
     float thickness_scale = rcp(max(view_distance, 1.0)) * min(layer_dist, 8.0);
     float distance_falloff_rate = eye_underwater ? 1.0 : 0.1;

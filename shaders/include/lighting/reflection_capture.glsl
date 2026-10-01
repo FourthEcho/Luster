@@ -3,15 +3,6 @@
 
 // ---------------------------------------------------------------------
 // Screen-space sphere capture for off-screen reflections.
-//
-// A 1024x512 equirectangular panorama (colortex21 = linear scene color +
-// raw depth flag, colortex22 = camera-relative scene position + age) is
-// rebuilt every frame by program/c23_capture.fsh from the current frame
-// and accumulated across frames with camera-motion compensation, the same
-// design Kappa uses. This file provides the shared sphere mapping plus
-// the position-aware read used as the SSR-miss fallback: captured
-// surfaces that would sit behind the reflecting surface are rejected in
-// favour of the sky fallback.
 // ---------------------------------------------------------------------
 
 #ifdef REFLECTION_CAPTURE

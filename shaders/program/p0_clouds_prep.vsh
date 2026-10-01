@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shader by FourthEcho
 
   world0/prepare.vsh:
   Create cloud base coverage map and cloud shadow map

@@ -21,42 +21,6 @@
 
 // ---------------------------------------------------------------------------
 //   Ozone absorption layer
-//
-//   A user-tunable stratospheric absorption shell that integrates into the
-//   rest of the atmosphere model. Real ozone absorbs in the visible
-//   Chappuis bands (400-650nm, broad peak near 575-600nm): it is almost
-//   transparent in blue, moderately absorbing in green and red, and most
-//   of the column sits in a layer peaking around 20-30km altitude. The
-//   effect is subtle at noon but decisive at dawn and dusk, where
-//   horizon-grazing light paths amplify the absorption and ozone is
-//   responsible for the deep-blue zenith and the warm horizon light of
-//   twilight.
-//
-//   Because the precomputed scattering LUT already bakes in a baseline
-//   ozone profile, this layer acts as the adjustable part of the model:
-//   it is applied analytically on top of the LUT and inside the analytic
-//   transmittance, so every system that asks the atmosphere for light
-//   (sunlight, moonlight, cloud lighting, crepuscular rays, planet
-//   bounce, air fog, mist) sees the same spectral filtering.
-//
-//   Integration points, each gated by its own setting:
-//    * atmosphere_transmittance() — a dedicated ozone airmass replaces the
-//      old "approximate ozone with the Rayleigh airmass" treatment
-//      (OZONE_LAYER)
-//    * atmosphere_scattering() — first-order differential absorption on
-//      the precomputed sky LUT along the view and sun/moon light paths
-//      (OZONE_SKY)
-//    * air fog — a dedicated ozone-aware multiple-scattering
-//      approximation: each scatter order is attenuated for its extra
-//      quasi-diffuse passes through the layer (OZONE_FOG)
-//    * mist — the mist tint picks up the ozone-filtered twilight
-//      spectrum (OZONE_MIST)
-//    * planet bounce — diffusely bounced light is filtered through the
-//      layer again on its way back up (OZONE_PLANET_BOUNCE)
-//
-//   This file is deliberately self-contained (no uniforms, no dependency
-//   on atmosphere.glsl) so vertex-stage fog parameter setup can use it
-//   too.
 // ---------------------------------------------------------------------------
 
 // Planet radius, mirroring atmosphere.glsl so the shell geometry below
@@ -142,25 +106,6 @@ vec3 ozone_layer_transmittance(float mu, float r) {
     return vec3(1.0);
 #endif
 }
-
-// ---------------------------------------------------------------------------
-//   Ozone-aware multiple scattering
-//
-//   Light illuminating the i-th scatter order has bounced i times inside
-//   the atmosphere. Each of those bounces adds roughly one more
-//   quasi-diffuse pass through the ozone layer, and diffusely incident
-//   light accumulates ~1.9x the vertical column of a constituent — the
-//   classical Chapman diffuse-illumination factor used for actinic flux.
-//   The per-order attenuation is therefore
-//
-//     exp(-ozone_extinction * 1.9 * order)
-//
-//   which grows with the order count and is strongest in green and red
-//   where the Chappuis bands absorb, so twilight fog and sky lose their
-//   green content and shift toward blue. This is the dedicated multiple
-//   scattering treatment of the ozone layer: the plain energy-decay loop
-//   used before could not reproduce this spectral behaviour.
-// ---------------------------------------------------------------------------
 
 // Chapman diffuse-illumination factor: mean slant amplification of
 // isotropically incident light relative to the vertical column

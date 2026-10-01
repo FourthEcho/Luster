@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shader by FourthEcho
 
   program/gbuffers_all_solid:
   Handle terrain, entities, the hand, beacon beams and spider eyes

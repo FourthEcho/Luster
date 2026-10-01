@@ -4,64 +4,6 @@
 // ============================================================================
 //  Screen-space path traced emission + colored lighting
 // ----------------------------------------------------------------------------
-//  Each shaded pixel gathers indirect light with a two-lobe mixture:
-//
-//    - COSINE lobe: cosine-weighted diffuse rays into the depth buffer,
-//      gathering emission plus one bounce of direct light at the hits
-//      (hash dithers, cosine-vector sampling, screenspace RT, Hammon BRDF,
-//      single/multibounce contribution logic, cubic emission falloff).
-//    - NEE lobe (emissive-guided): picks a uniformly random screen texel,
-//      cheap-tests it for emission (gbuffer mask ranges + labPBR emission
-//      map alpha, no material_from call), reconstructs its view position,
-//      marches an occlusion segment toward it, and evaluates an unbiased
-//      next-event estimator: E * cosX * falloff * 4d^2 / (P00*P11*r^2).
-//      This finds sparse emitters (torches, lava, glowstone) that cosine
-//      rays at 1 SPP almost never hit. Fragment-only, Mac-safe.
-//
-//  The lobes are stratified per pixel/frame by hash (SSPT_GUIDE_RATIO) and
-//  averaged, so the emission integral stays unbiased; the direct-light
-//  bounce is gathered on cosine-lobe candidates only (large smooth sources
-//  need no guiding) and normalized by the cosine count, not the total.
-//
-//  Bounce lighting gathered per hit:
-//    - shadowed sun/moon bounce (hitDirectLight, Overworld/End with SHADOW),
-//      tinted by the hit albedo
-//    - held-light bounce (hitDirectLight, everywhere HANDHELD_LIGHTING is on:
-//      all worlds, NORMAL and COLORED modes) evaluated at the hit with the
-//      primary pass's exact falloff/color, so held light is genuinely path
-//      traced — not a flat add-on
-//    - SSPT_INTENSITY scales both emission and bounce
-//  Skylight bounce: the hit surface's own sky exposure (light_levels.y)
-//  sampled directionally from the sky map at the hit normal (colortex4,
-//  DIRECT_SKY_BOUNCE, always on under SSPT). Primary-surface sky ambient
-//  comes from the traced sky (SSPT on) or the bent-cone term (SSPT off) --
-//  this is bounce only, at traced hits.
-//
-//  Porting notes:
-//    - View-space raytracing through Luster's space_conversion.glsl
-//      (10% relative-depth rejection threshold, same step counts).
-//    - Hit emission is reconstructed via material_from(), which generalizes
-//      to every hardcoded emissive block and to resource pack labPBR
-//      emission maps.
-//    - Hash-based dithers (no bluenoise texture layout dependency),
-//      tempered with frameCounter.
-//    - Rays sample the combined depth buffer (DH-aware) like Luster's other
-//      screen-space effects.
-//
-//  Required uniforms (declared by the including program before this file):
-//    colortex1, colortex2, colortex4 (sky map, sky bounce), depth via TRACE_DEPTH,
-//    gbufferModelView{,Inverse}, cameraPosition, view_res, view_pixel_size,
-//    taau_render_scale, near, far, frameCounter
-//    + for the retained bounce: shadowtex0/shadowtex1[/shadowcolor0],
-//      shadowModelView{,Inverse}, shadowProjection, sun_dir, moon_dir,
-//      sunAngle, time_sunrise/sunset, moon_phase_brightness,
-//      [colortex8], rainStrength, desert_sandstorm, light_dir, eyeAltitude,
-//      moonPhase, held-item uniforms (via handheld_lighting.glsl)
-//  Required macros (defined by the including program before this file):
-//    TRACE_DEPTH              - depth buffer to trace against
-//    TRACE_PROJ          - projection matrix (DH-aware: combined)
-//    TRACE_PROJ_INV  - its inverse
-// ============================================================================
 
 #include "/include/lighting/colors/blocklight_color.glsl"
 #include "/include/lighting/handheld_lighting.glsl"
@@ -294,7 +236,7 @@ vec3 hitEmission(vec4 hit_data_0, ivec2 hit_texel, vec3 hit_view_pos) {
     decode_emission(map, hit_material);
 #endif
 
-    // Match the primary Photon-style emissive response: the emitter's
+    // Match the primary Luster-style emissive response: the emitter's
     // own albedo modulates its emitted source radiance. This keeps bright
     // emissive blocks from becoming an independent white-hot HDR pool when
     // SSPT is enabled, while preserving the source texture detail.

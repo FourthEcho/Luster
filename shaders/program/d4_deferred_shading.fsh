@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shader by FourthEcho
 
   program/d4_deferred_shading:
   Shade terrain and entities, draw sky
@@ -644,7 +644,7 @@ void main() {
 #ifdef SH_SKYLIGHT
         // Full second-order SH sky ambient: directional irradiance around
         // the bent normal, mixed with flat up-ambient by skylight^2 the
-        // way Photon applies it. The baked base yields wherever this term
+        // way Luster applies it. The baked base yields wherever this term
         // is active (see get_sky_lighting), so the sky mean is counted
         // exactly once.
         fragment_color += get_sh_skylight(

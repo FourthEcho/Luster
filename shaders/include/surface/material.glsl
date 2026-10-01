@@ -59,7 +59,7 @@ void decode_emission(vec4 specular_map, inout Material material) {
         max(material.emission, vec3(0.0)),
         vec3(GLOBAL_EMISSION_CURVE)
     );
-    // Match Photon: preserve the albedo-shaped emissive source instead of
+    // Match Luster: preserve the albedo-shaped emissive source instead of
     // renormalizing it to a fixed luminance. GLOBAL_EMISSION_INTENSITY is a
     // simple multiplier so darker emissive texels stay darker.
     material.emission *= GLOBAL_EMISSION_INTENSITY;
@@ -967,7 +967,7 @@ Material material_from(
 #endif
     }
 
-    // Emissive baseline remains albedo-shaped like Photon; decode_emission()
+    // Emissive baseline remains albedo-shaped like Luster; decode_emission()
     // applies the shared curve/intensity later when the material is finalized.
 
 #ifdef POROSITY

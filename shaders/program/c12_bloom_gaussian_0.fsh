@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shader by FourthEcho
 
   program/post/bloom/gaussian0.fsh
   1D horizontal gaussian blur pass for bloom tiles

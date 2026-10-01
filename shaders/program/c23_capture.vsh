@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shader by FourthEcho
 
   program/c23_capture.vsh:
   Fullscreen-triangle vertex shader for the reflection capture pass

@@ -165,7 +165,7 @@ vec3 get_water_normal(
     normal_influence *= grazing_fade;
     normal_influence *= WATER_WAVE_STRENGTH;
 
-    // Photon-style wave normal (matches Photon exactly; note this tilts
+    // Luster-style wave normal (matches Luster exactly; note this tilts
     // towards the slope rather than away from it).
     vec3 normal = vec3(wave1 - wave0, wave2 - wave0, h);
     normal.xy *= normal_influence;

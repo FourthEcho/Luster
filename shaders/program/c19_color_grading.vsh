@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shader by FourthEcho
 
   program/c19_color_grading:
   Apply bloom, color grading and tone mapping then convert to rec. 709

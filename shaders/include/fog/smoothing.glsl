@@ -1,16 +1,6 @@
 #if !defined INCLUDE_FOG_SMOOTHING
 #define INCLUDE_FOG_SMOOTHING
 
-// Fog smoothing is a current-frame edge-aware Gaussian denoising stage. It
-// intentionally does not reuse scene color/TAA history: fog radiance is a
-// different signal.
-//
-// Each tap is weighted by a Gaussian falloff over distance from the center
-// pixel (so nearby samples contribute far more than samples near the edge
-// of the kernel, unlike a flat box filter) multiplied by a bilateral range
-// weight based on luminance difference (so the blur doesn't bleed across
-// hard fog-density edges, e.g. cave mouths or fog-bank boundaries).
-
 #include "/include/utility/color.glsl"
 #include "/include/utility/fast_math.glsl"
 

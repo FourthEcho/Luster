@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shader by FourthEcho
 
   program/d0_sky_map:
   Render omnidirectional sky map for reflections and environment irradiance

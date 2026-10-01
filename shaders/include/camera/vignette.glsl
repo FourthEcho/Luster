@@ -1,13 +1,6 @@
 #if !defined INCLUDE_CAMERA_VIGNETTE
 #define INCLUDE_CAMERA_VIGNETTE
 
-// Filmic vignette with darkness/pulse response.
-//
-// Requires from the including program:
-//   - frameTimeCounter, biome_cave, blindness, darknessFactor uniforms
-//   - VIGNETTE_INTENSITY / VIGNETTE_START / VIGNETTE_END / VIGNETTE_EXPONENT
-//     settings, dampen() from "/include/global.glsl".
-
 float vignette(vec2 uv) {
     const float vignette_size = 16.0;
     const float vignette_intensity = 0.08 * VIGNETTE_INTENSITY;

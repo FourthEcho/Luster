@@ -1,7 +1,7 @@
 /*
 --------------------------------------------------------------------------------
 
-  Photon Shader by SixthSurge
+  Luster Shader by FourthEcho
 
   program/c11_bloom_merge_buffers:
   Copy bloom tiles from read buffer to write buffer

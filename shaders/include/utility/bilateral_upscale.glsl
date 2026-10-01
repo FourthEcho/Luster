@@ -3,28 +3,6 @@
 
 #include "/include/utility/space_conversion.glsl"
 
-// Generic depth-aware bilinear upscale for buffers computed at a fraction
-// of full resolution (AO, SSPT, or any other screen-space effect that's
-// too expensive to run every pixel every frame) and later composited back
-// at full res.
-//
-// Split into sample/resolve so callers can fetch the four low-res texels
-// early (latency hiding) and combine them later once the full-res
-// fragment's own depth is available, matching how the original inline AO
-// upscale in d4_deferred_shading.fsh was structured.
-//
-// Uses plain `out` parameters rather than a struct-of-arrays return value -
-// Apple's OpenGL 4.1 GLSL compiler is unreliable with structs containing
-// arrays passed/returned by value, so this stays as flat scalars/vectors
-// to match the macOS GL4.1 hard constraint the rest of the pack targets.
-//
-// `depth_sampler` is expected to store `1.0 - linear_depth` per texel (the
-// same convention the AO history buffer uses), matched against the full-res
-// fragment's linear depth to reject texels that spilled across a depth
-// discontinuity (the usual cause of upscale haloing/ghosting on edges).
-
-// `base_texel` is the low-res texel at the floor of the current fragment's
-// position in low-res texel space (i.e. ivec2(frag_pos_in_low_res)).
 void bilateral_upscale_sample(
     sampler2D data_sampler,
     sampler2D depth_sampler,

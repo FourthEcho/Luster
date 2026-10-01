@@ -2,35 +2,9 @@
 #define INCLUDE_UTILITY_ANISOTROPIC_FILTERING
 
 // ---------------------------------------------------------------------------
-//   Anisotropic filtering strategy
-// ---------------------------------------------------------------------------
-//
-// The shader exposes a user-facing ANISOTROPIC_FILTERING_MODE setting with
-// levels Off / 2x / 4x / 8x / 16x.
-//
-// When the host (Minecraft / Iris / OptiFine) exposes the
-// GL_ARB_texture_filter_anisotropic extension (or the legacy
-// GL_EXT_texture_filter_anisotropic), anisotropic filtering is performed
-// in hardware by the texture sampler. The shader just calls texture() and
-// the GPU does the rest — no extra samples, no extra cost beyond what the
-// sampler already pays.
-//
-// When the extension is NOT available, we fall back to a full software
-// implementation: we take N elongated samples along the dominant
-// screen-space texture-coordinate gradient (the axis a surface is
-// foreshortened along, e.g. a floor viewed at a grazing angle) and
-// average them, rather than relying on a single isotropic mip sample.
-// The sample count is derived from the ANISOTROPIC_FILTERING_MODE setting,
-// clamped to the actual anisotropy ratio of the footprint so we don't
-// waste samples when the surface isn't actually foreshortened.
-//
-// Either way, calling code should use the read_tex_anisotropic() macro
-// below — it expands to the right thing depending on what's available.
+//   Anisotropic filtering 
 // ---------------------------------------------------------------------------
 
-// Detect hardware anisotropic support. Iris exposes GL extensions as
-// MC_GL_<extension_name> preprocessor defines, mirroring the GL_STRING
-// query. Both ARB (core in 4.6) and EXT (older drivers) spellings exist.
 #if defined MC_GL_ARB_texture_filter_anisotropic \
     || defined MC_GL_EXT_texture_filter_anisotropic
   #define ANISOTROPIC_FILTERING_HARDWARE

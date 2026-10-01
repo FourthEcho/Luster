@@ -3,12 +3,6 @@
 
 // Shared bookkeeping for the SSPT temporal passes (d5 accumulate + d6
 // SVGF filter): half-res buffer helpers and the packed-gbuffer fetch.
-//
-// Requires from the including program:
-//   - colortex19 sampler (packed normal + squared depth)
-//   - view_res uniform
-//   - sqr() from "/include/global.glsl", luminance weights from
-//     "/include/utility/color.glsl".
 
 #include "/include/utility/color.glsl"
 
