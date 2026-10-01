@@ -492,7 +492,6 @@ void main() {
               position_scene,
               normal,
               tbn[2],
-              tbn[2],
               shadows,
               adjusted_light_levels,
               1.0,

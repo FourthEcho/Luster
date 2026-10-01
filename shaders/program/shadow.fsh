@@ -30,6 +30,14 @@ flat in vec3 tint;
 in vec3 scene_pos;
 #endif
 
+#if defined POM && defined POM_DEPTH_WRITE && !defined COLORWHEEL && (defined PROGRAM_SHADOW_SOLID || defined PROGRAM_SHADOW_CUTOUT)
+in vec2 atlas_tile_coord;
+in float pom_view_distance;
+flat in vec2 atlas_tile_offset;
+flat in vec2 atlas_tile_scale;
+flat in mat3 tbn;
+#endif
+
 // ------------
 //   Uniforms
 // ------------
@@ -37,16 +45,17 @@ in vec3 scene_pos;
 uniform sampler2D tex;
 uniform sampler2D noisetex;
 
-#ifdef SHADOW_COLOR
-uniform sampler2D shadowtex1;
-#endif
-
 uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
 uniform mat4 gbufferProjection;
 uniform mat4 gbufferProjectionInverse;
 
+uniform mat4 shadowProjection;
 uniform mat4 shadowProjectionInverse;
+
+#if defined POM && defined POM_DEPTH_WRITE && !defined COLORWHEEL && (defined PROGRAM_SHADOW_SOLID || defined PROGRAM_SHADOW_CUTOUT)
+uniform sampler2D normals;
+#endif
 
 uniform vec3 cameraPosition;
 
@@ -63,6 +72,10 @@ uniform vec3 light_dir;
 #include "/include/fog/water_absorption.glsl"
 #include "/include/utility/color.glsl"
 #include "/include/utility/encoding.glsl"
+
+#if defined POM && defined POM_DEPTH_WRITE && !defined COLORWHEEL && (defined PROGRAM_SHADOW_SOLID || defined PROGRAM_SHADOW_CUTOUT)
+#include "/include/surface/parallax.glsl"
+#endif
 
 const float air_n = 1.000293; // for 0°C and 1 atm
 const float water_n = 1.333; // for 20°C
@@ -131,6 +144,12 @@ float get_water_caustics() {
 }
 
 void main() {
+#if defined POM && defined POM_DEPTH_WRITE && !defined COLORWHEEL && (defined PROGRAM_SHADOW_SOLID || defined PROGRAM_SHADOW_CUTOUT)
+    // Once gl_FragDepth is assigned anywhere it must be written on every
+    // path (undefined otherwise), so default to the rasterized depth.
+    gl_FragDepth = gl_FragCoord.z;
+#endif
+
 #ifndef COLORWHEEL
     if (material_mask == 1) { // Water
 #if defined PROGRAM_SHADOW_WATER || defined PROGRAM_SHADOW_FALLBACK
@@ -145,10 +164,60 @@ void main() {
         );
 #endif
     } else {
+#if defined POM && defined POM_DEPTH_WRITE && !defined COLORWHEEL && (defined PROGRAM_SHADOW_SOLID || defined PROGRAM_SHADOW_CUTOUT)
+        // POM in the shadow pass: march the height field along the LIGHT
+        // ray (tangent_dir points toward the light), sample colour/alpha at
+        // the displaced UV, and push shadow depth away from the light by the
+        // same relief the gbuffer pass writes, so both passes see one surface.
+        vec2 pom_shadow_uv = uv;
+        float pom_shadow_dz = 0.0;
+
+        vec3 pom_tangent_dir = normalize(light_dir * tbn);
+        bool pom_valid = pom_view_distance < POM_DISTANCE
+            && dot(tbn[0], tbn[0]) > 0.5 // at_tangent actually supplied
+            && pom_tangent_dir.z > 0.1; // surface faces the light
+
+        if (pom_valid) {
+            mat2 pom_uv_gradient = mat2(dFdx(uv), dFdy(uv));
+            vec3 pom_prev_ray_pos;
+            float pom_hit_depth;
+
+            // No dither here: a per-pixel jitter would make the shadow map
+            // shimmer, and the deferred pass already filters it.
+            pom_shadow_uv = get_parallax_uv(
+                pom_tangent_dir,
+                pom_uv_gradient,
+                pom_view_distance,
+                0.0,
+                pom_prev_ray_pos,
+                pom_hit_depth
+            );
+
+            float pom_relief = get_pom_world_relief(
+                pom_hit_depth,
+                pom_view_distance
+            );
+            // Relief is measured along the normal; along the light ray it is
+            // relief / cos(theta) (floored so grazing light cannot explode).
+            float pom_ray_dist = pom_relief * rcp(max(pom_tangent_dir.z, 0.15));
+            // World distance -> shadow window depth (ortho projection, then
+            // the same SHADOW_DEPTH_SCALE the vertex shader applies).
+            pom_shadow_dz = 0.5 * SHADOW_DEPTH_SCALE
+                * -shadowProjection[2][2] * pom_ray_dist;
+        }
+
+        vec4 base_color = textureLod(tex, pom_shadow_uv, 0);
+#else
         vec4 base_color = textureLod(tex, uv, 0);
+#endif
         if (base_color.a < 0.1) {
             discard;
         }
+#if defined POM && defined POM_DEPTH_WRITE && !defined COLORWHEEL && (defined PROGRAM_SHADOW_SOLID || defined PROGRAM_SHADOW_CUTOUT)
+        if (pom_shadow_dz == pom_shadow_dz) {
+            gl_FragDepth = min(gl_FragCoord.z + max(pom_shadow_dz, 0.0), 0.999999);
+        }
+#endif
 
         shadowcolor0_out = mix(vec3(1.0), base_color.rgb * tint, clamp01(base_color.a * SHADOW_COLOR_INTENSITY));
         shadowcolor0_out

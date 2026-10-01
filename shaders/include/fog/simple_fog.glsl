@@ -184,9 +184,6 @@ mat2x3 water_fog_simple(
     dist = max(dist, 2.0 - 1.0 * skylight_factor);
 
     vec3 light_ambient = ambient_color * light_levels.y;
-#if defined SH_SKYLIGHT
-    light_ambient += ambient_color * light_levels.y * SH_SKYLIGHT_INTENSITY * 0.35;
-#endif
     light_ambient
         += 1.41 * blocklight_color * blocklight_scale * sqr(light_levels.x);
 

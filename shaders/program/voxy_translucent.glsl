@@ -17,11 +17,52 @@ uniform float desert_sandstorm;
 
 // simple_fog needs fogColor, Voxy patch doesn't expose it by default
 uniform vec3 fogColor;
+uniform sampler2D depthtex1;
+uniform sampler2D colortex4;
+uniform sampler2D colortex5;
+uniform sampler2D colortex7;
+
+uniform mat4 gbufferModelView;
+uniform mat4 gbufferModelViewInverse;
+uniform mat4 gbufferProjection;
+uniform mat4 gbufferProjectionInverse;
+uniform mat4 gbufferPreviousModelView;
+uniform mat4 gbufferPreviousProjection;
+uniform mat4 shadowModelView;
+uniform mat4 shadowModelViewInverse;
+
+uniform vec3 cameraPosition;
+uniform vec3 previousCameraPosition;
+uniform vec3 sun_dir;
+uniform vec3 light_dir;
+
+uniform vec2 view_res;
+uniform vec2 view_pixel_size;
+uniform vec2 taa_offset;
+
+uniform float near;
+uniform float far;
+uniform float eyeAltitude;
+uniform float eye_skylight;
+uniform float rainStrength;
+uniform float blindness;
+uniform float darknessFactor;
+uniform float time_noon;
+uniform float nightVision;
+uniform float sunAngle;
+
+uniform int isEyeInWater;
+uniform int moonPhase;
+uniform int frameCounter;
 
 // Declared for water_normal.glsl / rain_ripples.glsl, which sample noise
 // and animate by frame in every TU that includes them.
 uniform sampler2D noisetex;
 uniform float frameTimeCounter;
+
+// Declared for the cave-fog path, which scales density by biome_cave in
+// every TU that includes it.
+uniform float biome_cave;
 
 vec3 ambient_color;
 vec3 light_color;
@@ -254,7 +295,6 @@ void voxy_emitFragment(VoxyFragmentParameters parameters) {
     fragment_color.rgb = get_diffuse_lighting(
         material,
         pos_scene,
-        normal,
         normal,
         normal,
         shadows,

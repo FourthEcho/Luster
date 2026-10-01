@@ -35,6 +35,7 @@ in vec2 uv;
 
 flat in vec3 ambient_color;
 flat in vec3 light_color;
+flat in vec3 sky_sh[9]; // SH sky projection from the vertex stage
 
 #ifdef WORLD_OVERWORLD
 #include "/include/fog/overworld/parameters.glsl"
@@ -58,8 +59,8 @@ uniform sampler2D colortex12; // clouds data
 uniform sampler2D colortex13; // rendered translucent layer
 
 #ifdef DISTANT_HORIZONS
-// colortex1 is declared above because GI and distant-water paths share the
-// same gbuffer texture.
+// colortex1 gbuffer fetch for the DH water path below.
+uniform sampler2D colortex1;
 #endif
 
 #ifdef VOXY
@@ -78,6 +79,7 @@ uniform mat4 gbufferPreviousModelView;
 uniform mat4 gbufferPreviousProjection;
 
 uniform mat4 shadowModelView;
+uniform mat4 shadowModelViewInverse;
 uniform mat4 shadowProjection;
 
 uniform vec3 cameraPosition;
@@ -129,6 +131,12 @@ uniform float time_midnight;
 #define TEMPORAL_REPROJECTION
 
 #include "/include/fog/simple_fog.glsl"
+#include "/include/lighting/ambient/sh_skylight.glsl"
+#include "/include/lighting/cloud_shadows.glsl"
+
+// Cloud shadow map for the analytic-fog gates below (p0 renders it
+// unconditionally, so this is valid in every config, mods or not).
+uniform sampler2D colortex8;
 #include "/include/misc/lightning_flash.glsl"
 #include "/include/misc/lod_mod_support.glsl"
 #include "/include/misc/material_masks.glsl"
@@ -144,9 +152,6 @@ uniform float time_midnight;
 #include "/include/sky/clouds/sampling.glsl"
 
 #ifdef LOD_MOD_ACTIVE
-uniform sampler2D colortex8;
-uniform mat4 shadowModelViewInverse;
-
 #include "/include/lighting/cloud_shadows.glsl"
 #endif
 #endif
@@ -174,13 +179,30 @@ vec3 blend_layers_with_fog(
 
 #if defined WORLD_OVERWORLD
     if (is_translucent) {
+#ifdef SH_SKYLIGHT
+        vec3 fog_ambient_back = fog_skylight(
+            sky_sh,
+            back_position_world - front_position_world
+        );
+#else
+        vec3 fog_ambient_back = ambient_color;
+#endif
         mat2x3 analytic_fog = air_fog_analytic(
             front_position_world,
             back_position_world,
             is_sky,
             eye_skylight,
-            1.0
+            1.0,
+            fog_ambient_back
         );
+
+        // Clouds gate the sun beam behind translucents (same job as the
+        // primary direct-sun path). One midpoint tap: the cloud map is
+        // smooth at this scale. Identity with CLOUD_SHADOWS off.
+        // Transmittance (not sun-driven) is untouched.
+        vec3 mid_scene = 0.5 * (front_position_world + back_position_world)
+            - cameraPosition;
+        analytic_fog[0] *= get_cloud_shadows(colortex8, mid_scene);
 
         background_color = background_color * analytic_fog[1] + analytic_fog[0];
     }
@@ -466,20 +488,36 @@ void main() {
 #if defined WORLD_OVERWORLD
         // Overworld fog
 
+#ifdef SH_SKYLIGHT
+        vec3 fog_ambient_front = fog_skylight(
+            sky_sh,
+            front_position_world - cameraPosition
+        );
+#else
+        vec3 fog_ambient_front = ambient_color;
+#endif
         mat2x3 analytic_fog = air_fog_analytic(
             cameraPosition,
             front_position_world,
             is_sky,
             eye_skylight,
-            1.0
+            1.0,
+            fog_ambient_front
         );
+
+        // Same cloud gate as above, at this segment's midpoint.
+        vec3 mid_scene_main
+            = 0.5 * (front_position_world - cameraPosition);
+        analytic_fog[0] *= get_cloud_shadows(colortex8, mid_scene_main);
 
         fragment_color *= analytic_fog[1];
         fragment_color += analytic_fog[0];
 
 #ifdef BLOOMY_FOG
+        // NOTE: fog_transmittance only exists under VL above; use the
+        // analytic transmittance computed just above in this branch.
         bloomy_fog
-            = clamp01(dot(fog_transmittance, vec3(luminance_weights)));
+            = clamp01(dot(analytic_fog[1], vec3(luminance_weights)));
         bloomy_fog = isEyeInWater == 1 ? sqrt(bloomy_fog) : bloomy_fog;
 #endif
 #else

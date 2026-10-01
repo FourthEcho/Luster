@@ -30,8 +30,7 @@ vec3 clouds_multiple_scattering_bounce(
         * exp(-extinction_coeff
               * (light_optical_depth + ground_optical_depth));
 
-    float sky_source = dot(sky_color, luminance_weights)
-        * exp(-extinction_coeff * sky_optical_depth);
+    float sky_source = exp(-extinction_coeff * sky_optical_depth);
 
     // Smooth base-to-top split: low samples drink ground bounce,
     // high samples drink sky ambient

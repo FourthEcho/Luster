@@ -3,22 +3,10 @@
 
 #include "/include/misc/lod_mod_support.glsl"
 
-// NB 2025-09-01 avoid the following functions, linearise using projection
-// matrices https://wiki.shaderlabs.org/wiki/Shader_tricks#Linearizing_depth
-float linearize_depth(float near, float far, float depth) {
-    return (near * far) / (depth * (near - far) + far);
-}
-
-float linearize_depth(float depth) { return linearize_depth(near, far, depth); }
-
-float reverse_linear_depth(float near, float far, float linear_z) {
-    // Exact inverse of linearize_depth: z = n*f / (d*(n-f) + f)
-    return far * (near - linear_z) / (linear_z * (near - far));
-}
-
-float reverse_linear_depth(float linear_z) {
-    return reverse_linear_depth(near, far, linear_z);
-}
+// NB 2025-09-01: linearise using the projection matrices below
+// https://wiki.shaderlabs.org/wiki/Shader_tricks#Linearizing_depth
+// (the old exact scalar linearize/reverse helpers were unused: everything
+// goes through screen_to_view_space_depth / linearize_depth_fast.)
 
 // Approximate linear depth function by DrDesten
 float linearize_depth_fast(float near, float depth) {

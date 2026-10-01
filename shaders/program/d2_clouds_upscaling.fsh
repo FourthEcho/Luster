@@ -35,8 +35,6 @@ in vec2 uv;
 //   Uniforms
 // ------------
 
-uniform sampler2D noisetex;
-
 uniform sampler2D colortex14; // previous frame depth
 uniform sampler2D colortex9; // low-res clouds
 uniform sampler2D colortex10; // low-res clouds apparent distance

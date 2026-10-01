@@ -35,9 +35,9 @@ in vec2 uv;
 flat in vec3 ambient_color;
 flat in vec3 light_color;
 
-// 6 RGB H-Basis sky ambient coefficients projected once per frame from
-// the live sky map. See include/lighting/ambient/h_basis_skylight.glsl.
-flat in vec3 sky_h[6];
+// 9 RGB SH sky ambient coefficients projected once per frame from the
+// live sky map. See include/lighting/ambient/sh_skylight.glsl.
+flat in vec3 sky_sh[9];
 
 #if defined WORLD_OVERWORLD
 flat in vec3 sun_color;
@@ -177,7 +177,7 @@ const bool colortex11MipmapEnabled = true;
 #define TEMPORAL_REPROJECTION
 
 #include "/include/fog/simple_fog.glsl"
-#include "/include/lighting/ambient/h_basis_skylight.glsl"
+#include "/include/lighting/ambient/sh_skylight.glsl"
 #include "/include/lighting/diffuse_lighting.glsl"
 #include "/include/lighting/shadows/common.glsl"
 #include "/include/lighting/shadows/pcss.glsl"
@@ -580,7 +580,6 @@ void main() {
             position_scene,
             normal,
             flat_normal,
-            bent_normal,
             shadows,
             light_levels,
             ao,
@@ -628,30 +627,35 @@ void main() {
             sspt_light *= material.albedo;
             sspt_light *= mix(1.0, metal_diffuse_amount, float(material.is_metal));
 
-#ifdef CLOUD_SHADOWS
-            sspt_light *= cloud_shadows;
-#endif
+            // NOTE: no cloud_shadows multiply here. Every component already
+            // carries its own correct gating: sun bounce is cloud-shadowed
+            // at the hit inside hitDirectLight, lamp emission ignores
+            // clouds physically, and traced sky arrives pre-darkened by the
+            // cloudy sky map. Multiplying the pixel's cloud factor on top
+            // would double-darken all three.
 
             fragment_color += sspt_light;
         }
 #endif
 
+        // Directional sky ambient: the SH term below owns it (traced SSPT
+        // light carries bounce + emission only, never sky).
+
 #ifdef SH_SKYLIGHT
-        // H-Basis sky ambient: reconstructs cosine-weighted hemisphere
-        // irradiance around the bent normal from the per-frame projection
-        // computed in d4_deferred_shading.vsh. The bent normal + AO
-        // cone-narrowing replace the old IBL's plain-normal hemisphere
-        // sampling at a fraction of the cost.
-        vec3 sh_skylight = get_h_basis_skylight(
+        // Full second-order SH sky ambient: directional irradiance around
+        // the bent normal, mixed with flat up-ambient by skylight^2 the
+        // way Photon applies it. The baked base yields wherever this term
+        // is active (see get_sky_lighting), so the sky mean is counted
+        // exactly once.
+        fragment_color += get_sh_skylight(
             material,
-            normal,
             bent_normal,
-            ao,
             clamp01(light_levels.y),
+            ao,
             SH_SKYLIGHT_INTENSITY,
-            sky_h
+            ambient_color,
+            sky_sh
         );
-        fragment_color += sh_skylight;
 #endif
 
         // Specular highlight

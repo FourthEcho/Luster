@@ -1,6 +1,22 @@
 #if !defined INCLUDE_SKY_OZONE
 #define INCLUDE_SKY_OZONE
 
+// Iris only lists a boolean option if it is checked with a plain
+// #ifdef/#ifndef somewhere; the per-system gates below use combined
+// #if defined A && defined B, so register the sub-toggles here.
+#ifdef OZONE_SKY
+#define OZONE_SKY_OPTION_ENABLED
+#endif
+#ifdef OZONE_FOG
+#define OZONE_FOG_OPTION_ENABLED
+#endif
+#ifdef OZONE_MIST
+#define OZONE_MIST_OPTION_ENABLED
+#endif
+#ifdef OZONE_PLANET_BOUNCE
+#define OZONE_PLANET_BOUNCE_OPTION_ENABLED
+#endif
+
 #include "/include/utility/color.glsl"
 
 // ---------------------------------------------------------------------------
@@ -58,6 +74,7 @@ const float ozone_layer_width = OZONE_THICKNESS * 1e3;   // m
 // primaries transformed to the working color space.
 const vec3 ozone_absorption_coefficient
     = vec3(8.304280072e-07, 1.314911970e-06, 5.440679729e-08)
+    * vec3(OZONE_COLOR_R, OZONE_COLOR_G, OZONE_COLOR_B) // user tint (Rec. 709)
     * rec709_to_working_color;
 
 // Vertical column of the Gaussian layer in unit-density metres, scaled

@@ -31,7 +31,6 @@ flat in vec3 moon_color;
 // ------------
 
 uniform sampler2D gtexture;
-uniform sampler2D noisetex;
 
 uniform int moonPhase;
 uniform int renderStage;
@@ -39,6 +38,7 @@ uniform int renderStage;
 uniform vec3 view_sun_dir;
 
 uniform float desert_sandstorm;
+uniform float rainStrength;
 
 #include "/include/sky/atmosphere.glsl"
 #include "/include/utility/color.glsl"

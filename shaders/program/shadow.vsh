@@ -20,6 +20,17 @@ flat out vec3 tint;
 out vec3 scene_pos;
 #endif
 
+// POM depth write for the shadow map: the terrain shadow programs need the
+// same tile/tangent data the gbuffer pass uses so the fragment shader can
+// march the height field along the light ray.
+#if defined POM && defined POM_DEPTH_WRITE && !defined COLORWHEEL && (defined PROGRAM_SHADOW_SOLID || defined PROGRAM_SHADOW_CUTOUT)
+out vec2 atlas_tile_coord;
+out float pom_view_distance;
+flat out vec2 atlas_tile_offset;
+flat out vec2 atlas_tile_scale;
+flat out mat3 tbn;
+#endif
+
 // --------------
 //   Attributes
 // --------------
@@ -103,6 +114,29 @@ void main() {
 
 #ifdef WATER_CAUSTICS
     scene_pos = pos;
+#endif
+
+#if defined POM && defined POM_DEPTH_WRITE && !defined COLORWHEEL && (defined PROGRAM_SHADOW_SOLID || defined PROGRAM_SHADOW_CUTOUT)
+    // Same tile / TBN construction as gbuffers_all_solid.vsh, but with the
+    // shadow view matrices, so the tangent frame matches the gbuffer's.
+    {
+        vec2 uv_minus_mid = uv - mc_midTexCoord;
+        atlas_tile_offset = min(uv, mc_midTexCoord - uv_minus_mid);
+        atlas_tile_scale = abs(uv_minus_mid) * 2.0;
+        atlas_tile_coord = sign(uv_minus_mid) * 0.5 + 0.5;
+
+        mat3 pom_tbn;
+        pom_tbn[0] = mat3(shadowModelViewInverse)
+            * normalize(gl_NormalMatrix * at_tangent.xyz);
+        pom_tbn[2] = mat3(shadowModelViewInverse)
+            * normalize(gl_NormalMatrix * gl_Normal);
+        pom_tbn[1] = cross(pom_tbn[0], pom_tbn[2]) * sign(at_tangent.w);
+        tbn = pom_tbn;
+
+        // Camera-relative distance: drives the same POM distance fade as
+        // the gbuffer pass so shadow and depth displacement agree.
+        pom_view_distance = length(pos);
+    }
 #endif
 
     pos = transform(shadowModelView, pos);

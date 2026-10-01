@@ -31,6 +31,12 @@ flat in CloudsParameters clouds_params;
 
 uniform sampler2D noisetex;
 
+// 3D cloud noise (global customTextures); the cloud-shadow includes pull in
+// cumulus.glsl, whose noise functions reference these.
+uniform sampler3D cumulus_curl;
+uniform sampler3D cumulus_detail1;
+uniform sampler3D cumulus_detail2;
+
 
 
 uniform mat4 gbufferModelView;

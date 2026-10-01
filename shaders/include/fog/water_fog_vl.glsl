@@ -98,8 +98,9 @@ mat2x3 raymarch_water_fog(
 
         // Guess the transmittance to sky using trigonometry
         float distance_traveled_sky = distance_traveled * light_dir.y;
-        distance_traveled_sky = min(
+        distance_traveled_sky = clamp(
             distance_traveled_sky,
+            0.0,
             15.0 - 15.0 * eye_skylight + max0(eyeAltitude - world_pos.y)
         );
 #else

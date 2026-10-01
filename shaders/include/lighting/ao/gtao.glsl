@@ -87,9 +87,12 @@ vec2 compute_gtao(
     float ambient_sss = 0.0;
     bent_normal = vec3(0.0);
 
-    // Construct local working space
+    // Construct local working space. Looking straight up/down makes the
+    // up-cross degenerate, so fall back to +X like get_tbn_matrix does.
     vec3 viewer_dir = normalize(-view_pos);
-    vec3 viewer_right = normalize(cross(vec3(0.0, 1.0, 0.0), viewer_dir));
+    vec3 viewer_right = abs(viewer_dir.y) > 1.0 - 1e-4
+        ? vec3(1.0, 0.0, 0.0)
+        : normalize(cross(vec3(0.0, 1.0, 0.0), viewer_dir));
     vec3 viewer_up = cross(viewer_dir, viewer_right);
     mat3 local_to_view = mat3(viewer_right, viewer_up, viewer_dir);
 

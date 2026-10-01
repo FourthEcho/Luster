@@ -17,8 +17,6 @@ uniform mat4 gbufferProjectionInverse;
 uniform mat4 shadowProjection, shadowProjectionInverse;
 uniform mat4 shadowModelView, shadowModelViewInverse;
 
-uniform sampler2D depthtex0;
-
 layout(location = 0) out vec3 shadowcolor0_out;
 
 #include "/include/lighting/shadows/distortion.glsl"

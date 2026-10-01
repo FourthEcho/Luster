@@ -104,7 +104,7 @@ void main() {
 
     if (is_lod) {
         position_view = screen_to_view_space(
-            dhProjectionInverse,
+            lod_projection_matrix_inverse,
             vec3(uv, depth_lod),
             true
         );

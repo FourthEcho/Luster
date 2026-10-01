@@ -199,6 +199,16 @@ mat2x3 raymarch_air_fog(
         transmittance *= step_transmittance;
     }
 
+    // Clouds gate the sun beam feeding the whole march (the same job as
+    // the primary direct-sun path's cloud shadows). One tap at the marched
+    // segment midpoint: the cloud map is smooth at this scale, so per-step
+    // taps would cost N× for no visible gain. Sky ambient needs no gate —
+    // it arrives via ambient_color, already cloud-darkened in the sky map.
+    // get_cloud_shadows() returns 1.0 with CLOUD_SHADOWS off, so no guard.
+    vec3 mid_world_pos = world_start_pos
+        + world_dir * (distance_to_volume_start + ray_length * 0.5);
+    light_sun *= get_cloud_shadows(colortex8, mid_world_pos - cameraPosition);
+
     light_sun[0] *= fog_params.rayleigh_scattering_coeff;
     light_sun[1] *= fog_params.mie_scattering_coeff;
     light_sky[0] *= fog_params.rayleigh_scattering_coeff;
@@ -211,7 +221,7 @@ mat2x3 raymarch_air_fog(
     }
 
     float LoV = dot(world_dir, light_dir);
-    float mie_phase = 0.7 * henyey_greenstein_phase(LoV, 0.5)
+    float mie_phase = 0.7 * henyey_greenstein_phase(LoV, FOG_MIE_ANISOTROPY)
         + 0.3 * henyey_greenstein_phase(LoV, -0.2);
 
     /*
@@ -229,14 +239,15 @@ mat2x3 raymarch_air_fog(
     vec3 ambient_color = ambient_color_fog;
 #endif
 
-    scattering += 2.0 * light_sky * vec2(isotropic_phase) * ambient_color;
-#if defined SH_SKYLIGHT
-    scattering += 1.15 * light_sky * vec2(isotropic_phase)
-        * ambient_color * SH_SKYLIGHT_INTENSITY;
+    scattering += 2.0 * light_sky * vec2(isotropic_phase)
+#ifdef SH_SKYLIGHT
+        * fog_skylight(sky_sh, world_dir);
+#else
+        * ambient_color;
 #endif
 
     for (int i = 0; i < 4; ++i) {
-        float mie_phase = 0.7 * henyey_greenstein_phase(LoV, 0.5 * anisotropy)
+        float mie_phase = 0.7 * henyey_greenstein_phase(LoV, FOG_MIE_ANISOTROPY * anisotropy)
             + 0.3 * henyey_greenstein_phase(LoV, -0.2 * anisotropy);
 
         vec3 order_light = light_color;

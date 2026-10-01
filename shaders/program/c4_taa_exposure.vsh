@@ -168,7 +168,12 @@ void main() {
 #if AUTO_EXPOSURE == AUTO_EXPOSURE_OFF
     exposure = get_exposure_from_ev_100(manual_exposure_value);
 #else
-    float previous_exposure = texelFetch(colortex5, ivec2(0), 0).a;
+    // Previous exposure carries the triangle factor (it is multiplied in
+    // below before storage), so divide it back out: the temporal blend
+    // must run in triangle-free space, otherwise the factor compounds
+    // every frame (dark, hunting exposure that drifts with f-stop/ISO).
+    float previous_exposure = texelFetch(colortex5, ivec2(0), 0).a
+        / max(camera_exposure_triangle_factor(), 1e-6);
 
 #if AUTO_EXPOSURE == AUTO_EXPOSURE_SIMPLE
     float lod = ceil(log2(max_of(view_res)));
@@ -185,7 +190,20 @@ void main() {
 
     float target_exposure = get_exposure_from_luminance(luminance);
 
-    if (isnan(previous_exposure) || isinf(previous_exposure)) {
+    // Sanitize both sides: a degenerate meter (all-zero/NaN histogram)
+    // yields zero or NaN luminance, i.e. an infinite exposure that would
+    // white out the frame and poison history for seconds. Fall back to
+    // the manual EV value rather than compounding bad state.
+    bool previous_bad = isnan(previous_exposure) || isinf(previous_exposure)
+        || previous_exposure <= 0.0;
+    bool target_bad = isnan(target_exposure) || isinf(target_exposure)
+        || target_exposure <= 0.0;
+    if (target_bad) {
+        target_exposure = previous_bad
+            ? get_exposure_from_ev_100(manual_exposure_value)
+            : previous_exposure;
+    }
+    if (previous_bad) {
         previous_exposure = target_exposure;
     }
 

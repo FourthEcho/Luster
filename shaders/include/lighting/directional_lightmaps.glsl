@@ -22,6 +22,14 @@ vec2 get_directional_lightmaps(vec3 position_scene, vec3 normal) {
             // Clamp the renormalization: near-zero lightmaps would
             // otherwise boost noise up to ~1000x (fireflies in caves)
             * inversesqrt(sqrt(max(light_levels.x, 0.0625)) + eps);
+
+        // Fade the effect out where the lightmap is nearly zero: the
+        // gradient is quantized/noisy there and would speckle dark areas.
+        lightmap_mul.x = mix(
+            1.0,
+            lightmap_mul.x,
+            sqr(linear_step(0.03, 0.30, light_levels.x))
+        );
     }
 
     // Skylight
@@ -36,6 +44,14 @@ vec2 get_directional_lightmaps(vec3 position_scene, vec3 normal) {
             // Clamp the renormalization: near-zero lightmaps would
             // otherwise boost noise up to ~1000x (fireflies in caves)
             * inversesqrt(sqrt(max(light_levels.y, 0.0625)) + eps);
+
+        // Fade the effect out where the lightmap is nearly zero: the
+        // gradient is quantized/noisy there and would speckle dark areas.
+        lightmap_mul.y = mix(
+            1.0,
+            lightmap_mul.y,
+            sqr(linear_step(0.03, 0.30, light_levels.y))
+        );
     }
 
     return lightmap_mul;

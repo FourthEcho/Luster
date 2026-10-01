@@ -33,8 +33,8 @@
 //    - SSPT_INTENSITY scales both emission and bounce
 //  Skylight bounce: the hit surface's own sky exposure (light_levels.y)
 //  sampled directionally from the sky map at the hit normal (colortex4,
-//  DIRECT_SKY_BOUNCE, always on under SSPT). SH_SKYLIGHT remains the sole
-//  owner of primary-surface ambient (the direct-view flat/SH term) --
+//  DIRECT_SKY_BOUNCE, always on under SSPT). Primary-surface sky ambient
+//  comes from the traced sky (SSPT on) or the bent-cone term (SSPT off) --
 //  this is bounce only, at traced hits.
 //
 //  Porting notes:
@@ -303,8 +303,8 @@ vec3 hitEmission(vec4 hit_data_0, ivec2 hit_texel, vec3 hit_view_pos) {
 //  Shadowed sun/moon light at the traced hit, tinted by the hit albedo (one
 //  hardware-filtered shadowtex1 tap, stained-glass transmission, cloud
 //  shadows), plus the held light source evaluated at the hit with the exact
-//  falloff/color of the primary pass. Skylight stays out (owned by
-//  SH_SKYLIGHT).
+//  falloff/color of the primary pass. Skylight stays out (owned by the
+//  traced sky / bent-cone ambient, never by the bounce itself).
 //  The sun/moon part needs shadow maps (Overworld/End with SHADOW); the
 //  handheld part is independent of shadows and worlds, so a held torch
 //  bounces everywhere — Nether included, in both NORMAL and COLORED modes
@@ -321,6 +321,8 @@ vec3 hitEmission(vec4 hit_data_0, ivec2 hit_texel, vec3 hit_view_pos) {
 // on under SSPT (no separate toggle) -- this is what lets light passing
 // through a cave opening bounce off the sunlit wall onto its neighbors
 // instead of just lighting the one surface directly under the hole.
+// (Pixel-level sky for escaped rays is gathered separately in
+// traceIndirect; there is no SH skylight term left to own it.)
 #define DIRECT_SKY_BOUNCE 1
 
 #if defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE || defined DIRECT_SKY_BOUNCE
@@ -558,10 +560,18 @@ vec3 traceEmissionNEE(vec3 view_pos, vec3 view_normal, vec2 pick_hash, out bool 
     vec3 emitter_radiance = hitEmission(pick_data, pick_texel, pick_view);
     if (dot(emitter_radiance, vec3(1.0)) <= 0.0) return vec3(0.0);
 
-    // Occlusion march toward the pick (10 steps over the exact segment, so
-    // the pick surface itself can never be stepped over). Any hit well
-    // short of r means something blocks the path.
+    // Occlusion march toward the pick over the exact segment, so the pick
+    // surface itself can never be stepped over (10 steps, 20 with High
+    // Quality Emission). Any hit well short of r means something blocks
+    // the path.
+#ifdef HIGH_QUALITY_EMISSION
+    // Iris requires boolean shader options to be checked with #ifdef/#ifndef.
+    // High quality doubles the march for tighter shadowing of bounced
+    // emission (less leaking through thin walls) at ~2x NEE march cost.
+    const uint occl_steps = 20u;
+#else
     const uint occl_steps = 10u;
+#endif
     for (uint k = 0u; k < occl_steps; ++k) {
         vec3 probe = view_pos
             + to_pick * ((float(k) + pick_hash.y) / float(occl_steps));
@@ -603,16 +613,24 @@ vec3 traceEmissionNEE(vec3 view_pos, vec3 view_normal, vec2 pick_hash, out bool 
 }
 
 // ----------------------------------------------------------------------------
-/* INDIRECT TRACER */
+// INDIRECT TRACER
 // ----------------------------------------------------------------------------
 //  Returns emission + direct-light bounce for this pixel (raw,
 //  noisy — temporal accumulation and the SVGF filter stabilize it
 //  downstream). Emission uses a cubic distance falloff and the
 //  clamped Hammon BRDF weight; the bounce carries no distance falloff
 //  and is tinted by the hit albedo inside hitDirectLight. Multibounce
-//  tints deeper hits with every intervening surface's albedo.
+//  tints deeper hits with every intervening surface's albedo. Sky
+//  ambient is NOT gathered here (no sky-on-escape): directional sky
+//  belongs to the SH skylight term, so the two can never double-count.
 
-vec3 traceIndirect(vec3 view_pos, vec3 scene_normal, vec2 dither, bool hand, out bool geometry_hit) {
+vec3 traceIndirect(
+    vec3 view_pos,
+    vec3 scene_normal,
+    vec2 dither,
+    bool hand,
+    out bool geometry_hit
+) {
     vec3 view_normal = mat3(gbufferModelView) * scene_normal;
 
     vec3 emission = vec3(0.0);
@@ -668,6 +686,20 @@ vec3 traceIndirect(vec3 view_pos, vec3 scene_normal, vec2 dither, bool hand, out
                 texel_pick,
                 nee_geometry_hit
             );
+#ifdef HIGH_QUALITY_EMISSION
+            // High quality: a second, decorrelated emitter pick per NEE
+            // candidate, averaged so the lobe keeps its weight (unbiased)
+            // while noise on small bright emitters drops. ~2x NEE cost.
+            bool nee_geometry_hit2;
+            vec3 nee_emission2 = traceEmissionNEE(
+                view_pos,
+                view_normal,
+                fract(texel_pick + vec2(0.371, 0.737)),
+                nee_geometry_hit2
+            );
+            nee_emission = 0.5 * (nee_emission + nee_emission2);
+            nee_geometry_hit = nee_geometry_hit || nee_geometry_hit2;
+#endif
             emission += nee_emission;
             geometry_hit = geometry_hit || nee_geometry_hit;
             continue;
@@ -675,10 +707,18 @@ vec3 traceIndirect(vec3 view_pos, vec3 scene_normal, vec2 dither, bool hand, out
 
         vec2 vector_xy = fract(sqrt(2.0) * quasirandom_curr + noise_curr);
 
+        // Cosine-candidate count lives here (not in the hit branch):
+        // bounce must average over candidates like emission does, not
+        // over hits (which overstates by 1/hit_rate, ~2x outdoors).
+        // Matches the multibounce branch below and Kappa's /SPP.
+        bounce_samples += 1.0;
+
         vec3 ray_direction = cosineVector(scene_normal, vector_xy);
             ray_direction = normalize(mat3(gbufferModelView) * ray_direction);
 
         if (dot(view_normal, ray_direction) < 0.0) ray_direction = -ray_direction;
+
+        float brdf = brdfWeight(view_normal, -normalize(view_pos), ray_direction);
 
         vec3 hit_position = screenspaceRT(view_pos, ray_direction, dither.y);
 
@@ -688,8 +728,6 @@ vec3 traceIndirect(vec3 view_pos, vec3 scene_normal, vec2 dither, bool hand, out
             vec4 hit_data_0 = texelFetch(colortex1, hit_texel, 0);
 
             vec3 hit_view_pos = screen_to_view_space(TRACE_PROJ_INV, hit_position, true);
-
-            float brdf = brdfWeight(view_normal, -normalize(view_pos), ray_direction);
 
             // Cubic emission distance falloff.
             float emission_falloff = 1.0 - linear_step(
@@ -704,8 +742,8 @@ vec3 traceIndirect(vec3 view_pos, vec3 scene_normal, vec2 dither, bool hand, out
 
 #if defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE || defined DIRECT_SKY_BOUNCE
             // Direct-light bounce: no distance falloff, BRDF-weighted.
+            // (Counted per cosine candidate above, not per hit.)
             bounce += hitDirectLight(unpackHit(hit_data_0), hit_view_pos) * brdf;
-            bounce_samples += 1.0;
 #endif
         }
     }
@@ -823,7 +861,7 @@ vec3 traceIndirect(vec3 view_pos, vec3 scene_normal, vec2 dither, bool hand, out
     if (bounce_samples > 0.5) bounce /= bounce_samples;
 #endif
 
-    emission *= float(!hand); // hand geometry gets no emission
+    emission *= float(!hand); // hand geometry gets no emission or sky
     // (hand keeps its direct-light bounce)
 
     // Hit emission is reconstructed with the same emission_scale the

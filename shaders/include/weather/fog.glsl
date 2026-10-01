@@ -116,8 +116,11 @@ OverworldFogParameters get_fog_parameters(Weather weather) {
     mie = mix(mie, AIR_FOG_MIE_DENSITY_SNOW, rainStrength * biome_may_snow);
 
     float mie_albedo = mix(0.9, 0.5, rainStrength * biome_may_rain);
-    params.mie_scattering_coeff = vec3(mie_albedo * mie);
-    params.mie_extinction_coeff = vec3(mie);
+    // User Mie tint: same multiplier the sky's Mie coefficient uses, so haze
+    // in the sky and air fog stay the same colour.
+    const vec3 mie_tint = vec3(MIE_COLOR_R, MIE_COLOR_G, MIE_COLOR_B);
+    params.mie_scattering_coeff = vec3(mie_albedo * mie) * mie_tint;
+    params.mie_extinction_coeff = vec3(mie) * mie_tint;
 
     // ---- Mist scattering coefficient ----
     // Tinted by the current Rayleigh colour so mist picks up the correct
@@ -164,7 +167,8 @@ OverworldFogParameters get_fog_parameters(Weather weather) {
 #endif
 
         params.mist_scattering_coeff = mist_base_scatter_coeff
-            * MIST_DENSITY * horizon_tint;
+            * MIST_DENSITY * horizon_tint
+            * vec3(MIST_COLOR_R, MIST_COLOR_G, MIST_COLOR_B);
         // Thicken mist during and after rain
         params.mist_scattering_coeff *= 1.0 + 0.5 * rainStrength * biome_may_rain;
     }

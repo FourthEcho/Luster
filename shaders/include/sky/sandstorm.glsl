@@ -1,6 +1,22 @@
 #if !defined INCLUDE_SKY_SANDSTORM
 #define INCLUDE_SKY_SANDSTORM
 
+// Iris only lists a boolean option if it is checked with a plain
+// #ifdef/#ifndef somewhere; the per-system gates below use combined
+// #if defined A && defined B, so register the sub-toggles here.
+#ifdef SANDSTORM_LAYER
+#define SANDSTORM_LAYER_OPTION_ENABLED
+#endif
+#ifdef SANDSTORM_SKY
+#define SANDSTORM_SKY_OPTION_ENABLED
+#endif
+#ifdef SANDSTORM_MIST
+#define SANDSTORM_MIST_OPTION_ENABLED
+#endif
+#ifdef SANDSTORM_BOUNCE
+#define SANDSTORM_BOUNCE_OPTION_ENABLED
+#endif
+
 #include "/include/utility/color.glsl"
 
 // ---------------------------------------------------------------------------
@@ -66,6 +82,17 @@ float sandstorm_airmass(float mu) {
     float x = sandstorm_scale_height / 6371e3;
     float c = sqrt(1.5707963 / max(x, 1e-9));
     float m = c / ((c - 1.0) * mu + 1.0);
+    if (mu < 0.0) {
+        // Below-horizon rays hit the Chapman singular point (denominator
+        // <= 0), which would clear the dust exactly where extinction
+        // should be maximal (setting suns going white). Continue with the
+        // geometric shell value through a dust top at 4 scale heights,
+        // same form as ozone_shell_airmass: ~24 at grazing incidence,
+        // relaxing to one vertical pass straight down.
+        float top = 6371e3 + 4.0 * sandstorm_scale_height;
+        float r = 6371e3;
+        m = top * inversesqrt(max(top * top - r * r * (1.0 - mu * mu), 1.0));
+    }
     return clamp(m, 0.0, 24.0);
 }
 

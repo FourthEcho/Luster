@@ -40,7 +40,8 @@ mat2x3 air_fog_analytic(
     vec3 ray_end_world,
     bool sky,
     float skylight,
-    float shadow
+    float shadow,
+    vec3 fog_ambient
 ) {
 #ifdef LOD_MOD_ACTIVE
     float fog_end = float(lod_render_distance);
@@ -73,7 +74,7 @@ mat2x3 air_fog_analytic(
         = scattering_integral * airmass.y * fog_params.mie_scattering_coeff;
 
     float LoV = dot(ray_direction_world, light_dir);
-    float mie_phase = 0.7 * henyey_greenstein_phase(LoV, 0.5)
+    float mie_phase = 0.7 * henyey_greenstein_phase(LoV, FOG_MIE_ANISOTROPY)
         + 0.3 * henyey_greenstein_phase(LoV, -0.2);
 
     /*
@@ -88,14 +89,10 @@ mat2x3 air_fog_analytic(
     float anisotropy = 1.0;
 
     scattering += 2.0 * (rayleigh_scattering + mie_scattering) * isotropic_phase
-        * ambient_color;
-#if defined SH_SKYLIGHT
-    scattering += 1.15 * (rayleigh_scattering + mie_scattering) * isotropic_phase
-        * ambient_color * SH_SKYLIGHT_INTENSITY;
-#endif
+        * fog_ambient;
 
     for (int i = 0; i < 4; ++i) {
-        float mie_phase = 0.7 * henyey_greenstein_phase(LoV, 0.5 * anisotropy)
+        float mie_phase = 0.7 * henyey_greenstein_phase(LoV, FOG_MIE_ANISOTROPY * anisotropy)
             + 0.3 * henyey_greenstein_phase(LoV, -0.2 * anisotropy);
 
         vec3 order_light = light_color;
@@ -126,6 +123,26 @@ mat2x3 air_fog_analytic(
     scattering += scattering * evening_glow;
 
     return mat2x3(max0(scattering), max0(transmittance));
+}
+
+// Flat-ambient overload: same march with the global ambient color.
+// Used wherever no SH projection is in scope (sky-map gen, DH water,
+// SSR-hit fog); callers with sky_sh pass fog_skylight() explicitly.
+mat2x3 air_fog_analytic(
+    vec3 ray_origin_world,
+    vec3 ray_end_world,
+    bool sky,
+    float skylight,
+    float shadow
+) {
+    return air_fog_analytic(
+        ray_origin_world,
+        ray_end_world,
+        sky,
+        skylight,
+        shadow,
+        ambient_color
+    );
 }
 
 #endif // INCLUDE_FOG_AIR_FOG_ANALYTIC

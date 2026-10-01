@@ -64,6 +64,16 @@ const bool colortex19Clear = false;
 const int colortex20Format = RGBA16F; // SSPT history gdata: variance moments, lightmap, sqrt distance
 const bool colortex20Clear = false;
 
+// Reflection sphere capture (screen-space panorama for off-screen
+// reflections). Fixed 1024x512 via size.buffer below, never cleared so the
+// panorama accumulates across frames. Written by composite23 (c23_capture)
+// only while REFLECTION_CAPTURE is enabled; read by the SSR-miss fallback
+// in deferred shading. Untouched buffers read as no-data -> sky fallback.
+const int colortex21Format = RGBA16F; // capture color (rgb) + raw depth flag (a: 1 = no data)
+const bool colortex21Clear = false;
+const int colortex22Format = RGBA16F; // capture scene position, camera-relative (rgb) + age (a)
+const bool colortex22Clear = false;
+
 */
 
 #endif // INCLUDE_BUFFERS

@@ -171,6 +171,10 @@ const float wetnessHalflife         = 70.0;
 // -------
 
   #define PLANET_BOUNCE
+// Render the planet ground disc for below-horizon rays instead of stretching
+// the horizon sky downward. Off by default to preserve the current look.
+//#define RENDER_BELOW_PLANET
+  #define RENDER_BELOW_PLANET_INTENSITY 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.40 1.50 1.60 1.70 1.80 1.90 2.00]
   #define PLANET_BOUNCE_INTENSITY 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.75 0.80 0.90 1.00 1.20 1.50 2.00]
   #define ATMOSPHERE_SATURATION_BOOST
   #define ATMOSPHERE_SATURATION_BOOST_INTENSITY 1.00 // [-1.00 -0.99 -0.98 -0.97 -0.96 -0.95 -0.94 -0.93 -0.92 -0.91 -0.90 -0.89 -0.88 -0.87 -0.86 -0.85 -0.84 -0.83 -0.82 -0.81 -0.80 -0.79 -0.78 -0.77 -0.76 -0.75 -0.74 -0.73 -0.72 -0.71 -0.70 -0.69 -0.68 -0.67 -0.66 -0.65 -0.64 -0.63 -0.62 -0.61 -0.60 -0.59 -0.58 -0.57 -0.56 -0.55 -0.54 -0.53 -0.52 -0.51 -0.50 -0.49 -0.48 -0.47 -0.46 -0.45 -0.44 -0.43 -0.42 -0.41 -0.40 -0.39 -0.38 -0.37 -0.36 -0.35 -0.34 -0.33 -0.32 -0.31 -0.30 -0.29 -0.28 -0.27 -0.26 -0.25 -0.24 -0.23 -0.22 -0.21 -0.20 -0.19 -0.18 -0.17 -0.16 -0.15 -0.14 -0.13 -0.12 -0.11 -0.10 -0.09 -0.08 -0.07 -0.06 -0.05 -0.04 -0.03 -0.02 -0.01 0.00 0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.10 0.11 0.12 0.13 0.14 0.15 0.16 0.17 0.18 0.19 0.20 0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29 0.30 0.31 0.32 0.33 0.34 0.35 0.36 0.37 0.38 0.39 0.40 0.41 0.42 0.43 0.44 0.45 0.46 0.47 0.48 0.49 0.50 0.51 0.52 0.53 0.54 0.55 0.56 0.57 0.58 0.59 0.60 0.61 0.62 0.63 0.64 0.65 0.66 0.67 0.68 0.69 0.70 0.71 0.72 0.73 0.74 0.75 0.76 0.77 0.78 0.79 0.80 0.81 0.82 0.83 0.84 0.85 0.86 0.87 0.88 0.89 0.90 0.91 0.92 0.93 0.94 0.95 0.96 0.97 0.98 0.99 1.00]
@@ -322,6 +326,10 @@ const float wetnessHalflife         = 70.0;
   #define MIST_FALLOFF_RATE 0.04 // [0.01 0.02 0.03 0.04 0.05 0.06 0.08 0.10 0.15 0.20]
   #define MIST_SEA_LEVEL_BIAS 0.0 // [-16.0 -12.0 -8.0 -4.0 0.0 4.0 8.0 12.0 16.0]
   #define MIST_SHADOW_STEPS 4 // [2 3 4 6 8 10 12]
+  #define MIST_SHADOW_STEP_LENGTH 10.0 // [2.5 5.0 7.5 10.0 12.5 15.0 20.0]
+  #define MIST_COLOR_R 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.40 1.50 1.75 2.00]
+  #define MIST_COLOR_G 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.40 1.50 1.75 2.00]
+  #define MIST_COLOR_B 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.40 1.50 1.75 2.00]
 
   #define BORDER_FOG
   #define CAVE_FOG
@@ -388,6 +396,9 @@ const float wetnessHalflife         = 70.0;
   #define OZONE_AMOUNT 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.25 1.50 1.75 2.00 2.50 3.00]
   #define OZONE_ALTITUDE 25.0 // [15.0 17.5 20.0 22.5 25.0 27.5 30.0 32.5 35.0]
   #define OZONE_THICKNESS 10.0 // [2.5 5.0 7.5 10.0 12.5 15.0 17.5 20.0]
+  #define OZONE_COLOR_R 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.40 1.50 1.75 2.00]
+  #define OZONE_COLOR_G 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.40 1.50 1.75 2.00]
+  #define OZONE_COLOR_B 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.40 1.50 1.75 2.00]
 
 #define OZONE_SKY
 #define OZONE_FOG
@@ -403,6 +414,11 @@ const float wetnessHalflife         = 70.0;
   #define AIR_FOG_MIE_DENSITY_RAIN      0.030 // [0.001 0.002 0.003 0.004 0.005 0.006 0.007 0.008 0.009 0.010 0.011 0.012 0.013 0.014 0.015 0.016 0.017 0.018 0.019 0.020 0.021 0.022 0.023 0.024 0.025 0.026 0.027 0.028 0.029 0.030 0.031 0.032 0.033 0.034 0.035 0.036 0.037 0.038 0.039 0.040 0.041 0.042 0.043 0.044 0.045 0.046 0.047 0.048 0.049 0.050 0.051 0.052 0.053 0.054 0.055 0.056 0.057 0.058 0.059 0.060 0.061 0.062 0.063 0.064 0.065 0.066 0.067 0.068 0.069 0.070 0.071 0.072 0.073 0.074 0.075 0.076 0.077 0.078 0.079 0.080 0.081 0.082 0.083 0.084 0.085 0.086 0.087 0.088 0.089 0.090 0.091 0.092 0.093 0.094 0.095 0.096 0.097 0.098 0.099 0.100]
   #define AIR_FOG_MIE_DENSITY_SNOW      0.015 // [0.001 0.002 0.003 0.004 0.005 0.006 0.007 0.008 0.009 0.010 0.011 0.012 0.013 0.014 0.015 0.016 0.017 0.018 0.019 0.020 0.021 0.022 0.023 0.024 0.025 0.026 0.027 0.028 0.029 0.030 0.031 0.032 0.033 0.034 0.035 0.036 0.037 0.038 0.039 0.040 0.041 0.042 0.043 0.044 0.045 0.046 0.047 0.048 0.049 0.050 0.051 0.052 0.053 0.054 0.055 0.056 0.057 0.058 0.059 0.060 0.061 0.062 0.063 0.064 0.065 0.066 0.067 0.068 0.069 0.070 0.071 0.072 0.073 0.074 0.075 0.076 0.077 0.078 0.079 0.080 0.081 0.082 0.083 0.084 0.085 0.086 0.087 0.088 0.089 0.090 0.091 0.092 0.093 0.094 0.095 0.096 0.097 0.098 0.099 0.100]
   #define AIR_FOG_MIE_DENSITY_BLUE_HOUR 0.0020 // [0.0001 0.0002 0.0003 0.0004 0.0005 0.0006 0.0007 0.0008 0.0009 0.0010 0.0011 0.0012 0.0013 0.0014 0.0015 0.0016 0.0017 0.0018 0.0019 0.0020 0.0021 0.0022 0.0023 0.0024 0.0025 0.0026 0.0027 0.0028 0.0029 0.0030 0.0031 0.0032 0.0033 0.0034 0.0035 0.0036 0.0037 0.0038 0.0039 0.0040 0.0041 0.0042 0.0043 0.0044 0.0045 0.0046 0.0047 0.0048 0.0049 0.0050 0.0051 0.0052 0.0053 0.0054 0.0055 0.0056 0.0057 0.0058 0.0059 0.0060 0.0061 0.0062 0.0063 0.0064 0.0065 0.0066 0.0067 0.0068 0.0069 0.0070 0.0071 0.0072 0.0073 0.0074 0.0075 0.0076 0.0077 0.0078 0.0079 0.0080 0.0081 0.0082 0.0083 0.0084 0.0085 0.0086 0.0087 0.0088 0.0089 0.0090 0.0091 0.0092 0.0093 0.0094 0.0095 0.0096 0.0097 0.0098 0.0099 0.0100]
+  #define MIE_ANISOTROPY 0.77 // [0.50 0.55 0.60 0.65 0.70 0.75 0.77 0.80 0.85 0.90 0.95]
+  #define FOG_MIE_ANISOTROPY 0.50 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90]
+  #define MIE_COLOR_R 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.40 1.50 1.75 2.00]
+  #define MIE_COLOR_G 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.40 1.50 1.75 2.00]
+  #define MIE_COLOR_B 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.40 1.50 1.75 2.00]
 
 // -------------
 //   Materials
@@ -434,6 +450,20 @@ const float wetnessHalflife         = 70.0;
 #endif
 
 //#define POM
+// POM slope normals are enabled by the medium-and-higher profiles.
+// Keep this default enabled for custom profiles while INFO=0 (Low) is
+// explicitly excluded in the shader path.
+  #define POM_SLOPE_NORMALS
+// Legacy singular alias: old profiles / user configs may still define
+// POM_SLOPE_NORMAL. Map it to the plural form so nothing silently breaks.
+#if defined POM_SLOPE_NORMAL && !defined POM_SLOPE_NORMALS
+  #define POM_SLOPE_NORMALS
+#endif
+// POM depth write: displaces gl_FragDepth by the raymarched POM relief so
+// deferred sunlight/moonlight shadows, skylight/AO and SSPT ray tracing see
+// the displaced surface instead of the flat quad. Enabled by the
+// medium-and-higher profiles; Low explicitly disables it.
+  #define POM_DEPTH_WRITE
   #define HARDCODED_EMISSION
 // ---- SSS mode: Off = no SSS, Hardcoded = built-in masks only,
 // Maps = read labPBR specular.B only (no fallback) ----
@@ -498,6 +528,7 @@ const float wetnessHalflife         = 70.0;
 // Reflections
 
   #define ENVIRONMENT_REFLECTIONS
+//#define REFLECTION_CAPTURE
   #define SKY_REFLECTIONS
   #define SSR_ROUGHNESS_SUPPORT
   #define SSR_RAY_COUNT 4 // [1 2 3 4 5 6 7 8]
@@ -551,11 +582,11 @@ const float wetnessHalflife         = 70.0;
 
 // ---- Physical camera ----
 // Sensor width, aperture, shutter and ISO drive depth of field,
-// motion blur and exposure like a real camera. At defaults (35mm, f/2.8,
+// motion blur and exposure like a real camera. At defaults (35mm, f/3.2,
 // 1/60s, ISO 100) the look matches the previous artistic controls they
 // replace.
   #define CAM_SENSOR_WIDTH 35 // [16 20 25 30 35 40 50 60 70 80]
-  #define CAM_FSTOPS 2.8 // [0.8 1.4 2.0 2.8 3.2 3.6 4.0 4.4 4.8 5.6 6.4 7.2 8.0 9.6 12.8 16.0]
+  #define CAM_FSTOPS 3.2 // [0.8 1.4 2.0 2.8 3.2 3.6 4.0 4.4 4.8 5.6 6.4 7.2 8.0 9.6 12.8 16.0]
   #define CAM_SHUTTER_SPEED 60 // [1000 500 250 125 60 30]
   #define CAM_ISO 100 // [100 200 400 800 1600 3200]
   #define CAM_EXPOSURE_COMPENSATION 0.0 // [-5.0 -4.5 -4.0 -3.5 -3.0 -2.5 -2.0 -1.5 -1.0 -0.5 0.0 0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0]
@@ -721,6 +752,18 @@ const float wetnessHalflife         = 70.0;
 // -----------------
 
   #define INFO 4 // [0 1 2 3 4]
+#if INFO > 0
+#if defined POM
+  // POM slope normals need the detailed-normal render target, but must not
+  // implicitly decode a resource-pack normal map when material mapping is off.
+#ifndef NORMAL_MAPPING
+  #define POM_SLOPE_NORMALS_ONLY
+// Legacy alias for the pre-rename guard name.
+  #define POM_SLOPE_NORMAL_ONLY
+  #define NORMAL_MAPPING
+#endif
+#endif
+#endif
 
   #define DEBUG_VIEW_NONE      0
   #define DEBUG_VIEW_SAMPLER   1
@@ -840,12 +883,10 @@ const float wetnessHalflife         = 70.0;
 
 
 
-// ---- Directional Ambient Lighting (H-Basis Skylight) ----
-// Enabled by the High/Ultra/Mac Compatible profiles; disabled on Low/Medium.
-// (same placement as the former IBL toggle). Internally implemented with a
-// 6-coefficient H-Basis projection of the live sky map rather than a 9-term
-// SH basis, but that distinction is invisible to users so the option keeps
-// the SH_SKYLIGHT naming for continuity with the older category.
+// ---- Directional Ambient Lighting (SH Skylight) ----
+// Full second-order spherical-harmonics sky ambient (9 coefficients with
+// cross terms), projected live per frame and evaluated around the bent
+// normal. Enabled by the High/Ultra/Mac Compatible profiles.
 #define SH_SKYLIGHT
   #define SH_SKYLIGHT_INTENSITY 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.75 0.80 0.90 1.00 1.20 1.50 2.00]
   #define SH_SKYLIGHT_QUALITY 512 // [128 256 512 1024]
@@ -856,6 +897,11 @@ const float wetnessHalflife         = 70.0;
 // indirectResReduction in colortex17-20. Fragment-only, Mac-safe.
   //#define ssptEnabled
   //#define ssptFullRangeRT
+// Higher quality SSPT emission: a second emitter pick per NEE candidate and
+// a twice-longer NEE occlusion march. Less noise on small bright emitters
+// and less light leaking through thin walls, at roughly twice the emission
+// gather cost. Off by default.
+//#define HIGH_QUALITY_EMISSION
   #define indirectResReduction 2 // [1 2 3 4]
   #define ssptSPP 1 // [1 2 3 4 5 6]
   #define ssptBounces 1 // [1 2 3 4 5 6]
@@ -974,9 +1020,6 @@ const float wetnessHalflife         = 70.0;
   #define TAA_INTENSITY 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.20 1.50 2.00]
 
 // ---- Decoy #ifdefs so the OptiFine parser detects the toggles ----
-
-#ifdef SH_SKYLIGHT
-#endif
 
 #ifdef FOG_SMOOTHING
 #endif

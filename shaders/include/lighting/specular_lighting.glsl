@@ -3,6 +3,7 @@
 
 #include "/include/lighting/bsdf.glsl"
 #include "/include/lighting/colors/moon_phase_influence.glsl"
+#include "/include/lighting/reflection_capture.glsl"
 #include "/include/misc/lod_mod_support.glsl"
 #include "/include/misc/raytracer.glsl"
 #include "/include/sky/projection.glsl"
@@ -299,7 +300,20 @@ vec3 trace_specular_ray(
 
         return mix(sky_reflection, reflection, border_attenuation);
     } else {
+#ifdef REFLECTION_CAPTURE
+        // SSR miss: fill off-screen geometry from the sphere capture with a
+        // position-aware check so captured surfaces that would sit behind
+        // the reflector fall back to sky instead of leaking through.
+        // view_to_scene_space keeps this camera-relative, matching the
+        // camera-relative positions stored in the capture.
+        return read_capture_position_aware(
+            ray_dir,
+            view_to_scene_space(view_pos),
+            sky_reflection
+        );
+#else
         return sky_reflection;
+#endif
     }
 }
 

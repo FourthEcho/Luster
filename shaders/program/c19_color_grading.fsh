@@ -87,7 +87,15 @@ void main() {
     scene_color += bloom * bloom_intensity;
 
 #ifdef BLOOMY_FOG
-    float fog_transmittance = texture(colortex3, uv * taau_render_scale).x;
+    // colortex3 is written by c1, which renders into the lower-left
+    // taau_render_scale sub-rect of the buffer (c1.vsh scales its quad), so
+    // map uv into that sub-rect. Clamp to the last valid texel centre so
+    // bilinear never bleeds in the unwritten region at the top/right edges.
+    vec2 fog_uv = min(
+        uv * taau_render_scale,
+        vec2(taau_render_scale) - 0.5 * view_pixel_size
+    );
+    float fog_transmittance = texture(colortex3, fog_uv).x;
     scene_color = mix(
         bloom,
         scene_color,

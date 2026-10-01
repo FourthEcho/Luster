@@ -11,6 +11,22 @@
 
 #include "/include/global.glsl"
 
+#ifdef POM_SLOPE_NORMALS
+// Iris requires boolean shader options to be checked with #ifdef/#ifndef.
+#define POM_SLOPE_NORMALS_OPTION_ENABLED
+#endif
+// Legacy singular guard name (pre-rename). Treat it as the plural toggle.
+#ifdef POM_SLOPE_NORMAL
+#define POM_SLOPE_NORMALS_OPTION_ENABLED
+#ifndef POM_SLOPE_NORMALS
+#define POM_SLOPE_NORMALS
+#endif
+#endif
+#ifdef POM_DEPTH_WRITE
+// Iris requires boolean shader options to be checked with #ifdef/#ifndef.
+#define POM_DEPTH_WRITE_OPTION_ENABLED
+#endif
+
 layout(
     location = 0
 ) out vec4 gbuffer_data_0; // albedo, block ID, flat normal, light levels
@@ -251,6 +267,10 @@ void main() {
 
     bool parallax_shadow = false;
     float dither = interleaved_gradient_noise(gl_FragCoord.xy, frameCounter);
+    // POM relief state shared by slope normals and depth write. Stays zero
+    // when the march is skipped so both effects fade out together.
+    float pom_relief = 0.0;
+    float pom_slope_fade = 0.0;
 
 #ifndef PROGRAM_GBUFFERS_VOXELS
 #if defined PROGRAM_GBUFFERS_TERRAIN && defined POM
@@ -279,6 +299,9 @@ void main() {
             shadow_trace_pos,
             pom_depth
         );
+
+        pom_relief = get_pom_world_relief(pom_depth, view_distance);
+        pom_slope_fade = get_pom_relief_scale(view_distance);
 #ifdef POM_SHADOW
         if (dot(tbn[2], light_dir) >= eps) {
             parallax_shadow = get_parallax_shadow(
@@ -444,21 +467,28 @@ void main() {
 #if defined NORMAL_MAPPING && !defined PROGRAM_GBUFFERS_VOXELS
     vec3 normal;
     float material_ao;
+#if defined POM_SLOPE_NORMALS_ONLY || defined POM_SLOPE_NORMAL_ONLY
+    normal = vec3(0.0, 0.0, 1.0);
+    material_ao = 1.0;
+#else
     decode_normal_map(normal_map, normal, material_ao);
+#endif
 
-#if defined PROGRAM_GBUFFERS_TERRAIN && defined POM
+#if defined PROGRAM_GBUFFERS_TERRAIN && defined POM \
+    && defined POM_SLOPE_NORMALS && INFO > 0
     // POM slope normals: perturb the tangent-space normal with the
     // heightfield gradient at the raymarched hit, so POM relief shades
-    // instead of only shifting UVs. Same close-range fade as the POM
-    // march itself, skipped for lava which never raymarches.
-    if (length(tangent_pos) < POM_DISTANCE
-        && material_mask != MATERIAL_LAVA) {
+    // instead of only shifting UVs. Faded with the same relief scale as the
+    // UV march and depth write so distant relief relaxes to the flat normal
+    // instead of popping. Skipped for lava which never raymarches.
+    if (has_pom && pom_slope_fade > 1e-4) {
         normal = normalize(
             normal
             + get_pom_slope_normal(
                 get_local_coord_from_uv(parallax_uv),
                 uv_gradient
             )
+                * pom_slope_fade
         );
     }
 #endif
@@ -475,6 +505,22 @@ void main() {
 #ifdef DIRECTIONAL_LIGHTMAPS
     adjusted_light_levels *= get_directional_lightmaps(scene_pos, normal);
 #endif
+#elif defined PROGRAM_GBUFFERS_TERRAIN && defined POM \
+    && defined POM_SLOPE_NORMALS && INFO > 0
+    // POM still carries a height field when resource-pack normal mapping is
+    // disabled. Start from the flat tangent-space normal so slope normals
+    // remain useful with the default material mapping mode.
+    vec3 normal = tbn[2];
+    if (has_pom && pom_slope_fade > 1e-4) {
+        normal = tbn * normalize(
+            vec3(0.0, 0.0, 1.0)
+            + get_pom_slope_normal(
+                get_local_coord_from_uv(parallax_uv),
+                uv_gradient
+            )
+                * pom_slope_fade
+        );
+    }
 #endif
 
 #if defined PROGRAM_GBUFFERS_VOXELS
@@ -493,6 +539,45 @@ void main() {
 #if defined PROGRAM_GBUFFERS_ENTITIES || defined PROGRAM_GBUFFERS_HAND
     uint new_material_mask = fix_material_mask();
 #define material_mask new_material_mask
+#endif
+
+#if defined PROGRAM_GBUFFERS_TERRAIN && defined POM && defined POM_DEPTH_WRITE
+    // POM depth write: recess the fragment into the surface by the raymarched
+    // relief so deferred sunlight/moonlight shadows, skylight/AO and SSPT see
+    // the displaced surface instead of the flat quad. The offset rides along
+    // the geometric normal (stable at grazing angles) and shares the UV
+    // march's distance fade, collapsing to the flat depth at POM_DISTANCE.
+    // gl_FragDepth MUST be written on every path once it is assigned anywhere
+    // (GLSL leaves it undefined otherwise). Previously the flat / no-relief /
+    // out-of-range fragments never wrote it, so height-mapped packs (Patrix)
+    // produced garbage depth => terrain treated as sky => invisible blocks.
+    gl_FragDepth = gl_FragCoord.z;
+    if (has_pom && pom_relief > 1e-5) {
+        // Displace along the VIEW RAY (true geometric hit point), not the
+        // normal: relief is measured along the normal, so the ray distance
+        // is relief / cos(theta). Screen xy stays on this pixel, only depth
+        // changes. cos is floored so grazing angles cannot explode.
+        float pom_cos_theta = max(abs(tangent_dir.z), 0.15);
+        float pom_ray_dist = pom_relief * rcp(pom_cos_theta);
+        vec3 pom_displaced_scene
+            = scene_pos * (1.0 + pom_ray_dist * rcp(max(length(scene_pos), 1e-3)));
+        vec3 pom_displaced_view = scene_to_view_space(pom_displaced_scene);
+        vec3 pom_displaced_screen = view_to_screen_space(
+            gbufferProjection,
+            pom_displaced_view,
+            true
+        );
+        float pom_depth_z = pom_displaced_screen.z;
+        // Only accept finite results, never pull the surface toward the
+        // camera, and stay strictly inside the depth range (>= 1.0 = sky).
+        if (pom_depth_z == pom_depth_z) {
+            gl_FragDepth = clamp(
+                max(pom_depth_z, gl_FragCoord.z),
+                0.0,
+                0.999999
+            );
+        }
+    }
 #endif
 
     gbuffer_data_0.x = pack_unorm_2x8(base_color.rg);

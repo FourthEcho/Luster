@@ -50,7 +50,7 @@ const float air_mie_albedo = 0.9;
 const float air_mie_energy_parameter
     = 3000.0; // Energy parameter for the Klein-Nishina phase function
 const float air_mie_g
-    = 0.77; // Anisotropy parameter for Henyey-Greenstein phase function
+    = MIE_ANISOTROPY; // Anisotropy parameter for Henyey-Greenstein phase function
 
 const vec2 air_scale_heights = vec2(8.4e3, 1.25e3); // m
 
@@ -60,9 +60,11 @@ const vec3 air_rayleigh_coefficient
     * rec709_to_working_color;
 const vec3 air_mie_coefficient
     = vec3(1.666442358e-06, 1.812685127e-06, 1.958927896e-06)
+    * vec3(MIE_COLOR_R, MIE_COLOR_G, MIE_COLOR_B) // user tint (Rec. 709)
     * rec709_to_working_color;
 const vec3 air_ozone_coefficient
     = vec3(8.304280072e-07, 1.314911970e-06, 5.440679729e-08)
+    * vec3(OZONE_COLOR_R, OZONE_COLOR_G, OZONE_COLOR_B) // user tint (Rec. 709)
     * rec709_to_working_color;
 
 const mat2x3 air_scattering_coefficients
@@ -610,6 +612,47 @@ vec3 atmosphere_scattering(
         moon_color,
         moon_dir
     );
+#endif
+
+#ifdef RENDER_BELOW_PLANET
+    // Explicit opaque planet ground for below-horizon rays. Without this,
+    // the horizon clamp above stretches horizon sky downward forever, so
+    // looking past the horizon edge shows glowing sky where the dark planet
+    // body should be. Sun, moon and stars need no extra handling: the
+    // view-path transmittance applied in draw_sky already zeroes them for
+    // ground-intersecting rays.
+    // Kept independent of PLANET_BOUNCE (own albedo copy) so the two
+    // toggles compose freely.
+    float below_horizon
+        = linear_step(horizon_mu, horizon_mu - 0.3, mu_view);
+    if (below_horizon > 0.0) {
+        const vec3 below_planet_albedo = vec3(0.30, 0.33, 0.22);
+
+        vec3 down_sun = atmosphere_transmittance(sun_dir.y, planet_radius);
+        vec3 down_moon = atmosphere_transmittance(moon_dir.y, planet_radius);
+        // Lambert ground, same 1/pi convention as atmosphere_planet_bounce
+        // so the disc meets the bounce glow seamlessly at the horizon.
+        vec3 ground_light = below_planet_albedo * rcp_pi
+            * (
+                max0(sun_dir.y) * sun_lut_color * down_sun
+              + max0(moon_dir.y) * moon_lut_color * down_moon
+            );
+        // View-path extinction toward the ground disc: near-vertical for
+        // steep-down rays, grazing at the horizon edge (a fixed grazing
+        // value would black out the nadir).
+        vec3 ground_up_path = mix(
+            atmosphere_transmittance(1.0, planet_radius),
+            atmosphere_transmittance(0.02, planet_radius),
+            linear_step(horizon_mu - 0.3, horizon_mu, mu_view)
+        );
+        ground_light *= ground_up_path;
+
+        atmosphere = mix(
+            atmosphere,
+            ground_light * RENDER_BELOW_PLANET_INTENSITY,
+            below_horizon
+        );
+    }
 #endif
 
     return atmosphere_post_processing(atmosphere);

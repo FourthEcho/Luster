@@ -271,7 +271,6 @@ void main() {
         scene_pos,
         normal,
         normal,
-        normal,
         shadows,
         light_levels,
         1.0,

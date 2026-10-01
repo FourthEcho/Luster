@@ -18,8 +18,15 @@
 const float sss_density = 14.0;
 const float sss_scale = 5.0 * SSS_INTENSITY;
 const float night_vision_scale = 1.5;
+#ifdef ENVIRONMENT_REFLECTIONS
 const float metal_diffuse_amount
-    = 0.5; // Legacy SSR fallback for metallic surfaces; retained for compatibility.
+    = 0.0; // Real reflections carry metals, so the fake diffuse is dead
+           // weight (and double-lights them next to SSR). Physical: zero.
+#else
+const float metal_diffuse_amount
+    = 0.5; // Legacy SSR fallback for metallic surfaces; retained for
+           // compatibility when reflections are off so metals stay visible.
+#endif
 
 float get_blocklight_falloff(float blocklight, float skylight, float ao) {
     float falloff = pow8(blocklight) + 0.18 * sqr(blocklight)
@@ -150,7 +157,6 @@ vec3 get_block_lighting(
 
 vec3 get_sky_lighting(
     Material material,
-    vec3 bent_normal,
     vec2 light_levels,
     float ao,
     float ambient_sss,
@@ -173,12 +179,21 @@ vec3 get_sky_lighting(
 
     lighting += skylight * get_skylight_falloff(light_levels.y);
 #else
-    // Baked ambient_color skylight. The H-Basis sky ambient (when
-    // SH_SKYLIGHT is enabled) is added on top from
-    // program/d4_deferred_shading.fsh so this baseline skylight contrast
-    // in caves/shade is preserved; tune SH_SKYLIGHT_INTENSITY to balance.
-    vec3 skylight = ambient_color * ao;
-    vec3 skylight_up = skylight;
+    // Baked ambient_color skylight. The SH skylight term (when enabled)
+    // replaces this flat base in program/d4_deferred_shading.fsh, so the
+    // sky mean is counted exactly once.
+    vec3 skylight_base = ambient_color * ao;
+#if defined SH_SKYLIGHT && defined PROGRAM_DEFERRED11
+    // Traced SSPT light carries bounce + emission only (never sky), so the
+    // SH term is its complement, never its double. Translucent/forward
+    // paths never define PROGRAM_DEFERRED11, so their baked ambient is
+    // untouched.
+    skylight_base = vec3(0.0);
+#endif
+    // SSS translucency wrap always references the live ambient, so leaves
+    // keep their glow in every mode.
+    vec3 skylight = skylight_base;
+    vec3 skylight_up = ambient_color * ao;
 
     skylight = mix(skylight, 0.5 * skylight_up * ao, material.sss_amount);
     skylight += ambient_sss * skylight_up * material.sss_amount * 2.0;
@@ -194,7 +209,6 @@ vec3 get_diffuse_lighting(
     vec3 scene_pos,
     vec3 normal,
     vec3 flat_normal,
-    vec3 bent_normal,
     vec3 shadows,
     vec2 light_levels,
     float ao,
@@ -247,12 +261,18 @@ vec3 get_diffuse_lighting(
         * (1.0 - 0.5 * material.sss_amount)
     );
 
-    // Cheap legacy bounced-light fallback for sunlit surfaces.
+    // Cheap legacy bounced-light fallback for sunlit surfaces. Disabled
+    // under SSPT: the traced bounce already provides real bounced light,
+    // so keeping this would double-light sunlit crevices.
+#ifdef ssptEnabled
+    const vec3 bounced = vec3(0.0);
+#else
     vec3 bounced = vec3(0.0);
     bounced = 0.033 * (1.0 - shadows)
         * (1.0 - 0.1 * max0(normal.y))
         * pow1d5(ao + eps)
         * pow4(light_levels.y);
+#endif
 
     vec3 sss = sss_approx(
                    material.albedo,
@@ -318,15 +338,14 @@ vec3 get_diffuse_lighting(
 
     lighting += get_sky_lighting(
         material,
-        bent_normal,
         light_levels,
         indirect_ao,
         ambient_sss,
         directional_lighting
     );
 
-// H-Basis skylight is wired in from program/d4_deferred_shading.fsh where
-// view_dir, bent_normal and sky_h[6] are in scope.
+// Directional sky ambient arrives separately: traced sky inside sspt_light
+// under SSPT, nothing extra without it (Photon parity: baked base only).
 
     // Blocklight
 
@@ -338,7 +357,8 @@ vec3 get_diffuse_lighting(
         directional_lighting
     );
 
-    lighting += material.emission * emission_scale;
+    // Emission is added untinted at return (below): it is independent
+    // radiance, not diffuse reflection, so albedo/1-pi must not touch it.
 
 #if defined WORLD_OVERWORLD
     // Cave lighting: preserve a subtle underground ambient fill even when
@@ -351,7 +371,8 @@ vec3 get_diffuse_lighting(
 #endif
 
     return max0(lighting) * material.albedo * rcp_pi
-        * mix(1.0, metal_diffuse_amount, float(material.is_metal));
+        * mix(1.0, metal_diffuse_amount, float(material.is_metal))
+        + max0(material.emission * emission_scale);
 }
 
 #endif // INCLUDE_LIGHTING_DIFFUSE_LIGHTING

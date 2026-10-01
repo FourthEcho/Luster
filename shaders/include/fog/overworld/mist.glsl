@@ -57,7 +57,7 @@ float mist_shadow_od(vec3 world_pos, float local_density) {
     if (local_density < 0.01 || sun_dir.y > 0.3) return 0.0;
 
     const int   steps     = MIST_SHADOW_STEPS;
-    const float step_size = 10.0;
+    const float step_size = MIST_SHADOW_STEP_LENGTH;
 
     float od = 0.0;
     vec3  pos = world_pos;
