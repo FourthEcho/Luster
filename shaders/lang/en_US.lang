@@ -838,7 +838,7 @@ value.TEXTURE_FORMAT.TEXTURE_FORMAT_OLD = Old PBR
 
 option.ENVIRONMENT_REFLECTIONS         = Environment Reflections
 option.REFLECTION_CAPTURE              = Reflection Capture
-option.REFLECTION_CAPTURE.comment     = World-space panorama filling reflections for off-screen geometry, with a position check against hidden-surface leaks. Off by default for performance.
+option.REFLECTION_CAPTURE.comment     = Work in Progress - World-space panorama filling reflections for off-screen geometry, with a position check against hidden-surface leaks. Off by default for performance.
 option.ENVIRONMENT_REFLECTIONS.comment    = Screen-space reflections on water and shiny blocks. Heavy on weaker GPUs.
 option.SKY_REFLECTIONS                 = Sky Reflections
 option.SKY_REFLECTIONS.comment              = Makes water and shiny blocks reflect the sky. Enhances the blue sky reflection on water surfaces for a more realistic appearance.
