@@ -7,35 +7,49 @@ All rights reserved unless otherwise explicitly stated.
 Any person obtaining a copy of this software package ("Luster Shaders") may:
 
 * Use Luster Shaders for personal use.
-* Use Luster Shaders, including for screenshots, videos, and other non-commercial media.
+* Use Luster Shaders for screenshots, videos, streams, and other non-commercial media.
 * Modify Luster Shaders for personal use.
 * Examine and learn from Luster Shaders's source code.
 * Create private modifications or derivative works of Luster Shaders for personal use.
 
-The following restrictions apply to Luster Shaders and its original components:
+The following restrictions apply to Luster-original material:
 
-* You may not redistribute Luster Shaders or derivative works containing Luster-original code, assets, or other original content without explicit written permission from the copyright holder.
-* You may not publish, upload, mirror, or otherwise distribute Luster Shaders or derivative works containing Luster-original content on platforms such as Modrinth, CurseForge, GitHub Releases, or other distribution platforms without explicit written permission from the copyright holder.
-* You may not sell, sublicense, rent, lease, or otherwise commercially distribute Luster Shaders or derivative works containing Luster-original content without explicit written permission from the copyright holder.
-* You may not claim Luster Shaders, its original code, assets, or other original content as your own.
-* You may not remove or alter copyright notices, license notices, or required attribution relating to Luster Shaders.
-* You may not use the Luster name, logo, branding, or other identifying marks to imply that a modified or derivative work is an official release of Luster Shaders without explicit written permission.
-* You may not redistribute modified versions under the name "Luster Shaders" without explicit written permission from the copyright holder.
-* You may not use Luster Shaders's original code or assets as the basis for another publicly distributed project without explicit written permission from the copyright holder.
+* You may not redistribute Luster Shaders, or any derivative work containing Luster-original material, without explicit written permission from the copyright holder.
+* You may not publish, upload, mirror, or otherwise distribute Luster-original material, or derivative works containing such material, on platforms including but not limited to Modrinth, CurseForge, GitHub Releases, GitLab, direct-download sites, or other public distribution services without explicit written permission from the copyright holder.
+* You may not sell, sublicense, rent, lease, or otherwise commercially distribute Luster-original material, or derivative works containing such material, without explicit written permission from the copyright holder.
+* You may not demand or solicit payment in exchange for copies of Luster-original material or derivative works containing such material without explicit written permission from the copyright holder.
+* You may not claim Luster-original material as your own work.
+* You may not remove, conceal, or alter copyright notices, license notices, attribution notices, or other notices required by this license or applicable third-party licenses.
+* You may not use the Luster name, logo, branding, or other identifying marks to imply that a modified or derivative work is an official release of Luster Shaders without explicit written permission from the copyright holder.
+* You may not redistribute a modified version under the name "Luster Shaders" or any substantially confusingly similar name without explicit written permission from the copyright holder.
+* You may not use Luster-original source code, assets, documentation, presets, configurations, or other original material as the basis of another publicly distributed project without explicit written permission from the copyright holder.
 
 Private modifications that are not distributed to other persons do not require permission.
 
-Any permission granted under this license applies only to the specific permission granted and does not constitute a transfer of copyright ownership or a general license to Luster Shaders.
+For the purposes of this license, "Luster-original material" means material created by FourthEcho and added to, substantially modified in, or otherwise authored for Luster Shaders, including original shader code, rendering systems, algorithms, configuration, settings, scripts, documentation, artwork, presets, language work, and other original contributions for which FourthEcho holds the applicable copyright rights.
 
-Luster Shaders may contain or be based upon third-party code, assets, or other material that is subject to separate licenses. Those materials remain subject to their respective licenses, and nothing in this license removes, limits, or replaces rights granted by those licenses.
+This license does not apply to material that FourthEcho does not own or control.
 
-In particular, Luster Shaders contains material derived from Photon Shaders by Benjamin Stott ("SixthSurge"). Photon Shaders and its corresponding material remain subject to the Photon Shaders License Agreement reproduced below. Where Photon Shaders's license grants permissions that apply to Photon material, those permissions remain in effect for that material.
+Luster Shaders is based substantially upon Photon Shaders by Benjamin Stott ("SixthSurge"). Photon-derived material, unchanged Photon material, and other material originating from Photon remain subject to the Photon Shaders License Agreement reproduced below. Nothing in this license is intended to revoke, replace, restrict, or override permissions granted by the Photon Shaders License Agreement with respect to Photon material.
 
-This license applies only to material that is original to Luster Shaders and for which FourthEcho holds the applicable copyright rights.
+Where a file or other work contains both Luster-original material and third-party material, this license applies only to the Luster-original portions. The third-party portions remain subject to their respective licenses and terms.
+
+Luster Shaders also contains or references other third-party material. Separate licenses and notices are retained in their respective locations and remain independent of this license, including:
+
+* `shaders/include/post_processing/aces/license.md` — Academy Color Encoding System (ACES) license.
+* `shaders/include/post_processing/agx/license.md` — AGX and related third-party licensing information.
+* `shaders/include/post_processing/hejl_2015/LICENSE.md` — Hejl 2015 tone mapping license.
+* `shaders/include/post_processing/lottes/LICENSE.md` — Lottes tone mapping license.
+
+Additional third-party contributions, techniques, references, translations, textures, images, and other material identified in the Luster documentation, source comments, acknowledgements, or other notices remain subject to their respective rights and licenses. This includes third-party contributions credited in the Luster README.
+
+Nothing in this license grants permission to redistribute or relicense third-party material beyond the permissions already granted by its applicable license.
+
+Any permission granted under this license applies only to the specific permission granted and does not constitute a transfer of copyright ownership or a general license to Luster-original material.
 
 This license document is to be included in all substantial copies of Luster Shaders that are permitted to be distributed under this license.
 
-LUSTER SHADERS IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH LUSTER SHADERS OR THE USE OR OTHER DEALINGS IN LUSTER SHADERS.
+LUSTER SHADERS IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH LUSTER SHADERS OR THE USE OR OTHER DEALINGS IN LUSTER SHADERS.
 
 ---
 
@@ -60,4 +74,15 @@ Any person obtaining a copy of this software package ("Photon Shaders") may:
 
 This license document is to be included in all substantial copies of Photon Shaders.
 
-PHOTON SHADERS IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH PHOTON SHADERS OR THE USE OR OTHER DEALINGS IN PHOTON SHADERS.
+PHOTON SHADERS IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH PHOTON SHADERS OR THE USE OR OTHER DEALINGS IN PHOTON SHADERS.
+
+---
+
+# Separate Third-Party License Files
+
+The following licenses are intentionally maintained separately in their respective directories and are not replaced or superseded by the Luster Shaders License Agreement:
+
+* `shaders/include/post_processing/aces/license.md`
+* `shaders/include/post_processing/agx/license.md`
+* `shaders/include/post_processing/hejl_2015/LICENSE.md`
+* `shaders/include/post_processing/lottes/LICENSE.md`
