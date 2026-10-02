@@ -15,7 +15,6 @@ out vec2 uv;
 
 flat out vec3 ambient_color;
 flat out vec3 light_color;
-flat out vec3 sky_sh[9]; // SH sky projection for fog ambient
 
 #if defined WORLD_OVERWORLD
 #include "/include/fog/overworld/parameters.glsl"
@@ -63,22 +62,11 @@ uniform float desert_sandstorm;
 #include "/include/weather/fog.glsl"
 #endif
 
-#include "/include/lighting/ambient/sh_skylight.glsl"
-
 void main() {
     uv = gl_MultiTexCoord0.xy;
 
     light_color = texelFetch(colortex4, ivec2(191, 0), 0).rgb;
     ambient_color = texelFetch(colortex4, ivec2(191, 1), 0).rgb;
-
-    // SH sky projection for the analytic fog ambient below. Same
-    // fullscreen-triangle pattern as the deferred pass: 3 vertices share
-    // the cost, fragments evaluate around their own ray direction.
-#if defined SH_SKYLIGHT && (defined WORLD_OVERWORLD || defined WORLD_END)
-    project_sky_sh(sky_sh);
-#else
-    for (int i = 0; i < 9; ++i) sky_sh[i] = vec3(0.0);
-#endif
 
 #if defined WORLD_OVERWORLD
     fog_params = get_fog_parameters(get_weather());

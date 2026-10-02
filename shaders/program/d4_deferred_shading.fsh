@@ -35,10 +35,6 @@ in vec2 uv;
 flat in vec3 ambient_color;
 flat in vec3 light_color;
 
-// 9 RGB SH sky ambient coefficients projected once per frame from the
-// live sky map. See include/lighting/ambient/sh_skylight.glsl.
-flat in vec3 sky_sh[9];
-
 #if defined WORLD_OVERWORLD
 flat in vec3 sun_color;
 flat in vec3 moon_color;
@@ -177,7 +173,6 @@ const bool colortex11MipmapEnabled = true;
 #define TEMPORAL_REPROJECTION
 
 #include "/include/fog/simple_fog.glsl"
-#include "/include/lighting/ambient/sh_skylight.glsl"
 #include "/include/lighting/diffuse_lighting.glsl"
 #include "/include/lighting/shadows/common.glsl"
 #include "/include/lighting/shadows/pcss.glsl"
@@ -638,25 +633,9 @@ void main() {
         }
 #endif
 
-        // Directional sky ambient: the SH term below owns it (traced SSPT
-        // light carries bounce + emission only, never sky).
-
-#ifdef SH_SKYLIGHT
-        // Full second-order SH sky ambient: directional irradiance around
-        // the bent normal, mixed with flat up-ambient by skylight^2 the
-        // way Luster applies it. The baked base yields wherever this term
-        // is active (see get_sky_lighting), so the sky mean is counted
-        // exactly once.
-        fragment_color += get_sh_skylight(
-            material,
-            bent_normal,
-            clamp01(light_levels.y),
-            ao,
-            SH_SKYLIGHT_INTENSITY,
-            ambient_color,
-            sky_sh
-        );
-#endif
+        // Sky ambient: the baked base above owns it. Traced SSPT light
+        // carries bounce + emission only, never sky, so the sky mean is
+        // counted exactly once.
 
         // Specular highlight
 

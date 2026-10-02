@@ -165,10 +165,9 @@ vec3 get_sky_lighting(
     vec3 lighting = vec3(0.0);
 
 #if defined WORLD_NETHER
-    // Nether keeps the baked ambient_color term; the H-Basis skylight path
-    // is Overworld/End only (it samples the dynamic sky map), so the Nether
-    // ambient is the only contribution here.
-    vec3 skylight = ambient_color * ao;
+    // Nether keeps the baked ambient_color term as its only ambient
+    // contribution here.
+    vec3 skylight = ambient_color * ao * SSPT_INTENSITY;
     vec3 skylight_up = skylight;
 
     skylight = mix(skylight, 0.5 * skylight_up * ao, material.sss_amount);
@@ -179,21 +178,14 @@ vec3 get_sky_lighting(
 
     lighting += skylight * get_skylight_falloff(light_levels.y);
 #else
-    // Baked ambient_color skylight. The SH skylight term (when enabled)
-    // replaces this flat base in program/d4_deferred_shading.fsh, so the
-    // sky mean is counted exactly once.
-    vec3 skylight_base = ambient_color * ao;
-#if defined SH_SKYLIGHT && defined PROGRAM_DEFERRED11
-    // Traced SSPT light carries bounce + emission only (never sky), so the
-    // SH term is its complement, never its double. Translucent/forward
-    // paths never define PROGRAM_DEFERRED11, so their baked ambient is
-    // untouched.
-    skylight_base = vec3(0.0);
-#endif
+    // Baked ambient_color skylight. Traced SSPT light carries bounce +
+    // emission only (never sky), so this flat base is its complement,
+    // never its double. SSPT_INTENSITY masters the whole lighting rig.
+    vec3 skylight_base = ambient_color * ao * SSPT_INTENSITY;
     // SSS translucency wrap always references the live ambient, so leaves
     // keep their glow in every mode.
     vec3 skylight = skylight_base;
-    vec3 skylight_up = ambient_color * ao;
+    vec3 skylight_up = ambient_color * ao * SSPT_INTENSITY;
 
     skylight = mix(skylight, 0.5 * skylight_up * ao, material.sss_amount);
     skylight += ambient_sss * skylight_up * material.sss_amount * 2.0;

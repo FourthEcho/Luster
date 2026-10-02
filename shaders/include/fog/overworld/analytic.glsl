@@ -126,8 +126,7 @@ mat2x3 air_fog_analytic(
 }
 
 // Flat-ambient overload: same march with the global ambient color.
-// Used wherever no SH projection is in scope (sky-map gen, DH water,
-// SSR-hit fog); callers with sky_sh pass fog_skylight() explicitly.
+// Used everywhere (sky-map gen, DH water, SSR-hit fog, blend layers).
 mat2x3 air_fog_analytic(
     vec3 ray_origin_world,
     vec3 ray_end_world,

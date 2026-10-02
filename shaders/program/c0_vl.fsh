@@ -20,7 +20,6 @@ in vec2 uv;
 
 flat in vec3 ambient_color;
 flat in vec3 light_color;
-flat in vec3 sky_sh[9]; // SH sky projection from the vertex stage
 
 #if defined WORLD_OVERWORLD
 #include "/include/fog/overworld/parameters.glsl"
@@ -102,9 +101,6 @@ uniform float time_midnight;
 // ------------
 
 #if defined WORLD_OVERWORLD
-// Forward declaration; defined in sh_skylight.glsl below (which needs
-// the utility includes first).
-vec3 fog_skylight(vec3 sh[9], vec3 ray_dir);
 #include "/include/fog/overworld/raymarched.glsl"
 #endif
 
@@ -119,12 +115,6 @@ vec3 fog_skylight(vec3 sh[9], vec3 ray_dir);
 #include "/include/utility/encoding.glsl"
 #include "/include/utility/random.glsl"
 #include "/include/utility/space_conversion.glsl"
-
-// SH fog ambient (after all utility includes: sh_skylight pulls material
-// code that needs fast_math and friends already declared).
-#if defined WORLD_OVERWORLD
-#include "/include/lighting/ambient/sh_skylight.glsl"
-#endif
 
 void main() {
     ivec2 fog_texel = ivec2(gl_FragCoord.xy);

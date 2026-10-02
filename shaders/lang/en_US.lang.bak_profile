@@ -124,6 +124,7 @@ value.INFO.0                           = §eBy Fourth Echo
 value.INFO.1                           = §aBy Fourth Echo
 value.INFO.2                           = §bBy Fourth Echo
 value.INFO.3                           = §dBy Fourth Echo
+value.INFO.4                           = §cBy Fourth Echo
 
 # World settings
 
@@ -977,7 +978,7 @@ option.CAM_EXPOSURE_COMPENSATION       = Exposure Compensation
 option.CAM_EXPOSURE_COMPENSATION.comment   = EV compensation dial for the exposure triangle. Brightens or darkens around the aperture/shutter/ISO result, like aperture-priority mode on a real camera.
 option.TAA                             = TAA
 option.TAA.comment                     = Temporal anti-aliasing over multiple frames. Reduces flicker but can ghost on fast motion. Required for TAAU.
-option.FXAA                            = FXAA Pass
+option.FXAA                            = FXAA
 option.FXAA.comment                    = Fast approximate anti-aliasing. Softens edges and reduces aliasing with minimal performance impact. Works in conjunction with TAA to improve motion clarity.
 option.TAAU                            = TAA Upscaling
 option.TAAU.comment                    = Renders below native resolution and upscales with TAA. Much faster, with some loss of sharpness and stability.
@@ -1564,6 +1565,7 @@ profile.low=Low
 profile.medium=Medium
 profile.high=High
 profile.ultra=Ultra
+profile.mac_compatible=Mac Compatible
 
 option.SUN_I=Sunlight Intensity
 option.SUN_I.comment=Adjusts the overall brightness of direct sunlight. Higher = brighter sun, stronger highlights and shadows.

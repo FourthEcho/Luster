@@ -144,23 +144,8 @@ uniform vec4 entityColor;
 #if defined PROGRAM_GBUFFERS_TERRAIN && defined POM
 #define read_tex(x) textureGrad(x, parallax_uv, uv_gradient[0], uv_gradient[1])
 #else
-// Anisotropic filtering: if the host exposes GL_ARB_texture_filter_anisotropic
-// (or the legacy EXT variant), the hardware sampler does the work and we
-// just call texture(). Otherwise we fall back to a full software
-// implementation that takes N elongated samples along the dominant
-// screen-space gradient. The helper file detects the extension and
-// exposes aniso_sample() / read_tex_anisotropic() only when the software
-// path is actually needed.
-#include "/include/utility/anisotropic_filtering.glsl"
-#if ANISOTROPIC_FILTERING_MODE != ANISOTROPIC_FILTERING_OFF \
-    && !defined ANISOTROPIC_FILTERING_HARDWARE
-#define read_tex(x) read_tex_anisotropic(x, uv)
-#else
-// Hardware anisotropic available (host-managed sampler state) OR
-// filtering disabled — plain texture() does the right thing in both
-// cases.
+// Plain isotropic sampling with the render-scale LOD bias.
 #define read_tex(x) texture(x, uv, lod_bias)
-#endif
 #endif
 
 #if defined PROGRAM_GBUFFERS_BLOCK

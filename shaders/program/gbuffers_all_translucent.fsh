@@ -180,7 +180,6 @@ vec3 light_color, ambient_color;
 #include "/include/misc/purkinje_shift.glsl"
 #include "/include/surface/material.glsl"
 #include "/include/surface/water_normal.glsl"
-#include "/include/utility/anisotropic_filtering.glsl"
 #include "/include/utility/color.glsl"
 #include "/include/utility/encoding.glsl"
 #include "/include/utility/fast_math.glsl"
@@ -192,23 +191,11 @@ vec3 light_color, ambient_color;
 
 const float lod_bias = log2(taau_render_scale);
 
-// Pick the right texture sampler for translucent surfaces.
-//
-// The translucent shader samples gtexture / normals / specular directly
-// (no POM path here), so we just need to decide between software
-// anisotropic, hardware anisotropic (host-managed) and plain isotropic.
-#if ANISOTROPIC_FILTERING_MODE != ANISOTROPIC_FILTERING_OFF \
-    && !defined ANISOTROPIC_FILTERING_HARDWARE
-  // Software anisotropic — aniso_sample() is provided by the helper.
-  #define read_tex_anisotropic_or_plain(samp, texcoord) \
-      aniso_sample(samp, texcoord)
-#else
-  // Hardware anisotropic available (host-managed sampler state) OR
-  // filtering disabled — plain texture() does the right thing in both
-  // cases.
-  #define read_tex_anisotropic_or_plain(samp, texcoord) \
-      texture(samp, texcoord, lod_bias)
-#endif
+// Plain isotropic sampling with the render-scale LOD bias. (The
+// read_tex_anisotropic_or_plain name is kept so shared surface includes
+// compile unchanged.)
+#define read_tex_anisotropic_or_plain(samp, texcoord) \
+    texture(samp, texcoord, lod_bias)
 
 // Water surface color/absorption (needs read_tex_anisotropic_or_plain above)
 // and the fancy nether portal effect (needs position_tangent/atlas varyings

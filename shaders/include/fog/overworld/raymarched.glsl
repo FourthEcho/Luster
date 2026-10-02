@@ -240,11 +240,7 @@ mat2x3 raymarch_air_fog(
 #endif
 
     scattering += 2.0 * light_sky * vec2(isotropic_phase)
-#ifdef SH_SKYLIGHT
-        * fog_skylight(sky_sh, world_dir);
-#else
         * ambient_color;
-#endif
 
     for (int i = 0; i < 4; ++i) {
         float mie_phase = 0.7 * henyey_greenstein_phase(LoV, FOG_MIE_ANISOTROPY * anisotropy)

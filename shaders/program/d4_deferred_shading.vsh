@@ -16,11 +16,6 @@ out vec2 uv;
 flat out vec3 ambient_color;
 flat out vec3 light_color;
 
-// 9 RGB SH sky ambient coefficients, projected once per frame from the
-// live sky map. Evaluated per-fragment around the bent normal. See
-// include/lighting/ambient/sh_skylight.glsl.
-flat out vec3 sky_sh[9];
-
 #if defined WORLD_OVERWORLD
 flat out vec3 sun_color;
 flat out vec3 moon_color;
@@ -93,7 +88,6 @@ uniform float time_midnight;
 #include "/include/weather/rainbow.glsl"
 #endif
 
-#include "/include/lighting/ambient/sh_skylight.glsl"
 #include "/include/utility/bicubic.glsl"
 #include "/include/utility/random.glsl"
 #include "/include/utility/sampling.glsl"
@@ -103,14 +97,6 @@ void main() {
 
     light_color = texelFetch(colortex4, ivec2(191, 0), 0).rgb;
     ambient_color = texelFetch(colortex4, ivec2(191, 1), 0).rgb;
-
-    // Project the live sky map into 9 SH coefficients once per frame.
-    // Only 3 vertices run this code (fullscreen triangle).
-#if defined SH_SKYLIGHT && (defined WORLD_OVERWORLD || defined WORLD_END)
-    project_sky_sh(sky_sh);
-#else
-    for (int i = 0; i < 9; ++i) sky_sh[i] = vec3(0.0);
-#endif
 
 #if defined WORLD_OVERWORLD
     Weather weather = get_weather();

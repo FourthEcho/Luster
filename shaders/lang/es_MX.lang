@@ -1,9 +1,5 @@
 # Profiles
 
-profile.low                            = §eBajo
-profile.medium                         = §aMedio
-profile.high                           = §bAlto
-profile.ultra                          = §dUltra
 
 # Screens
 
@@ -11,6 +7,9 @@ screen.world                           = Mundo
 screen.lighting                        = Iluminación
 screen.sky                             = Cielo
 screen.fog                             = Niebla
+screen.fog_fog=Fog
+screen.clouds_volumetric=Volumetric Clouds
+screen.clouds_planar=Planar Clouds
 screen.fog_general                      = General
 screen.fog_environment                  = Niebla Ambiental
 screen.materials                       = Materiales
@@ -236,16 +235,12 @@ option.SUN_EG                          = §a▍ §fGreen — Evening
 option.SUN_EG.comment = Adjusts the green tint of sunlight at sunset. Affects the balance between orange and yellow dusk.
 option.SUN_EB                          = §9▍ §fBlue — Evening
 option.SUN_EB.comment = Adjusts the blue tint of sunlight at sunset. Higher = cooler, less orange evening light.
-option.SUN_I                           = Sunlight Intensity
-option.SUN_I.comment = Adjusts the overall brightness of direct sunlight. Higher = brighter sun, stronger highlights and shadows.
 option.MOON_R                          = §c▍ §fRed — Moonlight
 option.MOON_R.comment = Adjusts the red tint of moonlight. Higher = warmer night light.
 option.MOON_G                          = §a▍ §fGreen — Moonlight
 option.MOON_G.comment = Adjusts the green tint of moonlight. Affects the coolness of night lighting.
 option.MOON_B                          = §9▍ §fBlue — Moonlight
 option.MOON_B.comment = Adjusts the blue tint of moonlight. Higher = cooler, more bluish nights.
-option.MOON_I                          = Moonlight Intensity
-option.MOON_I.comment = Adjusts the overall brightness of moonlight. Higher = brighter nights, more visible shadows at night.
 option.LIGHTNING_FLASH                 = Destello del rayo
 option.LIGHTNING_FLASH.comment = Controls lightning flash.
 option.NETHER_USE_BIOME_COLOR          = Use Biome Color
@@ -423,10 +418,6 @@ suffix.CLOUDS_ALTOCUMULUS_ALTITUDE              = °
 
 option.CLOUDS_CUMULUS_CONGESTUS                       = Nubes cúmulos amontonadas
 option.CLOUDS_CUMULUS_CONGESTUS.comment               = Nubes volumétricas masivas y distantes
-option.CLOUDS_CUMULUS_CONGESTUS_PRIMARY_STEPS_H       = Pasos primarios - Horizon
-option.CLOUDS_CUMULUS_CONGESTUS_PRIMARY_STEPS_H.comment = Controls primary steps - horizon.
-option.CLOUDS_CUMULUS_CONGESTUS_PRIMARY_STEPS_Z       = Pasos primarios - Zenith
-option.CLOUDS_CUMULUS_CONGESTUS_PRIMARY_STEPS_Z.comment = Controls primary steps - zenith.
 option.CLOUDS_CUMULUS_CONGESTUS_LIGHTING_STEPS        = Pasos de iluminación
 option.CLOUDS_CUMULUS_CONGESTUS_LIGHTING_STEPS.comment = Controls lighting steps.
 option.CLOUDS_CUMULUS_CONGESTUS_AMBIENT_STEPS         = Pasos ambientales
@@ -1053,16 +1044,10 @@ option.DH_OVERDRAW_FADE_LENGTH.comment = Controls overdraw fade length.
 option.NOISE_ON_DH_TERRAIN       = Ruido en terreno DH
 option.NOISE_ON_DH_TERRAIN.comment = Controls noise on dh terrain.
 
-option.ANISOTROPIC_FILTERING_MODE=Anisotropic Filtering Mode
-option.ANISOTROPIC_FILTERING_MODE.comment = Anisotropic texture filtering for surface materials. Reduces aliasing and blur on grazing-angle surfaces (ground, walls seen at shallow angles). Off=standard bilinear, 2x/4x/8x/16x=more samples along the major axis of the screen-space footprint.
-value.ANISOTROPIC_FILTERING_OFF=Off
-value.ANISOTROPIC_FILTERING_2=2x
-value.ANISOTROPIC_FILTERING_4=4x
-value.ANISOTROPIC_FILTERING_8=8x
-value.ANISOTROPIC_FILTERING_16=16x
 
 # English fallback labels for UI completeness
-screen.mods                            = Mod Options
+screen.direct_lighting = Direct Lighting
+screen.framing_tool = Framing Tool
 screen.moon_phase_influence             = Moon Phase Influence
 option.SHADOW_SSRT                     = Distant Shadows
 option.SHADOW_SSRT.comment = Extends shadows beyond the shadow map distance using screen-space ray tracing. Fills in far shadows without increasing shadow map size. Moderate performance cost.
@@ -1202,11 +1187,6 @@ option.RAINBOWS_INTENSITY=Rainbow Visibility
 option.RAINBOWS_INTENSITY.comment = Adjusts the opacity and vividness of rainbows during/after rain. Higher = brighter, more saturated rainbow.
 option.END_SUN_EFFECT_INTENSITY=End Sun Effect Intensity
 option.END_SUN_EFFECT_INTENSITY.comment = Controls end sun effect intensity.
-value.ANISOTROPIC_FILTERING_MODE.ANISOTROPIC_FILTERING_OFF=Off
-value.ANISOTROPIC_FILTERING_MODE.ANISOTROPIC_FILTERING_2=2x
-value.ANISOTROPIC_FILTERING_MODE.ANISOTROPIC_FILTERING_4=4x
-value.ANISOTROPIC_FILTERING_MODE.ANISOTROPIC_FILTERING_8=8x
-value.ANISOTROPIC_FILTERING_MODE.ANISOTROPIC_FILTERING_16=16x
 value.MATERIAL_MAPPING_MODE.MATERIAL_MAPPING_OFF=Off
 value.MATERIAL_MAPPING_MODE.MATERIAL_MAPPING_HARDCODED=Hardcoded Specular
 value.MATERIAL_MAPPING_MODE.MATERIAL_MAPPING_SPECULAR_ONLY=Specular Only
@@ -1277,3 +1257,14 @@ option.AGX_GOLDEN                     = AGX Golden
 screen.rp_emission                      = Emissions
 option.TEXTURE_AO=Texture AO
 option.TEXTURE_AO.comment=Occludes the lightmap using AO from the resource pack normal map (blue channel in LabPBR, normal length in OldPBR). Needs a normal-mapped pack; does nothing on vanilla textures. Off by default.
+
+profile.low=Low
+profile.medium=Medium
+profile.high=High
+profile.ultra=Ultra
+profile.mac_compatible=Mac Compatible
+
+option.SUN_I=Sunlight Intensity
+option.SUN_I.comment=Adjusts the overall brightness of direct sunlight. Higher = brighter sun, stronger highlights and shadows.
+option.MOON_I=Moonlight Intensity
+option.MOON_I.comment=Adjusts the overall brightness of moonlight. Higher = brighter nights, more visible shadows at night.

@@ -375,11 +375,9 @@ vec3 hitDirectLight(HitData hit, vec3 hit_view_pos) {
     indirect_direct += get_handheld_lighting(hit_scene_pos, 1.0);
 #endif
 
-    // SSPT_INTENSITY controls traced secondary-light strength only.
-    // Direct sun/moon bounce is kept at the physical radiance calculated
-    // above so the SSPT control cannot accidentally amplify daylight/night
-    // lighting. Sky and handheld are still secondary-light paths and keep
-    // the SSPT intensity control.
+    // SUN_I/MOON_I own the direct sun/moon bounce radiance;
+    // SSPT_INTENSITY scales the indirect paths below, so every
+    // contribution is counted exactly once.
     return hit.albedo * (sun_moon_direct + indirect_direct * SSPT_INTENSITY);
 }
 

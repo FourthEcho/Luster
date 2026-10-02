@@ -35,7 +35,6 @@ in vec2 uv;
 
 flat in vec3 ambient_color;
 flat in vec3 light_color;
-flat in vec3 sky_sh[9]; // SH sky projection from the vertex stage
 
 #ifdef WORLD_OVERWORLD
 #include "/include/fog/overworld/parameters.glsl"
@@ -130,7 +129,6 @@ uniform float time_midnight;
 #define TEMPORAL_REPROJECTION
 
 #include "/include/fog/simple_fog.glsl"
-#include "/include/lighting/ambient/sh_skylight.glsl"
 #include "/include/lighting/cloud_shadows.glsl"
 
 // Cloud shadow map for the analytic-fog gates below (p0 renders it
@@ -178,14 +176,7 @@ vec3 blend_layers_with_fog(
 
 #if defined WORLD_OVERWORLD
     if (is_translucent) {
-#ifdef SH_SKYLIGHT
-        vec3 fog_ambient_back = fog_skylight(
-            sky_sh,
-            back_position_world - front_position_world
-        );
-#else
         vec3 fog_ambient_back = ambient_color;
-#endif
         mat2x3 analytic_fog = air_fog_analytic(
             front_position_world,
             back_position_world,
@@ -487,14 +478,7 @@ void main() {
 #if defined WORLD_OVERWORLD
         // Overworld fog
 
-#ifdef SH_SKYLIGHT
-        vec3 fog_ambient_front = fog_skylight(
-            sky_sh,
-            front_position_world - cameraPosition
-        );
-#else
         vec3 fog_ambient_front = ambient_color;
-#endif
         mat2x3 analytic_fog = air_fog_analytic(
             cameraPosition,
             front_position_world,

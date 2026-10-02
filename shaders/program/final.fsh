@@ -26,6 +26,7 @@ uniform sampler2D DEBUG_SAMPLER;
 #endif
 
 uniform float viewHeight;
+uniform float viewWidth;
 uniform float frameTimeCounter;
 
 #include "/include/utility/bicubic.glsl"
@@ -57,6 +58,18 @@ ivec2 debug_text_position = ivec2(0, int(viewHeight) / debug_text_scale);
 
 #if DEBUG_VIEW == DEBUG_VIEW_WEATHER
 #include "/include/misc/debug_weather.glsl"
+#endif
+
+#ifdef FRAMING_TOOL
+// Composition-guide line profile shared by the thirds/aspect/safe
+// overlays at the end of main.
+float framing_line_profile(float d) {
+    return 1.0 - smoothstep(
+        FRAMING_LINE_WIDTH * 0.5 - 0.5,
+        FRAMING_LINE_WIDTH * 0.5 + 0.5,
+        d
+    );
+}
 #endif
 
 void main() {
@@ -122,6 +135,53 @@ void main() {
     fragment_color = is_sky
         ? vec3(1.0)
         : vec3(clamp01(dist * rcp(DISTANCE_VIEW_MAX_DISTANCE)));
+#endif
+
+#ifdef FRAMING_TOOL
+    // Composition guides: rule-of-thirds grid, target aspect box and
+    // safe-area rect. Overlaid last so grading never tints the guides.
+    {
+        vec2 framing_res = vec2(viewWidth, viewHeight);
+        float guide = 0.0;
+#ifdef FRAMING_THIRDS
+        vec2 third = framing_res / 3.0;
+        float thirds_dist = min(
+            min(
+                abs(gl_FragCoord.x - third.x),
+                abs(gl_FragCoord.x - 2.0 * third.x)
+            ),
+            min(
+                abs(gl_FragCoord.y - third.y),
+                abs(gl_FragCoord.y - 2.0 * third.y)
+            )
+        );
+        guide = max(guide, framing_line_profile(thirds_dist));
+#endif
+#ifdef FRAMING_ASPECT
+        float screen_aspect = framing_res.x / max(framing_res.y, 1.0);
+        float aspect_dist;
+        if (screen_aspect > FRAMING_ASPECT_RATIO) {
+            float half_w = 0.5 * framing_res.y * FRAMING_ASPECT_RATIO;
+            aspect_dist = min(
+                abs(gl_FragCoord.x - (0.5 * framing_res.x - half_w)),
+                abs(gl_FragCoord.x - (0.5 * framing_res.x + half_w))
+            );
+        } else {
+            float half_h = 0.5 * framing_res.x / max(FRAMING_ASPECT_RATIO, 1e-4);
+            aspect_dist = min(
+                abs(gl_FragCoord.y - (0.5 * framing_res.y - half_h)),
+                abs(gl_FragCoord.y - (0.5 * framing_res.y + half_h))
+            );
+        }
+        guide = max(guide, framing_line_profile(aspect_dist));
+        vec2 safe_q = abs(gl_FragCoord.xy - 0.5 * framing_res)
+            - 0.5 * framing_res * FRAMING_SAFE_AREA;
+        float safe_dist = length(max(safe_q, vec2(0.0)))
+            + min(max(safe_q.x, safe_q.y), 0.0);
+        guide = max(guide, framing_line_profile(abs(safe_dist)));
+#endif
+        fragment_color = mix(fragment_color, vec3(1.0), guide * FRAMING_OPACITY);
+    }
 #endif
 }
 
