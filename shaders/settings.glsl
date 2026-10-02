@@ -585,7 +585,7 @@ const float wetnessHalflife         = 70.0;
   #define CAM_SENSOR_WIDTH 35 // [16 20 25 30 35 40 50 60 70 80]
   #define CAM_FSTOPS 3.2 // [0.8 1.4 2.0 2.8 3.2 3.6 4.0 4.4 4.8 5.6 6.4 7.2 8.0 9.6 12.8 16.0]
   #define CAM_SHUTTER_SPEED 60 // [1000 500 250 125 60 30]
-  #define CAM_ISO 100 // [100 200 400 800 1600 3200]
+  #define CAM_ISO 80 // [50 64 80 100 125 160 200 250 320 400 500 640 800 1000 1250 1600 2000 2500 3200 4000 5000 6400]
   #define CAM_EXPOSURE_COMPENSATION 0.0 // [-5.0 -4.5 -4.0 -3.5 -3.0 -2.5 -2.0 -1.5 -1.0 -0.5 0.0 0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0]
 
   #define BLOOM
@@ -768,7 +768,7 @@ const float wetnessHalflife         = 70.0;
   #define DEBUG_VIEW_WEATHER   3
 
   #define DEBUG_VIEW DEBUG_VIEW_NONE // [DEBUG_VIEW_NONE DEBUG_VIEW_SAMPLER DEBUG_VIEW_HISTOGRAM DEBUG_VIEW_WEATHER]
-  #define DEBUG_SAMPLER colortex1 // [colortex1 colortex2 colortex3 colortex4 colortex5 colortex6 colortex7 colortex8 colortex9 colortex10 colortex11 colortex12 colortex13 colortex14 colortex15 depthtex0 depthtex1 depthtex2 shadowtex0 shadowtex1 shadowcolor0]
+  #define DEBUG_SAMPLER colortex1 // [colortex0 colortex1 colortex2 colortex3 colortex4 colortex5 colortex6 colortex7 colortex8 colortex9 colortex10 colortex11 colortex12 colortex13 colortex14 colortex15 colortex16 colortex17 colortex18 colortex19 colortex20 colortex21 colortex22 depthtex0 depthtex1 depthtex2 shadowtex0 shadowtex1 shadowcolor0 noisetex]
 //#define WHITE_WORLD
   #define WHITE_WORLD_BRIGHTNESS 1.00 // [0.00 0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.45 0.50 0.55 0.60 0.65 0.70 0.75 0.80 0.85 0.90 0.95 1.00 1.05 1.10 1.15 1.20 1.25 1.30 1.35 1.40 1.45 1.50 1.55 1.60 1.65 1.70 1.75 1.80 1.85 1.90 1.95 2.00]
 //#define TONEMAP_COMPARISON

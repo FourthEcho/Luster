@@ -1234,6 +1234,15 @@ value.DEBUG_SAMPLER.depthtex2=depthtex2
 value.DEBUG_SAMPLER.shadowtex0=shadowtex0
 value.DEBUG_SAMPLER.shadowtex1=shadowtex1
 value.DEBUG_SAMPLER.shadowcolor0=shadowcolor0
+value.DEBUG_SAMPLER.colortex0=colortex0
+value.DEBUG_SAMPLER.colortex16=colortex16
+value.DEBUG_SAMPLER.colortex17=colortex17
+value.DEBUG_SAMPLER.colortex18=colortex18
+value.DEBUG_SAMPLER.colortex19=colortex19
+value.DEBUG_SAMPLER.colortex20=colortex20
+value.DEBUG_SAMPLER.colortex21=colortex21
+value.DEBUG_SAMPLER.colortex22=colortex22
+value.DEBUG_SAMPLER.noisetex=noisetex
 Replaces flat nether fog with drifting, patchy volumetric smoke
 Controls nether smoke intensity.
 Controls the strength of the color tinting applied to light shafts

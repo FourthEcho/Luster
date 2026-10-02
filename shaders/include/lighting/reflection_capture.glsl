@@ -48,16 +48,18 @@ vec3 read_capture_position_aware(
     vec3 scene_pos,
     vec3 sky_fallback
 ) {
-    float reflector_dist_sq = dot(scene_pos, scene_pos);
-    if (reflector_dist_sq < eps) {
+    if (dot(scene_pos, scene_pos) < eps) {
         return sky_fallback;
     }
 
     vec3 dir = reflect_dir * inversesqrt(max(dot(reflect_dir, reflect_dir), eps));
     vec2 suv = unproject_capture_direction(dir);
 
-    // Reject captured surfaces sitting between the camera and the
-    // reflector: from the reflector they would be behind the surface.
+    // Reject captured surfaces sitting behind the reflector along the
+    // ray. This MUST be an along-ray test, not a radial-distance test:
+    // a nearby tree has a smaller camera distance than farther shoreline
+    // water, yet sits in front of it along the reflection ray and must
+    // still appear. The old radial test killed exactly those reflections.
     vec3 stored_pos = texelFetch(
         colortex22,
         ivec2(
@@ -69,8 +71,10 @@ vec3 read_capture_position_aware(
     if (any(isnan(stored_pos))) {
         return sky_fallback;
     }
-    if (dot(stored_pos, stored_pos) < reflector_dist_sq
-        && dot(scene_pos, dir) > 0.0) {
+    if (dot(stored_pos, stored_pos) < eps) {
+        return sky_fallback; // never captured
+    }
+    if (dot(stored_pos - scene_pos, dir) < 0.0) {
         return sky_fallback;
     }
 
