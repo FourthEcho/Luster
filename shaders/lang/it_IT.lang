@@ -5,9 +5,6 @@
 
 screen.world                           = Mondo
 screen.lighting                        = Illuminazione
-screen.sky                             = Cielo
-screen.fog                             = Nebbia
-screen.fog_fog=Fog
 screen.clouds_volumetric=Volumetric Clouds
 screen.clouds_planar=Planar Clouds
 screen.fog_general                      = Generale
@@ -19,8 +16,6 @@ screen.misc                            = Varie
 screen.tonemap_comparison              = Confronto Tonemap
 
 screen.weather                         = Meteo 
-screen.colored_lights                  = Luci Colorate
-screen.colored_lights_settings         = Impostazioni Luci Colorate
 screen.purkinje_shift                 = Spostamento di Purkinje
 screen.rp_settings                     = Impostazioni Resource Pack
 screen.rp_parallax                      = Parallax Occlusion Mapping
@@ -30,7 +25,6 @@ screen.rp_sss                           = Scattering Subsuperficiale
 screen.reflections                     = Riflessi
 screen.refraction                      = Rifrazione
 screen.light_sources                   = Fonti di luce
-screen.shadows                         = Ombre
 screen.shadows_general                 = General
 screen.color_grading                   = Gradiente di Colore
 screen.grading_basic                    = Base
@@ -39,7 +33,6 @@ screen.grading_curve                    = Curva Tonale
 screen.grading_split_tone               = Viraggio Selettivo
 screen.grading_selective                = Colore Selettivo
 screen.exposure                        = Esposizione
-screen.lpv_vl                          = Dispersione Luci Colorate Nebbia
 screen.box                             = Box di selezione
 
 screen.aurora                          = Aurora
@@ -93,7 +86,6 @@ value.INFO.0                           = §eBy Fourth Echo
 value.INFO.1                           = §aBy Fourth Echo
 value.INFO.2                           = §bBy Fourth Echo
 value.INFO.3                           = §dBy Fourth Echo
-value.INFO.4                           = §cBy Fourth Echo
 
 # World settings
 
@@ -139,8 +131,6 @@ option.WEATHER_WIND_VARIATION_SPEED.comment = Controls windiness variation speed
 
 # Lighting settings
 
-option.COLORED_LIGHTS                    = Luci Colorate
-option.COLORED_LIGHTS.comment            = Blocchi luci con colore variabile usando algoritmo Flood Fill. Richiede Iris 1.6 o superiori
 option.AO_IN_SUNLIGHT                  = AO nella Luce Solare
 option.AO_IN_SUNLIGHT.comment          = Applicazione dell'occlusione ambientale sotto luce solare o lunare
 option.CLOUD_SHADOWS                   = Ombre Nuvole
@@ -196,15 +186,9 @@ option.VANILLA_AO.comment              = Occlusione ambientale di Minecraft
 option.HIGH_QUALITY_EMISSION=High Quality Emission
 option.HIGH_QUALITY_EMISSION.comment=Cleaner SSPT emission: an extra emitter sample per path and a longer visibility march. Less noise and wall-leak at ~2× gather cost. Single-bounce guiding only.
 option.SSAO_RADIUS                     = Raggio SSAO
-comment.SSAO_RADIUS                    = Modifica il raggio di azione del SSAO - distanza alla quale gli oggetti possono occludersi a vicenda
 option.SSAO_STEPS                      = Qualità SSAO
-comment.SSAO_STEPS                     = Controlla quanto rumore produce Il SSAO
 option.GTAO_RADIUS                     = Raggio GTAO
-comment.GTAO_RADIUS                    = MOdifica il raggio di azione del GTAO - distanza alla quale gli oggetti possono occludersi a vicenda
-option.GTAO_SLICES                     = Qualità GTAO
-comment.GTAO_SLICES                    = Controlla quanto rumore produce il GTAO
 option.GTAO_HORIZON_STEPS              = Qualità Orizzonte GTAO
-comment.GTAO_HORIZON_STEPS             = Controlla l'accuratezza del GTAO
 
 option.SUN_NR                          = §c▍ §fRed — Noon
 option.SUN_NR.comment = Adjusts the red tint of sunlight at noon. Higher = warmer midday sun.
@@ -269,14 +253,7 @@ option.BLOCKLIGHT_B.comment = Adjusts the blue tint of block lights. Higher = co
 option.BLOCKLIGHT_I                    = Block Light Intensity
 option.BLOCKLIGHT_I.comment = Adjusts the overall brightness of block light sources. Higher = stronger torch and lamp illumination.
 
-option.VOXEL_VOLUME_SIZE               = Dimensioni volume Voxel
-option.VOXEL_VOLUME_SIZE.comment       = Grosso impatto performance, anche affetto dalla Distanza Ombre
-suffix.VOXEL_VOLUME_SIZE               = m
-option.VOXEL_VOLUME_CENTER             = Centro Volume Voxel
-option.VOXEL_VOLUME_CENTER.comment     = Davanti: volume voxel è centrato davanti il giocatore, rendendolo più visibile.
 
-value.VOXEL_VOLUME_CENTER.VOXEL_VOLUME_CENTER_AHEAD  = Davanti
-value.VOXEL_VOLUME_CENTER.VOXEL_VOLUME_CENTER_PLAYER = Giocatore
 
 suffix.shadowMapResolution             = ²
 suffix.sunPathRotation                 = °
@@ -314,9 +291,7 @@ option.SUN_ANGULAR_RADIUS.comment = Adjusts the apparent size of the sun disc in
 option.MOON_ANGULAR_RADIUS             = Moon Size
 option.MOON_ANGULAR_RADIUS.comment = Adjusts the apparent size of the moon disc at night. Larger = bigger moon and softer moon shadows.
 option.ATMOSPHERE_SATURATION_BOOST     = Aumento Saturazione Atmosferica
-comment.ATMOSPHERE_SATURATION_BOOST    = Aumenta la saturazione del cielo e del colore della luce solare secondo l'ora del giorno
 option.ATMOSPHERE_SATURATION_BOOST_INTENSITY = Aumento Intensità Saturazione Atmosferica
-comment.ATMOSPHERE_SATURATION_BOOST_INTENSITY = Modifica l'Intensità dell'Aumento di Saturazione Atmosferica
 option.STARS                           = Attivato
 option.STARS.comment                   = Stelle nel cielo notturno. Impatto performance basso
 option.STARS_INTENSITY                 = Intensità
@@ -373,7 +348,6 @@ option.CLOUDS_CUMULUS_WIND_ANGLE            = Angolo Vento
 option.CLOUDS_CUMULUS_WIND_ANGLE.comment = Controls wind angle.
 suffix.CLOUDS_CUMULUS_ALTITUDE              = °
 option.CLOUDS_CUMULUS_PRECOMPUTE_LOCAL_COVERAGE = Copertura Locale Precompilata
-comment.CLOUDS_CUMULUS_PRECOMPUTE_LOCAL_COVERAGE = Ottimizzazione aggressiva per i cumuli. Riduce la distanza massima in cui le nuvole possono generarsi e può creare artefatti quando la camera si muove. Disabilità per fare foto alle nuvole da sopra
 
 option.CLOUDS_ALTOCUMULUS                       = Nuvole Altocumulus
 option.CLOUDS_ALTOCUMULUS.comment               = Nuvole volumetriche di media altitudine fatte per assomigliare a nuvole altocumulus
@@ -416,19 +390,13 @@ option.CLOUDS_CUMULUS_CONGESTUS_ALTITUDE.comment = Controls altitude.
 suffix.CLOUDS_CUMULUS_CONGESTUS_ALTITUDE              = m
 option.CLOUDS_CUMULUS_CONGESTUS_THICKNESS             = Spessore
 option.CLOUDS_CUMULUS_CONGESTUS_THICKNESS.comment = Controls thickness.
-option.CLOUDS_CUMULUS_CONGESTUS_DENSITY               = Densità
-option.CLOUDS_CUMULUS_CONGESTUS_DENSITY.comment = Controls density.
 option.CLOUDS_CUMULUS_CONGESTUS_COVERAGE              = Copertura
 option.CLOUDS_CUMULUS_CONGESTUS_COVERAGE.comment = Controls coverage.
 option.CLOUDS_CUMULUS_CONGESTUS_SIZE                  = Dimensioni
 option.CLOUDS_CUMULUS_CONGESTUS_SIZE.comment = Controls size.
 option.CLOUDS_CUMULUS_CONGESTUS_DETAIL_STRENGTH       = Scala Dettagli
 option.CLOUDS_CUMULUS_CONGESTUS_DETAIL_STRENGTH.comment = Controls detail strength.
-option.CLOUDS_CUMULUS_CONGESTUS_WIND_SPEED            = Velocità Vento
-option.CLOUDS_CUMULUS_CONGESTUS_WIND_SPEED.comment = Controls wind speed.
 suffix.CLOUDS_CUMULUS_CONGESTUS_ALTITUDE              = m/s
-option.CLOUDS_CUMULUS_CONGESTUS_WIND_ANGLE            = Angolo Vento
-option.CLOUDS_CUMULUS_CONGESTUS_WIND_ANGLE.comment = Controls wind angle.
 suffix.CLOUDS_CUMULUS_CONGESTUS_ALTITUDE              = °
 
 option.CLOUDS_NOCTILUCENT              = Nuvole Nottilucenti
@@ -475,8 +443,6 @@ option.CLOUDS_CIRRUS_COVERAGE              = Copertura Cirrus
 option.CLOUDS_CIRRUS_COVERAGE.comment = Controls cirrus coverage.
 option.CLOUDS_CIRRUS_SIZE                  = Dimensione Cirrus
 option.CLOUDS_CIRRUS_SIZE.comment = Controls cirrus size.
-option.CLOUDS_CIRRUS_DETAIL_STRENGTH       = Scala Dettaglio Cirrus 
-option.CLOUDS_CIRRUS_DETAIL_STRENGTH.comment = Controls cirrus detail strength.
 option.CLOUDS_CIRRUS_CURL_STRENGTH         = Scala Arricciamento Cirrus
 option.CLOUDS_CIRRUS_CURL_STRENGTH.comment = Controls cirrus curl strength.
 option.CLOUDS_CIRRUS_WIND_SPEED            = Velocità Vento
@@ -573,7 +539,6 @@ option.RENDER_BELOW_PLANET.comment    = Renders the planet ground disc for below
 option.RENDER_BELOW_PLANET_INTENSITY  = Below Planet Brightness
 option.RENDER_BELOW_PLANET_INTENSITY.comment = Brightness of the planet ground rendered below the horizon.
 option.VL                              = Illuminazione Volumetrica
-comment.LPV_VL                         = Fonti di luce illuminano la nebbia. Richiede luci colorate! 
 option.VL.comment                      = Aggiunge raggi di luce e variabile nebbia volumetrica
 option.VL_RENDER_SCALE                 = Scala Render VL
 option.VL_RENDER_SCALE.comment = Controls vl render scale.
@@ -581,17 +546,6 @@ option.AIR_FOG_CLOUDY_NOISE            = Foschia nuvolosa
 option.AIR_FOG_CLOUDY_NOISE.comment    = Foschia a bassa quota, meglio visibile la mattina.\nRichiede Nebbia Volumetrica!
 
 # LPV VL
-option.LPV_VL                          = Attivato
-option.LPV_VL_STEPS                    = Light March Steps
-option.LPV_VL_STEPS.comment = Adjusts the number of ray-march steps for light scattering in fog. Higher = smoother, more accurate volumetric colored light at higher GPU cost.
-option.LPV_VL_INTENSITY_OVERWORLD      = Overworld Strength
-option.LPV_VL_INTENSITY_OVERWORLD.comment = Adjusts the brightness of volumetric colored-light scattering in the Overworld.
-option.LPV_VL_INTENSITY_UNDERGROUND    = Underground Strength
-option.LPV_VL_INTENSITY_UNDERGROUND.comment = Adjusts the brightness of volumetric colored-light scattering underground/in caves.
-option.LPV_VL_INTENSITY_NETHER         = Nether Strength
-option.LPV_VL_INTENSITY_NETHER.comment = Adjusts the brightness of volumetric colored-light scattering in the Nether.
-option.LPV_VL_INTENSITY_END            = End Strength
-option.LPV_VL_INTENSITY_END.comment = Adjusts the brightness of volumetric colored-light scattering in the End.
 
 # Rayleigh Fog
 option.AIR_FOG_RAYLEIGH_FALLOFF_START     = Inizio Caduta Rayleigh
@@ -806,7 +760,6 @@ option.WATER_PARALLAX.comment          = Rende le onde tridimensionali
 option.WATER_DISPLACEMENT              = Spostamento Acqua
 option.WATER_DISPLACEMENT.comment      = Simile a come funzionano le foglie ondulanti, fa muovere l'acqua leggermente in mondo ondulato così che la linea della costa risulti meno piatta
 option.WATER_WAVES_HEIGHT_VARIATION    = Variazione Altezza Onde
-comment.WATER_WAVES_HEIGHT_VARIATION   = L'altezza delle onde negli specchi d'acqua
 
 option.WATER_ABSORPTION_R              = Assorbimento Rosso 
 option.WATER_ABSORPTION_R.comment = Controls the ▍ red absorption color channel.
@@ -834,16 +787,12 @@ option.BLOOM_INTENSITY                 = Intensità dell'aura
 option.BLOOM_INTENSITY.comment         = Modifica quanto l'aura cambia l'immagina finale
 option.DOF                             = Profondità di campo (DoF)
 option.DOF.comment                     = Effetto Camera focus - Sfoca gli elementi retrostanti accentuando la profondità di campo
-option.DOF_INTENSITY                   = Intensità DoF
-option.DOF_INTENSITY.comment           = Modifica l'intensità della profondità di campo
 option.DOF_SAMPLES                     = Campionatura DoF
 option.DOF_SAMPLES.comment             = Numeri di campioni presi per la DoF. Maggiore è il numero di campioni, maggiore è la qualità dell'aura, ma pesa di più sulle performance
 option.DOF_FOCUS                       = DoF Focus
 option.DOF_FOCUS.comment               = Distanza focale per la DoF
 option.MOTION_BLUR                     = Motion Blur
 option.MOTION_BLUR.comment             = Blur cinematico quando c'è movimento, utile per rendere fluidi bassi fps ma può creare cinetosi
-option.MOTION_BLUR_INTENSITY           = Intensità Motion Blur
-option.MOTION_BLUR_INTENSITY.comment   = Modifica l'intensità del Motion Blur
 option.TAA                             = Anti-aliasing temporale (TAA)
 option.TAA.comment                     = Migliora notevolmente l'immagine riducendone il rumore, ma può creare artefatti come sfarfallio e ghosting. Richiesto da TAA Upscaling!
 option.FXAA                            = Anti-aliasing a schermo intero (FXAA)
@@ -1020,7 +969,6 @@ option.VANILLA_AO_LIFT.comment           = Lifts the darkest vanilla AO shadows 
 option.SSAO_RADIUS.comment             = Adjusts the radius of SSAO -  the distance from which objects can occlude each other
 option.SSAO_STEPS.comment              = Controls how noisy the SSAO appears
 option.GTAO_RADIUS.comment             = Adjusts the radius of GTAO - the distance from which objects can occlude each other
-option.GTAO_SLICES.comment             = Controls how noisy the GTAO appears
 option.GTAO_HORIZON_STEPS.comment      = Controls the accuracy of GTAO. A higher step count also increase the intensity of the effect
 option.ATMOSPHERE_SATURATION_BOOST.comment            = Increases the saturation of the sky and sunlight color depending on the time of day
 option.ATMOSPHERE_SATURATION_BOOST_INTENSITY.comment  = Adjust the intensity of Atmosphere Saturation Boost
@@ -1033,8 +981,6 @@ suffix.CLOUDS_CUMULUS_WIND_ANGLE            = °
 option.CLOUDS_CUMULUS_PRECOMPUTE_LOCAL_COVERAGE.comment = Aggressive optimization for cumulus clouds. Reduces the maximum distance clouds can be drawn and can cause some artifacts with cloud shapes morphing when the camera moves. Disable for taking screenshots above the clouds
 suffix.CLOUDS_ALTOCUMULUS_WIND_SPEED            = m/s
 suffix.CLOUDS_ALTOCUMULUS_WIND_ANGLE            = °
-suffix.CLOUDS_CUMULUS_CONGESTUS_WIND_SPEED            = m/s
-suffix.CLOUDS_CUMULUS_CONGESTUS_WIND_ANGLE            = °
 option.BLOCKY_CLOUDS_ALTITUDE.comment    = Adjust the height of the clouds
 suffix.BLOCKY_CLOUDS_ALTITUDE            = m
 suffix.BLOCKY_CLOUDS_ALTITUDE_2          = m
@@ -1060,7 +1006,6 @@ option.BLOCKY_CLOUDS_WIND_ANGLE.comment = Controls wind angle.
 suffix.BLOCKY_CLOUDS_WIND_ANGLE          = °
 suffix.CLOUDS_CIRRUS_WIND_SPEED            = m/s
 suffix.CLOUDS_CIRRUS_WIND_ANGLE            = °
-option.LPV_VL.comment                       = Light sources illuminate the fog. Requires Colored Lights! 
 option.AIR_FOG_COLORED_LIGHT_SHAFTS         = Colored Light Shafts
 option.AIR_FOG_COLORED_LIGHT_SHAFTS.comment = Light shafts passing through translucent objects are tinted by their color
 option.WATER_WAVES_HEIGHT_VARIATION.comment   = The height of water waves varies in space
@@ -1110,16 +1055,8 @@ option.FOG_SMOOTHING_RADIUS=Fog Blur Radius
 option.FOG_SMOOTHING_RADIUS.comment = Adjusts the spatial blur radius for fog smoothing. Higher = softer, more blended fog at higher cost.
 option.MATERIAL_MAPPING_MODE=Material Mapping Mode
 option.MATERIAL_MAPPING_MODE.comment = Controls how PBR material textures (specular/normal maps via labPBR or OldSchoolPBR conventions) are decoded from resource packs. OFF disables, HARDCODED uses built-in per-block values, SPECULAR_ONLY reads just the specular map, NORMALS_ONLY reads just the normal map, SPECULAR_NORMALS reads both.
-value.MATERIAL_MAPPING_OFF=Off
-value.MATERIAL_MAPPING_HARDCODED=Hardcoded Specular
-value.MATERIAL_MAPPING_SPECULAR_ONLY=Specular Only
-value.MATERIAL_MAPPING_NORMALS_ONLY=Normals Only
-value.MATERIAL_MAPPING_SPECULAR_NORMALS=Specular + Normal Mapping
 option.POROSITY_MODE=Porosity Mode
 option.POROSITY_MODE.comment=Off disables wetness. Hardcoded uses built-in per-block porosity. Maps reads the labPBR specular B channel when a resource pack provides it, with no fallback on vanilla texels.
-value.POROSITY_OFF=Off
-value.POROSITY_HARDCODED=Hardcoded
-value.POROSITY_MAPS=LabPBR
 value.POROSITY_MODE.POROSITY_OFF=Off
 value.POROSITY_MODE.POROSITY_HARDCODED=Hardcoded
 value.POROSITY_MODE.POROSITY_MAPS=LabPBR
@@ -1127,9 +1064,6 @@ option.POROSITY_STRENGTH=Porosity Strength
 option.POROSITY_STRENGTH.comment = Multiplier for the porosity darkening effect.
 option.SSS_MODE=Subsurface Scattering Mode
 option.SSS_MODE.comment=Off disables SSS. Hardcoded uses built-in scattering profiles for leaves and plants. Maps reads the labPBR specular B channel when a resource pack provides it, with no fallback on vanilla texels. Sheen follows the map automatically.
-value.SSS_OFF=Off
-value.SSS_HARDCODED=Hardcoded
-value.SSS_MAPS=LabPBR
 value.SSS_MODE.SSS_OFF=Off
 value.SSS_MODE.SSS_HARDCODED=Hardcoded
 value.SSS_MODE.SSS_MAPS=LabPBR
@@ -1139,20 +1073,6 @@ option.TAA_INTENSITY=TAA Strength
 option.TAA_INTENSITY.comment = Adjusts the blend weight of temporal anti-aliasing. Higher = smoother image with less flicker but more ghosting on moving objects.
 option.FXAA_INTENSITY=FXAA Strength
 option.FXAA_INTENSITY.comment = Adjusts the strength of fast approximate anti-aliasing. Higher = smoother edges but softer image.
-option.VOXY_QUALITY=Voxy Quality
-option.VOXY_QUALITY.comment = Selects the detail level for Voxy (Distant Horizons LOD) terrain. Higher = more triangles and sharper distant terrain at higher cost.
-value.VOXY_QUALITY_OFF=Off
-value.VOXY_QUALITY_BASIC=Basic
-value.VOXY_QUALITY_STANDARD=Standard
-value.VOXY_QUALITY_HIGH=High
-option.VOXY_LIGHTING_MODE=Voxy Lighting Mode
-option.VOXY_LIGHTING_MODE.comment = Selects the voxy lighting mode mode or method.
-option.VOXY_BRIGHTNESS=Voxy Brightness
-option.VOXY_BRIGHTNESS.comment = Adjusts the overall brightness of Voxy distant terrain to better match nearby chunks.
-option.VOXY_SHADOWS=Voxy Shadows
-option.VOXY_SHADOWS.comment = When enabled, Voxy distant terrain casts and receives shadows like nearby terrain. Moderate performance cost.
-option.VOXY_REFLECTIONS=Voxy Reflections
-option.VOXY_REFLECTIONS.comment = When enabled, Voxy terrain appears in screen-space reflections. Adds distant reflections on water at higher cost.
 option.WATER_WAVES_NOISE_STRENGTH=Water Waves Noise Strength
 option.WATER_WAVES_NOISE_STRENGTH.comment = Controls water waves noise strength.
 option.WATER_TEXTURE_INTENSITY=Water Texture Intensity
@@ -1212,10 +1132,6 @@ Replaces flat nether fog with drifting, patchy volumetric smoke
 Controls nether smoke intensity.
 Controls the strength of the color tinting applied to light shafts
 
-option.COLORED_LIGHTS_FALLOFF = Falloff Mode
-option.COLORED_LIGHTS_FALLOFF.comment = Controls the automatic colored-light fallback falloff.
-value.COLORED_LIGHTS_FALLOFF.COLORED_LIGHTS_FALLOFF_SQUARED = Squared
-value.COLORED_LIGHTS_FALLOFF.COLORED_LIGHTS_FALLOFF_LINEAR = Linear
 option.IMAGE_SHARPENING_INTENSITY = Image Sharpening
 option.IMAGE_SHARPENING_INTENSITY.comment = Controls final edge-aware image sharpening strength.
 
@@ -1244,9 +1160,314 @@ profile.low=Low
 profile.medium=Medium
 profile.high=High
 profile.ultra=Ultra
-profile.mac_compatible=Mac Compatible
 
 option.SUN_I=Sunlight Intensity
 option.SUN_I.comment=Adjusts the overall brightness of direct sunlight. Higher = brighter sun, stronger highlights and shadows.
 option.MOON_I=Moonlight Intensity
 option.MOON_I.comment=Adjusts the overall brightness of moonlight. Higher = brighter nights, more visible shadows at night.
+
+# Untranslated fallback (English) - synced from en_US.lang; translate as needed.
+screen.world_vegetation                 = Vegetation
+screen.world_weather_fx                 = Weather Effects
+screen.atmosphere                      = Atmosphere
+screen.atmo_space                       = Space
+screen.atmo_sky                         = Sky
+screen.atmo_air                         = Air
+screen.atmo_ground                      = Fog
+screen.sky_celestial_bodies             = Sun & Moon
+screen.sky_phenomena                    = Sky Phenomena
+screen.planet                          = Planet
+screen.sky_atmosphere                   = Atmosphere Color
+screen.camera                          = Camera
+screen.lens_flare                      = Lens Flare
+screen.misc_debug                      = Debug
+screen.shadows_quality                  = Shadow Quality
+screen.shadows_coverage                 = Shadow Coverage
+screen.shadows_style                    = Shadow Style
+screen.space_galaxy                     = Galaxy
+screen.fog_mie_density                 = Mie Density
+screen.fog_mie_color                   = Mie Color
+screen.ozone_color                     = Ozone Color
+screen.mist_shape                      = Mist Shape
+screen.mist_color                      = Mist Color
+option.WEATHER_TURBULENCE_BIAS             = Turbulence Bias
+option.WEATHER_TURBULENCE_BIAS.comment = Shifts baseline turbulence. Higher values tear clouds into broken, wispy detail.
+option.WEATHER_TURBULENCE_VARIATION_SPEED  = Turbulence Variation Speed
+option.WEATHER_TURBULENCE_VARIATION_SPEED.comment = How fast turbulence drifts. Higher values make cloud detail churn faster.
+option.BLOCKLIGHT_TEMPERATURE          = Block Light Temperature
+option.BLOCKLIGHT_TEMPERATURE.comment = Blackbody temperature of block lights in Kelvin. Lower is warmer candle glow, higher is cooler white. Neutral at 3400K.
+option.CAVE_LIGHTING_I                  = Cave Ambient
+option.CAVE_LIGHTING_I.comment = Adjusts the base brightness of underground ambient light when no direct light is present. Higher = caves appear less pitch-black.
+option.PLANET_BOUNCE                   = Planet Bounce Light
+option.PLANET_BOUNCE.comment           = Ground-bounced sun and moonlight re-scattered through the air. Warms the horizon and downward views almost for free.
+option.MIST_COLOR_R                       = §c▍ §fRed — Mist
+option.MIST_COLOR_R.comment               = Red tint of ground mist over its time-of-day hue. 1.00 is neutral; lower cools, higher warms.
+option.MIST_COLOR_G                       = §a▍ §fGreen — Mist
+option.MIST_COLOR_G.comment               = Green tint of ground mist. Multiplies the mist's time-of-day hue; 1.00 leaves it unchanged.
+option.MIST_COLOR_B                       = §9▍ §fBlue — Mist
+option.MIST_COLOR_B.comment               = Blue tint of ground mist. Multiplies the mist's time-of-day hue; 1.00 leaves it unchanged, higher values push it cooler.
+option.MIST_SHADOW_STEP_LENGTH                = Mist Shadow Step Length
+option.MIST_SHADOW_STEP_LENGTH.comment        = Distance in blocks between mist self-shadow samples (Advanced mode only). Smaller steps are more accurate but cover a shorter range (range = steps x length); larger steps reach further but can look coarse.
+option.OZONE_COLOR_R                      = §c▍ §fRed — Ozone
+option.OZONE_COLOR_R.comment              = Ozone absorption of red light. 1.00 is natural; higher removes more red from twilight, lower lets more through.
+option.OZONE_COLOR_G                      = §a▍ §fGreen — Ozone
+option.OZONE_COLOR_G.comment              = How strongly the ozone layer absorbs green light. Green is the strongest absorption band, so this has the biggest effect on the twilight hue.
+option.OZONE_COLOR_B                      = §9▍ §fBlue — Ozone
+option.OZONE_COLOR_B.comment              = How strongly the ozone layer absorbs blue light. 1.00 is the natural spectrum; raising it dulls the twilight blue.
+option.SANDSTORM_LAYER                     = Sandstorm Sky Layer
+option.SANDSTORM_LAYER.comment = Dust-dimmed direct sun and moonlight during desert storms. Follows the live storm amount.
+option.SANDSTORM_SKY                       = Sandstorm Sky Scattering
+option.SANDSTORM_SKY.comment = Dusty sky during desert storms. Hazes the horizon and dims the sun disk to match the fog.
+option.SANDSTORM_MIST                      = Sandstorm Mist Tint
+option.SANDSTORM_MIST.comment = Applies the desert sandstorm to ground mist: while a storm is active the mist tint blends toward the warm dust spectrum.
+option.SANDSTORM_BOUNCE                    = Sandstorm Planet Bounce
+option.SANDSTORM_BOUNCE.comment = Applies the desert sandstorm to planet bounce light: ground-bounced light is re-filtered through the dust layer on its way back up into the sky.
+option.AIR_FOG_COLORED_LIGHT_SHAFTS_INTENSITY         = Colored Light Shafts Intensity
+option.AIR_FOG_COLORED_LIGHT_SHAFTS_INTENSITY.comment = Controls the strength of the color tinting applied to light shafts
+option.MIE_ANISOTROPY                     = Sky Mie Anisotropy
+option.MIE_ANISOTROPY.comment             = Mie scattering directionality. Higher concentrates the haze glow around sun and moon; lower spreads it. Default 0.77.
+option.FOG_MIE_ANISOTROPY                 = Fog Mie Anisotropy
+option.FOG_MIE_ANISOTROPY.comment         = Forward-scattering strength of fog. Higher glows toward sun and moon; 0 scatters evenly. Default 0.50.
+option.MIE_COLOR_R                        = §c▍ §fRed — Mie
+option.MIE_COLOR_R.comment                = Red tint of Mie scattering (sky haze and air fog). 1.00 is the physical value; lowering it removes red from the haze, raising it warms it.
+option.MIE_COLOR_G                        = §a▍ §fGreen — Mie
+option.MIE_COLOR_G.comment                = Green tint of Mie scattering (sky haze and air fog). 1.00 is the physical value.
+option.MIE_COLOR_B                        = §9▍ §fBlue — Mie
+option.MIE_COLOR_B.comment                = Blue tint of Mie scattering (sky haze and air fog). 1.00 is the physical value; raising it cools the haze.
+option.REFRACTION_DISPERSION_INTENSITY         = Refraction Dispersion
+option.REFRACTION_DISPERSION_INTENSITY.comment = Adds chromatic dispersion (RGB fringing) to refracted water/glass, like light splitting through a prism
+option.RAIN_RIPPLES.comment            = Expanding raindrop ripple rings on still, sky-exposed water. Costs one texture sample per water texel.
+option.RAIN_RIPPLE_STRENGTH.comment    = Adjusts how strongly rain ripples distort the water surface normal. Higher = more pronounced, choppier ripples.
+option.BLOOM_ANAMORPHIC                = Anamorphic Bloom
+option.BLOOM_ANAMORPHIC.comment         = Widens the horizontal bloom blur so bright sources smear into horizontal streaks like an anamorphic camera lens.
+option.BLOOM_ANAMORPHIC_STRETCH        = Anamorphic Stretch
+option.BLOOM_ANAMORPHIC_STRETCH.comment = Adjusts the horizontal stretch of the anamorphic bloom. 1.00 is neutral; higher values lengthen the streaks.
+option.CHROMATIC_DISPERSION            = Chromatic Dispersion
+option.CHROMATIC_DISPERSION.comment      = Radial spectral fringing scaled by defocus, simulating real camera lens dispersion. In-focus regions stay clean; blurred areas fringe with color.
+option.CHROMATIC_DISPERSION_STRENGTH   = Dispersion Strength
+option.CHROMATIC_DISPERSION_STRENGTH.comment = Adjusts the strength of the chromatic dispersion fringing. Higher values widen the red/blue separation in out-of-focus areas.
+option.DOF_MAX_RADIUS                  = DoF Max Radius
+option.DOF_MAX_RADIUS.comment             = Caps the circle of confusion as a fraction of screen height. Lower values keep backgrounds sharper and save performance; higher values allow creamier blur.
+option.MOTION_BLUR_SAMPLES             = Motion Blur Samples
+option.MOTION_BLUR_SAMPLES.comment        = Number of samples along the motion trail. Higher values give smoother streaks at higher GPU cost.
+option.MOTION_BLUR_SCALE               = Motion Blur Scale
+option.MOTION_BLUR_SCALE.comment          = Artistic multiplier on the shutter-driven trail length. Shutter speed sets the physical baseline; this scales it.
+option.LENS_FLARE                      = Lens Flare
+option.LENS_FLARE.comment                 = Ghosts, halo and anamorphic streak from bright lights scattering inside the lens. Computed pre-tonemap so flare grades with the scene.
+option.LENS_FLARE_HALO                 = Flare Halo
+option.LENS_FLARE_HALO.comment            = Halo ring around the sun on top of the ghost chain.
+option.LENS_FLARE_INTENSITY            = Flare Intensity
+option.LENS_FLARE_INTENSITY.comment       = Overall strength of ghosts, halo and streak.
+option.LENS_FLARE_THRESHOLD            = Flare Threshold
+option.LENS_FLARE_THRESHOLD.comment       = Scene luminance above which highlights seed flare. Lower values let lamps and glints flare; higher isolates the sun.
+option.LENS_FLARE_GHOSTS               = Ghost Count
+option.LENS_FLARE_GHOSTS.comment          = Number of ghosts strung along the sun axis. More ghosts cost performance.
+option.LENS_FLARE_SPACING              = Ghost Spacing
+option.LENS_FLARE_SPACING.comment         = Spacing of the ghost chain along the sun-to-center axis.
+option.LENS_FLARE_HALO_RADIUS          = Halo Radius
+option.LENS_FLARE_HALO_RADIUS.comment     = Radius of the halo ring around the sun.
+option.LENS_FLARE_HALO_WIDTH           = Halo Width
+option.LENS_FLARE_HALO_WIDTH.comment      = Thickness of the halo ring.
+option.CAM_SENSOR_WIDTH                = Sensor Width
+option.CAM_SENSOR_WIDTH.comment           = Camera sensor width in millimetres. Larger sensors give shallower depth of field at the same aperture.
+option.CAM_FSTOPS                      = Aperture F-Stops
+option.CAM_FSTOPS.comment                 = Lens aperture. Low values (f/0.8) give razor-thin focus; high values (f/16) keep the scene sharp deep into the distance.
+option.CAM_SHUTTER_SPEED               = Shutter Speed
+option.CAM_SHUTTER_SPEED.comment          = Camera shutter speed as 1/N seconds. Slower speeds streak motion blur longer; 1/60 matches the old neutral look.
+option.CAM_ISO                         = ISO Sensitivity
+option.CAM_ISO.comment                    = Sensor sensitivity. Doubling ISO doubles exposure brightness across manual and auto exposure alike.
+option.CAM_EXPOSURE_COMPENSATION       = Exposure Compensation
+option.CAM_EXPOSURE_COMPENSATION.comment   = EV compensation dial for the exposure triangle. Brightens or darkens around the aperture/shutter/ISO result, like aperture-priority mode on a real camera.
+option.VIGNETTE_START                  = Vignette Start
+option.VIGNETTE_START.comment             = Radial distance from screen center where the vignette falloff begins.
+option.VIGNETTE_END                    = Vignette End
+option.VIGNETTE_END.comment               = Radial distance where the vignette reaches full strength.
+option.VIGNETTE_EXPONENT                 = Vignette Rolloff
+option.VIGNETTE_EXPONENT.comment          = Shapes the vignette falloff curve. Higher values concentrate darkening toward the corners.
+value.tonemap.tonemap_agx              = AGX
+value.tonemap.tonemap_agx_punchy       = AGX Punchy
+value.tonemap.tonemap_agx_golden       = AGX Golden
+option.GRADE_PIVOT                     = Contrast Pivot
+option.GRADE_PIVOT.comment             = Luminance anchor for contrast (0–1 linear). 0.18 is photographic middle grey.
+option.GRADE_VIBRANCE                  = Vibrance
+option.GRADE_VIBRANCE.comment          = Gentle saturation for muted colors only. Lifts dull areas without oversaturating vivid ones; negatives mute vivid areas.
+option.GRADE_LIFT_R                    = §c▍ §fShadow Lift — Red
+option.GRADE_LIFT_R.comment            = Raises or lowers the red channel in the darkest parts of the image (shadows/blacks). Positive = warm shadows, negative = cool shadows.
+option.GRADE_LIFT_G                    = §a▍ §fShadow Lift — Green
+option.GRADE_LIFT_G.comment            = Raises or lowers the green channel in shadows. Combine with red and blue lift to tint the darkest tones any color.
+option.GRADE_LIFT_B                    = §9▍ §fShadow Lift — Blue
+option.GRADE_LIFT_B.comment            = Raises or lowers the blue channel in shadows. Positive = blue-tinted blacks, negative = yellow-tinted blacks.
+option.GRADE_GAMMA_R                   = §c▍ §fMidtone Gamma — Red
+option.GRADE_GAMMA_R.comment           = Power-curve adjustment for the red channel in midtones. Above 1.0 brightens reds in the middle range; below 1.0 darkens them.
+option.GRADE_GAMMA_G                   = §a▍ §fMidtone Gamma — Green
+option.GRADE_GAMMA_G.comment           = Power-curve adjustment for the green channel in midtones. Useful for shifting the overall midtone hue toward magenta or green.
+option.GRADE_GAMMA_B                   = §9▍ §fMidtone Gamma — Blue
+option.GRADE_GAMMA_B.comment           = Power-curve adjustment for the blue channel in midtones. Above 1.0 adds a cool blue cast to midtones.
+option.GRADE_GAIN_R                    = §c▍ §fHighlight Gain — Red
+option.GRADE_GAIN_R.comment            = Multiplies the red channel in the brightest parts of the image. Above 1.0 warms highlights; below 1.0 cools them.
+option.GRADE_GAIN_G                    = §a▍ §fHighlight Gain — Green
+option.GRADE_GAIN_G.comment            = Multiplies the green channel in highlights. Combine with red and blue gain to tint the brightest tones.
+option.GRADE_GAIN_B                    = §9▍ §fHighlight Gain — Blue
+option.GRADE_GAIN_B.comment            = Multiplies the blue channel in highlights. Positive = cool blue highlights, negative = warm yellow highlights.
+option.GRADE_OKLAB_PIVOT               = Perceptual Contrast Pivot
+option.GRADE_OKLAB_PIVOT.comment       = The lightness value in Oklab space (0–1) that stays fixed when the perceptual contrast slider is applied. 0.5 = perceptual midpoint.
+option.GRADE_OKLAB_CONTRAST            = Perceptual Contrast
+option.GRADE_OKLAB_CONTRAST.comment    = Perceptual contrast in Oklab space. Preserves hue in saturated areas, unlike linear contrast.
+option.GRADE_SHADOW_LOW                = Shadow Range — Low
+option.GRADE_SHADOW_LOW.comment        = The lower luminance boundary of the shadow tonal range used by the three-way color wheel. Pixels below this value are fully in the shadow zone.
+option.GRADE_SHADOW_HIGH               = Shadow Range — High
+option.GRADE_SHADOW_HIGH.comment       = The upper luminance boundary of the shadow zone. Pixels between Shadow Low and Shadow High blend between shadow and midtone color wheels.
+option.GRADE_HIGHLIGHT_LOW             = Highlight Range — Low
+option.GRADE_HIGHLIGHT_LOW.comment     = The lower luminance boundary of the highlight zone. Pixels between Highlight Low and Highlight High blend between midtone and highlight color wheels.
+option.GRADE_HIGHLIGHT_HIGH            = Highlight Range — High
+option.GRADE_HIGHLIGHT_HIGH.comment    = The upper luminance boundary of the highlight zone. Pixels above this value are fully in the highlight zone.
+option.GRADE_SHADOW_STRENGTH           = Shadow Tint Strength
+option.GRADE_SHADOW_STRENGTH.comment   = How strongly the shadow color wheel hue is applied to dark areas. 0 = no tint, 1 = full tint at the chosen shadow hue and saturation.
+option.GRADE_MID_STRENGTH              = Midtone Tint Strength
+option.GRADE_MID_STRENGTH.comment      = How strongly the midtone color wheel hue is applied to middle-luminance areas.
+option.GRADE_HIGHLIGHT_STRENGTH        = Highlight Tint Strength
+option.GRADE_HIGHLIGHT_STRENGTH.comment = How strongly the highlight color wheel hue is applied to bright areas.
+option.GRADE_SHADOW_HUE                = Shadow Hue
+option.GRADE_SHADOW_HUE.comment        = The hue angle (0–360°) of the color tint applied to shadows when Shadow Tint Strength > 0. 220° = cool blue-purple, 30° = warm orange.
+option.GRADE_MID_HUE                   = Midtone Hue
+option.GRADE_MID_HUE.comment           = The hue angle of the color tint applied to midtones when Midtone Tint Strength > 0.
+option.GRADE_HIGHLIGHT_HUE             = Highlight Hue
+option.GRADE_HIGHLIGHT_HUE.comment     = The hue angle of the color tint applied to highlights when Highlight Tint Strength > 0. 45° = warm golden highlights.
+option.GRADE_SHADOW_TINT_HUE           = Shadow Tint Hue
+option.GRADE_SHADOW_TINT_HUE.comment   = Hue angle for the dedicated shadow tint pass (separate from the three-way wheel). Lets you add a subtle color cast to just the darkest tones.
+option.GRADE_SHADOW_TINT_SAT           = Shadow Tint Saturation
+option.GRADE_SHADOW_TINT_SAT.comment   = Saturation of the dedicated shadow tint. 0 = no tint, 1 = fully saturated shadow cast at the chosen hue.
+option.GRADE_HIGHLIGHT_TINT_HUE        = Highlight Tint Hue
+option.GRADE_HIGHLIGHT_TINT_HUE.comment = Hue angle for the dedicated highlight tint pass. Adds a color cast to only the brightest parts of the image.
+option.GRADE_HIGHLIGHT_TINT_SAT        = Highlight Tint Saturation
+option.GRADE_HIGHLIGHT_TINT_SAT.comment = Saturation of the dedicated highlight tint. 0 = no tint, 1 = fully saturated highlight cast.
+option.GRADE_SELECTIVE_BLEND           = Selective Grade Blend
+option.GRADE_SELECTIVE_BLEND.comment   = Master blend weight for all selective color adjustments (orange/teal/green saturation and green hue shift). 0 = no selective grading, 1 = full effect.
+option.GRADE_BLACK_POINT               = Black Point
+option.GRADE_BLACK_POINT.comment       = Raises the minimum output level, lifting blacks toward grey. Useful for a faded/matte look or to match a display with elevated black levels. 0 = true black.
+option.GRADE_WHITE_POINT               = White Point
+option.GRADE_WHITE_POINT.comment       = Lowers the maximum output level, compressing highlights toward grey. Useful for a filmic, low-contrast look. 0 = full white.
+option.PURKINJE_SHIFT_R                = §c▍ §fPurkinje Response — Red
+option.PURKINJE_SHIFT_R.comment         = Red channel weight of the scotopic tint. Lower values push night vision cooler.
+option.PURKINJE_SHIFT_G                = §a▍ §fPurkinje Response — Green
+option.PURKINJE_SHIFT_G.comment         = Green channel weight of the scotopic tint. Rods peak in blue-green, so this dominates the night hue.
+option.PURKINJE_SHIFT_B                = §9▍ §fPurkinje Response — Blue
+option.PURKINJE_SHIFT_B.comment         = Blue channel weight of the scotopic tint. Higher values deepen the classic blue night shift.
+option.HISTOGRAM_SHADOW_WEIGHT               = Meter Shadow Weight
+option.HISTOGRAM_SHADOW_WEIGHT.comment       = Weight of the shadow population in the three-population exposure meter. Higher values protect shadow detail from crushing.
+option.HISTOGRAM_HIGHLIGHT_WEIGHT            = Meter Highlight Weight
+option.HISTOGRAM_HIGHLIGHT_WEIGHT.comment    = Weight of the highlight population in the exposure meter. Higher values protect bright areas like sunsets from blowing out.
+option.LOCAL_EXPOSURE_REGIONAL               = Local Regional Blend
+option.LOCAL_EXPOSURE_REGIONAL.comment       = Blends the fine bilateral correction toward area-scale dodge and burn. Higher values adapt whole regions; 0 keeps pixel-local detail only.
+option.LOCAL_EXPOSURE_RANGE                  = Local Regional Range
+option.LOCAL_EXPOSURE_RANGE.comment          = Maximum exposure shift in stops the regional adaptation may apply. Caps grading so it never overrides global exposure.
+option.LOCAL_EXPOSURE_DETAIL                 = Local Detail Strength
+option.LOCAL_EXPOSURE_DETAIL.comment         = Scales the fine bilateral detail correction. Lower values leave only the area-scale regional grading.
+option.DISPLAY_GAMUT                   = Display Gamut
+option.DISPLAY_GAMUT.comment           = Native working/output gamut (needs Iris 1.6.4+ color correction). Keep the Iris client space on sRGB; fog, light and sky follow this setting.
+option.DISPLAY_GAMUT_SRGB              = sRGB
+option.DISPLAY_GAMUT_DCI_P3            = DCI-P3
+option.DISPLAY_GAMUT_DISPLAY_P3        = Display P3
+option.DISPLAY_GAMUT_REC2020           = Rec.2020
+option.DISPLAY_GAMUT_ADOBE_RGB         = Adobe RGB
+value.DISPLAY_GAMUT.DISPLAY_GAMUT_SRGB       = sRGB
+value.DISPLAY_GAMUT.DISPLAY_GAMUT_DCI_P3     = DCI-P3
+value.DISPLAY_GAMUT.DISPLAY_GAMUT_DISPLAY_P3 = Display P3
+value.DISPLAY_GAMUT.DISPLAY_GAMUT_REC2020    = Rec.2020
+value.DISPLAY_GAMUT.DISPLAY_GAMUT_ADOBE_RGB  = Adobe RGB
+value.tonemap_left.tonemap_agx              = AGX
+value.tonemap_left.tonemap_agx_punchy       = AGX Punchy
+value.tonemap_left.tonemap_agx_golden       = AGX Golden
+value.tonemap_right.tonemap_agx              = AGX
+value.tonemap_right.tonemap_agx_punchy       = AGX Punchy
+value.tonemap_right.tonemap_agx_golden       = AGX Golden
+screen.indirect_lighting=Indirect Lighting
+screen.sspt_filter=SVGF Filter
+option.ssptEnabled=SSPT
+option.ssptEnabled.comment=Screen-space path traced emission and colored lighting. Big performance impact.
+option.ssptFullRangeRT=Long Range SSPT
+option.ssptFullRangeRT.comment=Traces the whole screen instead of a short range. Needs more samples for similar quality.
+option.indirectResReduction=SSPT Resolution
+option.indirectResReduction.comment=Resolution of the SSPT trace and filter buffers, relative to the screen. Lower = faster but softer indirect light.
+value.indirectResReduction.1=100%
+value.indirectResReduction.2=50%
+value.indirectResReduction.3=33%
+value.indirectResReduction.4=25%
+option.ssptSPP=Samples per Pixel
+option.ssptSPP.comment=Paths traced per pixel per frame. More samples = less noise, more cost.
+option.ssptBounces=Bounces
+option.ssptBounces.comment=Path bounces per sample. More bounces = more colored light bleed.
+option.ssptEmissionDistance=Emission Distance
+option.ssptEmissionDistance.comment=How far colored emission carries before fading out (blocks).
+option.ssptLightmapBlend=Lightmap Blending
+option.ssptLightmapBlend.comment=How strongly the vanilla lightmap blocklight blends into the SSPT accumulation.
+option.SSPT_INTENSITY=SSPT Intensity
+option.SSPT_INTENSITY.comment=Global brightness multiplier for the SSPT indirect emission contribution.
+option.FRAMING_TOOL=Framing Tool
+option.FRAMING_TOOL.comment=Master toggle for composition guides (rule-of-thirds, aspect box, safe area). For lining up screenshots.
+option.FRAMING_THIRDS=Thirds Grid
+option.FRAMING_THIRDS.comment=Rule-of-thirds grid overlay.
+option.FRAMING_ASPECT=Aspect Guides
+option.FRAMING_ASPECT.comment=Target aspect-ratio box and safe-area guides.
+option.FRAMING_OPACITY=Guide Opacity
+option.FRAMING_OPACITY.comment=Guide line opacity.
+option.FRAMING_LINE_WIDTH=Line Width
+option.FRAMING_LINE_WIDTH.comment=Guide line thickness in pixels.
+option.FRAMING_ASPECT_RATIO=Aspect Ratio
+option.FRAMING_ASPECT_RATIO.comment=Target aspect ratio (width over height) for the crop box.
+option.FRAMING_SAFE_AREA=Safe Area
+option.FRAMING_SAFE_AREA.comment=Centered safe-area fraction shown inside the aspect box.
+option.maxFrames=Max Accumulated Frames
+option.maxFrames.comment=Temporal history length. Higher = smoother, but more ghosting.
+option.minAccumMult=Accumulation Weight Mult
+option.minAccumMult.comment=Minimum blend weight per frame. Higher = reacts faster, noisier.
+option.ADAPT_STRENGTH=Adaptive Strength
+option.ADAPT_STRENGTH.comment=How quickly history is discarded when the lightmap changes.
+option.SVGF_FILTER=Filtering
+option.SVGF_FILTER.comment=SVGF a-trous filter: removes the remaining SSPT noise edge-aware.
+option.SVGF_RAD=Filter Radius
+option.SVGF_RAD.comment=Tap radius of each a-trous filter iteration.
+option.SVGF_STRICTNESS=Luminance Strictness
+option.SVGF_STRICTNESS.comment=How aggressively the filter preserves brightness differences.
+option.SVGF_NORMALEXP=Normal Weight
+option.SVGF_NORMALEXP.comment=How strongly surface normal differences block filtering across edges.
+option.NETHER_SMOKE=Nether Smoke
+option.NETHER_SMOKE.comment = Turbulent Nether smoke replacing the flat fog glow, with ember-bright proximity glow. Falls back to classic fog when off.
+option.NETHER_SMOKE_INTENSITY=Nether Smoke Intensity
+option.NETHER_SMOKE_INTENSITY.comment = Brightness multiplier for the Nether Smoke v2 glow/emission. Only has an effect when Nether Smoke is enabled.
+option.PLANET_BOUNCE_INTENSITY=Planet Bounce Intensity
+option.PLANET_BOUNCE_INTENSITY.comment = Adjusts the strength of ground-bounced light re-entering the sky. Higher = brighter, warmer horizon glow; 0 disables the contribution entirely.
+option.COLOR_GRADING                    = Color Grading
+option.COLOR_GRADING.comment            = Full color grading pipeline: brightness, contrast, white balance, ASC CDL, Oklab contrast, selective hues and tints. Off passes tonemapper output through.
+option.ACADEMY_EXPOSURE.comment         = Pre-tonemap exposure in stops for ACES. Shifts highlight rolloff without changing overall brightness.
+option.ACADEMY_CONTRAST.comment        = ACES S-curve steepness. Above 1.0 punches blacks and highlights; below 1.0 softens.
+option.ACADEMY_SATURATION.comment      = Chroma inside ACES before the final curve. Saturated highlights still compress naturally.
+option.ACADEMY_HIGHLIGHT_ROLLOFF.comment = ACES highlight compression past middle grey. Higher is softer with more detail; lower clips harder.
+option.ACADEMY_SHADOW_TOE.comment      = Lifts the bottom of the ACES curve, preventing pure black and adding a subtle shadow lift. Higher = more lifted blacks with visible shadow detail, filmic look.
+option.ACADEMY_COLORFULNESS.comment    = ACES vividness shift. Positive adds midtone chroma without touching luminance.
+option.ACADEMY_RRT_EXPOSURE            = ACES RRT Exposure
+option.ACADEMY_RRT_EXPOSURE.comment    = Exposure in stops before the RRT. Moves the scene along the filmic S-curve itself.
+option.ACADEMY_RRT_GLOW                = ACES RRT Glow
+option.ACADEMY_RRT_GLOW.comment        = RRT glow lifting dim saturated colors. Higher means dreamier highlights; 0.10 is default.
+option.ACADEMY_RRT_SAT                 = ACES RRT Saturation
+option.ACADEMY_RRT_SAT.comment         = Global desaturation inside the RRT sweeteners. Lower = more filmic muted response before the tonescale. 0.96 matches the reference fit.
+option.ACADEMY_ODT_SAT                 = ACES ODT Saturation
+option.ACADEMY_ODT_SAT.comment         = Desaturation in the output device transform compensating luminance differences. Lower tames oversaturated brights after the tonescale.
+option.ACADEMY_RRT_GAMMA               = ACES RRT Gamma
+option.ACADEMY_RRT_GAMMA.comment       = Gamma shaping applied inside the RRT before the tonescale. Above 1.0 darkens midtones into the curve, below 1.0 lifts them.
+option.ACADEMY_RRT_RED                 = ACES RRT Red Modifier
+option.ACADEMY_RRT_RED.comment         = Strength of the RRT red modifier that pulls red hues toward the pivot. Higher = stronger classic ACES red rendering. 1.0 is the pack default.
+option.ACADEMY_CONTRAST_PIVOT          = ACES Contrast Pivot
+option.ACADEMY_CONTRAST_PIVOT.comment  = Middle-grey anchor for ACES contrast. 0.18 is reference 18% grey.
+option.AGX_EXPOSURE.comment            = Pre-tonemap exposure offset in stops fed into the AGX curve. +1 = twice as bright entering the curve. Shifts where highlights begin to compress.
+option.AGX_CONTRAST.comment            = AGX S-curve slope. Above 1.0 adds punch; below 1.0 flattens. Kinder to saturated highlights than ACES.
+option.AGX_SATURATION.comment          = Chroma inside AGX before the curve. Gamut compression rolls saturated colors off smoothly.
+option.AGX_HIGHLIGHT_ROLLOFF.comment   = AGX highlight compression toward white. Higher is softer with more detail; lower is harder.
+option.AGX_PUNCH.comment               = Midtone contrast and saturation boost. Positive adds pop; negative goes muted and filmic.
+option.AGX_GOLDEN.comment              = Shifts the AGX output toward a warm golden tint. Positive = warmer, more cinematic golden grade. Negative = cooler, more neutral or bluish output.
+option.AGX_SHADOW_TOE                  = AGX Shadow Toe
+option.AGX_SHADOW_TOE.comment          = Lifts the bottom of the AGX curve, the mirror of highlight rolloff for shadows. Higher = more lifted blacks with visible shadow detail, filmic look.
+option.AGX_HIGHLIGHT_DESAT             = AGX Highlight Desat
+option.AGX_HIGHLIGHT_DESAT.comment     = Desaturates highlights toward neutral grey above the shoulder. Higher = more filmic white clipping on bright saturated sources instead of colored clipping.
+option.AGX_CONTRAST_PIVOT              = AGX Contrast Pivot
+option.AGX_CONTRAST_PIVOT.comment      = Middle-grey anchor for AGX contrast. 0.18 is reference 18% grey.

@@ -46,7 +46,6 @@ screen.rp_sss                           = Subsurface Scattering
 screen.reflections                     = Reflections
 screen.refraction                      = Refraction
 screen.light_sources                   = Light Sources
-screen.shadows                         = Direct Lighting
 screen.shadows_general                 = General
 screen.shadows_quality                  = Shadow Quality
 screen.shadows_coverage                 = Shadow Coverage
@@ -451,20 +450,12 @@ option.CLOUDS_CUMULUS_CONGESTUS_ALTITUDE.comment = Controls altitude.
 suffix.CLOUDS_CUMULUS_CONGESTUS_ALTITUDE              = m
 option.CLOUDS_CUMULUS_CONGESTUS_THICKNESS             = Thickness
 option.CLOUDS_CUMULUS_CONGESTUS_THICKNESS.comment = Controls thickness.
-option.CLOUDS_CUMULUS_CONGESTUS_DENSITY               = Density
-option.CLOUDS_CUMULUS_CONGESTUS_DENSITY.comment = Controls density.
 option.CLOUDS_CUMULUS_CONGESTUS_COVERAGE              = Coverage
 option.CLOUDS_CUMULUS_CONGESTUS_COVERAGE.comment = Controls coverage.
 option.CLOUDS_CUMULUS_CONGESTUS_SIZE                  = Size
 option.CLOUDS_CUMULUS_CONGESTUS_SIZE.comment = Controls size.
 option.CLOUDS_CUMULUS_CONGESTUS_DETAIL_STRENGTH       = Detail Strength
 option.CLOUDS_CUMULUS_CONGESTUS_DETAIL_STRENGTH.comment = Controls detail strength.
-option.CLOUDS_CUMULUS_CONGESTUS_WIND_SPEED            = Wind Speed
-option.CLOUDS_CUMULUS_CONGESTUS_WIND_SPEED.comment = Controls wind speed.
-suffix.CLOUDS_CUMULUS_CONGESTUS_WIND_SPEED            = m/s
-option.CLOUDS_CUMULUS_CONGESTUS_WIND_ANGLE            = Wind Angle
-option.CLOUDS_CUMULUS_CONGESTUS_WIND_ANGLE.comment = Controls wind angle.
-suffix.CLOUDS_CUMULUS_CONGESTUS_WIND_ANGLE            = °
 
 option.CLOUDS_NOCTILUCENT               = Noctilucent Clouds
 option.CLOUDS_NOCTILUCENT.comment             = Controls noctilucent (night-shining) clouds. High-altitude clouds that glow in darkness, creating a beautiful night-time atmospheric effect.
@@ -533,8 +524,6 @@ option.CLOUDS_CIRRUS_COVERAGE              = Cirrus Coverage
 option.CLOUDS_CIRRUS_COVERAGE.comment = Controls cirrus coverage.
 option.CLOUDS_CIRRUS_SIZE                  = Cirrus Size
 option.CLOUDS_CIRRUS_SIZE.comment = Controls cirrus size.
-option.CLOUDS_CIRRUS_DETAIL_STRENGTH       = Cirrus Detail Strength
-option.CLOUDS_CIRRUS_DETAIL_STRENGTH.comment = Controls cirrus detail strength.
 option.CLOUDS_CIRRUS_CURL_STRENGTH         = Cirrus Curl Strength
 option.CLOUDS_CIRRUS_CURL_STRENGTH.comment = Controls cirrus curl strength.
 option.CLOUDS_CIRRUS_WIND_SPEED            = Wind Speed
@@ -1331,20 +1320,12 @@ option.NETHER_SMOKE_INTENSITY.comment = Brightness multiplier for the Nether Smo
 option.MATERIAL_MAPPING_MODE=Material Mapping Mode
 option.MATERIAL_MAPPING_MODE.comment=PBR source for materials: off, built-in per-block values, specular map only, normal map only, or both (labPBR/OldSchoolPBR).
 
-value.MATERIAL_MAPPING_OFF=Off
-value.MATERIAL_MAPPING_HARDCODED=Hardcoded Specular
-value.MATERIAL_MAPPING_SPECULAR_ONLY=Specular Only
-value.MATERIAL_MAPPING_NORMALS_ONLY=Normals Only
-value.MATERIAL_MAPPING_SPECULAR_NORMALS=Specular + Normal Mapping
 
 option.TEXTURE_AO=Texture AO
 option.TEXTURE_AO.comment=Lightmap occlusion from the pack's normal map. Needs a normal-mapped pack; inert on vanilla. Off by default.
 
 option.POROSITY_MODE=Porosity Mode
 option.POROSITY_MODE.comment=Wetness source: off, built-in per-block porosity, or the pack's specular map with no vanilla fallback.
-value.POROSITY_OFF=Off
-value.POROSITY_HARDCODED=Hardcoded
-value.POROSITY_MAPS=LabPBR
 value.POROSITY_MODE.POROSITY_OFF=Off
 value.POROSITY_MODE.POROSITY_HARDCODED=Hardcoded
 value.POROSITY_MODE.POROSITY_MAPS=LabPBR
@@ -1352,9 +1333,6 @@ option.POROSITY_STRENGTH=Porosity Strength
 option.POROSITY_STRENGTH.comment=Multiplier for the porosity darkening effect.
 option.SSS_MODE=Subsurface Scattering Mode
 option.SSS_MODE.comment=Subsurface scattering source: off, built-in leaf profiles, or the pack's specular map with no vanilla fallback.
-value.SSS_OFF=Off
-value.SSS_HARDCODED=Hardcoded
-value.SSS_MAPS=LabPBR
 value.SSS_MODE.SSS_OFF=Off
 value.SSS_MODE.SSS_HARDCODED=Hardcoded
 value.SSS_MODE.SSS_MAPS=LabPBR
@@ -1369,16 +1347,6 @@ option.TAA_INTENSITY.comment = Adjusts the blend weight of temporal anti-aliasin
 option.FXAA_INTENSITY=FXAA Strength
 option.FXAA_INTENSITY.comment = Adjusts the strength of fast approximate anti-aliasing. Higher = smoother edges but softer image.
 
-option.VOXY_QUALITY=Voxy Quality
-option.VOXY_QUALITY.comment = Selects the detail level for Voxy (Distant Horizons LOD) terrain. Higher = more triangles and sharper distant terrain at higher cost.
-value.VOXY_QUALITY_OFF=Off
-value.VOXY_QUALITY_BASIC=Basic
-value.VOXY_QUALITY_STANDARD=Standard
-value.VOXY_QUALITY_HIGH=High
-option.VOXY_LIGHTING_MODE=Voxy Lighting Mode
-option.VOXY_LIGHTING_MODE.comment = Selects how Voxy terrain is lit. Mode 0 = simple, Mode 1 = more accurate shading.
-option.VOXY_BRIGHTNESS=Voxy Brightness
-option.VOXY_BRIGHTNESS.comment = Adjusts the overall brightness of Voxy distant terrain to better match nearby chunks.
 
 option.WATER_WAVES_NOISE_STRENGTH=Water Waves Noise Strength
 option.WATER_WAVES_NOISE_STRENGTH.comment = Controls water waves noise strength.
