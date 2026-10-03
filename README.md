@@ -45,8 +45,6 @@ Not every feature is enabled on every profile — the in-game settings menu is t
 | **High** | Higher-quality shadows, reflections, clouds, AO, and lighting |
 | **Ultra** | Maximum available quality and sampling |
 
-*Mac Compatible* disables the more hardware- or platform-sensitive features while keeping the core lighting, atmosphere, water, reflection, shadow, cloud, and post-processing pipeline intact.
-
 ## Installation
 
 1. Install [Iris](https://irisshaders.dev/) for your Minecraft version — Luster does **not** support OptiFine.
@@ -57,7 +55,7 @@ Not every feature is enabled on every profile — the in-game settings menu is t
 
 ## Compatibility
 
-**GPU vendors:** Nvidia · AMD · Intel · Apple Silicon (via Iris' OpenGL compatibility path) Just because this is meant for macs doesn't mean that you cant play with this shader without a macbook. this shader has some features other windows only shaders may not.
+**GPU vendors:** Nvidia · AMD · Intel · Apple Silicon 
 
 **Shader loader:** Iris only
 
