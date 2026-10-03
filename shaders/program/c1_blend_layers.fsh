@@ -50,6 +50,7 @@ uniform sampler2D noisetex;
 uniform sampler2D colortex0; // scene color
 uniform sampler2D colortex3; // refraction data
 uniform sampler2D colortex4; // sky map
+uniform sampler2D colortex5; // scene history (used by SSR reflection reprojection)
 uniform sampler2D colortex6; // volumetric fog scattering
 uniform sampler2D colortex7; // volumetric fog transmittance
 uniform sampler2D colortex11; // clouds history

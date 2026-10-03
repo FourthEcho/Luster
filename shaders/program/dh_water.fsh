@@ -45,6 +45,9 @@ flat in OverworldFogParameters fog_params;
 
 uniform sampler2D noisetex;
 
+uniform sampler2D colortex5; // scene history (used by SSR reflection reprojection)
+uniform sampler2D colortex7; // fog scattering history (used by SSR reflection reprojection)
+
 
 #ifdef CLOUD_SHADOWS
 uniform sampler2D colortex8; // Cloud shadow map

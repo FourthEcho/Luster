@@ -165,7 +165,7 @@ void main() {
 
     // Auto exposure
 
-#if AUTO_EXPOSURE == AUTO_EXPOSURE_OFF
+#ifndef AUTO_EXPOSURE
     exposure = get_exposure_from_ev_100(manual_exposure_value);
 #else
     // Previous exposure carries the triangle factor (it is multiplied in
@@ -175,18 +175,10 @@ void main() {
     float previous_exposure = texelFetch(colortex5, ivec2(0), 0).a
         / max(camera_exposure_triangle_factor(), 1e-6);
 
-#if AUTO_EXPOSURE == AUTO_EXPOSURE_SIMPLE
-    float lod = ceil(log2(max_of(view_res)));
-    vec3 rgb
-        = textureLod(colortex0, vec2(0.5 * taau_render_scale), int(lod)).rgb;
-    float luminance
-        = clamp(dot(rgb, luminance_weights), min_luminance, max_luminance);
-#elif AUTO_EXPOSURE == AUTO_EXPOSURE_HISTOGRAM
     float[HISTOGRAM_BINS] pdf;
     build_histogram(pdf);
 
     float luminance = get_metered_luminance(pdf);
-#endif
 
     float target_exposure = get_exposure_from_luminance(luminance);
 
@@ -217,11 +209,11 @@ void main() {
 
     // Physical ISO gain: the metering above is calibrated for ISO 100,
     // so scale the final exposure by the camera sensitivity. Applies to
-    // manual, simple and histogram paths alike.
+    // manual and advanced paths alike.
     // Closed exposure triangle (see include/camera/camera.glsl).
     exposure *= camera_exposure_triangle_factor();
 
-#if AUTO_EXPOSURE == AUTO_EXPOSURE_HISTOGRAM \
+#if defined(AUTO_EXPOSURE) \
     && DEBUG_VIEW == DEBUG_VIEW_HISTOGRAM
     for (int i = 0; i < HISTOGRAM_BINS; ++i) {
         histogram_pdf[i >> 2][i & 3] = pdf[i];

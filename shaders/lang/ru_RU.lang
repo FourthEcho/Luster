@@ -780,8 +780,6 @@ value.TEXTURE_FORMAT.TEXTURE_FORMAT_LAB = labPBR
 value.TEXTURE_FORMAT.TEXTURE_FORMAT_OLD = Old PBR
 
 option.ENVIRONMENT_REFLECTIONS         = Отражения окружающей среды
-option.REFLECTION_CAPTURE              = Reflection Capture
-option.REFLECTION_CAPTURE.comment     = World-space panorama filling reflections for off-screen geometry, with a position check against hidden-surface leaks. Off by default for performance.
 option.ENVIRONMENT_REFLECTIONS.comment = Отражения в пространстве экрана. Вода и блестящие блоки отражают окружающую среду. Большое влияние на производительность
 option.SKY_REFLECTIONS                 = Отражения неба
 option.SKY_REFLECTIONS.comment         = Заставляет воду и блестящие глыбы отражать небо
@@ -944,7 +942,7 @@ option.PURKINJE_SHIFT_INTENSITY.comment = Controls purkinje shift intensity.
 # Exposure
 
 option.AUTO_EXPOSURE                         = Автоматическая экспозиция
-option.AUTO_EXPOSURE.comment = Selects the auto exposure mode or method.
+option.AUTO_EXPOSURE.comment = Enables advanced global auto exposure. Automatically adjusts exposure based on scene brightness.
 
 option.LOCAL_EXPOSURE                         = Local Exposure
 option.LOCAL_EXPOSURE.comment                 = Applies spatially adaptive HDR exposure while preserving the global exposure and protecting highlight and shadow detail.
@@ -965,9 +963,6 @@ option.HISTOGRAM_BINS.comment = Controls histogram bins.
 option.HISTOGRAM_TARGET                      = Целевое значение CDF гистограммы
 option.HISTOGRAM_TARGET.comment = Controls histogram target cdf value.
 
-value.AUTO_EXPOSURE.AUTO_EXPOSURE_SIMPLE    = Простое
-value.AUTO_EXPOSURE.AUTO_EXPOSURE_HISTOGRAM = Гистограмма
-value.AUTO_EXPOSURE.AUTO_EXPOSURE_OFF       = Выкл
 
 # Misc settings
 
@@ -1220,8 +1215,6 @@ value.DEBUG_SAMPLER.colortex17=colortex17
 value.DEBUG_SAMPLER.colortex18=colortex18
 value.DEBUG_SAMPLER.colortex19=colortex19
 value.DEBUG_SAMPLER.colortex20=colortex20
-value.DEBUG_SAMPLER.colortex21=colortex21
-value.DEBUG_SAMPLER.colortex22=colortex22
 value.DEBUG_SAMPLER.noisetex=noisetex
 Replaces flat nether fog with drifting, patchy volumetric smoke
 Controls nether smoke intensity.

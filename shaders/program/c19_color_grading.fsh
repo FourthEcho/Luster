@@ -52,6 +52,7 @@ uniform vec2 view_pixel_size;
 
 #include "/include/post_processing/tonemap_operators.glsl"
 #include "/include/post_processing/color_grading.glsl"
+#include "/include/camera/camera.glsl"
 #include "/include/camera/local_exposure.glsl"
 #include "/include/camera/vignette.glsl"
 #include "/include/utility/bicubic.glsl"
@@ -104,10 +105,22 @@ void main() {
 #endif
 #endif
 
+    // Single-system local: derive the global meter anchor from the stored
+    // exposure (must match c4_taa_exposure.vsh calibration exactly).
+    // exposure includes the triangle factor, so divide it back out to get
+    // the metered scene luminance. Correction below is zero-mean around it.
+    const float exposure_calibration = 12.5 / 100.0 / 1.2;
+    float triangle = max(camera_exposure_triangle_factor(), 1e-6);
+    float triangle_free = exposure / triangle;
+    float anchor_log = log2(0.18);
+    if (triangle_free > 1e-6 && !isnan(triangle_free) && !isinf(triangle_free)) {
+        anchor_log = log2(max(exposure_calibration / triangle_free, 1e-5));
+    }
+
     scene_color *= exposure;
 
 #ifdef LOCAL_EXPOSURE
-    float local_ev = compute_local_exposure_ev(uv, scene_color / max(exposure, 1e-6));
+    float local_ev = compute_local_exposure_ev(uv, scene_color / max(exposure, 1e-6), anchor_log);
     scene_color *= exp2(local_ev);
 #endif
 

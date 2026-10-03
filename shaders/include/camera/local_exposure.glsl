@@ -3,20 +3,25 @@
 
 #include "/include/utility/color.glsl"
 
-// HDR-aware local exposure.
+// HDR-aware local exposure: one system with the global meter.
 //
-// The global exposure is still the photographic exposure of the whole scene.
-// This pass only adds a restrained spatially-varying correction around that
-// exposure. The neighborhood is measured in log luminance, which makes the
-// response behave in stops instead of raw linear multiplication. A center-
-// luminance similarity term keeps the filter from bleeding exposure across
-// strong depth/color boundaries, reducing the classic local-tone halos.
+// The global exposure already moved the frame to the metered anchor
+// (see program/c4_taa_exposure.vsh). This pass only adds a zero-mean
+// spatially-varying correction around THAT anchor — never a second
+// independent push to middle gray. anchor_log is log2(metered luminance)
+// derived from the stored global exposure, so when local == metered the
+// correction is exactly 0 (centered, no net brightening). Log domain =>
+// stops; bilateral similarity term prevents halo bleed.
+// Must match the global meter in c4_taa_exposure.vsh (luminance_weights_ap1),
+// not the display-gamut luminance_weights — otherwise the anchor derived
+// from global exposure lives in a different primary set than local_log and
+// the correction gains a systematic offset.
 float local_exposure_luma(vec3 rgb) {
-    return max(dot(max(rgb, vec3(0.0)), luminance_weights), 1e-5);
+    return max(dot(max(rgb, vec3(0.0)), luminance_weights_ap1), 1e-5);
 }
 
 #ifdef LOCAL_EXPOSURE
-float compute_local_exposure_ev(vec2 texel_uv, vec3 center_rgb) {
+float compute_local_exposure_ev(vec2 texel_uv, vec3 center_rgb, float anchor_log) {
     float center_log = log2(local_exposure_luma(center_rgb));
 
     float sum_log = center_log * 4.0;
@@ -80,11 +85,10 @@ float compute_local_exposure_ev(vec2 texel_uv, vec3 center_rgb) {
 
     float local_log = sum_log / max(sum_w, 1e-5);
 
-    // The global exposure pipeline targets the meter-calibrated middle gray.
-    // Local exposure only moves a fraction of the way toward that target.
-    const float middle_gray = 0.18;
+    // Centered on the global meter anchor, not an absolute middle gray.
+    // Same adaptation for detail and regional so the two stages agree.
     const float adaptation = 0.28;
-    float ev = (log2(middle_gray) - local_log) * adaptation;
+    float ev = (anchor_log - local_log) * adaptation;
 
     // Keep local exposure a detail-preserving correction, never a replacement
     // for the user's global exposure. The symmetric limit is 2/3 stop.
@@ -101,7 +105,7 @@ float compute_local_exposure_ev(vec2 texel_uv, vec3 center_rgb) {
         = textureLod(colortex5, texel_uv, region_lod).rgb;
     float region_log = log2(local_exposure_luma(region_rgb));
     float region_ev = clamp(
-        (log2(middle_gray) - region_log) * adaptation,
+        (anchor_log - region_log) * adaptation,
         -LOCAL_EXPOSURE_RANGE,
         LOCAL_EXPOSURE_RANGE
     );

@@ -82,12 +82,12 @@ uniform vec2 taa_offset;
 
 /*
 (needed by vertex stage for auto exposure)
-#if AUTO_EXPOSURE != AUTO_EXPOSURE_OFF
+#ifdef AUTO_EXPOSURE
 const bool colortex0MipmapEnabled = true;
 #endif
  */
 
-#if AUTO_EXPOSURE == AUTO_EXPOSURE_HISTOGRAM \
+#if defined(AUTO_EXPOSURE) \
     && DEBUG_VIEW == DEBUG_VIEW_HISTOGRAM
 void draw_histogram(ivec2 texel) {
     const int width = 512;
@@ -238,7 +238,7 @@ void main() {
         result.a = exposure;
     }
 
-#if AUTO_EXPOSURE == AUTO_EXPOSURE_HISTOGRAM \
+#if defined(AUTO_EXPOSURE) \
     && DEBUG_VIEW == DEBUG_VIEW_HISTOGRAM
     draw_histogram(texel);
 #endif

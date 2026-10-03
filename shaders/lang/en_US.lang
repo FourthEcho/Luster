@@ -826,8 +826,6 @@ value.TEXTURE_FORMAT.TEXTURE_FORMAT_LAB = labPBR
 value.TEXTURE_FORMAT.TEXTURE_FORMAT_OLD = Old PBR
 
 option.ENVIRONMENT_REFLECTIONS         = Environment Reflections
-option.REFLECTION_CAPTURE              = Reflection Capture
-option.REFLECTION_CAPTURE.comment     = Work in Progress - World-space panorama filling reflections for off-screen geometry, with a position check against hidden-surface leaks. Off by default for performance.
 option.ENVIRONMENT_REFLECTIONS.comment    = Screen-space reflections on water and shiny blocks. Heavy on weaker GPUs.
 option.SKY_REFLECTIONS                 = Sky Reflections
 option.SKY_REFLECTIONS.comment              = Makes water and shiny blocks reflect the sky. Enhances the blue sky reflection on water surfaces for a more realistic appearance.
@@ -1109,7 +1107,7 @@ option.PURKINJE_SHIFT_B.comment         = Blue channel weight of the scotopic ti
 # Exposure
 
 option.AUTO_EXPOSURE                         = Auto Exposure
-option.AUTO_EXPOSURE.comment                 = Selects the auto exposure mode. Automatically adjusts exposure based on scene brightness.
+option.AUTO_EXPOSURE.comment = Enables advanced global auto exposure. Automatically adjusts exposure based on scene brightness.
 
 option.LOCAL_EXPOSURE                         = Local Exposure
 option.LOCAL_EXPOSURE.comment                 = Applies spatially adaptive HDR exposure while preserving the global exposure and protecting highlight and shadow detail.
@@ -1140,9 +1138,6 @@ option.LOCAL_EXPOSURE_RANGE.comment          = Maximum exposure shift in stops t
 option.LOCAL_EXPOSURE_DETAIL                 = Local Detail Strength
 option.LOCAL_EXPOSURE_DETAIL.comment         = Scales the fine bilateral detail correction. Lower values leave only the area-scale regional grading.
 
-value.AUTO_EXPOSURE.AUTO_EXPOSURE_SIMPLE    = Simple
-value.AUTO_EXPOSURE.AUTO_EXPOSURE_HISTOGRAM = Histogram
-value.AUTO_EXPOSURE.AUTO_EXPOSURE_OFF       = Off
 
 # Misc settings
 
@@ -1450,9 +1445,6 @@ value.WATER_TEXTURE.WATER_TEXTURE_OFF=Off
 value.WATER_TEXTURE.WATER_TEXTURE_HIGHLIGHT=Highlights
 value.WATER_TEXTURE.WATER_TEXTURE_VANILLA=Vanilla
 value.WATER_TEXTURE.WATER_TEXTURE_HIGHLIGHT_UNDERGROUND=Highlights (Underground only)
-value.AUTO_EXPOSURE.AUTO_EXPOSURE_OFF=Off
-value.AUTO_EXPOSURE.AUTO_EXPOSURE_SIMPLE=Simple
-value.AUTO_EXPOSURE.AUTO_EXPOSURE_HISTOGRAM=Histogram
 value.DEBUG_VIEW.DEBUG_VIEW_NONE=OFF
 value.DEBUG_VIEW.DEBUG_VIEW_SAMPLER=Sampler
 value.DEBUG_VIEW.DEBUG_VIEW_HISTOGRAM=Histogram
@@ -1497,8 +1489,6 @@ value.DEBUG_SAMPLER.colortex17=colortex17
 value.DEBUG_SAMPLER.colortex18=colortex18
 value.DEBUG_SAMPLER.colortex19=colortex19
 value.DEBUG_SAMPLER.colortex20=colortex20
-value.DEBUG_SAMPLER.colortex21=colortex21
-value.DEBUG_SAMPLER.colortex22=colortex22
 value.DEBUG_SAMPLER.noisetex=noisetex
 
 option.IMAGE_SHARPENING_INTENSITY = Image Sharpening
