@@ -67,7 +67,7 @@ Some features are conditional on shader loader, Minecraft version, GPU, and sele
 
 ## Configuration
 
-Settings are organized into: **World** · **Lighting** · **Sky** · **Fog** · **Materials** · **Water** · **Post-Processing** · **Camera** · **Misc** and **Mods**.
+Settings are organized into: **World** · **Lighting** · **Atmospherics and Fog** · **Materials** · **Post-Processing** · **Camera** · **Misc**.
 
 ## Development
 
