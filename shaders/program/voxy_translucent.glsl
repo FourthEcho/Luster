@@ -188,11 +188,10 @@ void voxy_emitFragment(VoxyFragmentParameters parameters) {
     float lod_depth_behind
         = texelFetch(vxDepthTexOpaque, ivec2(gl_FragCoord.xy), 0).x;
 
-    // Get direct light color. The old SH skylight slot is retired;
-    // surface ambient uses the precomputed baked ambient that the sky
-    // shader publishes to colortex4(191, 1). The per-frame H-Basis
-    // coefficients are only available to the deferred path, so Voxy
-    // translucents fall back to the baked ambient term.
+    // Get direct light color. Surface ambient uses the precomputed baked
+    // ambient that the sky shader publishes to colortex4(191, 1), the
+    // same term the deferred path uses, so Voxy translucents match the
+    // rest of the world.
     light_color = texelFetch(colortex4, ivec2(191, 0), 0).rgb;
     ambient_color = texelFetch(colortex4, ivec2(191, 1), 0).rgb;
 

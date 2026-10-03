@@ -98,11 +98,8 @@ void main() {
         * (mat3(gl_ModelViewMatrix) * gl_Normal);
 
     light_color = texelFetch(colortex4, ivec2(191, 0), 0).rgb;
-    // Use the baked sky ambient published to colortex4(191, 1). The
-    // per-frame H-Basis coefficients are only available to the deferred
-    // pass (d4_deferred_shading.vsh), so DH water falls back to the
-    // baked ambient term to stay consistent with the rest of the
-    // forward-shaded world.
+    // Use the baked sky ambient published to colortex4(191, 1), the same
+    // term the rest of the forward-shaded world uses.
     ambient_color = texelFetch(colortex4, ivec2(191, 1), 0).rgb
         * clamp01(light_levels.y);
 

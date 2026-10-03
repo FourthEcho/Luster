@@ -1,10 +1,7 @@
 # Profiles
-# Profiles control preset quality levels. Each profile sets shadow resolution,
-# AO method, cloud steps, reflection quality and more. Switch profiles to
-# trade performance for quality — Low for potato PCs, Ultra for high-end.
-# Mac Compatible (red) disables Mac-incompatible or heavy features
-# (Directional Sky Ambient, Colored Shadows/VPS) and keeps
-# GTAO + 4× Aniso for smooth Mac performance.
+# Profiles control preset quality levels: shadow resolution, AO method, cloud steps,
+# reflection quality and more. Low is for potato PCs, High is the default, and
+# Ultra is for high-end hardware.
 
 
 # Screens
@@ -230,7 +227,7 @@ option.SSS_STEPS                       = SSS Steps
 option.SSS_STEPS.comment               = Increase to reduce noise on foliage and other materials with SSS, at the cost of performance.
 
 option.SHADER_AO                       = Shader AO
-option.SHADER_AO.comment               = AO method. Off - no shader AO. SSAO - screen-space, light. GTAO - horizon-based, better quality; provides bent normal for SH Skylight
+option.SHADER_AO.comment               = AO method. Off - no shader AO. SSAO - screen-space, light. GTAO - horizon-based, better quality; provides the bent normal used by SSPT
 value.SHADER_AO.SHADER_AO_NONE         = Off
 value.SHADER_AO.SHADER_AO_SSAO         = SSAO
 value.SHADER_AO.SHADER_AO_GTAO         = GTAO
@@ -1265,9 +1262,6 @@ option.DH_OVERDRAW_FADE_LENGTH  = Overdraw Fade Length
 option.DH_OVERDRAW_FADE_LENGTH.comment = Controls the fade length for Distant Horizons overdraw. Smooths the transition between rendered and non-rendered terrain.
 option.NOISE_ON_DH_TERRAIN      = Noise on DH Terrain
 option.NOISE_ON_DH_TERRAIN.comment = Controls whether noise is applied to Distant Horizons terrain. Adds subtle detail variation to avoid repetitive-looking generated terrain.
-
-# Photonics
-
 
 screen.indirect_lighting=Indirect Lighting
 screen.aa=Anti-Aliasing

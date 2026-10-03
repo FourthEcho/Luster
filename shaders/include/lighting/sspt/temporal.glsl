@@ -6,7 +6,8 @@
 
 #include "/include/utility/color.glsl"
 
-// Half-res SSPT buffer bookkeeping (matches size.buffer.colortex17-20)
+// Half-res SSPT buffer bookkeeping. Hardcoded: only matches size.buffer.colortex17-20
+// when indirectResReduction = 2 (the default).
 const float bufferScale = 0.5;
 
 // Relative luminance in the pack's working color space (Rec. 2020).

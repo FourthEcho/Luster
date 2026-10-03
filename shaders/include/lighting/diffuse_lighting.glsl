@@ -225,7 +225,7 @@ vec3 get_diffuse_lighting(
 
     vec3 lighting = vec3(0.0);
 
-    // Non-directional lighting sources (blocklight/ambient/H-Basis skylight)
+    // Non-directional lighting sources (blocklight/baked sky ambient)
     // must not depend on surface orientation. Direct celestial lighting is
     // evaluated separately from NoL and the shadow term below.
     float directional_lighting = 1.0;

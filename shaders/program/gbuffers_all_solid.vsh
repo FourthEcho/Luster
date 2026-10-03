@@ -132,7 +132,7 @@ void main() {
 #endif
 
 #if defined PROGRAM_GBUFFERS_ENTITIES && !defined COLORWHEEL
-    // Fix fire entity not glowing with Colored Lights
+    // Fire entities should always glow at full emission
     if (light_levels.x > 0.99) {
         material_mask = 40;
     }

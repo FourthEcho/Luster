@@ -253,10 +253,8 @@ void main() {
     vec3 normal_tangent = vec3(0.0, 0.0, 1.0);
 
     // Resolve the ambient_color from the precomputed sky ambient that
-    // the sky shader writes to colortex4. Translucents are forward-shaded
-    // and don't have access to the per-frame H-Basis coefficients projected
-    // by d4_deferred_shading.vsh, so they fall back to the same baked
-    // ambient term the non-skylight deferred path uses.
+    // the sky shader writes to colortex4. Translucents are forward-shaded,
+    // so they use the same baked ambient term as the deferred path.
     ambient_color = texelFetch(colortex4, ivec2(191, 1), 0).rgb
         * clamp01(light_levels.y);
 
@@ -427,10 +425,8 @@ void main() {
 #endif
     }
 
-    // Replace the retired directional irradiance with the precomputed
-    // sky ambient term. Translucents don't carry the per-frame H-Basis
-    // coefficients projected by d4_deferred_shading.vsh, so we use the
-    // baked ambient_color that the sky shader publishes to colortex4.
+    // Use the precomputed sky ambient term: the baked ambient_color
+    // that the sky shader publishes to colortex4.
     ambient_color = texelFetch(colortex4, ivec2(191, 1), 0).rgb
         * clamp01(adjusted_light_levels.y);
 
