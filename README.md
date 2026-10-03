@@ -21,8 +21,6 @@ Atmosphere · lighting · clouds · water · image quality — built with Iris a
 
 (WIP) Luster is a heavily reworked shader pack built on the [Photon](https://github.com/sixthsurge/photon) codebase by SixthSurge. It's designed around modular rendering systems rather than a single visual gimmick — dynamic atmosphere, layered volumetric clouds, configurable lighting and reflections, detailed water, labPBR material support, temporal reconstruction, and a full post-processing stack — all exposed through Iris' in-game settings menu.
 
-A dedicated **Mac Compatible** profile makes Luster one of the few shader packs built to actually run well on Apple Silicon through Iris' OpenGL 4.1 compatibility path.
-
 ## Features
 
 - **Lighting** — sun/moon/block/Nether/End lighting, Screen Space Path Tracing, multiple shadow paths (PCF + screen-space), SSAO/GTAO
@@ -51,7 +49,7 @@ Not every feature is enabled on every profile — the in-game settings menu is t
 2. [Download the latest Luster archive](#).
 3. Drop the `.zip` into `.minecraft/shaderpacks`.
 4. In Minecraft: **Video Settings → Shader Packs → Luster**.
-5. Start on **Mac Compatible**, **Medium**, or **High** depending on your hardware, then tune from there.
+5. Start on **Medium**, or **High** depending on your hardware, then tune from there.
 
 ## Compatibility
 
