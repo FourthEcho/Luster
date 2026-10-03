@@ -25,7 +25,7 @@ A dedicated **Mac Compatible** profile makes Luster one of the few shader packs 
 
 ## Features
 
-- **Lighting** — sun/moon/block/Nether/End lighting, SSPT Indirect Lighting + Colored Lighting, Directional Ambient Lighting, multiple shadow paths (PCF + screen-space), SSAO/GTAO
+- **Lighting** — sun/moon/block/Nether/End lighting, Screen Space Path Tracing, multiple shadow paths (PCF + screen-space), SSAO/GTAO
 - **Sky & atmosphere** — dynamic Rayleigh/Mie scattering/Ozone/Mist, biome and weather-aware color, aurora, stars, galaxy, rainbows, god rays, and advanced Mist shading.
 - **Clouds** — Cumulus, AltoCumulus, Cumulus Congestus, Cirrus/Cirrocumulus, noctilucent, and optional blocky clouds, independently tunable per layer, with up to 16× temporal upscaling
 - **Water & materials** — physically-inspired absorption/scattering, procedural waves, parallax, caustics, Snell's window, biome-colored water, rain puddles, POM, subsurface scattering, full labPBR support
@@ -44,7 +44,6 @@ Not every feature is enabled on every profile — the in-game settings menu is t
 | **Medium** | Balanced quality and performance |
 | **High** | Higher-quality shadows, reflections, clouds, AO, and lighting |
 | **Ultra** | Maximum available quality and sampling |
-| **Mac Compatible** | Conservative feature set tuned for macOS / Apple Silicon |
 
 *Mac Compatible* disables the more hardware- or platform-sensitive features while keeping the core lighting, atmosphere, water, reflection, shadow, cloud, and post-processing pipeline intact.
 
