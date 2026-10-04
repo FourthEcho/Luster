@@ -34,7 +34,9 @@ in vec2 uv;
 
 flat in vec3 ambient_color;
 flat in vec3 light_color;
+#ifdef H_BASIS_SKYLIGHT
 flat in vec3 h_sky[6];
+#endif
 
 #if defined WORLD_OVERWORLD
 flat in vec3 sun_color;

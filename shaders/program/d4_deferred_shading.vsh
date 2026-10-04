@@ -15,7 +15,9 @@ out vec2 uv;
 
 flat out vec3 ambient_color;
 flat out vec3 light_color;
+#ifdef H_BASIS_SKYLIGHT
 flat out vec3 h_sky[6];
+#endif
 
 #if defined WORLD_OVERWORLD
 flat out vec3 sun_color;
