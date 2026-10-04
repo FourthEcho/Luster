@@ -880,11 +880,6 @@ const float wetnessHalflife         = 70.0;
 // resolution (indirectResReduction = 2).
   //#define ssptEnabled
   //#define ssptFullRangeRT
-// Higher quality SSPT emission: a second emitter pick per NEE candidate and
-// a twice-longer NEE occlusion march. Less noise on small bright emitters
-// and less light leaking through thin walls, at roughly twice the emission
-// gather cost. Off by default.
-//#define HIGH_QUALITY_EMISSION
   #define indirectResReduction 2 // [1 2 3 4]
   #define ssptSPP 1 // [1 2 3 4 5 6]
   #define ssptBounces 1 // [1 2 3 4 5 6]

@@ -1289,8 +1289,6 @@ option.FRAMING_ASPECT_RATIO=Aspect Ratio
 option.FRAMING_ASPECT_RATIO.comment=Target aspect ratio (width over height) for the crop box.
 option.FRAMING_SAFE_AREA=Safe Area
 option.FRAMING_SAFE_AREA.comment=Centered safe-area fraction shown inside the aspect box.
-option.HIGH_QUALITY_EMISSION=High Quality Emission
-option.HIGH_QUALITY_EMISSION.comment=Cleaner SSPT emission: an extra emitter sample per path and a longer visibility march. Less noise and wall-leak at ~2× gather cost. Single-bounce guiding only.
 option.maxFrames=Max Accumulated Frames
 option.maxFrames.comment=Temporal history length. Higher = smoother, but more ghosting.
 option.minAccumMult=Accumulation Weight Mult

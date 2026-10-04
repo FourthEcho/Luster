@@ -3,9 +3,7 @@
 
   program/d4_sspt:
   Trace one frame of screen-space path traced emission + colored lighting
-  (cosine-lobe emission + shadowed sun/moon and handheld bounce, plus an
-  emissive-guided NEE lobe that picks random screen texels, tests them for
-  emission, and evaluates an occlusion-checked next-event estimator — see
+  (cosine-lobe emission + shadowed sun/moon and handheld bounce — see
    include/lighting/indirect_lighting/sspt.glsl). Sky ambient is NOT gathered here;
   directional sky belongs to the SH skylight term.
   Raw, noisy output — program/d5_sspt_accumulate and the SVGF filter passes
@@ -169,8 +167,8 @@ void main() {
         geometry_hit
     );
 
-    // colortex17 alpha is a geometry-hit flag. This includes both cosine-ray
-    // surface hits and successful emissive NEE hits. d5 recomputes the
-    // lightmap fallback so AO is used only when every SSPT path misses.
+    // colortex17 alpha is a geometry-hit flag for cosine-ray surface
+    // hits. d5 recomputes the lightmap fallback so AO is used only when
+    // every SSPT path misses.
     indirect = vec4(indirect_light, float(geometry_hit));
 }
