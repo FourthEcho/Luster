@@ -1,5 +1,5 @@
-#if !defined INCLUDE_MISC_TONEMAP_OPERATORS
-#define INCLUDE_MISC_TONEMAP_OPERATORS
+#if !defined INCLUDE_POST_PROCESSING_TONEMAP_OPERATORS
+#define INCLUDE_POST_PROCESSING_TONEMAP_OPERATORS
 
 // Host include for every selectable tonemap operator (see the `tonemap`
 // option in "/settings.glsl"). Each operator lives in its own directory
@@ -18,4 +18,4 @@
 #include "/include/post_processing/reinhard_jodie/reinhard_jodie.glsl"
 #include "/include/post_processing/agx/agx.glsl"
 
-#endif // INCLUDE_MISC_TONEMAP_OPERATORS
+#endif // INCLUDE_POST_PROCESSING_TONEMAP_OPERATORS
