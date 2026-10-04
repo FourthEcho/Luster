@@ -1,7 +1,6 @@
 #if !defined INCLUDE_POST_PROCESSING_AGX
 #define INCLUDE_POST_PROCESSING_AGX
 
-// AGX tonemapper for Luster.
 // Best-practice minimal AgX without LUT, matching Blender 4.0+ / Filament /
 // Godot / three.js. The fitted inset/outset core below expects linear
 // Rec.709 (linear sRGB); working-space color is converted in and out so the
