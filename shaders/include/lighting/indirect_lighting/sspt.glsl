@@ -2,7 +2,7 @@
 #define INCLUDE_LIGHTING_INDIRECT_LIGHTING_SSPT
 
 // ============================================================================
-//  Screen-space path traced emission + colored lighting
+//  Screen-space path traced emission + indirect lighting
 // ----------------------------------------------------------------------------
 
 #include "/include/lighting/colors/blocklight_color.glsl"
