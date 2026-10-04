@@ -1,5 +1,5 @@
-#if !defined INCLUDE_LIGHTING_SSPT_TEMPORAL
-#define INCLUDE_LIGHTING_SSPT_TEMPORAL
+#if !defined INCLUDE_LIGHTING_INDIRECT_LIGHTING_TEMPORAL
+#define INCLUDE_LIGHTING_INDIRECT_LIGHTING_TEMPORAL
 
 // Shared bookkeeping for the SSPT temporal passes (d5 accumulate + d6
 // SVGF filter): half-res buffer helpers and the packed-gbuffer fetch.
@@ -28,4 +28,4 @@ vec4 fetchGbuffer(ivec2 texel) {
     return vec4(val.rgb * 2.0 - 1.0, sqr(val.a));
 }
 
-#endif // INCLUDE_LIGHTING_SSPT_TEMPORAL
+#endif // INCLUDE_LIGHTING_INDIRECT_LIGHTING_TEMPORAL

@@ -9,7 +9,7 @@
 //----------------------------------------------------------------------------//
 #if defined WORLD_OVERWORLD
 
-#include "/include/lighting/bsdf.glsl"
+#include "/include/lighting/bsdf/bsdf.glsl"
 #include "/include/lighting/colors/light_color.glsl"
 #include "/include/lighting/colors/weather_color.glsl"
 #include "/include/misc/lightning_flash.glsl"

@@ -1,5 +1,5 @@
-#if !defined INCLUDE_MISC_RAYTRACER
-#define INCLUDE_MISC_RAYTRACER
+#if !defined INCLUDE_LIGHTING_BSDF_RAYTRACER
+#define INCLUDE_LIGHTING_BSDF_RAYTRACER
 
 #include "/include/misc/lod_mod_support.glsl"
 #include "/include/utility/geometry.glsl"
@@ -109,4 +109,4 @@ bool raymarch_depth_buffer(
     return hand_depth < final_depth && final_depth < 1.0;
 }
 
-#endif // INCLUDE_MISC_RAYTRACER
+#endif // INCLUDE_LIGHTING_BSDF_RAYTRACER

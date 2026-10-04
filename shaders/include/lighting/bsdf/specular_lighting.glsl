@@ -1,10 +1,10 @@
-#if !defined INCLUDE_LIGHTING_SPECULAR_LIGHTING
-#define INCLUDE_LIGHTING_SPECULAR_LIGHTING
+#if !defined INCLUDE_LIGHTING_BSDF_SPECULAR_LIGHTING
+#define INCLUDE_LIGHTING_BSDF_SPECULAR_LIGHTING
 
-#include "/include/lighting/bsdf.glsl"
+#include "/include/lighting/bsdf/bsdf.glsl"
 #include "/include/lighting/colors/moon_phase_influence.glsl"
 #include "/include/misc/lod_mod_support.glsl"
-#include "/include/misc/raytracer.glsl"
+#include "/include/lighting/bsdf/raytracer.glsl"
 #include "/include/sky/projection.glsl"
 #include "/include/surface/material.glsl"
 #include "/include/utility/bicubic.glsl"
@@ -446,4 +446,4 @@ vec3 get_specular_reflections(
     return reflection * material.ssr_multiplier;
 }
 
-#endif // INCLUDE_LIGHTING_SPECULAR_LIGHTING
+#endif // INCLUDE_LIGHTING_BSDF_SPECULAR_LIGHTING

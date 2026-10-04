@@ -32,7 +32,7 @@ uniform float frameTimeCounter;
 #include "/include/utility/bicubic.glsl"
 #include "/include/utility/color.glsl"
 #include "/include/utility/dithering.glsl"
-#include "/include/utility/text_rendering.glsl"
+#include "/include/misc/text_rendering.glsl"
 #include "/include/post_processing/sharpening.glsl"
 
 #ifdef DISTANCE_VIEW

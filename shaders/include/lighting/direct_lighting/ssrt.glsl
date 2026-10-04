@@ -1,7 +1,7 @@
-#if !defined INCLUDE_LIGHTING_SHADOWS_SSRT_SHADOWS
-#define INCLUDE_LIGHTING_SHADOWS_SSRT_SHADOWS
+#if !defined INCLUDE_LIGHTING_DIRECT_LIGHTING_SSRT
+#define INCLUDE_LIGHTING_DIRECT_LIGHTING_SSRT
 
-#include "/include/lighting/shadows/common.glsl"
+#include "/include/lighting/direct_lighting/common.glsl"
 #include "/include/utility/random.glsl"
 #include "/include/utility/sampling.glsl"
 #include "/include/utility/space_conversion.glsl"
@@ -196,4 +196,4 @@ float get_screen_space_shadows(
     return float(!hit) * get_lightmap_light_leak_prevention(skylight);
 }
 
-#endif // INCLUDE_LIGHTING_SHADOWS_SSRT_SHADOWS
+#endif // INCLUDE_LIGHTING_DIRECT_LIGHTING_SSRT

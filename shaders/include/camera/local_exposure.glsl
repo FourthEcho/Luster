@@ -3,19 +3,6 @@
 
 #include "/include/utility/color.glsl"
 
-// HDR-aware local exposure: one system with the global meter.
-//
-// The global exposure already moved the frame to the metered anchor
-// (see program/c4_taa_exposure.vsh). This pass only adds a zero-mean
-// spatially-varying correction around THAT anchor — never a second
-// independent push to middle gray. anchor_log is log2(metered luminance)
-// derived from the stored global exposure, so when local == metered the
-// correction is exactly 0 (centered, no net brightening). Log domain =>
-// stops; bilateral similarity term prevents halo bleed.
-// Must match the global meter in c4_taa_exposure.vsh (luminance_weights_ap1),
-// not the display-gamut luminance_weights — otherwise the anchor derived
-// from global exposure lives in a different primary set than local_log and
-// the correction gains a systematic offset.
 float local_exposure_luma(vec3 rgb) {
     return max(dot(max(rgb, vec3(0.0)), luminance_weights_ap1), 1e-5);
 }

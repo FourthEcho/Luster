@@ -1,5 +1,5 @@
-#if !defined INCLUDE_MISC_PURKINJE_SHIFT
-#define INCLUDE_MISC_PURKINJE_SHIFT
+#if !defined INCLUDE_POST_PROCESSING_PURKINJE_SHIFT
+#define INCLUDE_POST_PROCESSING_PURKINJE_SHIFT
 
 // Purkinje effect: mesopic shift toward rod (scotopic) peak sensitivity.
 // https://en.wikipedia.org/wiki/Purkinje_effect
@@ -47,4 +47,4 @@ vec3 purkinje_shift(vec3 rgb, vec2 light_levels) {
 #endif
 }
 
-#endif // INCLUDE_MISC_PURKINJE_SHIFT
+#endif // INCLUDE_POST_PROCESSING_PURKINJE_SHIFT

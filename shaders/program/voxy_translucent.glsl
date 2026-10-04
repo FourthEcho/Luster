@@ -75,9 +75,9 @@ OverworldFogParameters fog_params;
 #define TEMPORAL_REPROJECTION
 
 #include "/include/fog/simple_fog.glsl"
-#include "/include/lighting/diffuse_lighting.glsl"
-#include "/include/lighting/shadows/pcss.glsl"
-#include "/include/lighting/specular_lighting.glsl"
+#include "/include/lighting/bsdf/diffuse_lighting.glsl"
+#include "/include/lighting/direct_lighting/pcss.glsl"
+#include "/include/lighting/bsdf/specular_lighting.glsl"
 #include "/include/misc/lod_mod_support.glsl"
 #include "/include/misc/material_masks.glsl"
 #include "/include/surface/material.glsl"

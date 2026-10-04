@@ -5,7 +5,7 @@
 #include "/include/utility/phase_functions.glsl"
 #include "/include/lighting/cloud_shadows.glsl"
 #include "/include/fog/overworld/mist.glsl"
-#include "/include/lighting/shadows/distortion.glsl"
+#include "/include/lighting/direct_lighting/distortion.glsl"
 #include "/include/misc/lod_mod_support.glsl"
 #include "/include/sky/atmosphere.glsl"
 #include "/include/utility/encoding.glsl"

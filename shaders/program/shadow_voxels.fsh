@@ -19,7 +19,7 @@ uniform mat4 shadowModelView, shadowModelViewInverse;
 
 layout(location = 0) out vec3 shadowcolor0_out;
 
-#include "/include/lighting/shadows/distortion.glsl"
+#include "/include/lighting/direct_lighting/distortion.glsl"
 #include "/include/utility/color.glsl"
 void main() {
 #if defined WORLD_NETHER

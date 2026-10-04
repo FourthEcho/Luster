@@ -6,7 +6,7 @@
   (cosine-lobe emission + shadowed sun/moon and handheld bounce, plus an
   emissive-guided NEE lobe that picks random screen texels, tests them for
   emission, and evaluates an occlusion-checked next-event estimator — see
-  include/lighting/sspt/sspt.glsl). Sky ambient is NOT gathered here;
+   include/lighting/indirect_lighting/sspt.glsl). Sky ambient is NOT gathered here;
   directional sky belongs to the SH skylight term.
   Raw, noisy output — program/d5_sspt_accumulate and the SVGF filter passes
   (program/d6_sspt_filter, sizes 32/16/8/4/2) denoise it. Runs at half
@@ -95,7 +95,7 @@ uniform int moonPhase;
 #define TRACE_PROJ_INV combined_projection_matrix_inverse
 
 #include "/include/misc/lod_mod_support.glsl"
-#include "/include/lighting/sspt/sspt.glsl"
+#include "/include/lighting/indirect_lighting/sspt.glsl"
 #include "/include/utility/encoding.glsl"
 #include "/include/utility/space_conversion.glsl"
 

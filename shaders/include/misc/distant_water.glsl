@@ -1,8 +1,8 @@
 #if !defined INCLUDE_MISC_DISTANT_WATER
 #define INCLUDE_MISC_DISTANT_WATER
 
-#include "/include/lighting/specular_lighting.glsl"
-#include "/include/misc/purkinje_shift.glsl"
+#include "/include/lighting/bsdf/specular_lighting.glsl"
+#include "/include/post_processing/purkinje_shift.glsl"
 #include "/include/surface/water_normal.glsl"
 
 vec4 draw_distant_water(

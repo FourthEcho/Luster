@@ -1,7 +1,7 @@
 #if !defined INCLUDE_FOG_NETHER_FOG_VL
 #define INCLUDE_FOG_NETHER_FOG_VL
 
-#include "/include/lighting/shadows/distortion.glsl"
+#include "/include/lighting/direct_lighting/distortion.glsl"
 #include "/include/utility/color.glsl"
 #include "/include/utility/fast_math.glsl"
 #include "/include/utility/phase_functions.glsl"

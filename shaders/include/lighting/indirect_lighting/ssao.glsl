@@ -1,5 +1,5 @@
-#if !defined INCLUDE_LIGHTING_AO_SSAO
-#define INCLUDE_LIGHTING_AO_SSAO
+#if !defined INCLUDE_LIGHTING_INDIRECT_LIGHTING_SSAO
+#define INCLUDE_LIGHTING_INDIRECT_LIGHTING_SSAO
 
 #include "/include/utility/fast_math.glsl"
 #include "/include/utility/random.glsl"
@@ -87,4 +87,4 @@ float compute_ssao(
     return cube(clamp01(1.0 - ao * rcp(float(SSAO_STEPS))));
 }
 
-#endif // INCLUDE_LIGHTING_AO_SSAO
+#endif // INCLUDE_LIGHTING_INDIRECT_LIGHTING_SSAO

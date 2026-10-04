@@ -67,7 +67,7 @@ uniform bool world_age_changed;
 // ------------
 
 #include "/include/lighting/colors/blocklight_color.glsl"
-#include "/include/lighting/sspt/temporal.glsl"
+#include "/include/lighting/indirect_lighting/temporal.glsl"
 #include "/include/misc/lod_mod_support.glsl"
 #include "/include/utility/encoding.glsl"
 #include "/include/utility/fast_math.glsl"

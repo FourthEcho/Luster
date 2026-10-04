@@ -1,5 +1,5 @@
-#if !defined INCLUDE_MISC_EDGE_HIGHLIGHT
-#define INCLUDE_MISC_EDGE_HIGHLIGHT
+#if !defined INCLUDE_SURFACE_EDGE_HIGHLIGHT
+#define INCLUDE_SURFACE_EDGE_HIGHLIGHT
 
 #include "/include/utility/encoding.glsl"
 #include "/include/utility/space_conversion.glsl"
@@ -116,4 +116,4 @@ float get_edge_highlight(
     return clamp01(float(has_edge_highlight(world_normal)) * highlight);
 }
 
-#endif // INCLUDE_MISC_EDGE_HIGHLIGHT
+#endif // INCLUDE_SURFACE_EDGE_HIGHLIGHT

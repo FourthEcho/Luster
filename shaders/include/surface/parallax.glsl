@@ -1,5 +1,5 @@
-#if !defined INCLUDE_MISC_PARALLAX
-#define INCLUDE_MISC_PARALLAX
+#if !defined INCLUDE_SURFACE_PARALLAX
+#define INCLUDE_SURFACE_PARALLAX
 
 vec2 get_uv_from_local_coord(vec2 local_coord) {
     return atlas_tile_offset + atlas_tile_scale * fract(local_coord);
@@ -154,4 +154,4 @@ bool get_parallax_shadow(
     return false;
 }
 
-#endif // INCLUDE_MISC_PARALLAX
+#endif // INCLUDE_SURFACE_PARALLAX

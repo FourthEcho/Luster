@@ -172,12 +172,12 @@ vec3 light_color, ambient_color;
 #endif
 
 #include "/include/fog/simple_fog.glsl"
-#include "/include/lighting/diffuse_lighting.glsl"
-#include "/include/lighting/shadows/pcss.glsl"
-#include "/include/lighting/specular_lighting.glsl"
+#include "/include/lighting/bsdf/diffuse_lighting.glsl"
+#include "/include/lighting/direct_lighting/pcss.glsl"
+#include "/include/lighting/bsdf/specular_lighting.glsl"
 #include "/include/misc/lod_mod_support.glsl"
 #include "/include/misc/material_masks.glsl"
-#include "/include/misc/purkinje_shift.glsl"
+#include "/include/post_processing/purkinje_shift.glsl"
 #include "/include/surface/material.glsl"
 #include "/include/surface/water_normal.glsl"
 #include "/include/utility/color.glsl"

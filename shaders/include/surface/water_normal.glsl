@@ -1,5 +1,5 @@
-#if !defined INCLUDE_MISC_WATER_NORMAL
-#define INCLUDE_MISC_WATER_NORMAL
+#if !defined INCLUDE_SURFACE_WATER_NORMAL
+#define INCLUDE_SURFACE_WATER_NORMAL
 
 #include "/include/utility/space_conversion.glsl"
 #include "/include/surface/rain_ripples.glsl"
@@ -236,4 +236,4 @@ vec2 get_water_parallax_coord(
     );
 }
 
-#endif // INCLUDE_MISC_WATER_NORMAL
+#endif // INCLUDE_SURFACE_WATER_NORMAL

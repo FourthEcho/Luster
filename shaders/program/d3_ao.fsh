@@ -69,11 +69,11 @@ uniform vec2 taa_offset;
 #include "/include/utility/space_conversion.glsl"
 
 #if SHADER_AO == SHADER_AO_SSAO
-#include "/include/lighting/ao/ssao.glsl"
+#include "/include/lighting/indirect_lighting/ssao.glsl"
 #endif
 
 #if SHADER_AO == SHADER_AO_GTAO
-#include "/include/lighting/ao/gtao.glsl"
+#include "/include/lighting/indirect_lighting/gtao.glsl"
 #endif
 
 const float ao_render_scale = 0.5;
@@ -150,7 +150,7 @@ void main() {
     dither = r2(frameCounter, dither);
 
     // Decode this fragment's own albedo for the GTAO multibounce
-    // approximation (see lighting/ao/gtao.glsl) — cheap luminance
+    // approximation (see lighting/indirect_lighting/gtao.glsl) — cheap luminance
     // estimate, doesn't need full material decoding
     vec3 surface_albedo_srgb = vec3(
         unpack_unorm_2x8(gbuffer_data_0.x),

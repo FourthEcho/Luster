@@ -1,5 +1,5 @@
-#if !defined INCLUDE_MISC_RAIN_PUDDLES
-#define INCLUDE_MISC_RAIN_PUDDLES
+#if !defined INCLUDE_SURFACE_RAIN_PUDDLES
+#define INCLUDE_SURFACE_RAIN_PUDDLES
 
 #include "/include/misc/material_masks.glsl"
 #include "/include/surface/rain_ripples.glsl"
@@ -195,4 +195,4 @@ bool get_rain_puddles(
     return true;
 }
 
-#endif // INCLUDE_MISC_RAIN_PUDDLES
+#endif // INCLUDE_SURFACE_RAIN_PUDDLES

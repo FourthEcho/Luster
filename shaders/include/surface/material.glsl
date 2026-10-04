@@ -1,5 +1,5 @@
-#if !defined INCLUDE_MISC_MATERIAL
-#define INCLUDE_MISC_MATERIAL
+#if !defined INCLUDE_SURFACE_MATERIAL
+#define INCLUDE_SURFACE_MATERIAL
 
 #include "/include/post_processing/aces/matrices.glsl"
 #include "/include/utility/color.glsl"
@@ -984,4 +984,4 @@ Material material_from(
     return material;
 }
 
-#endif // INCLUDE_MISC_MATERIAL
+#endif // INCLUDE_SURFACE_MATERIAL

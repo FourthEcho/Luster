@@ -66,7 +66,7 @@ uniform vec2 view_res;
 //   Includes
 // ------------
 
-#include "/include/lighting/sspt/temporal.glsl"
+#include "/include/lighting/indirect_lighting/temporal.glsl"
 #include "/include/utility/color.glsl"
 #include "/include/utility/fast_math.glsl"
 

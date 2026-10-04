@@ -1,5 +1,5 @@
-#if !defined INCLUDE_LIGHTING_AO_GTAO
-#define INCLUDE_LIGHTING_AO_GTAO
+#if !defined INCLUDE_LIGHTING_INDIRECT_LIGHTING_GTAO
+#define INCLUDE_LIGHTING_INDIRECT_LIGHTING_GTAO
 
 #include "/include/misc/lod_mod_support.glsl"
 #include "/include/utility/fast_math.glsl"
@@ -186,4 +186,4 @@ vec2 compute_gtao(
     return clamp01(vec2(ao, ambient_sss));
 }
 
-#endif // INCLUDE_LIGHTING_AO_GTAO
+#endif // INCLUDE_LIGHTING_INDIRECT_LIGHTING_GTAO

@@ -79,7 +79,7 @@ uniform float biome_humidity;
 //   Includes
 // ------------
 
-#include "/include/lighting/shadows/distortion.glsl"
+#include "/include/lighting/direct_lighting/distortion.glsl"
 #include "/include/vertex/displacement.glsl"
 
 void main() {

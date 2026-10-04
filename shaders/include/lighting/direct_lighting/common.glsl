@@ -1,5 +1,5 @@
-#if !defined INCLUDE_LIGHTING_SHADOWS_COMMON
-#define INCLUDE_LIGHTING_SHADOWS_COMMON
+#if !defined INCLUDE_LIGHTING_DIRECT_LIGHTING_COMMON
+#define INCLUDE_LIGHTING_DIRECT_LIGHTING_COMMON
 
 // Fade from close shadows (shadow maps) to distant shadows (lightmap or SSRT)
 float get_shadow_distance_fade(vec3 scene_pos, vec3 shadow_screen_pos) {
@@ -26,4 +26,4 @@ float get_lightmap_light_leak_prevention(float skylight) {
     return smoothstep(0.0 / 15.0, 2.0 / 15.0, skylight);
 }
 
-#endif
+#endif // INCLUDE_LIGHTING_DIRECT_LIGHTING_COMMON

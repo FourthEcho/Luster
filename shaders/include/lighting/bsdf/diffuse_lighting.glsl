@@ -1,7 +1,7 @@
-#if !defined INCLUDE_LIGHTING_DIFFUSE_LIGHTING
-#define INCLUDE_LIGHTING_DIFFUSE_LIGHTING
+#if !defined INCLUDE_LIGHTING_BSDF_DIFFUSE_LIGHTING
+#define INCLUDE_LIGHTING_BSDF_DIFFUSE_LIGHTING
 
-#include "/include/lighting/bsdf.glsl"
+#include "/include/lighting/bsdf/bsdf.glsl"
 #include "/include/lighting/colors/blocklight_color.glsl"
 #include "/include/misc/end_lighting_fix.glsl"
 #include "/include/surface/material.glsl"
@@ -336,9 +336,6 @@ vec3 get_diffuse_lighting(
         directional_lighting
     );
 
-// Directional sky ambient arrives separately: traced sky inside sspt_light
-// under SSPT, nothing extra without it (Luster parity: baked base only).
-
     // Blocklight
 
     lighting += get_block_lighting(
@@ -369,4 +366,4 @@ vec3 get_diffuse_lighting(
         * mix(1.0, metal_diffuse_amount, float(material.is_metal));
 }
 
-#endif // INCLUDE_LIGHTING_DIFFUSE_LIGHTING
+#endif // INCLUDE_LIGHTING_BSDF_DIFFUSE_LIGHTING

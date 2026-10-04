@@ -1,5 +1,5 @@
-#if !defined INCLUDE_LIGHTING_SSPT
-#define INCLUDE_LIGHTING_SSPT
+#if !defined INCLUDE_LIGHTING_INDIRECT_LIGHTING_SSPT
+#define INCLUDE_LIGHTING_INDIRECT_LIGHTING_SSPT
 
 // ============================================================================
 //  Screen-space path traced emission + colored lighting
@@ -8,7 +8,7 @@
 #include "/include/lighting/colors/blocklight_color.glsl"
 #include "/include/lighting/handheld_lighting.glsl"
 #include "/include/lighting/cloud_shadows.glsl"
-#include "/include/lighting/shadows/distortion.glsl"
+#include "/include/lighting/direct_lighting/distortion.glsl"
 #include "/include/misc/lod_mod_support.glsl"
 #include "/include/utility/color.glsl"
 #include "/include/utility/encoding.glsl"
@@ -826,4 +826,4 @@ vec3 traceIndirect(
 #endif
 }
 
-#endif // INCLUDE_LIGHTING_SSPT
+#endif // INCLUDE_LIGHTING_INDIRECT_LIGHTING_SSPT

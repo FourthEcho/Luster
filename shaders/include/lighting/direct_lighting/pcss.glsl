@@ -1,10 +1,10 @@
-#if !defined INCLUDE_LIGHTING_SHADOWS
-#define INCLUDE_LIGHTING_SHADOWS
+#if !defined INCLUDE_LIGHTING_DIRECT_LIGHTING_PCSS
+#define INCLUDE_LIGHTING_DIRECT_LIGHTING_PCSS
 
 #if defined SHADOW && (defined WORLD_OVERWORLD || defined WORLD_END)
 
-#include "/include/lighting/shadows/common.glsl"
-#include "/include/lighting/shadows/distortion.glsl"
+#include "/include/lighting/direct_lighting/common.glsl"
+#include "/include/lighting/direct_lighting/distortion.glsl"
 #include "/include/utility/color.glsl"
 #include "/include/utility/dithering.glsl"
 #include "/include/utility/random.glsl"
@@ -299,4 +299,4 @@ vec3 get_filtered_shadows(
 }
 #endif
 
-#endif // INCLUDE_LIGHTING_SHADOWS
+#endif // INCLUDE_LIGHTING_DIRECT_LIGHTING_PCSS
