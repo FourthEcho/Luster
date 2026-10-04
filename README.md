@@ -27,7 +27,7 @@ Atmosphere · lighting · clouds · water · image quality — built with Iris a
 - **Sky & atmosphere** — dynamic Rayleigh/Mie scattering/Ozone/Mist, biome and weather-aware color, aurora, stars, galaxy, rainbows, god rays, and advanced Mist shading.
 - **Clouds** — Cumulus, AltoCumulus, Cumulus Congestus, Cirrus/Cirrocumulus, noctilucent, and optional blocky clouds, independently tunable per layer, with up to 16× temporal upscaling
 - **Water & materials** — physically-inspired absorption/scattering, procedural waves, parallax, caustics, Snell's window, biome-colored water, rain puddles, POM, subsurface scattering, full labPBR support
-- **Reflections** — environment, sky, and screen-space reflections, optional off-screen reflection capture, roughness-aware, tuned separately for water and other materials
+- **Reflections** — environment, sky, and screen-space reflections, roughness-aware, tuned separately for water and other materials
 - **Fog & volumetrics** — full atmospheric fog per biome, colored volumetric light shafts, cave/border fog, dedicated Nether and End fog paths
 - **Post-processing** — TAA/FXAA/CAS, TAAU, Purkinje shift, ACES and AGX tonemapping, full color grading
 - **Camera** - bloom, DOF, motion blur, vignette, multiple exposure modes, lens flare
