@@ -3,7 +3,7 @@
 
   Luster Shader by FourthEcho
 
-  program/post/bloom/gaussian0.fsh
+  program/c13_bloom_gaussian_1.fsh
   1D vertical gaussian blur pass for bloom tiles
 
 --------------------------------------------------------------------------------

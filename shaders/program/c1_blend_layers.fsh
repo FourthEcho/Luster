@@ -157,6 +157,7 @@ uniform sampler2D colortex8;
 #ifdef LOD_MOD_ACTIVE
 #include "/include/misc/distant_water.glsl"
 #endif
+#include "/include/sky/projection.glsl"
 
 vec3 blend_layers_with_fog(
     vec3 background_color,
@@ -177,7 +178,18 @@ vec3 blend_layers_with_fog(
 
 #if defined WORLD_OVERWORLD
     if (is_translucent) {
-        vec3 fog_ambient_back = ambient_color;
+        // Directional sky ambient along the segment: horizon warmth vs
+        // zenith blue instead of the flat average.
+        vec3 back_dir;
+        float back_len;
+        length_normalize(
+            back_position_world - front_position_world,
+            back_dir,
+            back_len
+        );
+        vec3 fog_ambient_back = textureLod(
+            colortex4, project_sky(back_dir), 0.0
+        ).rgb;
         mat2x3 analytic_fog = air_fog_analytic(
             front_position_world,
             back_position_world,
@@ -477,9 +489,11 @@ void main() {
 #endif
     } else {
 #if defined WORLD_OVERWORLD
-        // Overworld fog
-
-        vec3 fog_ambient_front = ambient_color;
+        // Overworld fog. Directional sky ambient along the view ray
+        // instead of the flat average.
+        vec3 fog_ambient_front = textureLod(
+            colortex4, project_sky(direction_world), 0.0
+        ).rgb;
         mat2x3 analytic_fog = air_fog_analytic(
             cameraPosition,
             front_position_world,

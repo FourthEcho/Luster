@@ -3,7 +3,7 @@
 
   Luster Shader by FourthEcho
 
-  program/post/fxaa.fsh
+  program/c21_fxaa.fsh
   FXAA v3.11 from
 http://blog.simonrodriguez.fr/articles/2016/07/implementing_fxaa.html
 

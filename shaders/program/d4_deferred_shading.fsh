@@ -34,6 +34,7 @@ in vec2 uv;
 
 flat in vec3 ambient_color;
 flat in vec3 light_color;
+flat in vec3 h_sky[6];
 
 #if defined WORLD_OVERWORLD
 flat in vec3 sun_color;
@@ -173,6 +174,7 @@ const bool colortex11MipmapEnabled = true;
 #define TEMPORAL_REPROJECTION
 
 #include "/include/fog/simple_fog.glsl"
+#include "/include/lighting/ambient/h_basis_skylight.glsl"
 #include "/include/lighting/bsdf/diffuse_lighting.glsl"
 #include "/include/lighting/direct_lighting/common.glsl"
 #include "/include/lighting/direct_lighting/pcss.glsl"
@@ -568,7 +570,16 @@ void main() {
         const float sss_depth = 0.0;
 #endif
 
-        // Diffuse lighting
+        // Diffuse lighting. Sky irradiance is directional H-basis
+        // evaluated at the bent normal, or the flat sky average with
+        // the toggle off. Intensity masters both paths.
+
+#ifdef H_BASIS_SKYLIGHT
+        vec3 sky_irradiance = H_BASIS_INTENSITY
+            * evaluate_h_basis_irradiance(h_sky, bent_normal);
+#else
+        vec3 sky_irradiance = H_BASIS_INTENSITY * ambient_color;
+#endif
 
         fragment_color = get_diffuse_lighting(
             material,
@@ -591,7 +602,8 @@ void main() {
             NoL,
             NoV,
             NoH,
-            LoV
+            LoV,
+            sky_irradiance
         );
 
 #ifdef ssptEnabled

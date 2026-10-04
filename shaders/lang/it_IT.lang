@@ -183,6 +183,12 @@ value.SHADER_AO.SHADER_AO_SSAO         = SSAO
 value.SHADER_AO.SHADER_AO_GTAO         = GTAO
 option.VANILLA_AO                      = AO Vanilla
 option.VANILLA_AO.comment              = Occlusione ambientale di Minecraft
+option.H_BASIS_SKYLIGHT                = H-Basis Skylight
+option.H_BASIS_SKYLIGHT.comment        = Directional sky ambient from a live H-basis projection of the sky map. Off falls back to the flat sky average.
+option.H_BASIS_INTENSITY               = Ambient Intensity
+option.H_BASIS_INTENSITY.comment       = Master brightness of directional sky ambient. Higher = brighter sky fill.
+option.H_BASIS_SKY_SAMPLES             = Projection Samples
+option.H_BASIS_SKY_SAMPLES.comment     = Sky directions sampled per frame for the H-basis projection. Higher = smoother, more accurate ambient at higher cost.
 option.SSAO_RADIUS                     = Raggio SSAO
 option.SSAO_STEPS                      = Qualità SSAO
 option.GTAO_RADIUS                     = Raggio GTAO
@@ -951,6 +957,7 @@ option.NOISE_ON_DH_TERRAIN.comment = Controls noise on dh terrain.
 
 # English fallback labels for UI completeness
 screen.direct_lighting = Direct Lighting
+screen.ambient_lighting = Ambient Lighting
 screen.framing_tool = Framing Tool
 screen.moon_phase_influence             = Moon Phase Influence
 screen.developer                       = Developer Options

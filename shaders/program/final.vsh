@@ -3,7 +3,7 @@
 
   Luster Shader by FourthEcho
 
-  program/program/final.glsl:
+  program/final.vsh:
   CAS, dithering, debug views
 
 --------------------------------------------------------------------------------

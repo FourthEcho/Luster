@@ -5,7 +5,7 @@
   Trace one frame of screen-space path traced emission + colored lighting
   (cosine-lobe emission + shadowed sun/moon and handheld bounce — see
    include/lighting/indirect_lighting/sspt.glsl). Sky ambient is NOT gathered here;
-  directional sky belongs to the SH skylight term.
+   directional sky belongs to the sky-map ambient term.
   Raw, noisy output — program/d5_sspt_accumulate and the SVGF filter passes
   (program/d6_sspt_filter, sizes 32/16/8/4/2) denoise it. Runs at half
   resolution in colortex17, with filter gbuffer side-data (view normal +

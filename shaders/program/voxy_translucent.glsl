@@ -308,7 +308,8 @@ void voxy_emitFragment(VoxyFragmentParameters parameters) {
         NoL,
         NoV,
         NoH,
-        LoV
+        LoV,
+        ambient_color
     );
     fragment_color.a = alpha;
 

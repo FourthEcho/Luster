@@ -487,7 +487,8 @@ void main() {
               NoL,
               NoV,
               NoH,
-              LoV
+              LoV,
+              ambient_color
           )
         * fragment_color.a;
 

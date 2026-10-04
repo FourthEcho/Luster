@@ -167,6 +167,17 @@ const float wetnessHalflife         = 70.0;
   #define GTAO_MULTIBOUNCE_INTENSITY 1.00 // Blends the surface-albedo-based GTAO multibounce approximation in/out (no longer a GUI slider)
 
 // -------
+//   Ambient lighting (H-basis directional sky)
+// -------
+
+// Directional sky ambient: projects the live sky map into H-basis
+// coefficients once per frame and evaluates them at the bent normal.
+// Off falls back to the flat sky average.
+  #define H_BASIS_SKYLIGHT
+  #define H_BASIS_INTENSITY 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.40 1.50 1.60 1.70 1.80 1.90 2.00]
+  #define H_BASIS_SKY_SAMPLES 64 // [16 32 48 64 96 128]
+
+// -------
 //   Sky
 // -------
 

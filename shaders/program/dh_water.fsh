@@ -283,7 +283,8 @@ void main() {
         NoL,
         NoV,
         NoH,
-        LoV
+        LoV,
+        ambient_color
     );
 
     // Apply fog

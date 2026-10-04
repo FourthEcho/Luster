@@ -5,7 +5,6 @@
 
   program/d2_clouds_upscaling:
   Temporal upscaling for clouds
-  Create combined depth buffer for LoD terrain
 
 --------------------------------------------------------------------------------
 */

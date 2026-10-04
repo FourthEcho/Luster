@@ -435,7 +435,7 @@ float brdfWeight(vec3 normal, vec3 incoming, vec3 outgoing) {
 //  and is tinted by the hit albedo inside hitDirectLight. Multibounce
 //  tints deeper hits with every intervening surface's albedo. Sky
 //  ambient is NOT gathered here (no sky-on-escape): directional sky
-//  belongs to the SH skylight term, so the two can never double-count.
+//  belongs to the sky-map ambient term, so the two can never double-count.
 
 vec3 traceIndirect(
     vec3 view_pos,

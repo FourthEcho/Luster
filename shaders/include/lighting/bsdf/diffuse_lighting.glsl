@@ -160,14 +160,15 @@ vec3 get_sky_lighting(
     vec2 light_levels,
     float ao,
     float ambient_sss,
-    float directional_lighting
+    float directional_lighting,
+    vec3 sky_irradiance
 ) {
     vec3 lighting = vec3(0.0);
 
 #if defined WORLD_NETHER
-    // Nether keeps the baked ambient_color term as its only ambient
+    // Nether keeps the caller-provided sky irradiance as its only ambient
     // contribution here.
-    vec3 skylight = ambient_color * ao * SSPT_INTENSITY;
+    vec3 skylight = sky_irradiance * ao * SSPT_INTENSITY;
     vec3 skylight_up = skylight;
 
     skylight = mix(skylight, 0.5 * skylight_up * ao, material.sss_amount);
@@ -178,14 +179,15 @@ vec3 get_sky_lighting(
 
     lighting += skylight * get_skylight_falloff(light_levels.y);
 #else
-    // Baked ambient_color skylight. Traced SSPT light carries bounce +
-    // emission only (never sky), so this flat base is its complement,
-    // never its double. SSPT_INTENSITY masters the whole lighting rig.
-    vec3 skylight_base = ambient_color * ao * SSPT_INTENSITY;
+    // Caller-provided sky irradiance (directional H-basis in deferred,
+    // flat sky average in forward paths). Traced SSPT light carries bounce
+    // + emission only (never sky), so this base is its complement, never
+    // its double. SSPT_INTENSITY masters the whole lighting rig.
+    vec3 skylight_base = sky_irradiance * ao * SSPT_INTENSITY;
     // SSS translucency wrap always references the live ambient, so leaves
     // keep their glow in every mode.
     vec3 skylight = skylight_base;
-    vec3 skylight_up = ambient_color * ao * SSPT_INTENSITY;
+    vec3 skylight_up = sky_irradiance * ao * SSPT_INTENSITY;
 
     skylight = mix(skylight, 0.5 * skylight_up * ao, material.sss_amount);
     skylight += ambient_sss * skylight_up * material.sss_amount * 2.0;
@@ -213,7 +215,8 @@ vec3 get_diffuse_lighting(
     float NoL,
     float NoV,
     float NoH,
-    float LoV
+    float LoV,
+    vec3 sky_irradiance
 ) {
 #if defined PROGRAM_GBUFFERS_WATER
     // Small optimization, don't calculate diffuse lighting when albedo is 0 (eg
@@ -333,7 +336,8 @@ vec3 get_diffuse_lighting(
         light_levels,
         indirect_ao,
         ambient_sss,
-        directional_lighting
+        directional_lighting,
+        sky_irradiance
     );
 
     // Blocklight

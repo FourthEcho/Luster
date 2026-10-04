@@ -15,6 +15,7 @@ out vec2 uv;
 
 flat out vec3 ambient_color;
 flat out vec3 light_color;
+flat out vec3 h_sky[6];
 
 #if defined WORLD_OVERWORLD
 flat out vec3 sun_color;
@@ -91,12 +92,18 @@ uniform float time_midnight;
 #include "/include/utility/bicubic.glsl"
 #include "/include/utility/random.glsl"
 #include "/include/utility/sampling.glsl"
+#include "/include/lighting/ambient/h_basis_skylight.glsl"
 
 void main() {
     uv = gl_MultiTexCoord0.xy;
 
     light_color = texelFetch(colortex4, ivec2(191, 0), 0).rgb;
+    // Flat average stays for sky/blocky-cloud consumers in this unit;
+    // diffuse skylight uses the directional H-basis instead.
     ambient_color = texelFetch(colortex4, ivec2(191, 1), 0).rgb;
+#ifdef H_BASIS_SKYLIGHT
+    project_sky_h_basis(h_sky);
+#endif
 
 #if defined WORLD_OVERWORLD
     Weather weather = get_weather();
