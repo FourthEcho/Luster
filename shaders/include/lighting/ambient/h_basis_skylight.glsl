@@ -2,38 +2,9 @@
 #define INCLUDE_LIGHTING_AMBIENT_H_BASIS_SKYLIGHT
 
 // H-basis directional sky ambient.
-//
-// The flat sky average answers "how bright is the sky" but not "from
-// where", so walls, floors and ceilings under open sky all receive the
-// same tint. This projects the live sky map once per frame into six RGB
-// H-basis coefficients (the rotation-symmetric subset of second-order
-// spherical harmonics: constant, linear xyz, and the two quadratic
-// vertical/azimuthal lobes), and reconstructs cosine-weighted hemisphere
-// irradiance around any normal in closed form. The cross terms (xy, xz,
-// yz) are dropped deliberately: skylight is dominated by the vertical
-// gradient (zenith blue vs horizon warmth vs ground bounce), which the
-// kept lobes capture, while the dropped terms mostly fit noise.
-//
-// Projection runs in a fullscreen-triangle vertex shader (a few hundred
-// taps per frame total), evaluation is ~15 ALU per fragment with no
-// textures, so this stays always on with no quality toggle. Sample
-// positions are deterministic: the coefficients feed lighting directly
-// with no temporal accumulation, so per-frame jitter would read as
-// flickering illumination.
-//
-// Math follows Habel et al., "Efficient Irradiance Normal Mapping"
-// (2008): E(n) = pi*h0 + (2pi/3)*sum(hi*ni) + (pi/8)*h4*(3ny^2-1)
-//              + (pi/8)*h5*(nx^2-nz^2), y-up.
 
 #include "/include/sky/projection.glsl"
 
-// Sample count comes from settings (H_BASIS_SKY_SAMPLES slider):
-// projection cost is verts * N, so fullscreen passes pay ~3*N taps
-// per frame.
-
-// Projects the live sky map into 6 RGB coefficients. Call once per frame
-// from a fullscreen vertex stage; pass the result flat to the fragment
-// stage. Requires colortex4 (sky map) readable in the calling stage.
 void project_sky_h_basis(out vec3 h[6]) {
     for (int i = 0; i < 6; ++i) {
         h[i] = vec3(0.0);
@@ -69,10 +40,6 @@ void project_sky_h_basis(out vec3 h[6]) {
     }
 }
 
-// Cosine-weighted hemisphere irradiance around normal. Evaluate at the
-// bent normal wherever one is available: in occluded areas it already
-// points away from blockers, so the result is the average visible sky
-// rather than the geometric normal staring at a wall.
 vec3 evaluate_h_basis_irradiance(vec3 h[6], vec3 normal) {
     vec3 n = normalize(normal);
 
