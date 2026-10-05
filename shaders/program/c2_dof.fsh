@@ -117,10 +117,6 @@ void main() {
     // coc is a fraction of screen height: for circular bokeh in UV space
     // the horizontal radius must be divided by the aspect ratio
     CoC = coc * vec2(rcp(aspectRatio), 1.0);
-#ifdef BLOOM_ANAMORPHIC
-    // Anamorphic squeeze: horizontal CoC stretch for oval bokeh
-    CoC.x *= BLOOM_ANAMORPHIC_STRETCH;
-#endif
 
     scene_color = vec3(0.0);
 
