@@ -937,7 +937,7 @@ const float wetnessHalflife         = 70.0;
 // raindrop impacts. Disabled underground/under overhangs via skylight.
 // Off by default since it adds a texture-noise sample per water texel. ----
   #define RAIN_RIPPLES
-  #define RAIN_RIPPLE_STRENGTH 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.20 1.50 2.00]
+  #define RAIN_RIPPLE_STRENGTH 2.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.20 1.50 2.00]
 
 // ---- Rain puddles intensity (on/off is the RAIN_PUDDLES toggle above,
 // next to POROSITY_MODE) ----
