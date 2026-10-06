@@ -23,14 +23,41 @@ Atmosphere · lighting · clouds · water · image quality — built with Iris a
 
 ## Features
 
-- **Lighting** — sun/moon/block/Nether/End lighting, Screen Space Path Tracing, multiple shadow paths (PCF + screen-space), SSAO/GTAO
-- **Sky & atmosphere** — dynamic Rayleigh/Mie scattering/Ozone/Mist, biome and weather-aware color, aurora, stars, galaxy, rainbows, god rays, and advanced Mist shading.
-- **Clouds** — Cumulus, AltoCumulus, Cumulus Congestus, Cirrus/Cirrocumulus, noctilucent, and optional blocky clouds, independently tunable per layer, with up to 16× temporal upscaling
-- **Water & materials** — physically-inspired absorption/scattering, procedural waves, parallax, caustics, Snell's window, biome-colored water, rain puddles, POM, subsurface scattering, full labPBR support
-- **Reflections** — environment, sky, and screen-space reflections, roughness-aware, tuned separately for water and other materials
-- **Fog & volumetrics** — full atmospheric fog per biome, colored volumetric light shafts, cave/border fog, dedicated Nether and End fog paths
-- **Post-processing** — TAA/FXAA/CAS, TAAU, Purkinje shift, ACES and AGX tonemapping, full color grading
-- **Camera** - bloom, DOF, motion blur, vignette, multiple exposure modes, lens flare
+* Dynamic Rayleigh, Mie, ozone, and mist-based atmosphere
+* Biome- and weather-aware sky colors
+* Aurora, stars, galaxy, rainbows, god rays, and advanced mist shading
+* Multiple detailed volumetric cloud types including Cumulus, AltoCumulus, Cumulus Congestus, Cirrus, Cirrocumulus, and noctilucent clouds
+* Independently configurable cloud layers with temporal upscaling
+* Sun, moon, block, Nether, and End lighting
+* Screen Space Path Tracing
+* Directional Ambient Lighting
+* Multiple shadow rendering paths including PCF and screen-space shadows
+* Detailed ambient occlusion(GTAO)
+* Physically-inspired water absorption and scattering
+* Procedural water waves and biome-colored water
+* Parallax mapping and POM
+* Water caustics and Snell's window
+* Rain puddles and subsurface scattering
+* Full labPBR material support
+* Environment, sky, and screen-space reflections
+* Roughness-aware reflections for water and other materials
+* Full atmospheric fog with biome-aware rendering
+* Colored volumetric light shafts
+* Cave, border, Nether, and End fog
+* TAA, FXAA, and CAS
+* Temporal upscaling with TAAU
+* Purkinje shift
+* ACES and AGX tonemapping
+* Full color grading controls
+* Bloom
+* Depth of field
+* Motion blur
+* Vignette
+* Multiple exposure modes
+* Lens flare
+* Extensive in-game configuration through Iris' shader settings
+* Low, Medium, High, Ultra profiles
+* Distant Horizons and Voxy compatibility
 
 Not every feature is enabled on every profile — the in-game settings menu is the source of truth for what's available on your hardware and shader loader.
 
@@ -72,14 +99,6 @@ Luster is actively developed. The source tree is organized into reusable modules
 ## Acknowledgements
 
 Luster is built on substantially reworked code from [Photon](https://github.com/sixthsurge/photon) by SixthSurge. Original Photon credits and licenses are retained in the project.
-
-- Menu translations: **NakiriRuri** & **OrzMiku** (Chinese, Simplified) · **ChunghwaMC** (Chinese, Traditional) · **Jmayk** (Italian) · **Timtaran** (Russian) · **shihyeon** (Korean) · **DVRKHz** (Spanish) · **Patatagod69** (Dutch) · **sincerity** (Estonian)
-- **Emin** — shadow bias method from Complementary Reimagined
-- **DrDesten** — depth tolerance calculation for SSR
-- **Jessie** — f0/f82 values for labPBR hardcoded metals
-- **Sledgehammer Games** — bloom downsampling technique from *Call of Duty: Advanced Warfare*
-- [momentsingraphics.de](https://momentsingraphics.de/) — blue noise texture
-- **NASA Scientific Visualization Studio** — galaxy image
 
 See the included `LICENSE` files for full attribution and licensing terms.
 
