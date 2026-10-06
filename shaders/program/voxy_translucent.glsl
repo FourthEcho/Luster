@@ -177,8 +177,12 @@ void voxy_emitFragment(VoxyFragmentParameters parameters) {
 
     // Discard if vanilla opaque geometry is in front of this fragment, so
     // Voxy translucent doesn't paint over vanilla entities/glints in
-    // colortex13.
-    if (texelFetch(depthtex1, ivec2(gl_FragCoord.xy), 0).x < 1.0) {
+    // colortex13. Compares against this fragment's own depth: opaque
+    // behind the fragment (lakebed under water) must keep rendering.
+    float vanilla_opaque_depth
+        = texelFetch(depthtex1, ivec2(gl_FragCoord.xy), 0).x;
+    if (vanilla_opaque_depth < gl_FragCoord.z
+        && vanilla_opaque_depth < 1.0) {
         discard;
     }
 
