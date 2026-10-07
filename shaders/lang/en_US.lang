@@ -1256,6 +1256,7 @@ option.MOON_PHASE_REFLECTIONS_SATURATION.comment = Adjusts how strongly the moon
 
 
 screen.sspt_filter=SVGF Filter
+screen.sspt_quality=SSPT Quality
 
 # ---- SSPT ----
 option.ssptEnabled=SSPT

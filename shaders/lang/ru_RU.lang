@@ -1371,6 +1371,7 @@ value.tonemap_right.tonemap_agx_punchy       = AGX Punchy
 value.tonemap_right.tonemap_agx_golden       = AGX Golden
 screen.indirect_lighting=Indirect Lighting
 screen.sspt_filter=SVGF Filter
+screen.sspt_quality=SSPT Quality
 option.ssptEnabled=SSPT
 option.ssptEnabled.comment=Screen-space path traced emission and colored lighting. Big performance impact.
 option.ssptFullRangeRT=Long Range SSPT
