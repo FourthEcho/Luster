@@ -101,6 +101,10 @@ uniform sampler2D colortex11; // clouds history
 uniform sampler2D colortex12; // clouds data
 uniform sampler2D colortex13; // rendered translucent layer
 
+#ifdef ssptEnabled
+uniform sampler2D colortex17; // filtered SSPT emission + bounce (fog tint)
+#endif
+
 #ifdef DISTANT_HORIZONS
 // colortex1 gbuffer fetch for the DH water path below.
 uniform sampler2D colortex1;
@@ -557,7 +561,7 @@ vec3 apply_refraction(
         refracted_uv_out = refracted_uv;
 
         vec2 dispersion = clamp(normal_tangent, -0.2, 0.2) * 5.0
-            * (0.035 * refractionDispersionIntensity);
+            * (0.035 * dispersionIntensity);
 
         vec2 uv_r = reject_if_in_front(uv + (normal_tangent + dispersion) * amount, uv, front_depth);
         vec2 uv_b = reject_if_in_front(uv + (normal_tangent - dispersion) * amount, uv, front_depth);
@@ -1078,6 +1082,19 @@ vec4 draw_distant_water(
 #endif
 #include "/lib/sky/projection.glsl"
 
+#ifdef ssptEnabled
+// SSPT-colored fog: the filtered SSPT buffer (emission + bounced light,
+// already denoised) is the local light field, so fog near emissives or
+// bounce-heavy corners picks up their color. Scaled by the scattered
+// fraction (1 - transmittance), which is ~0 for sky/clear rays, so those
+// are untouched. No-op when SSPT is off (whole block compiled out).
+vec3 sspt_fog_tint(vec2 uv, vec3 transmittance) {
+    vec3 sspt = max0(texture(colortex17, uv).rgb);
+    float scatter = 1.0 - clamp01(dot(transmittance, luminance_weights));
+    return sspt * (scatter * 0.5);
+}
+#endif
+
 vec3 blend_layers_with_fog(
     vec3 background_color,
     vec4 translucent_color,
@@ -1124,6 +1141,9 @@ vec3 blend_layers_with_fog(
         analytic_fog[0] *= get_cloud_shadows(colortex8, mid_scene);
 
         background_color = background_color * analytic_fog[1] + analytic_fog[0];
+#ifdef ssptEnabled
+        background_color += sspt_fog_tint(uv, analytic_fog[1]);
+#endif
     }
 #endif
 
@@ -1372,6 +1392,9 @@ void main() {
     // Volumetric fog
 
     fragment_color = fragment_color * fog_transmittance + fog_scattering;
+#ifdef ssptEnabled
+    fragment_color += sspt_fog_tint(uv, fog_transmittance);
+#endif
 
 #ifdef bloomyFog
     bloomy_fog
@@ -1399,6 +1422,9 @@ void main() {
 
         fragment_color *= analytic_fog[1];
         fragment_color += analytic_fog[0];
+#ifdef ssptEnabled
+        fragment_color += sspt_fog_tint(uv, analytic_fog[1]);
+#endif
 
 #ifdef bloomyFog
         bloomy_fog = sqrt(clamp01(dot(analytic_fog[1], vec3(0.33))));
@@ -1426,6 +1452,9 @@ void main() {
 
         fragment_color *= analytic_fog[1];
         fragment_color += analytic_fog[0];
+#ifdef ssptEnabled
+        fragment_color += sspt_fog_tint(uv, analytic_fog[1]);
+#endif
 
 #ifdef bloomyFog
         // NOTE: fog_transmittance only exists under vl above; use the

@@ -1181,8 +1181,8 @@ option.mieColorG                        = §a▍ §fGreen — Mie
 option.mieColorG.comment                = Green tint of Mie scattering (sky haze and air fog). 1.00 is the physical value.
 option.mieColorB                        = §9▍ §fBlue — Mie
 option.mieColorB.comment                = Blue tint of Mie scattering (sky haze and air fog). 1.00 is the physical value; raising it cools the haze.
-option.refractionDispersionIntensity         = Refraction Dispersion Intensity
-option.refractionDispersionIntensity.comment = Adds chromatic dispersion (RGB fringing) to refracted water/glass, like light splitting through a prism
+option.dispersionIntensity         = Dispersion Intensity
+option.dispersionIntensity.comment = Adds chromatic dispersion (RGB fringing) to refracted water/glass, like light splitting through a prism
 option.rainRipples.comment            = Expanding raindrop ripple rings on still, sky-exposed water. Costs one texture sample per water texel.
 option.rainRippleStrength.comment    = Adjusts how strongly rain ripples distort the water surface normal. Higher = more pronounced, choppier ripples.
 option.chromaticDispersion            = Chromatic Dispersion

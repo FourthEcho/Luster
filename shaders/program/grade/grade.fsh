@@ -640,7 +640,10 @@ void main() {
 
 #ifdef bloom
     vec3 bloomColor = get_bloom();
-    float bloom_intensity = 0.12 * bloomIntensity;
+    // Bloom rides the exposure: hot dark-scene gain no longer blows it
+    // out, bright scenes keep full bloom. No-op at exposure <= 1.
+    float bloom_intensity = 0.12 * bloomIntensity
+        / mix(max(exposure, 1.0), 1.0, 0.31);
 
     // Additive bloomColor: lerping towards bloomColor would dim the base image
     scene_color += bloomColor * bloom_intensity;

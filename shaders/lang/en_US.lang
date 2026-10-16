@@ -783,8 +783,8 @@ value.refraction.refractionAll        = Everything
 value.refraction.refractionWaterOnly = Water Only
 option.refractionIntensity            = Refraction Intensity
 option.refractionIntensity.comment    = Adjusts the intensity of refractions on water
-option.refractionDispersionIntensity         = Refraction Dispersion Intensity
-option.refractionDispersionIntensity.comment = Adds chromatic dispersion (RGB fringing) to refracted water/glass, like light splitting through a prism
+option.dispersionIntensity         = Dispersion Intensity
+option.dispersionIntensity.comment = Adds chromatic dispersion (RGB fringing) to refracted water/glass, like light splitting through a prism
 
 suffix.pomDepth                       = m
 suffix.pomDistance                    = m

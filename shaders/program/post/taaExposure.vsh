@@ -226,7 +226,16 @@ void main() {
 
     float luminance = get_metered_luminance(pdf);
 
-    float target_exposure = get_exposure_from_luminance(luminance);
+    // Sigmoid highlight rolloff into the rails: linear cal/lum through
+    // the mid-tones with a soft knee at both ends instead of a hard
+    // clamp snap. Bounds come from our EV Min/Max histogram rails, so
+    // the sliders stay the single source of truth for calibration.
+    float min_allowed_exposure = calibration / max_luminance;
+    float max_allowed_exposure = calibration / min_luminance;
+    float sigmoid_a = max_luminance;
+    float sigmoid_b = max(max_luminance - min_luminance, 1e-6);
+    float target_exposure = calibration
+        / (sigmoid_a - sigmoid_b * exp(-luminance / sigmoid_b));
 
 
     bool previous_bad = isnan(previous_exposure) || isinf(previous_exposure)
@@ -241,6 +250,14 @@ void main() {
     if (previous_bad) {
         previous_exposure = target_exposure;
     }
+
+    // Hard rails from the EV Min/Max sliders: neither a spike frame nor
+    // a stale history texel can push exposure outside calibration.
+    // Ordered defensively since the sliders can be set inverted.
+    float rail_lo = min(min_allowed_exposure, max_allowed_exposure);
+    float rail_hi = max(min_allowed_exposure, max_allowed_exposure);
+    target_exposure = clamp(target_exposure, rail_lo, rail_hi);
+    previous_exposure = clamp(previous_exposure, rail_lo, rail_hi);
 
     float adjustment_rate = target_exposure < previous_exposure
         ? autoExposureRateDimToBright

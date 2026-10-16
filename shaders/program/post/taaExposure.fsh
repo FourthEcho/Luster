@@ -245,12 +245,11 @@ vec3 neighborhood_clipping(
 
 #endif // INCLUDE_POST_TAA
 
-/*
-(needed by vertex stage for auto exposure)
+// Mip chain on the scene color, needed by the vertex stage auto-exposure
+// histogram below (it taps colortex0 with textureLod).
 #ifdef autoExposure
 const bool colortex0MipmapEnabled = true;
 #endif
- */
 
 #if defined(autoExposure) \
     && debugView == debugViewHistogram
