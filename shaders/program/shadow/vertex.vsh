@@ -1,0 +1,155 @@
+/*
+====================================================================================================
+
+    Copyright (C) 2026 FourthEcho
+
+    All Rights Reserved unless otherwise explicitly stated.
+
+
+    By downloading this you have agreed to the license and terms of use.
+    These can be found inside the included license-file.
+
+    Violating these terms may be penalized with actions according to the Digital Millennium
+    Copyright Act (DMCA), the Information Society Directive and/or similar laws
+    depending on your country.
+
+====================================================================================================
+*/
+
+#include "/lib/global.glsl"
+
+out vec2 uv;
+
+flat out uint material_mask;
+flat out vec3 tint;
+
+#ifdef waterCaustics
+out vec3 scene_pos;
+#endif
+
+
+#if defined pom && defined pomDepthWrite && !defined COLORWHEEL && (defined PROGRAM_SHADOW_SOLID || defined PROGRAM_SHADOW_CUTOUT)
+out vec2 atlas_tile_coord;
+out float pom_view_distance;
+flat out vec2 atlas_tile_offset;
+flat out vec2 atlas_tile_scale;
+flat out mat3 tbn;
+#endif
+
+// --------------
+//   Attributes
+// --------------
+
+attribute vec3 at_midBlock;
+attribute vec4 at_tangent;
+attribute vec3 mc_Entity;
+attribute vec2 mc_midTexCoord;
+
+// ------------
+//   Uniforms
+// ------------
+
+uniform sampler2D tex;
+uniform sampler2D noisetex;
+
+uniform mat4 gbufferModelView;
+uniform mat4 gbufferModelViewInverse;
+uniform mat4 gbufferProjection;
+uniform mat4 gbufferProjectionInverse;
+
+uniform mat4 shadowModelView;
+uniform mat4 shadowModelViewInverse;
+
+uniform vec3 cameraPosition;
+
+uniform float near;
+uniform float far;
+
+uniform float frameTimeCounter;
+uniform float rainStrength;
+uniform float wetness;
+
+uniform vec2 taa_offset;
+uniform vec3 light_dir;
+
+uniform float world_age;
+uniform float time_sunrise;
+uniform float time_noon;
+uniform float time_sunset;
+uniform float time_midnight;
+uniform float biome_temperature;
+uniform float biome_humidity;
+
+// ------------
+//   Includes
+// ------------
+
+#include "/lib/light/distortion.glsl"
+#include "/lib/vertex/displacement.glsl"
+
+void main() {
+    uv = gl_MultiTexCoord0.xy;
+    material_mask = uint(mc_Entity.x - 10000.0);
+    tint = gl_Color.rgb;
+
+#if defined WORLD_NETHER
+    // No shadows, discard vertices now
+#ifdef waterCaustics
+    scene_pos = vec3(0.0);
+#endif
+    gl_Position = vec4(-1.0);
+    return;
+#endif
+
+    bool is_top_vertex = uv.y < mc_midTexCoord.y;
+
+    vec3 pos = transform(gl_ModelViewMatrix, gl_Vertex.xyz);
+
+#if !defined PROGRAM_SHADOW_ENTITIES
+    // Animations
+    pos = transform(shadowModelViewInverse, pos);
+    pos = pos + cameraPosition;
+    pos = animate_vertex(
+        pos,
+        is_top_vertex,
+        clamp01(rcp(240.0) * gl_MultiTexCoord1.y),
+        material_mask
+    );
+    pos = pos - cameraPosition;
+
+#ifdef waterCaustics
+    scene_pos = pos;
+#endif
+
+#if defined pom && defined pomDepthWrite && !defined COLORWHEEL && (defined PROGRAM_SHADOW_SOLID || defined PROGRAM_SHADOW_CUTOUT)
+    // Same tile / TBN construction as gbuffers_all_solid.vsh, but with the
+    // shadow view matrices, so the tangent frame matches the gbuffer's.
+    {
+        vec2 uv_minus_mid = uv - mc_midTexCoord;
+        atlas_tile_offset = min(uv, mc_midTexCoord - uv_minus_mid);
+        atlas_tile_scale = abs(uv_minus_mid) * 2.0;
+        atlas_tile_coord = sign(uv_minus_mid) * 0.5 + 0.5;
+
+        mat3 pom_tbn;
+        pom_tbn[0] = mat3(shadowModelViewInverse)
+            * normalize(gl_NormalMatrix * at_tangent.xyz);
+        pom_tbn[2] = mat3(shadowModelViewInverse)
+            * normalize(gl_NormalMatrix * gl_Normal);
+        pom_tbn[1] = cross(pom_tbn[0], pom_tbn[2]) * sign(at_tangent.w);
+        tbn = pom_tbn;
+
+        // Camera-relative distance: drives the same pom distance fade as
+        // the gbuffer pass so shadow and depth displacement agree.
+        pom_view_distance = length(pos);
+    }
+#endif
+
+    pos = transform(shadowModelView, pos);
+    ;
+#endif
+
+    vec3 shadow_clip_pos = project_ortho(gl_ProjectionMatrix, pos);
+    shadow_clip_pos = distort_shadow_space(shadow_clip_pos);
+
+    gl_Position = vec4(shadow_clip_pos, 1.0);
+}
