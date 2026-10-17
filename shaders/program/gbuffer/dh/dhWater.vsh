@@ -18,18 +18,18 @@
 
 #include "/lib/global.glsl"
 
-out vec2 light_levels;
-out vec3 scene_pos;
+out vec2 lightLevels;
+out vec3 scenePos;
 out vec3 normal;
 out vec4 tint;
 
-flat out uint is_water;
-flat out vec3 light_color;
-flat out vec3 ambient_color;
+flat out uint isWater;
+flat out vec3 lightColor;
+flat out vec3 ambientColor;
 
 #if defined WORLD_OVERWORLD
-#include "/lib/fog/overworld/parameters.glsl"
-flat out OverworldFogParameters fog_params;
+#include "/lib/atmos/fog/overworld/parameters.glsl"
+flat out OverworldFogParameters fogParams;
 #endif
 
 // ------------
@@ -62,40 +62,40 @@ uniform float sunAngle;
 uniform float rainStrength;
 uniform float wetness;
 
-uniform vec2 view_res;
-uniform vec2 view_pixel_size;
-uniform vec2 taa_offset;
+uniform vec2 viewRes;
+uniform vec2 viewPixelSize;
+uniform vec2 taaOffset;
 
-uniform vec3 light_dir;
-uniform vec3 sun_dir;
+uniform vec3 lightDir;
+uniform vec3 sunDir;
 
-uniform float eye_skylight;
+uniform float eyeSkylight;
 
-uniform float biome_temperate;
-uniform float biome_arid;
-uniform float biome_snowy;
-uniform float biome_taiga;
-uniform float biome_jungle;
-uniform float biome_swamp;
-uniform float biome_may_rain;
-uniform float biome_may_snow;
-uniform float biome_temperature;
-uniform float biome_humidity;
+uniform float biomeTemperate;
+uniform float biomeArid;
+uniform float biomeSnowy;
+uniform float biomeTaiga;
+uniform float biomeJungle;
+uniform float biomeSwamp;
+uniform float biomeMayRain;
+uniform float biomeMaySnow;
+uniform float biomeTemperature;
+uniform float biomeHumidity;
 
-uniform float world_age;
-uniform float time_sunrise;
-uniform float time_noon;
-uniform float time_sunset;
-uniform float time_midnight;
+uniform float worldAge;
+uniform float timeSunrise;
+uniform float timeNoon;
+uniform float timeSunset;
+uniform float timeMidnight;
 
-uniform float desert_sandstorm;
+uniform float desertSandstormWeather;
 
 #if defined WORLD_OVERWORLD
 #include "/lib/weather/fog.glsl"
 #endif
 
 void main() {
-    light_levels = linear_step(
+    lightLevels = linearStep(
         vec2(1.0 / 32.0),
         vec2(31.0 / 32.0),
         (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy
@@ -104,35 +104,35 @@ void main() {
     normal = mat3(gbufferModelViewInverse)
         * (mat3(gl_ModelViewMatrix) * gl_Normal);
 
-    light_color = texelFetch(colortex4, ivec2(191, 0), 0).rgb;
+    lightColor = texelFetch(colortex4, ivec2(191, 0), 0).rgb;
     // Use the baked sky ambient published to colortex4(191, 1), the same
     // term the rest of the forward-shaded world uses.
-    ambient_color = texelFetch(colortex4, ivec2(191, 1), 0).rgb
-        * clamp01(light_levels.y);
+    ambientColor = texelFetch(colortex4, ivec2(191, 1), 0).rgb
+        * clamp01(lightLevels.y);
 
-    is_water = uint(dhMaterialId == DH_BLOCK_WATER);
+    isWater = uint(dhMaterialId == DH_BLOCK_WATER);
 
-    vec3 camera_offset = fract(cameraPosition);
+    vec3 cameraOffset = fract(cameraPosition);
 
     vec3 pos = gl_Vertex.xyz;
-    pos = floor(pos + camera_offset + 0.5) - camera_offset;
+    pos = floor(pos + cameraOffset + 0.5) - cameraOffset;
     pos = transform(gl_ModelViewMatrix, pos);
 
-    scene_pos = transform(gbufferModelViewInverse, pos);
+    scenePos = transform(gbufferModelViewInverse, pos);
 
-    vec4 clip_pos = dhProjection * vec4(pos, 1.0);
+    vec4 clipPos = dhProjection * vec4(pos, 1.0);
 
 #if defined taa && defined taau
-    clip_pos.xy = clip_pos.xy * taau_render_scale
-        + clip_pos.w * (taau_render_scale - 1.0);
-    clip_pos.xy += taa_offset * clip_pos.w;
+    clipPos.xy = clipPos.xy * taauViewportScale
+        + clipPos.w * (taauViewportScale - 1.0);
+    clipPos.xy += taaOffset * clipPos.w;
 #elif defined taa
-    clip_pos.xy += taa_offset * clip_pos.w * 0.66;
+    clipPos.xy += taaOffset * clipPos.w * 0.66;
 #endif
 
 #if defined WORLD_OVERWORLD
-    fog_params = get_fog_parameters(get_weather());
+    fogParams = getFogParameters(getWeather());
 #endif
 
-    gl_Position = clip_pos;
+    gl_Position = clipPos;
 }

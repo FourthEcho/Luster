@@ -22,8 +22,8 @@
 #include "/lib/util/color.glsl"
 #include "/lib/util/fastMath.glsl"
 
-mat3 get_chromatic_adaptation_matrix(vec3 src_xyz, vec3 dst_xyz) {
-    const mat3 bradford_cone_response = mat3(
+mat3 getChromaticAdaptationMatrix(vec3 srcXyz, vec3 dstXyz) {
+    const mat3 bradfordConeResponse = mat3(
         0.89510,
         -0.75020,
         0.03890,
@@ -35,11 +35,11 @@ mat3 get_chromatic_adaptation_matrix(vec3 src_xyz, vec3 dst_xyz) {
         1.02960
     );
 
-    vec3 src_lms = src_xyz * bradford_cone_response;
-    vec3 dst_lms = dst_xyz * bradford_cone_response;
-    vec3 quotient = dst_lms / src_lms;
+    vec3 srcLms = srcXyz * bradfordConeResponse;
+    vec3 dstLms = dstXyz * bradfordConeResponse;
+    vec3 quotient = dstLms / srcLms;
 
-    mat3 von_kries = mat3(
+    mat3 vonKries = mat3(
         quotient.x,
         0.0,
         0.0,
@@ -51,14 +51,14 @@ mat3 get_chromatic_adaptation_matrix(vec3 src_xyz, vec3 dst_xyz) {
         quotient.z
     );
 
-    return (bradford_cone_response * von_kries)
-        * inverse(bradford_cone_response); // please invert at compile time
+    return (bradfordConeResponse * vonKries)
+        * inverse(bradfordConeResponse); // please invert at compile time
 }
 
 float log10(float x) { return log(x) * rcp(log(10.0)); }
 
-vec3 y_to_lin_c_v(vec3 y, float y_max, float y_min) {
-    return (y - y_min) / (y_max - y_min);
+vec3 yToLinCV(vec3 y, float yMax, float yMin) {
+    return (y - yMin) / (yMax - yMin);
 }
 
 // Transformations between CIE XYZ tristimulus values and CIE x,y chromaticity
@@ -69,23 +69,23 @@ vec3 XYZ_to_xy_y(vec3 XYZ) {
     return vec3(XYZ.x * mul, XYZ.y * mul, XYZ.y);
 }
 
-vec3 xy_y_to_XYZ(vec3 xy_y) {
-    float mul = xy_y.z / max(xy_y.y, 1e-10);
+vec3 xy_y_to_XYZ(vec3 xyY) {
+    float mul = xyY.z / max(xyY.y, 1e-10);
 
-    return vec3(xy_y.x * mul, xy_y.z, (1.0 - xy_y.x - xy_y.y) * mul);
+    return vec3(xyY.x * mul, xyY.z, (1.0 - xyY.x - xyY.y) * mul);
 }
 
 // Transformations from RGB to other color representations
 
-float rgb_to_saturation(vec3 rgb) {
-    float max_component = max(max_of(rgb), 1e-10);
-    float min_component = max(min_of(rgb), 1e-10);
+float rgbToSaturation(vec3 rgb) {
+    float maxComponent = max(maxOf(rgb), 1e-10);
+    float minComponent = max(minOf(rgb), 1e-10);
 
-    return (max_component - min_component) / max_component;
+    return (maxComponent - minComponent) / maxComponent;
 }
 
 
-float rgb_to_hue(vec3 rgb) {
+float rgbToHue(vec3 rgb) {
     if (rgb.r == rgb.g && rgb.g == rgb.b) {
         return float(0.0);
     }
@@ -102,15 +102,15 @@ float rgb_to_hue(vec3 rgb) {
 
 // Converts RGB to a luminance proxy, here called YC
 // YC is ~ Y + K * Chroma
-float rgb_to_yc(vec3 rgb) {
-    const float yc_radius_weight = 1.75;
+float rgbToYc(vec3 rgb) {
+    const float ycRadiusWeight = 1.75;
 
     float chroma = sqrt(
         rgb.b * (rgb.b - rgb.g) + rgb.g * (rgb.g - rgb.r)
         + rgb.r * (rgb.r - rgb.b)
     );
 
-    return rcp(3.0) * (rgb.r + rgb.g + rgb.b + yc_radius_weight * chroma);
+    return rcp(3.0) * (rgb.r + rgb.g + rgb.b + ycRadiusWeight * chroma);
 }
 
 #endif // INCLUDE_ACES_UTILITY

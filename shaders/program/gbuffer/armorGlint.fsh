@@ -18,7 +18,7 @@
 
 #include "/lib/global.glsl"
 
-layout(location = 0) out vec4 frag_color;
+layout(location = 0) out vec4 fragColor;
 
 #if MC_VERSION > 12111
 /* RENDERTARGETS: 13 */
@@ -34,23 +34,23 @@ in vec2 uv;
 
 uniform sampler2D gtexture;
 
-uniform vec2 taa_offset;
-uniform vec2 view_pixel_size;
+uniform vec2 taaOffset;
+uniform vec2 viewPixelSize;
 
-const float lod_bias = log2(taau_render_scale);
+const float lodBias = log2(taauViewportScale);
 
 #include "/lib/util/color.glsl"
 
 void main() {
 #if defined taa && defined taau
-    vec2 coord = gl_FragCoord.xy * view_pixel_size * rcp(taau_render_scale);
+    vec2 coord = gl_FragCoord.xy * viewPixelSize * rcp(taauViewportScale);
     if (clamp01(coord) != coord) {
         discard;
     }
 #endif
 
 #if defined COLORWHEEL
-	vec4 color = texture(gtexture, uv, lod_bias);
+	vec4 color = texture(gtexture, uv, lodBias);
 	vec2 lmcoord;
 	float ao;
 	vec4 overlayColor;
@@ -58,12 +58,12 @@ void main() {
 	clrwl_computeFragment(color, color, lmcoord, ao, overlayColor);
 	color.rgb = mix(color.rgb, overlayColor.rgb, overlayColor.a);
 
-	vec3 armor_glint = color.rgb;
+	vec3 armorGlint = color.rgb;
 #else
-    vec3 armor_glint = texture(gtexture, uv, lod_bias).rgb;
+    vec3 armorGlint = texture(gtexture, uv, lodBias).rgb;
 #endif
 
-frag_color.rgb = (srgb_eotf_inv(armor_glint) * rec709_to_working_color)
+fragColor.rgb = (srgbEotfInv(armorGlint) * rec709ToWorkingColor)
     * 1.00;
-frag_color.a = 0.0;
+fragColor.a = 0.0;
 }

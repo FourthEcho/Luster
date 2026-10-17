@@ -20,7 +20,7 @@
 
 layout(
     location = 0
-) out vec4 gbuffer_data_0; // albedo, block ID, flat normal, light levels
+) out vec4 gbufferData0; // albedo, block ID, flat normal, light levels
 
 /* RENDERTARGETS: 1 */
 
@@ -32,14 +32,14 @@ layout(
 /* RENDERTARGETS: 1,2 */
 #endif
 
-in vec2 light_levels;
-in vec3 scene_pos;
+in vec2 lightLevels;
+in vec3 scenePos;
 in vec3 normal;
 in vec3 color;
 
-flat in uint material_mask;
+flat in uint materialMask;
 
-uniform vec2 view_pixel_size;
+uniform vec2 viewPixelSize;
 uniform int frameCounter;
 
 #include "/lib/util/dithering.glsl"
@@ -54,7 +54,7 @@ uniform sampler2D noisetex;
 uniform vec3 cameraPosition;
 uniform float far;
 
-mat3 get_tbn_matrix(vec3 normal) {
+mat3 getTbnMatrix(vec3 normal) {
     vec3 tangent = normal.y == 1.0
         ? vec3(1.0, 0.0, 0.0)
         : normalize(cross(vec3(0.0, 1.0, 0.0), normal));
@@ -66,7 +66,7 @@ void main() {
     // Clip to taau viewport
 
 #if defined taa && defined taau
-    vec2 coord = gl_FragCoord.xy * view_pixel_size * rcp(taau_render_scale);
+    vec2 coord = gl_FragCoord.xy * viewPixelSize * rcp(taauViewportScale);
     if (clamp01(coord) != coord) {
         discard;
     }
@@ -74,16 +74,16 @@ void main() {
 
     // Overdraw fade
 
-    float dh_fade_start_distance
+    float dhFadeStartDistance
         = max0(far - dhOverdrawDistance - dhOverdrawFadeLength);
-    float dh_fade_end_distance = max0(far - dhOverdrawDistance);
-    float view_distance = length(scene_pos);
+    float dhFadeEndDistance = max0(far - dhOverdrawDistance);
+    float viewDistance = length(scenePos);
 
-    float dither = interleaved_gradient_noise(gl_FragCoord.xy, frameCounter);
+    float dither = interleavedGradientNoise(gl_FragCoord.xy, frameCounter);
     float fade = smoothstep(
-        dh_fade_start_distance,
-        dh_fade_end_distance,
-        view_distance
+        dhFadeStartDistance,
+        dhFadeEndDistance,
+        viewDistance
     );
 
     if (dither > fade) {
@@ -92,21 +92,21 @@ void main() {
     }
 
 #ifdef noiseOnDhTerrain
-    mat3 tbn = get_tbn_matrix(normal);
-    vec3 world_pos = scene_pos + cameraPosition;
-    vec2 noise_pos = (world_pos * tbn).xy;
+    mat3 tbn = getTbnMatrix(normal);
+    vec3 worldPos = scenePos + cameraPosition;
+    vec2 noisePos = (worldPos * tbn).xy;
 
-    float noise = texture(noisetex, noise_pos.xy * 0.2).x;
-    vec3 adjusted_color = clamp01(color * (noise * 0.25 + 0.85));
+    float noise = texture(noisetex, noisePos.xy * 0.2).x;
+    vec3 adjustedColor = clamp01(color * (noise * 0.25 + 0.85));
 #else
-    vec3 adjusted_color = color;
+    vec3 adjustedColor = color;
 #endif
 
-    gbuffer_data_0.x = pack_unorm_2x8(adjusted_color.rg);
-    gbuffer_data_0.y = pack_unorm_2x8(
-        adjusted_color.b,
-        clamp01(float(material_mask) * rcp(255.0))
+    gbufferData0.x = packUnorm2x8(adjustedColor.rg);
+    gbufferData0.y = packUnorm2x8(
+        adjustedColor.b,
+        clamp01(float(materialMask) * rcp(255.0))
     );
-    gbuffer_data_0.z = pack_unorm_2x8(encode_unit_vector(normal));
-    gbuffer_data_0.w = pack_unorm_2x8(light_levels);
+    gbufferData0.z = packUnorm2x8(encodeUnitVector(normal));
+    gbufferData0.w = packUnorm2x8(lightLevels);
 }

@@ -18,8 +18,8 @@
 
 #include "/lib/global.glsl"
 
-#define bloom_tile_scale(i) 0.5 * exp2(-(i))
-#define bloom_tile_offset(i) \
+#define bloomTileScale(i) 0.5 * exp2(-(i))
+#define bloomTileOffset(i) \
     vec2(1.0 - exp2(-(i)), float((i) & 1) * (1.0 - 0.5 * exp2(-(i))))
 
 out vec2 uv;

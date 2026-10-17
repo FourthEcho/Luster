@@ -18,13 +18,13 @@
 
 #include "/lib/global.glsl"
 
-layout(location = 0) out vec4 clouds_history;
-layout(location = 1) out vec3 clouds_data;
+layout(location = 0) out vec4 cloudsHistory;
+layout(location = 1) out vec3 cloudsData;
 
 /* RENDERTARGETS: 11,12 */
 
 #ifdef LOD_MOD_ACTIVE
-layout(location = 2) out float combined_depth;
+layout(location = 2) out float combinedDepth;
 
 /* RENDERTARGETS: 11,12,15 */
 #endif
@@ -63,15 +63,15 @@ uniform int moonPhase;
 uniform int frameCounter;
 uniform float frameTime;
 
-uniform vec3 light_dir;
+uniform vec3 lightDir;
 
-uniform vec2 view_res;
-uniform vec2 view_pixel_size;
-uniform vec2 taa_offset;
-uniform vec2 clouds_offset;
+uniform vec2 viewRes;
+uniform vec2 viewPixelSize;
+uniform vec2 taaOffset;
+uniform vec2 cloudsOffset;
 
-uniform bool daylight_cycle_enabled;
-uniform bool world_age_changed;
+uniform bool daylightCycleEnabled;
+uniform bool worldAgeChanged;
 
 // ------------
 //   Includes
@@ -89,15 +89,15 @@ uniform bool world_age_changed;
 #include "/lib/util/random.glsl"
 #include "/lib/util/spaceConversion.glsl"
 
-vec4 min_of(vec4 a, vec4 b, vec4 c, vec4 d, vec4 e) {
+vec4 minOf(vec4 a, vec4 b, vec4 c, vec4 d, vec4 e) {
     return min(a, min(b, min(c, min(d, e))));
 }
 
-vec4 max_of(vec4 a, vec4 b, vec4 c, vec4 d, vec4 e) {
+vec4 maxOf(vec4 a, vec4 b, vec4 c, vec4 d, vec4 e) {
     return max(a, max(b, max(c, max(d, e))));
 }
 
-vec4 smooth_filter(sampler2D sampler, vec2 coord) {
+vec4 smoothFilter(sampler2D sampler, vec2 coord) {
     // from https://iquilezles.org/www/articles/texture/texture.htm
     vec2 res = vec2(textureSize(sampler, 0));
 
@@ -111,104 +111,104 @@ vec4 smooth_filter(sampler2D sampler, vec2 coord) {
     return texture(sampler, coord);
 }
 
-float texture_min_4x4(sampler2D s, vec2 coord) {
-    vec2 pixel_size = rcp(textureSize(s, 0).xy);
+float textureMin4x4(sampler2D s, vec2 coord) {
+    vec2 pixelSize = rcp(textureSize(s, 0).xy);
 
-    vec4 samples_0 = textureGather(
+    vec4 samples0 = textureGather(
         s,
-        coord + vec2(2.0 * pixel_size.x, 2.0 * pixel_size.y)
+        coord + vec2(2.0 * pixelSize.x, 2.0 * pixelSize.y)
     );
-    vec4 samples_1 = textureGather(
+    vec4 samples1 = textureGather(
         s,
-        coord + vec2(-2.0 * pixel_size.x, 2.0 * pixel_size.y)
+        coord + vec2(-2.0 * pixelSize.x, 2.0 * pixelSize.y)
     );
-    vec4 samples_2 = textureGather(
+    vec4 samples2 = textureGather(
         s,
-        coord + vec2(2.0 * pixel_size.x, -2.0 * pixel_size.y)
+        coord + vec2(2.0 * pixelSize.x, -2.0 * pixelSize.y)
     );
-    vec4 samples_3 = textureGather(
+    vec4 samples3 = textureGather(
         s,
-        coord + vec2(-2.0 * pixel_size.x, -2.0 * pixel_size.y)
+        coord + vec2(-2.0 * pixelSize.x, -2.0 * pixelSize.y)
     );
 
     return min(
-        min(min_of(samples_0), min_of(samples_1)),
-        min(min_of(samples_2), min_of(samples_3))
+        min(minOf(samples0), minOf(samples1)),
+        min(minOf(samples2), minOf(samples3))
     );
 }
 
-vec3 reproject_clouds(vec2 uv, float distance_to_cloud) {
-    const float planet_radius = 6371e3;
-    const float clouds_cumulus_radius = planet_radius + cloudsCumulusAltitude;
-    const float clouds_altocumulus_radius
-        = planet_radius + cloudsAltocumulusAltitude;
-    const float clouds_cirrus_radius = planet_radius + cloudsCirrusAltitude;
-    const float clouds_cumulus_wind_angle = cloudsCumulusWindAngle * degree;
-    const float clouds_altocumulus_wind_angle
+vec3 reprojectClouds(vec2 uv, float distanceToCloud) {
+    const float planetRadius = 6371e3;
+    const float cloudsCumulusRadius = planetRadius + cloudsCumulusAltitude;
+    const float cloudsAltocumulusRadius
+        = planetRadius + cloudsAltocumulusAltitude;
+    const float cloudsCirrusRadius = planetRadius + cloudsCirrusAltitude;
+    const float cumulusWindAngleRad = cloudsCumulusWindAngle * degree;
+    const float altocumulusWindAngleRad
         = cloudsAltocumulusWindAngle * degree;
-    const float clouds_cirrus_wind_angle = cloudsCirrusWindAngle * degree;
-    const vec3 clouds_cumulus_velocity = cloudsCumulusWindSpeed
-        * vec3(cos(clouds_cumulus_wind_angle),
+    const float cirrusWindAngleRad = cloudsCirrusWindAngle * degree;
+    const vec3 cloudsCumulusVelocity = cloudsCumulusWindSpeed
+        * vec3(cos(cumulusWindAngleRad),
                0.0,
-               sin(clouds_cumulus_wind_angle));
-    const vec3 clouds_altocumulus_velocity = cloudsAltocumulusWindSpeed
-        * vec3(cos(clouds_altocumulus_wind_angle),
+               sin(cumulusWindAngleRad));
+    const vec3 cloudsAltocumulusVelocity = cloudsAltocumulusWindSpeed
+        * vec3(cos(altocumulusWindAngleRad),
                0.0,
-               sin(clouds_altocumulus_wind_angle));
-    const vec3 clouds_cirrus_velocity = cloudsCirrusWindSpeed
-        * vec3(cos(clouds_cirrus_wind_angle),
+               sin(altocumulusWindAngleRad));
+    const vec3 cloudsCirrusVelocity = cloudsCirrusWindSpeed
+        * vec3(cos(cirrusWindAngleRad),
                0.0,
-               sin(clouds_cirrus_wind_angle));
+               sin(cirrusWindAngleRad));
 
-    vec3 view_pos = screen_to_view_space(vec3(uv, 1.0), false, false);
-    vec3 scene_pos = view_to_scene_space(view_pos);
-    vec3 world_dir = normalize(scene_pos - gbufferModelViewInverse[3].xyz);
+    vec3 viewPos = screenToViewSpace(vec3(uv, 1.0), false, false);
+    vec3 scenePos = viewToSceneSpace(viewPos);
+    vec3 worldDir = normalize(scenePos - gbufferModelViewInverse[3].xyz);
 
-    vec3 cloud_pos
-        = world_dir * distance_to_cloud + gbufferModelViewInverse[3].xyz;
+    vec3 cloudPos
+        = worldDir * distanceToCloud + gbufferModelViewInverse[3].xyz;
 
     // Work out which layer this cloud belongs to
     vec3 velocity;
-    vec3 air_cloud_pos
+    vec3 airCloudPos
         = vec3(
               0.0,
-              cloudsScale * (eyeAltitude - 63.0) + planet_radius,
+              cloudsScale * (eyeAltitude - 63.0) + planetRadius,
               0.0
           )
-        + cloudsScale * cloud_pos;
-    float r = length(air_cloud_pos);
+        + cloudsScale * cloudPos;
+    float r = length(airCloudPos);
 
-    if (r < clouds_altocumulus_radius) {
-        velocity = clouds_cumulus_velocity;
-    } else if (r < clouds_cirrus_radius) {
-        velocity = clouds_altocumulus_velocity;
+    if (r < cloudsAltocumulusRadius) {
+        velocity = cloudsCumulusVelocity;
+    } else if (r < cloudsCirrusRadius) {
+        velocity = cloudsAltocumulusVelocity;
     } else {
-        velocity = clouds_cirrus_velocity;
+        velocity = cloudsCirrusVelocity;
     }
 
-    cloud_pos += velocity * frameTime * rcp(cloudsScale)
-        * float(daylight_cycle_enabled);
+    cloudPos += velocity * frameTime * rcp(cloudsScale)
+        * float(daylightCycleEnabled);
 
-    return reproject_scene_space(cloud_pos, false, false);
+    return reprojectSceneSpace(cloudPos, false, false);
 }
 
 void main() {
-    const int checkerboard_area
+    const int checkerboardArea
         = cloudsTemporalUpscaling * cloudsTemporalUpscaling;
 
-    ivec2 dst_texel = ivec2(gl_FragCoord.xy);
-    ivec2 src_texel = clamp(
-        dst_texel / cloudsTemporalUpscaling,
+    ivec2 dstTexel = ivec2(gl_FragCoord.xy);
+    ivec2 srcTexel = clamp(
+        dstTexel / cloudsTemporalUpscaling,
         ivec2(0),
-        ivec2(vec2(textureSize(colortex9, 0).xy) * taau_render_scale - 1.0)
+        ivec2(vec2(textureSize(colortex9, 0).xy) * taauViewportScale - 1.0)
     );
 
-    vec4 current = texelFetch(colortex9, src_texel, 0);
-    vec2 current_data = texelFetch(colortex10, src_texel, 0).xy;
-    float depth = texelFetch(depthtex1, dst_texel, 0).x;
+    vec4 current = texelFetch(colortex9, srcTexel, 0);
+    vec2 currentData = texelFetch(colortex10, srcTexel, 0).xy;
+    float depth = texelFetch(depthtex1, dstTexel, 0).x;
 
-    bool is_hand;
-    fix_hand_depth(depth, is_hand);
+    bool isHand;
+    fixHandDepth(depth, isHand);
 
     // -----------------------------------------
     //   combined depth buffer for LoD terrain
@@ -216,30 +216,30 @@ void main() {
 
 #ifdef LOD_MOD_ACTIVE
     // Check for LoD terrain
-    float depth_lod = texelFetch(lod_depth_tex_shading, dst_texel, 0).x;
-    bool is_lod = is_lod_terrain(depth, depth_lod);
+    float depthLod = texelFetch(lodDepthTexShading, dstTexel, 0).x;
+    bool isLod = isLodTerrain(depth, depthLod);
 
-    float depth_linear
-        = screen_to_view_space_depth(gbufferProjectionInverse, depth);
-    float depth_linear_dh
-        = screen_to_view_space_depth(lod_projection_matrix_inverse, depth_lod);
+    float depthLinear
+        = screenToViewSpaceDepth(gbufferProjectionInverse, depth);
+    float depthLinearDh
+        = screenToViewSpaceDepth(lodProjectionMatrixInverse, depthLod);
 
-    combined_depth = is_lod
-        ? view_to_screen_space_depth(
-              combined_projection_matrix,
-              depth_linear_dh
+    combinedDepth = isLod
+        ? viewToScreenSpaceDepth(
+              combinedProjectionMatrix,
+              depthLinearDh
           )
-        : view_to_screen_space_depth(combined_projection_matrix, depth_linear);
+        : viewToScreenSpaceDepth(combinedProjectionMatrix, depthLinear);
 
-    if (depth >= 1.0 && !is_lod) {
+    if (depth >= 1.0 && !isLod) {
         // Sky
-        combined_depth = 1.0;
-    } else if (is_hand) {
+        combinedDepth = 1.0;
+    } else if (isHand) {
         // 0 signals hand
-        combined_depth = 0.0;
+        combinedDepth = 0.0;
     }
 #else
-    const bool is_lod = false;
+    const bool isLod = false;
 #endif
 
     // --------------------
@@ -252,146 +252,146 @@ void main() {
 
 #if defined taau
     // Fixes issue at the top and left side of the screen with taau
-    vec2 uv_clamped = clamp(uv, 0.0, 0.95);
+    vec2 uvClamped = clamp(uv, 0.0, 0.95);
 #else
-#define uv_clamped uv
+#define uvClamped uv
 #endif
 
-    float apparent_distance = current_data.x;
-    float ambient_scattering = current_data.y;
+    float apparentDistance = currentData.x;
+    float ambientScattering = currentData.y;
 
     // Find the closest cloud distance between the current frame and a 4x4 area
     // of the previous frame
-    float closest_distance = min(
-        apparent_distance,
-        texture_min_4x4(colortex12, uv_clamped * taau_render_scale)
+    float closestDistance = min(
+        apparentDistance,
+        textureMin4x4(colortex12, uvClamped * taauViewportScale)
     );
 
     // Early exit if clouds covered by terrain
     if (depth != 1.0) {
-        float view_distance_squared
-            = length_squared(screen_to_view_space(vec3(uv, depth), true));
-        if (view_distance_squared < sqr(closest_distance) || is_hand) {
-            clouds_history = current;
-            clouds_data.x = 1e6; // apparent distance
-            clouds_data.y = 0.0; // pixel age
-            clouds_data.z = 0.0; // ambient scattering
+        float viewDistanceSquared
+            = lengthSquared(screenToViewSpace(vec3(uv, depth), true));
+        if (viewDistanceSquared < sqr(closestDistance) || isHand) {
+            cloudsHistory = current;
+            cloudsData.x = 1e6; // apparent distance
+            cloudsData.y = 0.0; // pixel age
+            cloudsData.z = 0.0; // ambient scattering
             return;
         }
     }
 
     // Reproject clouds
-    vec2 previous_uv = reproject_clouds(uv, closest_distance).xy;
+    vec2 previousUv = reprojectClouds(uv, closestDistance).xy;
 
 #ifdef taau
-    vec2 previous_uv_clamped = clamp(
-        previous_uv,
+    vec2 previousUvClamped = clamp(
+        previousUv,
         vec2(0.0),
-        1.0 - 2.0 * view_pixel_size / taau_render_scale
+        1.0 - 2.0 * viewPixelSize / taauViewportScale
     );
 #else
-#define previous_uv_clamped previous_uv
+#define previousUvClamped previousUv
 #endif
 
-    vec4 history = max0(catmull_rom_filter_fast(
+    vec4 history = max0(catmullRomFilterFast(
         colortex11,
-        previous_uv_clamped * taau_render_scale,
+        previousUvClamped * taauViewportScale,
         0.5
     ));
-    vec3 history_data
-        = texture(colortex12, previous_uv_clamped * taau_render_scale).xyz;
+    vec3 historyData
+        = texture(colortex12, previousUvClamped * taauViewportScale).xyz;
 
     // Depth at the previous position
-    float history_depth
-        = 1.0 - max_of(textureGather(colortex14, previous_uv_clamped, 0));
+    float historyDepth
+        = 1.0 - maxOf(textureGather(colortex14, previousUvClamped, 0));
 
     // Get distance to terrain in the previous frame
-    float distance_to_terrain_squared = length_squared(screen_to_view_space(
-        combined_projection_matrix_inverse,
-        vec3(previous_uv, history_depth),
+    float distanceToTerrainSquared = lengthSquared(screenToViewSpace(
+        combinedProjectionMatrixInverse,
+        vec3(previousUv, historyDepth),
         true
     ));
 
     // Work out whether the history should be invalidated
-    bool disocclusion = clamp01(previous_uv) != previous_uv;
+    bool disocclusion = clamp01(previousUv) != previousUv;
     disocclusion = disocclusion
-        || (history_depth < 1.0
-            && distance_to_terrain_squared < sqr(closest_distance));
-    disocclusion = disocclusion || history_depth == 0.0; // Signals hand
+        || (historyDepth < 1.0
+            && distanceToTerrainSquared < sqr(closestDistance));
+    disocclusion = disocclusion || historyDepth == 0.0; // Signals hand
     disocclusion = disocclusion || any(isnan(history));
-    disocclusion = disocclusion || world_age_changed;
+    disocclusion = disocclusion || worldAgeChanged;
 
     // Replace history if a disocclusion was detected
     if (disocclusion) {
         history = current;
-        history.z = ambient_scattering;
+        history.z = ambientScattering;
     }
 
     // Perform neighbourhood clamping when moving quickly relative to the clouds
     float velocity = rcp(sqr(frameTime))
-        * length_squared(cameraPosition - previousCameraPosition);
-    float velocity_factor = 75.0 * velocity / max(sqr(closest_distance), eps);
-    velocity_factor = velocity_factor / (velocity_factor + 1.0);
+        * lengthSquared(cameraPosition - previousCameraPosition);
+    float velocityFactor = 75.0 * velocity / max(sqr(closestDistance), eps);
+    velocityFactor = velocityFactor / (velocityFactor + 1.0);
 
-    if (velocity_factor > 0.1) {
+    if (velocityFactor > 0.1) {
         // Fetch 3x3 neighborhood
-        vec4 a = texelFetch(colortex9, src_texel + ivec2(-1, -1), 0);
-        vec4 b = texelFetch(colortex9, src_texel + ivec2(0, -1), 0);
-        vec4 c = texelFetch(colortex9, src_texel + ivec2(1, -1), 0);
-        vec4 d = texelFetch(colortex9, src_texel + ivec2(-1, 0), 0);
-        vec4 f = texelFetch(colortex9, src_texel + ivec2(1, 0), 0);
-        vec4 g = texelFetch(colortex9, src_texel + ivec2(-1, 1), 0);
-        vec4 h = texelFetch(colortex9, src_texel + ivec2(0, 1), 0);
-        vec4 i = texelFetch(colortex9, src_texel + ivec2(1, 1), 0);
+        vec4 a = texelFetch(colortex9, srcTexel + ivec2(-1, -1), 0);
+        vec4 b = texelFetch(colortex9, srcTexel + ivec2(0, -1), 0);
+        vec4 c = texelFetch(colortex9, srcTexel + ivec2(1, -1), 0);
+        vec4 d = texelFetch(colortex9, srcTexel + ivec2(-1, 0), 0);
+        vec4 f = texelFetch(colortex9, srcTexel + ivec2(1, 0), 0);
+        vec4 g = texelFetch(colortex9, srcTexel + ivec2(-1, 1), 0);
+        vec4 h = texelFetch(colortex9, srcTexel + ivec2(0, 1), 0);
+        vec4 i = texelFetch(colortex9, srcTexel + ivec2(1, 1), 0);
         vec4 e = current;
 
 
-        vec4 aabb_min = min_of(b, d, e, f, h);
-        aabb_min += min_of(aabb_min, a, c, g, i);
-        aabb_min *= 0.5;
-        aabb_min = max0(aabb_min);
+        vec4 aabbMin = minOf(b, d, e, f, h);
+        aabbMin += minOf(aabbMin, a, c, g, i);
+        aabbMin *= 0.5;
+        aabbMin = max0(aabbMin);
 
-        vec4 aabb_max = max_of(b, d, e, f, h);
-        aabb_max += max_of(aabb_max, a, c, g, i);
-        aabb_max *= 0.5;
-        aabb_max = max0(aabb_max);
+        vec4 aabbMax = maxOf(b, d, e, f, h);
+        aabbMax += maxOf(aabbMax, a, c, g, i);
+        aabbMax *= 0.5;
+        aabbMax = max0(aabbMax);
 
         history
-            = mix(history, clamp(history, aabb_min, aabb_max), velocity_factor);
+            = mix(history, clamp(history, aabbMin, aabbMax), velocityFactor);
     }
 
     // Get previous pixel age and apparent distance
-    float apparent_distance_history = history_data.x;
-    apparent_distance_history
-        = disocclusion ? apparent_distance : apparent_distance_history;
+    float apparentDistanceHistory = historyData.x;
+    apparentDistanceHistory
+        = disocclusion ? apparentDistance : apparentDistanceHistory;
 
     // Checkerboard upscaling
-    ivec2 offset_0 = dst_texel % cloudsTemporalUpscaling;
-    ivec2 offset_1
-        = clouds_checkerboard_offsets[frameCounter % checkerboard_area];
-    if (offset_0 != offset_1 && !disocclusion) {
+    ivec2 offset0 = dstTexel % cloudsTemporalUpscaling;
+    ivec2 offset1
+        = cloudsCheckerboardOffsets[frameCounter % checkerboardArea];
+    if (offset0 != offset1 && !disocclusion) {
         current = history;
-        apparent_distance = min(apparent_distance, apparent_distance_history);
-        ambient_scattering = history_data.z;
+        apparentDistance = min(apparentDistance, apparentDistanceHistory);
+        ambientScattering = historyData.z;
     }
 
-    float pixel_age = max0(history_data.y) * float(!disocclusion);
-    float history_weight = 1.0 - rcp(max(pixel_age - checkerboard_area, 1.0));
+    float pixelAge = max0(historyData.y) * float(!disocclusion);
+    float historyWeight = 1.0 - rcp(max(pixelAge - checkerboardArea, 1.0));
 
 #ifndef taau
     // Offcenter rejection
-    vec2 pixel_center_offset
-        = 1.0 - abs(fract(previous_uv * view_res) * 2.0 - 1.0);
-    float offcenter_rejection
-        = sqrt(pixel_center_offset.x * pixel_center_offset.y);
-    offcenter_rejection = mix(1.0, offcenter_rejection, history_weight);
+    vec2 pixelCenterOffset
+        = 1.0 - abs(fract(previousUv * viewRes) * 2.0 - 1.0);
+    float offcenterRejection
+        = sqrt(pixelCenterOffset.x * pixelCenterOffset.y);
+    offcenterRejection = mix(1.0, offcenterRejection, historyWeight);
 
-    history_weight *= offcenter_rejection;
+    historyWeight *= offcenterRejection;
 #endif
 
-    clouds_history = max0(mix(current, history, history_weight));
-    clouds_data.x
-        = mix(apparent_distance, apparent_distance_history, history_weight);
-    clouds_data.y = min(++pixel_age, cloudsAccumulationLimit);
-    clouds_data.z = mix(ambient_scattering, history_data.z, history_weight);
+    cloudsHistory = max0(mix(current, history, historyWeight));
+    cloudsData.x
+        = mix(apparentDistance, apparentDistanceHistory, historyWeight);
+    cloudsData.y = min(++pixelAge, cloudsAccumulationLimit);
+    cloudsData.z = mix(ambientScattering, historyData.z, historyWeight);
 }

@@ -37,8 +37,8 @@ uniform ivec2 atlasSize;
 uniform float frameTimeCounter;
 uniform float rainStrength;
 
-uniform vec2 taa_offset;
-uniform vec3 light_dir;
+uniform vec2 taaOffset;
+uniform vec3 lightDir;
 
 #include "/lib/util/spaceConversion.glsl"
 #include "/lib/vertex/displacement.glsl"
@@ -48,21 +48,21 @@ void main() {
         + gl_TextureMatrix[0][3].xy;
 
     vec3 pos = transform(gl_ModelViewMatrix, gl_Vertex.xyz);
-    pos = view_to_scene_space(pos);
+    pos = viewToSceneSpace(pos);
     pos = pos + cameraPosition;
-    pos = animate_vertex(pos, false, 1.0, 0);
+    pos = animateVertex(pos, false, 1.0, 0);
     pos = pos - cameraPosition;
 
-    vec3 view_pos = scene_to_view_space(pos);
-    vec4 clip_pos = project(gl_ProjectionMatrix, view_pos);
+    vec3 viewPos = sceneToViewSpace(pos);
+    vec4 clipPos = project(gl_ProjectionMatrix, viewPos);
 
 #if defined taa && defined taau
-    clip_pos.xy = clip_pos.xy * taau_render_scale
-        + clip_pos.w * (taau_render_scale - 1.0);
-    clip_pos.xy += taa_offset * clip_pos.w;
+    clipPos.xy = clipPos.xy * taauViewportScale
+        + clipPos.w * (taauViewportScale - 1.0);
+    clipPos.xy += taaOffset * clipPos.w;
 #elif defined taa
-    clip_pos.xy += taa_offset * clip_pos.w * 0.66;
+    clipPos.xy += taaOffset * clipPos.w * 0.66;
 #endif
 
-    gl_Position = clip_pos;
+    gl_Position = clipPos;
 }

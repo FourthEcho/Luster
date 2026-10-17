@@ -19,15 +19,15 @@
 #include "/lib/global.glsl"
 
 out vec2 uv;
-out vec3 view_pos;
+out vec3 viewPos;
 
 #if MC_VERSION >= 260100
-out vec2 uv_mid;
+out vec2 uvMid;
 #endif
 
 flat out vec3 tint;
-flat out vec3 sun_color;
-flat out vec3 moon_color;
+flat out vec3 sunColor;
+flat out vec3 moonColor;
 
 #if MC_VERSION >= 260100
 attribute vec2 mc_midTexCoord;
@@ -39,18 +39,18 @@ attribute vec2 mc_midTexCoord;
 
 uniform float sunAngle;
 uniform float rainStrength;
-uniform float desert_sandstorm;
+uniform float desertSandstormWeather;
 uniform int moonPhase;
 
-uniform vec2 taa_offset;
+uniform vec2 taaOffset;
 
-uniform vec3 sun_dir;
-uniform vec3 light_dir;
+uniform vec3 sunDir;
+uniform vec3 lightDir;
 
-uniform float time_sunrise;
-uniform float time_noon;
-uniform float time_sunset;
-uniform float time_midnight;
+uniform float timeSunrise;
+uniform float timeNoon;
+uniform float timeSunset;
+uniform float timeMidnight;
 
 #define LUSTER_INCLUDE_MOON_PHASE_COLOR
 #include "/lib/light/colors.glsl"
@@ -60,11 +60,11 @@ uniform float time_midnight;
 #undef LUSTER_INCLUDE_LIGHT_COLOR
 
 void main() {
-    sun_color = get_sun_exposure() * get_sun_tint();
-    moon_color = get_moon_exposure() * get_moon_tint();
+    sunColor = getSunExposure() * getSunTint();
+    moonColor = getMoonExposure() * getMoonTint();
 #ifdef moonPhaseNightAtmosphere
-    moon_color = apply_moon_phase_influence(
-        moon_color,
+    moonColor = applyMoonPhaseInfluence(
+        moonColor,
         moonPhaseNightAtmosphereIntensity * moonPhaseInfluenceIntensity,
         1.00,
         1.00
@@ -76,21 +76,21 @@ void main() {
     tint = gl_Color.rgb;
 
 #if MC_VERSION >= 260100
-    uv_mid = mat2(gl_TextureMatrix[0]) * mc_midTexCoord
+    uvMid = mat2(gl_TextureMatrix[0]) * mc_midTexCoord
         + gl_TextureMatrix[0][3].xy;
 #endif
 
-    view_pos = transform(gl_ModelViewMatrix, gl_Vertex.xyz);
+    viewPos = transform(gl_ModelViewMatrix, gl_Vertex.xyz);
 
-    vec4 clip_pos = project(gl_ProjectionMatrix, view_pos);
+    vec4 clipPos = project(gl_ProjectionMatrix, viewPos);
 
 #if defined taa && defined taau
-    clip_pos.xy = clip_pos.xy * taau_render_scale
-        + clip_pos.w * (taau_render_scale - 1.0);
-    clip_pos.xy += taa_offset * clip_pos.w;
+    clipPos.xy = clipPos.xy * taauViewportScale
+        + clipPos.w * (taauViewportScale - 1.0);
+    clipPos.xy += taaOffset * clipPos.w;
 #elif defined taa
-    clip_pos.xy += taa_offset * clip_pos.w * 0.75;
+    clipPos.xy += taaOffset * clipPos.w * 0.75;
 #endif
 
-    gl_Position = clip_pos;
+    gl_Position = clipPos;
 }

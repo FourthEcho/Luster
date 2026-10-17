@@ -26,130 +26,130 @@
 
 
 // Approximate linear depth function by DrDesten
-float linearize_depth_fast(float near, float depth) {
+float linearizeDepthFast(float near, float depth) {
     return near / (1.0 - depth);
 }
 
-float linearize_depth_fast(float depth) {
-    return linearize_depth_fast(near, depth);
+float linearizeDepthFast(float depth) {
+    return linearizeDepthFast(near, depth);
 }
 
-vec3 screen_to_view_space(
-    mat4 projection_matrix_inverse,
-    vec3 screen_pos,
-    bool handle_jitter
+vec3 screenToViewSpace(
+    mat4 projectionMatrixInverse,
+    vec3 screenPos,
+    bool handleJitter
 ) {
-    vec3 ndc_pos = 2.0 * screen_pos - 1.0;
+    vec3 ndcPos = 2.0 * screenPos - 1.0;
 
 #ifdef taa
 #ifdef taau
-    vec2 jitter_offset = taa_offset * rcp(taau_render_scale);
+    vec2 jitterOffset = taaOffset * rcp(taauViewportScale);
 #else
-    vec2 jitter_offset = taa_offset * 0.66;
+    vec2 jitterOffset = taaOffset * 0.66;
 #endif
 
-    if (handle_jitter) {
-        ndc_pos.xy -= jitter_offset;
+    if (handleJitter) {
+        ndcPos.xy -= jitterOffset;
     }
 #endif
 
-    return project_and_divide(projection_matrix_inverse, ndc_pos);
+    return projectAndDivide(projectionMatrixInverse, ndcPos);
 }
 
-vec3 view_to_screen_space(
-    mat4 projection_matrix,
-    vec3 view_pos,
-    bool handle_jitter
+vec3 viewToScreenSpace(
+    mat4 projectionMatrix,
+    vec3 viewPos,
+    bool handleJitter
 ) {
-    vec3 ndc_pos = project_and_divide(projection_matrix, view_pos);
+    vec3 ndcPos = projectAndDivide(projectionMatrix, viewPos);
 
 #ifdef taa
 #ifdef taau
-    vec2 jitter_offset = taa_offset * rcp(taau_render_scale);
+    vec2 jitterOffset = taaOffset * rcp(taauViewportScale);
 #else
-    vec2 jitter_offset = taa_offset * 0.66;
+    vec2 jitterOffset = taaOffset * 0.66;
 #endif
 
-    if (handle_jitter) {
-        ndc_pos.xy += jitter_offset;
+    if (handleJitter) {
+        ndcPos.xy += jitterOffset;
     }
 #endif
 
-    return ndc_pos * 0.5 + 0.5;
+    return ndcPos * 0.5 + 0.5;
 }
 
-vec3 screen_to_view_space(vec3 screen_pos, bool handle_jitter) {
-    return screen_to_view_space(
+vec3 screenToViewSpace(vec3 screenPos, bool handleJitter) {
+    return screenToViewSpace(
         gbufferProjectionInverse,
-        screen_pos,
-        handle_jitter
+        screenPos,
+        handleJitter
     );
 }
 
-vec3 view_to_screen_space(vec3 view_pos, bool handle_jitter) {
-    return view_to_screen_space(gbufferProjection, view_pos, handle_jitter);
+vec3 viewToScreenSpace(vec3 viewPos, bool handleJitter) {
+    return viewToScreenSpace(gbufferProjection, viewPos, handleJitter);
 }
 
-vec3 screen_to_view_space(
-    vec3 screen_pos,
-    bool handle_jitter,
-    bool is_lod_terrain
+vec3 screenToViewSpace(
+    vec3 screenPos,
+    bool handleJitter,
+    bool isLodTerrain
 ) {
 #ifdef LOD_MOD_ACTIVE
-    mat4 projection_matrix_inverse = is_lod_terrain
-        ? lod_projection_matrix_inverse
+    mat4 projectionMatrixInverse = isLodTerrain
+        ? lodProjectionMatrixInverse
         : gbufferProjectionInverse;
 
-    return screen_to_view_space(
-        projection_matrix_inverse,
-        screen_pos,
-        handle_jitter
+    return screenToViewSpace(
+        projectionMatrixInverse,
+        screenPos,
+        handleJitter
     );
 #else
-    return screen_to_view_space(
+    return screenToViewSpace(
         gbufferProjectionInverse,
-        screen_pos,
-        handle_jitter
+        screenPos,
+        handleJitter
     );
 #endif
 }
 
-vec3 view_to_screen_space(
-    vec3 view_pos,
-    bool handle_jitter,
-    bool is_lod_terrain
+vec3 viewToScreenSpace(
+    vec3 viewPos,
+    bool handleJitter,
+    bool isLodTerrain
 ) {
 #ifdef LOD_MOD_ACTIVE
-    mat4 projection_matrix
-        = is_lod_terrain ? lod_projection_matrix : gbufferProjection;
+    mat4 projectionMatrix
+        = isLodTerrain ? lodProjectionMatrix : gbufferProjection;
 
-    return view_to_screen_space(projection_matrix, view_pos, handle_jitter);
+    return viewToScreenSpace(projectionMatrix, viewPos, handleJitter);
 #else
-    return view_to_screen_space(gbufferProjection, view_pos, handle_jitter);
+    return viewToScreenSpace(gbufferProjection, viewPos, handleJitter);
 #endif
 }
 
-float screen_to_view_space_depth(mat4 projection_matrix_inverse, float depth) {
+float screenToViewSpaceDepth(mat4 projectionMatrixInverse, float depth) {
     depth = depth * 2.0 - 1.0;
-    vec2 zw = depth * projection_matrix_inverse[2].zw
-        + projection_matrix_inverse[3].zw;
+    vec2 zw = depth * projectionMatrixInverse[2].zw
+        + projectionMatrixInverse[3].zw;
     return -zw.x / zw.y;
 }
 
-float view_to_screen_space_depth(mat4 projection_matrix, float depth) {
-    vec2 zw = -depth * projection_matrix[2].zw + projection_matrix[3].zw;
+float viewToScreenSpaceDepth(mat4 projectionMatrix, float depth) {
+    vec2 zw = -depth * projectionMatrix[2].zw + projectionMatrix[3].zw;
     return (zw.x / zw.y) * 0.5 + 0.5;
 }
 
-vec3 view_to_scene_space(vec3 view_pos) {
-    return transform(gbufferModelViewInverse, view_pos);
+vec3 viewToSceneSpace(vec3 viewPos) {
+    return transform(gbufferModelViewInverse, viewPos);
 }
 
-vec3 scene_to_view_space(vec3 scene_pos) {
-    return transform(gbufferModelView, scene_pos);
+vec3 sceneToViewSpace(vec3 scenePos) {
+    return transform(gbufferModelView, scenePos);
 }
 
-mat3 get_tbn_matrix(vec3 normal) {
+mat3 getTbnMatrix(vec3 normal) {
     vec3 tangent = abs(normal.y) == 1.0
         ? vec3(1.0, 0.0, 0.0)
         : normalize(cross(vec3(0.0, 1.0, 0.0), normal));
@@ -158,46 +158,46 @@ mat3 get_tbn_matrix(vec3 normal) {
 }
 
 #if defined TEMPORAL_REPROJECTION
-vec3 reproject_scene_space(vec3 scene_pos, bool hand, bool is_lod_terrain) {
+vec3 reprojectSceneSpace(vec3 scenePos, bool hand, bool isLodTerrain) {
 #ifdef LOD_MOD_ACTIVE
-    mat4 previous_projection_matrix = is_lod_terrain
-        ? lod_previous_projection_matrix
+    mat4 previousProjectionMatrix = isLodTerrain
+        ? lodPreviousProjectionMatrix
         : gbufferPreviousProjection;
 #else
-    mat4 previous_projection_matrix = gbufferPreviousProjection;
+    mat4 previousProjectionMatrix = gbufferPreviousProjection;
 #endif
 
-    vec3 camera_offset
+    vec3 cameraOffset
         = hand ? vec3(0.0) : cameraPosition - previousCameraPosition;
 
-    vec3 previous_pos
-        = transform(gbufferPreviousModelView, scene_pos + camera_offset);
-    previous_pos = project_and_divide(previous_projection_matrix, previous_pos);
+    vec3 previousPos
+        = transform(gbufferPreviousModelView, scenePos + cameraOffset);
+    previousPos = projectAndDivide(previousProjectionMatrix, previousPos);
 
-    return previous_pos * 0.5 + 0.5;
+    return previousPos * 0.5 + 0.5;
 }
 
-vec3 reproject(vec3 screen_pos, bool is_lod_terrain) {
-    vec3 pos = screen_to_view_space(screen_pos, false, is_lod_terrain);
-    pos = view_to_scene_space(pos);
+vec3 reproject(vec3 screenPos, bool isLodTerrain) {
+    vec3 pos = screenToViewSpace(screenPos, false, isLodTerrain);
+    pos = viewToSceneSpace(pos);
 
-    bool hand = screen_pos.z < hand_depth;
+    bool hand = screenPos.z < handDepth;
 
-    return reproject_scene_space(pos, hand, is_lod_terrain);
+    return reprojectSceneSpace(pos, hand, isLodTerrain);
 }
 
-vec3 reproject(vec3 screen_pos) { return reproject(screen_pos, false); }
+vec3 reproject(vec3 screenPos) { return reproject(screenPos, false); }
 
-vec3 reproject(vec3 screen_pos, sampler2D velocity_sampler) {
+vec3 reproject(vec3 screenPos, sampler2D velocitySampler) {
     vec3 velocity
-        = texelFetch(velocity_sampler, ivec2(screen_pos.xy * view_res), 0).xyz;
+        = texelFetch(velocitySampler, ivec2(screenPos.xy * viewRes), 0).xyz;
 
-    if (max_of(abs(velocity)) < eps) {
-        return reproject(screen_pos);
+    if (maxOf(abs(velocity)) < eps) {
+        return reproject(screenPos);
     } else {
-        vec3 pos = screen_to_view_space(screen_pos, false);
+        vec3 pos = screenToViewSpace(screenPos, false);
         pos = pos - velocity;
-        pos = view_to_screen_space(pos, false);
+        pos = viewToScreenSpace(pos, false);
 
         return pos;
     }

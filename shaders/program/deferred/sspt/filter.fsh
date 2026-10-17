@@ -54,7 +54,7 @@ uniform sampler2D colortex15; // merged vanilla + LoD/Voxy depth
 #define SSPT_FILTER_DEPTH_TEX depthtex1
 #endif
 
-uniform vec2 view_res;
+uniform vec2 viewRes;
 
 // ------------
 //   Includes
@@ -72,7 +72,7 @@ uniform vec2 view_res;
 
 // Relative luminance in the pack's working color space (Rec. 2020).
 float getLuma(vec3 c) {
-    return dot(c, luminance_weights);
+    return dot(c, luminanceWeights);
 }
 
 vec2 bufferSize() {
@@ -120,31 +120,31 @@ float computeSigmaL(ivec2 texel, float center) {
 }
 
 vec4 atrousSVGF(ivec2 texel, const int size) {
-    vec4 center_data = fetchGbuffer(texel);
+    vec4 centerData = fetchGbuffer(texel);
 
-    vec4 center_color = texelFetch(colortex17, texel, 0);
-    float center_luma = getLuma(center_color.rgb);
+    vec4 centerColor = texelFetch(colortex17, texel, 0);
+    float centerLuma = getLuma(centerColor.rgb);
 
     // Pixel age drives how aggressively the filter converges.
     float frames = texelFetch(colortex18, texel, 0).a;
 
-    float sigma_bias = (4.0 / max(frames, 1.0)) + 0.25;
-    float max_delta = mix(half_pi, tau, clamp01(frames / 32.0));
+    float sigmaBias = (4.0 / max(frames, 1.0)) + 0.25;
+    float maxDelta = mix(halfPi, tau, clamp01(frames / 32.0));
     float offset = mix(0.04 / (0.5 * svgfRad), 0.03, clamp01(frames / 32.0));
-    float sigma_mul = mix(2.718281828459045, 0.41, clamp01(frames / 16.0));
+    float sigmaMul = mix(2.718281828459045, 0.41, clamp01(frames / 16.0));
 
-    float sigma_dist_mul = 2.0 - (1.0 / (1.0 + center_data.a / 64.0));
+    float sigmaDistMul = 2.0 - (1.0 / (1.0 + centerData.a / 64.0));
 
-    float sigma_l = 1.0 / (
-        sigma_mul * svgfStrictness * sigma_dist_mul
-            * computeSigmaL(texel, center_color.a)
-        + sigma_bias * sigma_dist_mul
+    float sigmaL = 1.0 / (
+        sigmaMul * svgfStrictness * sigmaDistMul
+            * computeSigmaL(texel, centerColor.a)
+        + sigmaBias * sigmaDistMul
     );
 
-    float normal_exp = mix(2.0, 8.0, clamp01(frames / 8.0)) * svgfNormalexp;
+    float normalExp = mix(2.0, 8.0, clamp01(frames / 8.0)) * svgfNormalexp;
 
-    vec4 total = center_color;
-    float total_weight = 1.0;
+    vec4 total = centerColor;
+    float totalWeight = 1.0;
 
     const int r = svgfRad;
     for (int y = -r; y <= r; ++y) {
@@ -158,31 +158,31 @@ vec4 atrousSVGF(ivec2 texel, const int size) {
 
             if (!valid) continue;
 
-            vec4 current_data = fetchGbuffer(p);
+            vec4 currentData = fetchGbuffer(p);
 
-            vec4 current_color = texelFetch(colortex17, p, 0);
-            float current_luma = getLuma(current_color.rgb);
+            vec4 currentColor = texelFetch(colortex17, p, 0);
+            float currentLuma = getLuma(currentColor.rgb);
 
             float w = 1.0;
 
-            float dist_lum = abs(center_luma - current_luma);
-                dist_lum = sqr(dist_lum) / max(center_luma, offset);
-                dist_lum = clamp(dist_lum, 0.0, max_delta);
+            float distLum = abs(centerLuma - currentLuma);
+                distLum = sqr(distLum) / max(centerLuma, offset);
+                distLum = clamp(distLum, 0.0, maxDelta);
 
-            float dist_depth = abs(center_data.a - current_data.a) * 4.0;
+            float distDepth = abs(centerData.a - currentData.a) * 4.0;
 
-                w *= pow(max0(dot(center_data.xyz, current_data.xyz)), normal_exp);
-                w *= exp(-dist_depth / sqrt(float(size)) - sqrt(dist_lum * sigma_l));
+                w *= pow(max0(dot(centerData.xyz, currentData.xyz)), normalExp);
+                w *= exp(-distDepth / sqrt(float(size)) - sqrt(distLum * sigmaL));
 
             // accumulate stuff
-            total += current_color * w * vec4(1.0, 1.0, 1.0, w);
+            total += currentColor * w * vec4(1.0, 1.0, 1.0, w);
 
-            total_weight += w;
+            totalWeight += w;
         }
     }
 
     // compensate for total sampling weight
-    total /= vec4(total_weight, total_weight, total_weight, sqr(total_weight));
+    total /= vec4(totalWeight, totalWeight, totalWeight, sqr(totalWeight));
 
     return total;
 }
@@ -193,9 +193,9 @@ vec4 atrousSVGF(ivec2 texel, const int size) {
 
 void main() {
     ivec2 texel = ivec2(gl_FragCoord.xy);
-    ivec2 gbuffer_texel = ivec2(uv * view_res * taau_render_scale);
+    ivec2 gbufferTexel = ivec2(uv * viewRes * taauViewportScale);
 
-    float depth = texelFetch(SSPT_FILTER_DEPTH_TEX, gbuffer_texel, 0).x;
+    float depth = texelFetch(SSPT_FILTER_DEPTH_TEX, gbufferTexel, 0).x;
 
     if (depth < 1.0) {
         filtered = atrousSVGF(texel, SVGF_SIZE);

@@ -18,10 +18,14 @@
 
 #include "/lib/global.glsl"
 
-layout(location = 0) out vec4 damage_overlay;
+layout(location = 0) out vec4 damageOverlay;
 
 #ifdef useSeparateEntityDraws
+#if MC_VERSION >= 260300
+/* RENDERTARGETS: 3 */
+#else
 /* RENDERTARGETS: 0 */
+#endif
 #else
 /* RENDERTARGETS: 3 */
 #endif
@@ -34,43 +38,43 @@ in vec2 uv;
 
 uniform sampler2D gtexture;
 
-uniform vec2 taa_offset;
-uniform vec2 view_pixel_size;
+uniform vec2 taaOffset;
+uniform vec2 viewPixelSize;
 
-const float lod_bias = log2(taau_render_scale);
+const float lodBias = log2(taauViewportScale);
 
 #include "/lib/util/color.glsl"
 
 void main() {
 #if defined taa && defined taau
-    vec2 coord = gl_FragCoord.xy * view_pixel_size * rcp(taau_render_scale);
+    vec2 coord = gl_FragCoord.xy * viewPixelSize * rcp(taauViewportScale);
     if (clamp01(coord) != coord) {
         discard;
     }
 #endif
 
-    damage_overlay = texture(gtexture, uv, lod_bias);
+    damageOverlay = texture(gtexture, uv, lodBias);
 
 #if defined COLORWHEEL
 	vec2 lmcoord;
 	float ao;
 	vec4 overlayColor;
 
-	clrwl_computeFragment(damage_overlay, damage_overlay, lmcoord, ao, overlayColor);
-	damage_overlay.rgb = mix(damage_overlay.rgb, overlayColor.rgb, overlayColor.a);
+	clrwl_computeFragment(damageOverlay, damageOverlay, lmcoord, ao, overlayColor);
+	damageOverlay.rgb = mix(damageOverlay.rgb, overlayColor.rgb, overlayColor.a);
 #endif
 
-    if (damage_overlay.a < 0.1) {
+    if (damageOverlay.a < 0.1) {
         discard;
     }
 
-#ifdef useSeparateEntityDraws
-    damage_overlay.rgb
-        = 0.5 * srgb_eotf_inv(2.0 * damage_overlay.rgb) * rec709_to_working_color;
-    damage_overlay.a = 1.0;
+#if defined useSeparateEntityDraws && MC_VERSION < 260300
+    damageOverlay.rgb
+        = 0.5 * srgbEotfInv(2.0 * damageOverlay.rgb) * rec709ToWorkingColor;
+    damageOverlay.a = 1.0;
 #else
     // Old overlay handling
     // alpha of 1 <=> block breaking overlay
-    damage_overlay.a = 1.0 / 255.0;
+    damageOverlay.a = 1.0 / 255.0;
 #endif
 }

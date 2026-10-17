@@ -18,7 +18,7 @@
 
 #include "/lib/global.glsl"
 
-layout(location = 0) out vec3 scene_color;
+layout(location = 0) out vec3 sceneColor;
 
 /* RENDERTARGETS: 0 */
 
@@ -26,7 +26,7 @@ in vec2 uv;
 
 #ifdef colorGrading
   #if gradeWhiteBalance != 6500
-flat in mat3 white_balance_matrix;
+flat in mat3 whiteBalanceMatrix;
   #endif
 #endif
 
@@ -41,7 +41,7 @@ uniform sampler2D colortex5; // scene color
 uniform mat4 gbufferProjection;
 uniform mat4 gbufferModelView;
 
-uniform vec3 sun_dir;
+uniform vec3 sunDir;
 
 uniform float rainStrength;
 
@@ -50,11 +50,11 @@ uniform float blindness;
 uniform float darknessFactor;
 uniform float frameTimeCounter;
 
-uniform float biome_cave;
-uniform float time_noon;
-uniform float eye_skylight;
+uniform float biomeCave;
+uniform float timeNoon;
+uniform float eyeSkylight;
 
-uniform vec2 view_pixel_size;
+uniform vec2 viewPixelSize;
 
 #if !defined INCLUDE_POST_TONEMAP_OPERATORS
 #define INCLUDE_POST_TONEMAP_OPERATORS
@@ -65,67 +65,113 @@ uniform vec2 view_pixel_size;
 
 // ACES Fit
 // ACES RRT and ODT approximation
-vec3 tonemap_aces_fit(vec3 rgb) {
+vec3 tonemapAcesFit(vec3 rgb) {
     rgb *= 1.6 * exp2(academyRrtExposure); // Match the exposure to the RRT
 
-    rgb = rgb * working_to_ap0;
+    rgb = rgb * workingToAp0;
 
-    rgb = rrt_sweeteners(rgb);
-    rgb = rrt_and_odt_fit(rgb);
+    rgb = rrtSweeteners(rgb);
+    rgb = rrtAndOdtFit(rgb);
 
     // Global desaturation (fit domain is AP0/AP1; use stable AP1 luma so
     // the result does not drift with displayGamut).
-    vec3 grayscale = vec3(dot(rgb, luminance_weights_ap1));
-    rgb = mix(grayscale, rgb, odt_sat_factor);
+    vec3 grayscale = vec3(dot(rgb, luminanceWeightsAp1));
+    rgb = mix(grayscale, rgb, odtSatFactor);
 
-    return academy_color_controls(rgb * ap1_to_working);
+    return academyColorControls(rgb * ap1ToWorking);
 }
 
 // ACES Full
 // ACES RRT and ODT
-vec3 tonemap_aces_full(vec3 rgb) {
+vec3 tonemapAcesFull(vec3 rgb) {
     rgb *= 1.6 * exp2(academyRrtExposure); // Match the exposure to the RRT
 
-    rgb = rgb * working_to_ap0;
+    rgb = rgb * workingToAp0;
 
-    rgb = aces_rrt(rgb);
-    rgb = aces_odt(rgb);
+    rgb = acesRrt(rgb);
+    rgb = acesOdt(rgb);
 
-    return academy_color_controls(rgb * ap1_to_working);
+    return academyColorControls(rgb * ap1ToWorking);
 }
 
 // Lottes
 // Timothy Lottes 2016, "Advanced Techniques and Optimization of HDR Color
 // Pipelines" https://gpuopen.com/wp-content/uploads/2016/03/GdcVdrLottes.pdf
 
-// https://github.com/dmnsgn/shaders-tone-map (MIT; see the Lottes MIT license reproduced in the root LICENSE)
-vec3 tonemap_lottes(vec3 rgb) {
+// GLSL port via https://github.com/dmnsgn/shaders-tone-map
+
+// License:
+/*
+Copyright (C) 2019 Damien Seguin
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+*/
+vec3 tonemapLottes(vec3 rgb) {
     rgb = max(rgb, vec3(0.0)); // pow() of negatives is NaN
     const vec3 a = vec3(1.6); // Contrast
     const vec3 d = vec3(0.977); // Shoulder contrast
-    const vec3 hdr_max = vec3(8.0); // White point
-    const vec3 mid_in = vec3(0.18); // Fixed midpoint x
-    const vec3 mid_out = vec3(0.267); // Fixed midpoint y
+    const vec3 hdrMax = vec3(8.0); // White point
+    const vec3 midIn = vec3(0.18); // Fixed midpoint x
+    const vec3 midOut = vec3(0.267); // Fixed midpoint y
 
-    const vec3 b = (-pow(mid_in, a) + pow(hdr_max, a) * mid_out)
-        / ((pow(hdr_max, a * d) - pow(mid_in, a * d)) * mid_out);
-    const vec3 c = (pow(hdr_max, a * d) * pow(mid_in, a)
-                    - pow(hdr_max, a) * pow(mid_in, a * d) * mid_out)
-        / ((pow(hdr_max, a * d) - pow(mid_in, a * d)) * mid_out);
+    const vec3 b = (-pow(midIn, a) + pow(hdrMax, a) * midOut)
+        / ((pow(hdrMax, a * d) - pow(midIn, a * d)) * midOut);
+    const vec3 c = (pow(hdrMax, a * d) * pow(midIn, a)
+                    - pow(hdrMax, a) * pow(midIn, a * d) * midOut)
+        / ((pow(hdrMax, a * d) - pow(midIn, a * d)) * midOut);
 
     return pow(rgb, a) / (pow(rgb, a * d) * b + c);
 }
 
 // Hejl 2015
 // Hejl 2015 filmic, after Jim Hejl's reference ("ToneMapFilmic_Hejl2015").
-// GLSL port follows https://github.com/dmnsgn/shaders-tone-map (MIT; see
-// the Hejl 2015 MIT license reproduced in the root LICENSE), including its guard: the curve goes negative just above
+// GLSL port via https://github.com/dmnsgn/shaders-tone-map, including its
+// guard: the curve goes negative just above ~0.0046 linear, so the documented
+// white point is understated: at the root vf.w is 0 and the correction blows
+// up, below it the whole result flips sign. max() keeps black at black.
 
+// License:
+/*
+Copyright (C) 2019 Damien Seguin
 
-vec3 tonemap_hejl_2015(vec3 rgb) {
-    const float white_point = 5.0;
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-    vec4 vh = vec4(rgb, white_point);
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+*/
+vec3 tonemapHejl2015(vec3 rgb) {
+    const float whitePoint = 5.0;
+
+    vec4 vh = vec4(rgb, whitePoint);
     vec4 va = (1.425 * vh) + 0.05; // eval filmic curve
     vec4 vf = ((vh * va + 0.004) / ((vh * (va + 0.55) + 0.0491))) - 0.0821;
 
@@ -137,15 +183,15 @@ vec3 tonemap_hejl_2015(vec3 rgb) {
 // ("Filmic Tonemapping for Real-time Rendering", SIGGRAPH 2010 course).
 // Modified by Tech to not lose color information below 0.004 (replaces the
 
-vec3 tonemap_hejl_burgess(vec3 rgb) {
+vec3 tonemapHejlBurgess(vec3 rgb) {
     rgb = rgb * min(vec3(1.0), 1.0 - 0.8 * exp(rcp(-0.004) * rgb));
     rgb = (rgb * (6.2 * rgb + 0.5)) / (rgb * (6.2 * rgb + 1.7) + 0.06);
-    return srgb_eotf_inv(rgb); // Revert built-in sRGB conversion
+    return srgbEotfInv(rgb); // Revert built-in sRGB conversion
 }
 
 // Tech
 // Tone mapping operator made by Tech for his shader pack Lux
-vec3 tonemap_tech(vec3 rgb) {
+vec3 tonemapTech(vec3 rgb) {
     vec3 a = rgb * min(vec3(1.0), 1.0 - exp(-1.0 / 0.038 * rgb));
     a = mix(a, rgb, rgb * rgb);
     return a / (a + 0.6);
@@ -153,7 +199,7 @@ vec3 tonemap_tech(vec3 rgb) {
 
 // Uncharted 2
 // Filmic tonemapping operator made by John Hable for Uncharted 2
-vec3 tonemap_uncharted_2_partial(vec3 rgb) {
+vec3 tonemapUncharted2Partial(vec3 rgb) {
     const float a = 0.15;
     const float b = 0.50;
     const float c = 0.10;
@@ -166,42 +212,65 @@ vec3 tonemap_uncharted_2_partial(vec3 rgb) {
         - e / f;
 }
 
-vec3 tonemap_uncharted_2(vec3 rgb) {
-    const float exposure_bias = 2.0;
+vec3 tonemapUncharted2(vec3 rgb) {
+    const float exposureBias = 2.0;
     const vec3 w = vec3(11.2);
 
-    vec3 curr = tonemap_uncharted_2_partial(rgb * exposure_bias);
-    vec3 white_scale = vec3(1.0) / tonemap_uncharted_2_partial(w);
-    return curr * white_scale;
+    vec3 curr = tonemapUncharted2Partial(rgb * exposureBias);
+    vec3 whiteScale = vec3(1.0) / tonemapUncharted2Partial(w);
+    return curr * whiteScale;
 }
 
 // Ozius
 // Tonemapping operator made by Zombye for his old shader pack Ozius
 // It was given to me by Jessie
-vec3 tonemap_ozius(vec3 rgb) {
+vec3 tonemapOzius(vec3 rgb) {
     const vec3 a = vec3(0.46, 0.46, 0.46);
     const vec3 b = vec3(0.60, 0.60, 0.60);
 
     rgb *= 1.6;
 
-    vec3 cr = mix(vec3(dot(rgb, luminance_weights)), rgb, 0.5) + 1.0;
+    vec3 cr = mix(vec3(dot(rgb, luminanceWeights)), rgb, 0.5) + 1.0;
 
     rgb = pow(rgb / (1.0 + rgb), a);
     return pow(rgb * rgb * (-2.0 * rgb + 3.0), cr / b);
 }
 
 // Reinhard
-vec3 tonemap_reinhard(vec3 rgb) { return rgb / (rgb + 1.0); }
+vec3 tonemapReinhard(vec3 rgb) { return rgb / (rgb + 1.0); }
 
 // Reinhard Jodie
 // Reinhard driven by luminance, then blended per channel by the per-channel
+// result, so saturated colors keep their hue instead of skewing towards
+// whichever channel compresses first
+// https://64.github.io/tonemapping/#reinhard-jodie
+// GLSL port via https://github.com/dmnsgn/shaders-tone-map
 
-// see https://64.github.io/tonemapping/#reinhard-jodie
+// License:
+/*
+Copyright (C) 2019 Damien Seguin
 
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-vec3 tonemap_reinhard_jodie(vec3 rgb) {
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+*/
+vec3 tonemapReinhardJodie(vec3 rgb) {
     vec3 reinhard = rgb / (rgb + 1.0);
-    return mix(rgb / (dot(rgb, luminance_weights) + 1.0), reinhard, reinhard);
+    return mix(rgb / (dot(rgb, luminanceWeights) + 1.0), reinhard, reinhard);
 }
 
 #endif // INCLUDE_POST_TONEMAP_OPERATORS
@@ -211,7 +280,7 @@ vec3 tonemap_reinhard_jodie(vec3 rgb) {
 // Stage A: scene-linear controls before tone mapping.
 // Stage B: display-linear perceptual controls after tone mapping.
 
-vec3 color_grade_lift_gamma_gain(vec3 rgb) {
+vec3 colorGradeLiftGammaGain(vec3 rgb) {
     // Log-domain-friendly lift, then power/gain. Defaults are mathematically neutral.
     vec3 lift = vec3(gradeLiftR, gradeLiftG, gradeLiftB);
     vec3 gamma = vec3(max(gradeGammaR, 0.05), max(gradeGammaG, 0.05), max(gradeGammaB, 0.05));
@@ -222,7 +291,7 @@ vec3 color_grade_lift_gamma_gain(vec3 rgb) {
     return max(rgb * gain, vec3(0.0));
 }
 
-vec3 color_grade_input(vec3 rgb, mat3 white_balance_matrix) {
+vec3 colorGradeInput(vec3 rgb, mat3 whiteBalanceMatrix) {
     float brightness = max(gradeBrightness, 0.0);
     float contrast = max(gradeContrast, 0.0);
     float pivot = max(gradePivot, 1e-4);
@@ -232,21 +301,21 @@ vec3 color_grade_input(vec3 rgb, mat3 white_balance_matrix) {
 
     // Symmetric contrast around a scene-linear pivot, performed in log space so exposure stops stay natural.
     rgb = log2(rgb + 1e-6);
-    float log_pivot = log2(pivot);
-    rgb = exp2((rgb - log_pivot) * contrast + log_pivot);
+    float logPivot = log2(pivot);
+    rgb = exp2((rgb - logPivot) * contrast + logPivot);
     rgb = max(rgb - 1e-6, vec3(0.0));
 
     // White balance in chromaticity space. A Bradford matrix is calculated in the vertex shader.
-    rgb = max(rgb * white_balance_matrix, vec3(0.0));
+    rgb = max(rgb * whiteBalanceMatrix, vec3(0.0));
 
     // Lift / gamma / gain (ASC-style three-way control).
-    rgb = color_grade_lift_gamma_gain(rgb);
+    rgb = colorGradeLiftGammaGain(rgb);
     return max(rgb, vec3(0.0));
 }
 
 
-vec3 grade_rgb_to_oklab(vec3 c) {
-    vec3 lms = c * working_to_xyz_color * xyz_to_lms;
+vec3 gradeRgbToOklab(vec3 c) {
+    vec3 lms = c * workingToXyzColor * xyzToLms;
     lms = sign(lms) * pow(abs(lms), vec3(1.0 / 3.0));
     return vec3(
         0.2104542553 * lms.x + 0.7936177850 * lms.y - 0.0040720468 * lms.z,
@@ -255,35 +324,35 @@ vec3 grade_rgb_to_oklab(vec3 c) {
     );
 }
 
-vec3 grade_oklab_to_rgb(vec3 c) {
+vec3 gradeOklabToRgb(vec3 c) {
     float l = c.x + 0.3963377774 * c.y + 0.2158037573 * c.z;
     float m = c.x - 0.1055613458 * c.y - 0.0638541728 * c.z;
     float s = c.x - 0.0894841775 * c.y - 1.2914855480 * c.z;
     vec3 lms = vec3(l, m, s);
     lms = lms * lms * lms;
-    return max((lms * lms_to_xyz) * xyz_to_working_color, vec3(0.0));
+    return max((lms * lmsToXyz) * xyzToWorkingColor, vec3(0.0));
 }
 
-vec2 grade_rotate(vec2 v, float radians_angle) {
-    float s = sin(radians_angle), c = cos(radians_angle);
+vec2 gradeRotate(vec2 v, float radiansAngle) {
+    float s = sin(radiansAngle), c = cos(radiansAngle);
     return vec2(c * v.x - s * v.y, s * v.x + c * v.y);
 }
 
-vec2 grade_hue_vector(float degrees, float saturation) {
+vec2 gradeHueVector(float degrees, float saturation) {
     float h = radians(degrees);
     return vec2(cos(h), sin(h)) * saturation;
 }
 
-vec3 color_grade_output(vec3 rgb) {
+vec3 colorGradeOutput(vec3 rgb) {
     rgb = clamp(rgb, vec3(0.0), vec3(1.0));
 
-    vec3 lab = grade_rgb_to_oklab(rgb);
+    vec3 lab = gradeRgbToOklab(rgb);
     float chroma = length(lab.yz);
 
     // Global saturation + vibrance: vibrance preferentially boosts low-chroma colors.
-    float vibrance_mask = 1.0 - clamp(chroma * 3.5, 0.0, 1.0);
-    float sat_mul = max(gradeSaturation + gradeVibrance * vibrance_mask, 0.0);
-    lab.yz *= sat_mul;
+    float vibranceMask = 1.0 - clamp(chroma * 3.5, 0.0, 1.0);
+    float satMul = max(gradeSaturation + gradeVibrance * vibranceMask, 0.0);
+    lab.yz *= satMul;
 
     // Gentle perceptual contrast with a stable pivot around middle gray.
     lab.x = clamp((lab.x - gradeOklabPivot) * gradeOklabContrast + gradeOklabPivot, 0.0, 1.0);
@@ -295,33 +364,33 @@ vec3 color_grade_output(vec3 rgb) {
 
     // Three-way hue rotation while preserving existing chroma magnitude.
     if (chroma > 1e-6) {
-        float shadow_w = shadows * gradeShadowStrength;
-        float mid_w = mids * gradeMidStrength;
-        float highlight_w = highlights * gradeHighlightStrength;
+        float shadowW = shadows * gradeShadowStrength;
+        float midW = mids * gradeMidStrength;
+        float highlightW = highlights * gradeHighlightStrength;
         vec2 ab = lab.yz;
-        ab = grade_rotate(ab, radians(gradeShadowHue) * shadow_w);
-        ab = grade_rotate(ab, radians(gradeMidHue) * mid_w);
-        ab = grade_rotate(ab, radians(gradeHighlightHue) * highlight_w);
+        ab = gradeRotate(ab, radians(gradeShadowHue) * shadowW);
+        ab = gradeRotate(ab, radians(gradeMidHue) * midW);
+        ab = gradeRotate(ab, radians(gradeHighlightHue) * highlightW);
         lab.yz = ab;
     }
 
     // Add controlled chroma bias for classic split toning.
-    float tint_scale = sqrt(max(lab.x, 0.0));
-    lab.yz += grade_hue_vector(gradeShadowTintHue, gradeShadowTintSat * shadows) * tint_scale;
-    lab.yz += grade_hue_vector(gradeHighlightTintHue, gradeHighlightTintSat * highlights) * tint_scale;
+    float tintScale = sqrt(max(lab.x, 0.0));
+    lab.yz += gradeHueVector(gradeShadowTintHue, gradeShadowTintSat * shadows) * tintScale;
+    lab.yz += gradeHueVector(gradeHighlightTintHue, gradeHighlightTintSat * highlights) * tintScale;
 
     // Convert the perceptual pass back to RGB, then apply selective HSL accents.
-    vec3 perceptual_rgb = grade_oklab_to_rgb(lab);
-    vec3 hsv = rgb_to_hsv(perceptual_rgb);
-    float orange = isolate_hue(hsv, 30.0, 20.0);
-    float teal = isolate_hue(hsv, 210.0, 20.0);
-    float green = isolate_hue(hsv, 90.0, 44.0);
+    vec3 perceptualRgb = gradeOklabToRgb(lab);
+    vec3 hsv = rgbToHsv(perceptualRgb);
+    float orange = isolateHue(hsv, 30.0, 20.0);
+    float teal = isolateHue(hsv, 210.0, 20.0);
+    float green = isolateHue(hsv, 90.0, 44.0);
     hsv.y = clamp(hsv.y * (1.0 + gradeOrangeSatBoost * orange), 0.0, 1.0);
     hsv.y = clamp(hsv.y * (1.0 + gradeTealSatBoost * teal), 0.0, 1.0);
     hsv.y = clamp(hsv.y * (1.0 + gradeGreenSatBoost * green), 0.0, 1.0);
     hsv.x = fract(hsv.x + (gradeGreenHueShift / 360.0) * green);
-    vec3 selective_rgb = hsv_to_rgb(hsv);
-    rgb = mix(perceptual_rgb, selective_rgb, clamp(gradeSelectiveBlend, 0.0, 1.0));
+    vec3 selectiveRgb = hsvToRgb(hsv);
+    rgb = mix(perceptualRgb, selectiveRgb, clamp(gradeSelectiveBlend, 0.0, 1.0));
 
     // Black/white point control, applied last to avoid fighting the tonemapper.
     rgb = max((rgb - gradeBlackPoint) / max(1.0 - gradeBlackPoint - gradeWhitePoint, 1e-4), vec3(0.0));
@@ -335,45 +404,45 @@ vec3 color_grade_output(vec3 rgb) {
 
 // Reference setup: every triangle factor is normalized to these, so the
 // shipped defaults reproduce the pre-physical look exactly.
-const float camera_reference_fstops = 3.2;
-const float camera_reference_shutter = 60.0; // 1/60 s
-const float camera_reference_iso = 100.0;
+const float cameraReferenceFstops = 3.2;
+const float cameraReferenceShutter = 60.0; // 1/60 s
+const float cameraReferenceIso = 100.0;
 
 // Focal length in millimetres from the vertical FOV and the sensor height
 // (sensor width shared across axes, height derived from aspect ratio).
-float camera_sensor_height_mm(float aspect_ratio) {
-    return float(camSensorWidth) / max(aspect_ratio, 1e-4);
+float cameraSensorHeightMm(float frameAspect) {
+    return float(camSensorWidth) / max(frameAspect, 1e-4);
 }
 
-float camera_focal_length_mm(float projection_11, float aspect_ratio) {
-    float sensor_h = camera_sensor_height_mm(aspect_ratio);
-    return 0.5 * sensor_h * projection_11;
+float cameraFocalLengthMm(float projection11, float frameAspect) {
+    float sensorH = cameraSensorHeightMm(frameAspect);
+    return 0.5 * sensorH * projection11;
 }
 
 // Thin-lens circle of confusion as a fraction of screen height:
 // CoC = (f^2 / N) * |1/S - 1/D|, distances in metres.
-float camera_coc_height_fraction(
-    float focal_mm,
-    float sensor_h,
-    float focus_m,
-    float dist_m
+float cameraCocHeightFraction(
+    float focalMm,
+    float sensorH,
+    float focusM,
+    float distM
 ) {
-    float coc_mm = focal_mm * focal_mm / max(camFstops, 1e-4)
-        * abs(1.0 / (focus_m * 1000.0) - 1.0 / (dist_m * 1000.0));
-    return coc_mm / max(sensor_h, 1e-4);
+    float cocMm = focalMm * focalMm / max(camFstops, 1e-4)
+        * abs(1.0 / (focusM * 1000.0) - 1.0 / (distM * 1000.0));
+    return cocMm / max(sensorH, 1e-4);
 }
 
 // Shutter trail factor relative to the 60Hz reference capture.
-float camera_shutter_trail_factor() {
-    return camera_reference_shutter / float(camShutterSpeed);
+float cameraShutterTrailFactor() {
+    return cameraReferenceShutter / float(camShutterSpeed);
 }
 
 // Closed-triangle exposure factor: t * ISO / N^2, normalized to the
 // reference setup, times the EV compensation dial.
-float camera_exposure_triangle_factor() {
-    float t = camera_shutter_trail_factor();
-    float iso = float(camIso) / camera_reference_iso;
-    float n = camera_reference_fstops / max(camFstops, 1e-4);
+float cameraExposureTriangleFactor() {
+    float t = cameraShutterTrailFactor();
+    float iso = float(camIso) / cameraReferenceIso;
+    float n = cameraReferenceFstops / max(camFstops, 1e-4);
     return t * iso * n * n * exp2(camExposureCompensation);
 }
 
@@ -383,16 +452,16 @@ float camera_exposure_triangle_factor() {
 
 #include "/lib/util/color.glsl"
 
-float local_exposure_luma(vec3 rgb) {
-    return max(dot(max(rgb, vec3(0.0)), luminance_weights_ap1), 1e-5);
+float localExposureLuma(vec3 rgb) {
+    return max(dot(max(rgb, vec3(0.0)), luminanceWeightsAp1), 1e-5);
 }
 
 #ifdef localExposure
-float compute_local_exposure_ev(vec2 texel_uv, vec3 center_rgb, float anchor_log) {
-    float center_log = log2(local_exposure_luma(center_rgb));
+float computeLocalExposureEv(vec2 texelUv, vec3 centerRgb, float anchorLog) {
+    float centerLog = log2(localExposureLuma(centerRgb));
 
-    float sum_log = center_log * 4.0;
-    float sum_w = 4.0;
+    float sumLog = centerLog * 4.0;
+    float sumW = 4.0;
 
 
     // a per-pixel post pass; larger-scale adaptation is already handled by the
@@ -401,108 +470,108 @@ float compute_local_exposure_ev(vec2 texel_uv, vec3 center_rgb, float anchor_log
     vec3 s;
     float l, w, d;
 
-    s = textureLod(colortex5, texel_uv + view_pixel_size * vec2(-o.x, 0.0), 0.0).rgb;
-    l = log2(local_exposure_luma(s));
-    d = abs(l - center_log);
+    s = textureLod(colortex5, texelUv + viewPixelSize * vec2(-o.x, 0.0), 0.0).rgb;
+    l = log2(localExposureLuma(s));
+    d = abs(l - centerLog);
     w = 2.0 * exp2(-d * 1.442695); // ~= exp(-d)
-    sum_log += l * w; sum_w += w;
+    sumLog += l * w; sumW += w;
 
-    s = textureLod(colortex5, texel_uv + view_pixel_size * vec2( o.x, 0.0), 0.0).rgb;
-    l = log2(local_exposure_luma(s));
-    d = abs(l - center_log);
+    s = textureLod(colortex5, texelUv + viewPixelSize * vec2( o.x, 0.0), 0.0).rgb;
+    l = log2(localExposureLuma(s));
+    d = abs(l - centerLog);
     w = 2.0 * exp2(-d * 1.442695);
-    sum_log += l * w; sum_w += w;
+    sumLog += l * w; sumW += w;
 
-    s = textureLod(colortex5, texel_uv + view_pixel_size * vec2(0.0, -o.y), 0.0).rgb;
-    l = log2(local_exposure_luma(s));
-    d = abs(l - center_log);
+    s = textureLod(colortex5, texelUv + viewPixelSize * vec2(0.0, -o.y), 0.0).rgb;
+    l = log2(localExposureLuma(s));
+    d = abs(l - centerLog);
     w = 2.0 * exp2(-d * 1.442695);
-    sum_log += l * w; sum_w += w;
+    sumLog += l * w; sumW += w;
 
-    s = textureLod(colortex5, texel_uv + view_pixel_size * vec2(0.0,  o.y), 0.0).rgb;
-    l = log2(local_exposure_luma(s));
-    d = abs(l - center_log);
+    s = textureLod(colortex5, texelUv + viewPixelSize * vec2(0.0,  o.y), 0.0).rgb;
+    l = log2(localExposureLuma(s));
+    d = abs(l - centerLog);
     w = 2.0 * exp2(-d * 1.442695);
-    sum_log += l * w; sum_w += w;
+    sumLog += l * w; sumW += w;
 
     const float diag = 1.41421356 * 2.0;
-    s = textureLod(colortex5, texel_uv + view_pixel_size * vec2(-diag, -diag), 0.0).rgb;
-    l = log2(local_exposure_luma(s));
-    d = abs(l - center_log);
+    s = textureLod(colortex5, texelUv + viewPixelSize * vec2(-diag, -diag), 0.0).rgb;
+    l = log2(localExposureLuma(s));
+    d = abs(l - centerLog);
     w = exp2(-d * 1.442695);
-    sum_log += l * w; sum_w += w;
+    sumLog += l * w; sumW += w;
 
-    s = textureLod(colortex5, texel_uv + view_pixel_size * vec2( diag, -diag), 0.0).rgb;
-    l = log2(local_exposure_luma(s));
-    d = abs(l - center_log);
+    s = textureLod(colortex5, texelUv + viewPixelSize * vec2( diag, -diag), 0.0).rgb;
+    l = log2(localExposureLuma(s));
+    d = abs(l - centerLog);
     w = exp2(-d * 1.442695);
-    sum_log += l * w; sum_w += w;
+    sumLog += l * w; sumW += w;
 
-    s = textureLod(colortex5, texel_uv + view_pixel_size * vec2(-diag,  diag), 0.0).rgb;
-    l = log2(local_exposure_luma(s));
-    d = abs(l - center_log);
+    s = textureLod(colortex5, texelUv + viewPixelSize * vec2(-diag,  diag), 0.0).rgb;
+    l = log2(localExposureLuma(s));
+    d = abs(l - centerLog);
     w = exp2(-d * 1.442695);
-    sum_log += l * w; sum_w += w;
+    sumLog += l * w; sumW += w;
 
-    s = textureLod(colortex5, texel_uv + view_pixel_size * vec2( diag,  diag), 0.0).rgb;
-    l = log2(local_exposure_luma(s));
-    d = abs(l - center_log);
+    s = textureLod(colortex5, texelUv + viewPixelSize * vec2( diag,  diag), 0.0).rgb;
+    l = log2(localExposureLuma(s));
+    d = abs(l - centerLog);
     w = exp2(-d * 1.442695);
-    sum_log += l * w; sum_w += w;
+    sumLog += l * w; sumW += w;
 
-    float local_log = sum_log / max(sum_w, 1e-5);
+    float localLog = sumLog / max(sumW, 1e-5);
 
     // Centered on the global meter anchor, not an absolute middle gray.
     // Same adaptation for detail and regional so the two stages agree.
     const float adaptation = 0.28;
-    float ev = (anchor_log - local_log) * adaptation;
+    float ev = (anchorLog - localLog) * adaptation;
 
 
     ev = clamp(ev * localExposureDetail, -0.6666667, 0.6666667);
 
 
-    float region_lod = ceil(log2(max_of(rcp(view_pixel_size)) * 0.02));
-    vec3 region_rgb
-        = textureLod(colortex5, texel_uv, region_lod).rgb;
-    float region_log = log2(local_exposure_luma(region_rgb));
-    float region_ev = clamp(
-        (anchor_log - region_log) * adaptation,
+    float regionLod = ceil(log2(maxOf(rcp(viewPixelSize)) * 0.02));
+    vec3 regionRgb
+        = textureLod(colortex5, texelUv, regionLod).rgb;
+    float regionLog = log2(localExposureLuma(regionRgb));
+    float regionEv = clamp(
+        (anchorLog - regionLog) * adaptation,
         -localExposureRange,
         localExposureRange
     );
 
-    return mix(ev, region_ev, localExposureRegional);
+    return mix(ev, regionEv, localExposureRegional);
 }
 #endif
 
 #endif // INCLUDE_CAMERA_LOCAL_EXPOSURE
 // Vignette mask (inlined; only used by this grading stage)
 float vignetteMask(vec2 uv) {
-    const float vignette_size = 16.0;
-    const float vignette_intensity = 0.08 * vignetteIntensity;
+    const float vignetteSize = 16.0;
+    const float vignetteStrength = 0.08 * vignetteIntensity;
 
-    float darkness_pulse = 1.0 - dampen(abs(cos(2.0 * frameTimeCounter)));
+    float darknessPulse = 1.0 - dampen(abs(cos(2.0 * frameTimeCounter)));
 
     float vignetteBase
-        = vignette_size * (uv.x * uv.y - uv.x) * (uv.x * uv.y - uv.y);
+        = vignetteSize * (uv.x * uv.y - uv.x) * (uv.x * uv.y - uv.y);
     vignetteBase = pow(
         vignetteBase,
-        vignette_intensity + 0.1 * biome_cave + 0.3 * blindness
-            + 0.2 * darkness_pulse * darknessFactor
+        vignetteStrength + 0.1 * biomeCave + 0.3 * blindness
+            + 0.2 * darknessPulse * darknessFactor
     );
 
 
-    float vignette_r = length((uv - 0.5) * 2.0);
-    float vignette_shaping = pow(
+    float vignetteR = length((uv - 0.5) * 2.0);
+    float vignetteShaping = pow(
         smoothstep(
             vignetteStart,
             max(vignetteEnd, vignetteStart + 1e-3),
-            vignette_r
+            vignetteR
         ),
         vignetteExponent
     );
 
-    return mix(1.0, vignetteBase, vignette_shaping);
+    return mix(1.0, vignetteBase, vignetteShaping);
 }
 #include "/lib/util/bicubic.glsl"
 #include "/lib/util/color.glsl"
@@ -512,32 +581,32 @@ float vignetteMask(vec2 uv) {
 #ifdef lensFlare
 // Blurred bright source: bloom tile 2 is the full frame downsampled into a
 // Threshold is subtractive so sub-threshold sky contributes exactly zero.
-vec3 lens_flare_source(vec2 screen_uv) {
+vec3 lensFlareSource(vec2 screenUv) {
 #ifdef bloom
-    const float tile_scale = 0.5 * exp2(-2.0);
-    const vec2 tile_offset = vec2(1.0 - exp2(-2.0), 0.0);
-    vec2 tile_uv = clamp(screen_uv, vec2(0.0), vec2(1.0)) * tile_scale
-        + tile_offset;
-    vec3 c = bicubic_filter(colortex0, tile_uv).rgb;
+    const float tileScale = 0.5 * exp2(-2.0);
+    const vec2 tileOffset = vec2(1.0 - exp2(-2.0), 0.0);
+    vec2 tileUv = clamp(screenUv, vec2(0.0), vec2(1.0)) * tileScale
+        + tileOffset;
+    vec3 c = bicubicFilter(colortex0, tileUv).rgb;
 #else
-    vec3 c = texture(colortex5, clamp(screen_uv, vec2(0.0), vec2(1.0))).rgb;
+    vec3 c = texture(colortex5, clamp(screenUv, vec2(0.0), vec2(1.0))).rgb;
 #endif
     return max0(c - lensFlareThreshold);
 }
 
 // Project the sun into screen UV; facing fades to 0 as the sun drops
 // below the horizon or swings behind the camera.
-vec2 lens_flare_sun_uv(out float facing) {
-    vec3 view_sun = mat3(gbufferModelView) * sun_dir;
-    vec4 clip = gbufferProjection * vec4(view_sun * 100.0, 1.0);
-    vec2 sun_uv = clip.xy / max(clip.w, 1e-4) * 0.5 + 0.5;
-    facing = smoothstep(0.05, -0.15, view_sun.z)
-        * smoothstep(-0.12, 0.02, sun_dir.y);
-    return sun_uv;
+vec2 lensFlareSunUv(out float facing) {
+    vec3 viewSun = mat3(gbufferModelView) * sunDir;
+    vec4 clip = gbufferProjection * vec4(viewSun * 100.0, 1.0);
+    vec2 sunUv = clip.xy / max(clip.w, 1e-4) * 0.5 + 0.5;
+    facing = smoothstep(0.05, -0.15, viewSun.z)
+        * smoothstep(-0.12, 0.02, sunDir.y);
+    return sunUv;
 }
 
 
-vec3 lens_flare_ghosts(vec2 uv) {
+vec3 lensFlareGhostSample(vec2 uv) {
     vec2 mirror = 1.0 - uv;
     vec2 axis = (vec2(0.5) - mirror) * lensFlareSpacing;
 
@@ -549,9 +618,9 @@ vec3 lens_flare_ghosts(vec2 uv) {
             continue;
         }
         vec3 ghost;
-        ghost.r = lens_flare_source(base + axis * 0.01 * fi).r;
-        ghost.g = lens_flare_source(base).g;
-        ghost.b = lens_flare_source(base - axis * 0.01 * fi).b;
+        ghost.r = lensFlareSource(base + axis * 0.01 * fi).r;
+        ghost.g = lensFlareSource(base).g;
+        ghost.b = lensFlareSource(base - axis * 0.01 * fi).b;
 
         float edge = 1.0 - smoothstep(0.0, 0.75, length(base - 0.5));
         acc += ghost * (edge * edge) / (1.0 + fi * 0.5);
@@ -563,8 +632,8 @@ vec3 lens_flare_ghosts(vec2 uv) {
 #ifdef lensFlareHalo
 // Halo ring around the sun position: gaussian annulus sampled
 // chromatically, widened/narrowed by the width control.
-vec3 lens_flare_halo(vec2 uv, vec2 sun_uv) {
-    vec2 huv = uv - sun_uv;
+vec3 lensFlareHaloSample(vec2 uv, vec2 sunUv) {
+    vec2 huv = uv - sunUv;
     huv.x *= aspectRatio;
     float dist = length(huv);
     vec2 dir = huv / max(dist, 1e-4);
@@ -580,27 +649,27 @@ vec3 lens_flare_halo(vec2 uv, vec2 sun_uv) {
         return vec3(0.0);
     }
 
-    vec2 base = sun_uv + dir * lensFlareHaloRadius
+    vec2 base = sunUv + dir * lensFlareHaloRadius
         * vec2(1.0 / aspectRatio, 1.0);
     vec3 halo;
-    halo.r = lens_flare_source(base + dir * 0.004).r;
-    halo.g = lens_flare_source(base).g;
-    halo.b = lens_flare_source(base - dir * 0.004).b;
+    halo.r = lensFlareSource(base + dir * 0.004).r;
+    halo.g = lensFlareSource(base).g;
+    halo.b = lensFlareSource(base - dir * 0.004).b;
 
     return halo * ring;
 }
 #endif
 
-vec3 get_lens_flare(vec2 uv) {
+vec3 getLensFlare(vec2 uv) {
     float facing;
-    vec2 sun_uv = lens_flare_sun_uv(facing);
+    vec2 sunUv = lensFlareSunUv(facing);
     if (facing < 1e-4) {
         return vec3(0.0);
     }
 
-    vec3 flare = lens_flare_ghosts(uv);
+    vec3 flare = lensFlareGhostSample(uv);
 #ifdef lensFlareHalo
-    flare += lens_flare_halo(uv, sun_uv);
+    flare += lensFlareHaloSample(uv, sunUv);
 #endif
 
     // Storms and night haze kill flare faster than the sun itself dims
@@ -617,102 +686,102 @@ vec3 get_lens_flare(vec2 uv) {
 
 #endif // INCLUDE_CAMERA_LENS_FLARE
 
-vec3 get_bloom() {
+vec3 getBloom() {
     // Upsample last bloomColor tile. 
 
-    vec2 pad_amount = 6.0 * view_pixel_size;
-    vec2 uv_src = clamp(uv, pad_amount, 1.0 - pad_amount) * 0.5;
+    vec2 padAmount = 6.0 * viewPixelSize;
+    vec2 uvSrc = clamp(uv, padAmount, 1.0 - padAmount) * 0.5;
 
-    return bloomUpsamplingFilter(colortex0, uv_src).rgb;
+    return bloomUpsamplingFilter(colortex0, uvSrc).rgb;
 }
 
 void main() {
     ivec2 texel = ivec2(gl_FragCoord.xy);
 
-    scene_color = texelFetch(colortex5, texel, 0).rgb;
+    sceneColor = texelFetch(colortex5, texel, 0).rgb;
 
     float exposure = texelFetch(colortex5, ivec2(0), 0).a;
 
 #if defined lensFlare && defined WORLD_OVERWORLD
     // Lens flare in HDR before exposure/tonemap so it grades with the scene
-    scene_color += get_lens_flare(uv);
+    sceneColor += getLensFlare(uv);
 #endif
 
 #ifdef bloom
-    vec3 bloomColor = get_bloom();
+    vec3 bloomColor = getBloom();
     // Bloom rides the exposure: hot dark-scene gain no longer blows it
     // out, bright scenes keep full bloom. No-op at exposure <= 1.
-    float bloom_intensity = 0.12 * bloomIntensity
+    float bloomStrength = 0.12 * bloomIntensity
         / mix(max(exposure, 1.0), 1.0, 0.31);
 
     // Additive bloomColor: lerping towards bloomColor would dim the base image
-    scene_color += bloomColor * bloom_intensity;
+    sceneColor += bloomColor * bloomStrength;
 
 #ifdef bloomyFog
     // colortex3 is written by c1, which renders into the lower-left
 
 
-    vec2 fog_uv = min(
-        uv * taau_render_scale,
-        vec2(taau_render_scale) - 0.5 * view_pixel_size
+    vec2 fogUv = min(
+        uv * taauViewportScale,
+        vec2(taauViewportScale) - 0.5 * viewPixelSize
     );
-    float fog_transmittance = texture(colortex3, fog_uv).x;
-    scene_color = mix(
+    float fogTransmittance = texture(colortex3, fogUv).x;
+    sceneColor = mix(
         bloomColor,
-        scene_color,
-        pow(fog_transmittance, bloomyFogIntensity)
+        sceneColor,
+        pow(fogTransmittance, bloomyFogIntensity)
     );
 #endif
 #endif
 
 
-    const float exposure_calibration = 12.5 / 100.0 / 1.2;
-    float triangle = max(camera_exposure_triangle_factor(), 1e-6);
-    float triangle_free = exposure / triangle;
-    float anchor_log = log2(0.18);
-    if (triangle_free > 1e-6 && !isnan(triangle_free) && !isinf(triangle_free)) {
-        anchor_log = log2(max(exposure_calibration / triangle_free, 1e-5));
+    const float exposureCalibration = 12.5 / 100.0 / 1.2;
+    float triangle = max(cameraExposureTriangleFactor(), 1e-6);
+    float triangleFree = exposure / triangle;
+    float anchorLog = log2(0.18);
+    if (triangleFree > 1e-6 && !isnan(triangleFree) && !isinf(triangleFree)) {
+        anchorLog = log2(max(exposureCalibration / triangleFree, 1e-5));
     }
 
-    scene_color *= exposure;
+    sceneColor *= exposure;
 
 #ifdef localExposure
-    float local_ev = compute_local_exposure_ev(uv, scene_color / max(exposure, 1e-6), anchor_log);
-    scene_color *= exp2(local_ev);
+    float localEv = computeLocalExposureEv(uv, sceneColor / max(exposure, 1e-6), anchorLog);
+    sceneColor *= exp2(localEv);
 #endif
 
 #ifdef vignette
-    scene_color *= vignetteMask(uv);
+    sceneColor *= vignetteMask(uv);
 #endif
 
 #ifdef colorGrading
   #if gradeWhiteBalance != 6500
-    scene_color = color_grade_input(scene_color, white_balance_matrix);
+    sceneColor = colorGradeInput(sceneColor, whiteBalanceMatrix);
   #else
-    scene_color = color_grade_input(scene_color, mat3(1.0));
+    sceneColor = colorGradeInput(sceneColor, mat3(1.0));
   #endif
 #endif
 
 #ifdef tonemapComparison
-    scene_color
-        = uv.x < tonemapComparisonSplit ? tonemap_left(scene_color) : tonemap_right(scene_color);
+    sceneColor
+        = uv.x < tonemapComparisonSplit ? tonemapLeft(sceneColor) : tonemapRight(sceneColor);
 #else
-    scene_color = tonemap(scene_color);
+    sceneColor = tonemap(sceneColor);
 #endif
 
-    scene_color = clamp01(scene_color * working_to_display_color);
+    sceneColor = clamp01(sceneColor * workingToDisplayColor);
 #ifdef colorGrading
-    scene_color = color_grade_output(scene_color);
+    sceneColor = colorGradeOutput(sceneColor);
 #endif
 
 #if 0 // Tonemap plot
         const float scale = 2.0;
-        vec2 uv_scaled = uv * scale * vec2(1.0, 1.0 / aspectRatio);
-        float x = uv_scaled.x;
+        vec2 uvScaled = uv * scale * vec2(1.0, 1.0 / aspectRatio);
+        float x = uvScaled.x;
         float y = tonemap(vec3(x)).x;
 
-        if (abs(uv_scaled.x - 1.0) < 0.001 * scale) scene_color = vec3(1.0, 0.0, 0.0);
-        if (abs(uv_scaled.y - 1.0) < 0.001 * scale) scene_color = vec3(1.0, 0.0, 0.0);
-        if (abs(uv_scaled.y - y) < 0.001 * scale) scene_color = vec3(1.0);
+        if (abs(uvScaled.x - 1.0) < 0.001 * scale) sceneColor = vec3(1.0, 0.0, 0.0);
+        if (abs(uvScaled.y - 1.0) < 0.001 * scale) sceneColor = vec3(1.0, 0.0, 0.0);
+        if (abs(uvScaled.y - y) < 0.001 * scale) sceneColor = vec3(1.0);
 #endif
 }

@@ -33,8 +33,8 @@ uniform vec3 cameraPosition;
 
 uniform int frameCounter;
 
-uniform vec2 taa_offset;
-uniform vec2 view_pixel_size;
+uniform vec2 taaOffset;
+uniform vec2 viewPixelSize;
 
 void main() {
     uv = mat2(gl_TextureMatrix[0]) * gl_MultiTexCoord0.xy
@@ -42,32 +42,32 @@ void main() {
 
     tint = gl_Color;
 
-    vec3 view_pos = transform(gl_ModelViewMatrix, gl_Vertex.xyz);
+    vec3 viewPos = transform(gl_ModelViewMatrix, gl_Vertex.xyz);
 
 #ifdef slantedRain
-    const float rain_tilt_amount = 0.25;
-    const float rain_tilt_angle = 30.0 * degree;
-    const vec2 rain_tilt_offset
-        = rain_tilt_amount * vec2(cos(rain_tilt_angle), sin(rain_tilt_angle));
+    const float rainTiltAmount = 0.25;
+    const float rainTiltAngle = 30.0 * degree;
+    const vec2 rainTiltOffset
+        = rainTiltAmount * vec2(cos(rainTiltAngle), sin(rainTiltAngle));
 
-    vec3 scene_pos = transform(gbufferModelViewInverse, view_pos);
-    vec3 world_pos = scene_pos + cameraPosition;
+    vec3 scenePos = transform(gbufferModelViewInverse, viewPos);
+    vec3 worldPos = scenePos + cameraPosition;
 
-    float tilt_wave = 0.7 + 0.3 * sin(dot(world_pos, vec3(5.0)));
-    scene_pos.xz -= rain_tilt_offset * tilt_wave * scene_pos.y;
+    float tiltWave = 0.7 + 0.3 * sin(dot(worldPos, vec3(5.0)));
+    scenePos.xz -= rainTiltOffset * tiltWave * scenePos.y;
 
-    view_pos = transform(gbufferModelView, scene_pos);
+    viewPos = transform(gbufferModelView, scenePos);
 #endif
 
-    vec4 clip_pos = project(gl_ProjectionMatrix, view_pos);
+    vec4 clipPos = project(gl_ProjectionMatrix, viewPos);
 
 #if defined taa && defined taau
-    clip_pos.xy = clip_pos.xy * taau_render_scale
-        + clip_pos.w * (taau_render_scale - 1.0);
-    clip_pos.xy += taa_offset * clip_pos.w;
+    clipPos.xy = clipPos.xy * taauViewportScale
+        + clipPos.w * (taauViewportScale - 1.0);
+    clipPos.xy += taaOffset * clipPos.w;
 #elif defined taa
-    clip_pos.xy += taa_offset * clip_pos.w * 0.66;
+    clipPos.xy += taaOffset * clipPos.w * 0.66;
 #endif
 
-    gl_Position = clip_pos;
+    gl_Position = clipPos;
 }

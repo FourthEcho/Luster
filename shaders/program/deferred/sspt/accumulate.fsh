@@ -56,10 +56,10 @@ uniform vec3 previousCameraPosition;
 uniform float near;
 uniform float far;
 
-uniform vec2 view_res;
-uniform vec2 taa_offset;
+uniform vec2 viewRes;
+uniform vec2 taaOffset;
 
-uniform bool world_age_changed;
+uniform bool worldAgeChanged;
 
 // ------------
 //   Includes
@@ -80,7 +80,7 @@ uniform bool world_age_changed;
 
 // Relative luminance in the pack's working color space (Rec. 2020).
 float getLuma(vec3 c) {
-    return dot(c, luminance_weights);
+    return dot(c, luminanceWeights);
 }
 
 vec2 bufferSize() {
@@ -111,65 +111,65 @@ float avgOf(vec2 v) {
 // fallback finishing. Mirrors the shading-pass bilateral resolve (10.0 depth
 // scale) so DSSAO and DGTAO finish without bleeding across discontinuities
 // at any indirectResReduction. Returns 1.0 for hands and shaderAoNone.
-float fetch_fallback_ao(vec2 uv, float lin_z, bool is_hand) {
-    if (is_hand) {
+float fetchFallbackAo(vec2 uv, float linZ, bool isHand) {
+    if (isHand) {
         return 1.0;
     }
 #if shaderAo == shaderAoNone
     return 1.0;
 #else
-    vec2 ao_size = vec2(textureSize(colortex6, 0));
-    vec2 ao_pos = uv * ao_size - 0.5;
-    ivec2 base = ivec2(floor(ao_pos));
-    vec2 f = fract(ao_pos);
+    vec2 aoSize = vec2(textureSize(colortex6, 0));
+    vec2 aoPos = uv * aoSize - 0.5;
+    ivec2 base = ivec2(floor(aoPos));
+    vec2 f = fract(aoPos);
 
-    vec4 ao_taps;
-    vec4 ao_depths;
-    ao_taps.x = texelFetch(colortex6, clamp(base, ivec2(0), ivec2(ao_size) - 1), 0).x;
-    ao_taps.y = texelFetch(colortex6, clamp(base + ivec2(1, 0), ivec2(0), ivec2(ao_size) - 1), 0).x;
-    ao_taps.z = texelFetch(colortex6, clamp(base + ivec2(0, 1), ivec2(0), ivec2(ao_size) - 1), 0).x;
-    ao_taps.w = texelFetch(colortex6, clamp(base + ivec2(1, 1), ivec2(0), ivec2(ao_size) - 1), 0).x;
+    vec4 aoTaps;
+    vec4 aoDepths;
+    aoTaps.x = texelFetch(colortex6, clamp(base, ivec2(0), ivec2(aoSize) - 1), 0).x;
+    aoTaps.y = texelFetch(colortex6, clamp(base + ivec2(1, 0), ivec2(0), ivec2(aoSize) - 1), 0).x;
+    aoTaps.z = texelFetch(colortex6, clamp(base + ivec2(0, 1), ivec2(0), ivec2(aoSize) - 1), 0).x;
+    aoTaps.w = texelFetch(colortex6, clamp(base + ivec2(1, 1), ivec2(0), ivec2(aoSize) - 1), 0).x;
 
-    ao_depths.x = texelFetch(colortex14, clamp(base, ivec2(0), ivec2(ao_size) - 1), 0).x;
-    ao_depths.y = texelFetch(colortex14, clamp(base + ivec2(1, 0), ivec2(0), ivec2(ao_size) - 1), 0).x;
-    ao_depths.z = texelFetch(colortex14, clamp(base + ivec2(0, 1), ivec2(0), ivec2(ao_size) - 1), 0).x;
-    ao_depths.w = texelFetch(colortex14, clamp(base + ivec2(1, 1), ivec2(0), ivec2(ao_size) - 1), 0).x;
+    aoDepths.x = texelFetch(colortex14, clamp(base, ivec2(0), ivec2(aoSize) - 1), 0).x;
+    aoDepths.y = texelFetch(colortex14, clamp(base + ivec2(1, 0), ivec2(0), ivec2(aoSize) - 1), 0).x;
+    aoDepths.z = texelFetch(colortex14, clamp(base + ivec2(0, 1), ivec2(0), ivec2(aoSize) - 1), 0).x;
+    aoDepths.w = texelFetch(colortex14, clamp(base + ivec2(1, 1), ivec2(0), ivec2(aoSize) - 1), 0).x;
 
     vec4 w;
-    w.x = exp2(-10.0 * abs(screen_to_view_space_depth(combined_projection_matrix_inverse, 1.0 - ao_depths.x) - lin_z));
-    w.y = exp2(-10.0 * abs(screen_to_view_space_depth(combined_projection_matrix_inverse, 1.0 - ao_depths.y) - lin_z));
-    w.z = exp2(-10.0 * abs(screen_to_view_space_depth(combined_projection_matrix_inverse, 1.0 - ao_depths.z) - lin_z));
-    w.w = exp2(-10.0 * abs(screen_to_view_space_depth(combined_projection_matrix_inverse, 1.0 - ao_depths.w) - lin_z));
+    w.x = exp2(-10.0 * abs(screenToViewSpaceDepth(combinedProjectionMatrixInverse, 1.0 - aoDepths.x) - linZ));
+    w.y = exp2(-10.0 * abs(screenToViewSpaceDepth(combinedProjectionMatrixInverse, 1.0 - aoDepths.y) - linZ));
+    w.z = exp2(-10.0 * abs(screenToViewSpaceDepth(combinedProjectionMatrixInverse, 1.0 - aoDepths.z) - linZ));
+    w.w = exp2(-10.0 * abs(screenToViewSpaceDepth(combinedProjectionMatrixInverse, 1.0 - aoDepths.w) - linZ));
 
     w.x *= (1.0 - f.x) * (1.0 - f.y);
     w.y *= f.x * (1.0 - f.y);
     w.z *= (1.0 - f.x) * f.y;
     w.w *= f.x * f.y;
 
-    float w_sum = w.x + w.y + w.z + w.w;
-    if (w_sum <= 1e-6) {
-        return clamp01(dot(ao_taps, vec4(0.25)));
+    float wSum = w.x + w.y + w.z + w.w;
+    if (wSum <= 1e-6) {
+        return clamp01(dot(aoTaps, vec4(0.25)));
     }
-    return clamp01(dot(ao_taps, w) / w_sum);
+    return clamp01(dot(aoTaps, w) / wSum);
 #endif
 }
 
 /* ------ REPROJECTION ------ */
 
-vec3 reprojectHistory(vec3 scene_space) {
-    vec3 prev_pos = scene_space + (cameraPosition - previousCameraPosition);
-    prev_pos = transform(gbufferPreviousModelView, prev_pos);
-    prev_pos = project_and_divide(gbufferPreviousProjection, prev_pos);
-    return prev_pos * 0.5 + 0.5;
+vec3 reprojectHistory(vec3 sceneSpace) {
+    vec3 prevPos = sceneSpace + (cameraPosition - previousCameraPosition);
+    prevPos = transform(gbufferPreviousModelView, prevPos);
+    prevPos = projectAndDivide(gbufferPreviousProjection, prevPos);
+    return prevPos * 0.5 + 0.5;
 }
 
 /* ------ EDGE-AWARE SPATIAL FILTERS ------ */
 
 vec3 spatialColor(ivec2 texel) {
     // 5x5 gather, normal + depth + luma weighted.
-    vec3 total_color = texelFetch(colortex17, texel, 0).rgb;
-    float sum_weight = 1.0;
-    float luma_center = getLuma(total_color);
+    vec3 totalColor = texelFetch(colortex17, texel, 0).rgb;
+    float sumWeight = 1.0;
+    float lumaCenter = getLuma(totalColor);
 
     vec4 gbuffer = fetchGbuffer(texel);
 
@@ -182,36 +182,36 @@ vec3 spatialColor(ivec2 texel) {
 
             vec4 gb = fetchGbuffer(tap);
 
-            float depth_delta = distance(gb.w, gbuffer.w) * far;
+            float depthDelta = distance(gb.w, gbuffer.w) * far;
 
-            if (depth_delta < 2.0) {
-                vec3 current_color = texelFetch(colortex17, tap, 0).rgb;
+            if (depthDelta < 2.0) {
+                vec3 currentColor = texelFetch(colortex17, tap, 0).rgb;
 
-                float lum = getLuma(current_color);
+                float lum = getLuma(currentColor);
 
-                float dist_lum = abs(luma_center - lum);
-                    dist_lum = sqr(dist_lum) / max(luma_center, 0.027);
-                    dist_lum = clamp(dist_lum, 0.0, pi);
+                float distLum = abs(lumaCenter - lum);
+                    distLum = sqr(distLum) / max(lumaCenter, 0.027);
+                    distLum = clamp(distLum, 0.0, pi);
 
                 float weight = pow(max0(dot(gbuffer.xyz, gb.xyz)), 8.0)
-                             * exp(-depth_delta - sqrt(dist_lum) * rcp_pi);
+                             * exp(-depthDelta - sqrt(distLum) * rcpPi);
 
-                total_color += current_color * weight;
-                sum_weight += weight;
+                totalColor += currentColor * weight;
+                sumWeight += weight;
             }
         }
     }
 
-    return total_color / sum_weight;
+    return totalColor / sumWeight;
 }
 
-vec3 spatialColor7x7(ivec2 texel, inout vec2 variance, out float max_lum) {
+vec3 spatialColor7x7(ivec2 texel, inout vec2 variance, out float maxLum) {
     // 7x7 gather, normal + depth weighted; also builds variance moments.
-    vec3 total_color = texelFetch(colortex17, texel, 0).rgb;
-    float sum_weight = 1.0;
-    float luma_center = getLuma(total_color);
+    vec3 totalColor = texelFetch(colortex17, texel, 0).rgb;
+    float sumWeight = 1.0;
+    float lumaCenter = getLuma(totalColor);
 
-        max_lum = luma_center;
+        maxLum = lumaCenter;
 
     vec4 gbuffer = fetchGbuffer(texel);
 
@@ -224,29 +224,29 @@ vec3 spatialColor7x7(ivec2 texel, inout vec2 variance, out float max_lum) {
 
             vec4 gb = fetchGbuffer(tap);
 
-            float depth_delta = distance(gb.w, gbuffer.w) * far;
+            float depthDelta = distance(gb.w, gbuffer.w) * far;
 
-            if (depth_delta < 2.0) {
-                vec3 current_color = texelFetch(colortex17, tap, 0).rgb;
+            if (depthDelta < 2.0) {
+                vec3 currentColor = texelFetch(colortex17, tap, 0).rgb;
 
                 float weight = pow(max0(dot(gbuffer.xyz, gb.xyz)), 2.0);
-                float current_luma = getLuma(current_color);
+                float currentLuma = getLuma(currentColor);
 
-                max_lum = max(max_lum, current_luma);
+                maxLum = max(maxLum, currentLuma);
 
-                total_color += current_color * weight;
-                variance += vec2(current_luma * weight, sqr(current_luma) * sqr(weight));
-                sum_weight += weight;
+                totalColor += currentColor * weight;
+                variance += vec2(currentLuma * weight, sqr(currentLuma) * sqr(weight));
+                sumWeight += weight;
             }
         }
     }
 
-    total_color /= sum_weight;
-    variance /= vec2(sum_weight, sqr(sum_weight));
+    totalColor /= sumWeight;
+    variance /= vec2(sumWeight, sqr(sumWeight));
 
-    max_lum = clamp(max_lum, 0.0, 2.71) * rcp_pi;
+    maxLum = clamp(maxLum, 0.0, 2.71) * rcpPi;
 
-    return total_color;
+    return totalColor;
 }
 
 // ------------
@@ -255,33 +255,33 @@ vec3 spatialColor7x7(ivec2 texel, inout vec2 variance, out float max_lum) {
 
 void main() {
     ivec2 texel = ivec2(gl_FragCoord.xy);
-    ivec2 gbuffer_texel = ivec2(uv * view_res * taau_render_scale);
+    ivec2 gbufferTexel = ivec2(uv * viewRes * taauViewportScale);
 
     historyGData = vec4(1.0); // .w = 1 -> sqr(1) never matches currentDistance
     indirectHistory = vec4(0.0);
     indirectCurrent = vec4(texelFetch(colortex17, texel, 0).rgb, 0.0);
 
-    float depth = texelFetch(combined_depth_tex, gbuffer_texel, 0).x;
+    float depth = texelFetch(combinedDepthTex, gbufferTexel, 0).x;
 
     if (depth >= 1.0) return;
 
-    vec3 screen_pos = vec3(uv, depth);
-    vec3 view_pos = screen_to_view_space(
-        combined_projection_matrix_inverse,
-        screen_pos,
+    vec3 screenPos = vec3(uv, depth);
+    vec3 viewPos = screenToViewSpace(
+        combinedProjectionMatrixInverse,
+        screenPos,
         true
     );
-    vec3 scene_pos = view_to_scene_space(view_pos);
+    vec3 scenePos = viewToSceneSpace(viewPos);
 
-    float current_distance = clamp01(length(scene_pos) / far);
+    float currentDistance = clamp01(length(scenePos) / far);
 
-    vec3 reprojection = reprojectHistory(scene_pos);
+    vec3 reprojection = reprojectHistory(scenePos);
 
     bool offscreen = clamp01(reprojection.xy) != reprojection.xy;
 
     // History texel + subpixel weights, 4-tap bilinear.
-    ivec2 rep_texel = ivec2(floor(reprojection.xy * bufferSize() - vec2(0.5)));
-    vec2 subpix = fract(reprojection.xy * bufferSize() - vec2(0.5) - rep_texel);
+    ivec2 repTexel = ivec2(floor(reprojection.xy * bufferSize() - vec2(0.5)));
+    vec2 subpix = fract(reprojection.xy * bufferSize() - vec2(0.5) - repTexel);
 
     const ivec2 offset[4] = ivec2[4](
         ivec2(0, 0),
@@ -297,116 +297,116 @@ void main() {
         subpix.x         * subpix.y
     );
 
-    vec2 lightmap_source = unpack_unorm_2x8(
-        texelFetch(colortex1, gbuffer_texel, 0).w
+    vec2 lightmapSource = unpackUnorm2x8(
+        texelFetch(colortex1, gbufferTexel, 0).w
     );
 
-    float lightmap = pow5(lightmap_source.x);
+    float lightmap = pow5(lightmapSource.x);
 
     // Depth-aware finishing for the fallback: same scalar visibility as the
     // trace pass for both DSSAO and DGTAO, hands excluded.
-    float lin_z = screen_to_view_space_depth(
-        combined_projection_matrix_inverse,
+    float linZ = screenToViewSpaceDepth(
+        combinedProjectionMatrixInverse,
         depth
     );
-    bool is_hand = depth < hand_depth;
-    float ao = fetch_fallback_ao(uv, lin_z, is_hand);
+    bool isHand = depth < handDepth;
+    float ao = fetchFallbackAo(uv, linZ, isHand);
 
-    vec3 rt_light = vec3(0.0);
+    vec3 rtLight = vec3(0.0);
     float samples = 0.0;
     float variance = 0.0;
-    vec2 variance_data = vec2(0.0);
+    vec2 varianceData = vec2(0.0);
 
 
     // The trace pass finishes bounced radiance with AO while preserving
     // emission. Apply AO here only to the lightmap fallback when the ray
     // paths miss all geometry. With shaderAoNone, ao is 1.0 by construction.
-    float sspt_geometry_hit = texelFetch(colortex17, texel, 0).a;
-    float miss_ao = mix(ao, 1.0, sspt_geometry_hit);
-    float raw_lightmap_weight = lightmap * sqr(miss_ao) * ssptLightmapBlend;
+    float ssptGeometryHit = texelFetch(colortex17, texel, 0).a;
+    float missAo = mix(ao, 1.0, ssptGeometryHit);
+    float rawLightmapWeight = lightmap * sqr(missAo) * ssptLightmapBlend;
 
-    if (offscreen || world_age_changed) {
+    if (offscreen || worldAgeChanged) {
         // Offscreen / world-change path: spatial estimate only.
-        rt_light = spatialColor7x7(texel, variance_data, variance);
+        rtLight = spatialColor7x7(texel, varianceData, variance);
         samples = 1.0;
     } else {
-        vec4 previous_light = vec4(0.0); // rgb + frames
-        vec3 previous_aux = vec3(0.0);   // variance moments + lightmap
+        vec4 previousLight = vec4(0.0); // rgb + frames
+        vec3 previousAux = vec3(0.0);   // variance moments + lightmap
 
-        float sum_weight = 0.0;
+        float sumWeight = 0.0;
 
         // Camera-motion depth rejection tolerance.
-        vec3 camera_movement
+        vec3 cameraMovement
             = mat3(gbufferModelView) * (cameraPosition - previousCameraPosition);
 
         // Sample history with depth rejection.
         for (int i = 0; i < 4; ++i) {
-            ivec2 history_texel = rep_texel + offset[i];
+            ivec2 historyTexel = repTexel + offset[i];
 
-            if (clampTexel(history_texel) != history_texel) continue;
+            if (clampTexel(historyTexel) != historyTexel) continue;
 
-            vec4 history_g = texelFetch(colortex20, history_texel, 0);
+            vec4 historyG = texelFetch(colortex20, historyTexel, 0);
 
-            float depth_delta = distance(sqr(history_g.w), current_distance)
-                              - abs(camera_movement.z / far);
-            bool depth_rejection = (depth_delta / max(current_distance, 1e-6)) < 0.1;
+            float depthDelta = distance(sqr(historyG.w), currentDistance)
+                              - abs(cameraMovement.z / far);
+            bool depthRejection = (depthDelta / max(currentDistance, 1e-6)) < 0.1;
 
-            if (depth_rejection) {
-                previous_light += max0(texelFetch(colortex18, history_texel, 0)) * weight[i];
-                previous_aux += history_g.xyz * weight[i];
-                sum_weight += weight[i];
+            if (depthRejection) {
+                previousLight += max0(texelFetch(colortex18, historyTexel, 0)) * weight[i];
+                previousAux += historyG.xyz * weight[i];
+                sumWeight += weight[i];
             }
         }
 
-        if (sum_weight > 1e-3) {
-            previous_light /= sum_weight;
-            previous_aux /= sum_weight;
+        if (sumWeight > 1e-3) {
+            previousLight /= sumWeight;
+            previousAux /= sumWeight;
 
             // Accumulation alpha schedule.
-            float frames = min(previous_light.a + 1.0, maxFrames);
-            float alpha_color = max(0.01 * 1.0, 1.0 / frames);
-            float alpha_variance = max(0.02 * 1.0, 1.0 / frames);
+            float frames = min(previousLight.a + 1.0, maxFrames);
+            float alphaColor = max(0.01 * 1.0, 1.0 / frames);
+            float alphaVariance = max(0.02 * 1.0, 1.0 / frames);
 
             // Adaptive rejection from the lightmap delta.
-            float adapt_delta = sqr(
-                max0(abs(lightmap - previous_aux.z) - (1.0 / 1024.0))
-                    / (avgOf(vec2(lightmap, previous_aux.z)) + 5e-3)
+            float adaptDelta = sqr(
+                max0(abs(lightmap - previousAux.z) - (1.0 / 1024.0))
+                    / (avgOf(vec2(lightmap, previousAux.z)) + 5e-3)
             );
 
-            float rejection = 1.0 / (1.0 + adapt_delta);
+            float rejection = 1.0 / (1.0 + adaptDelta);
                 rejection = clamp01(1.0 - rejection);
                 rejection = clamp01(0.71 * rejection * 1.0);
 
-            alpha_color = max(rejection, alpha_color);
-            alpha_variance = max(rejection, alpha_variance);
+            alphaColor = max(rejection, alphaColor);
+            alphaVariance = max(rejection, alphaVariance);
 
-            vec3 current_light = spatialColor(texel);
+            vec3 currentLight = spatialColor(texel);
 
-            float current_luma = getLuma(current_light);
-            vec2 current_variance = vec2(current_luma, sqr(current_luma));
-                variance_data = mix(previous_aux.xy, current_variance, alpha_variance);
+            float currentLuma = getLuma(currentLight);
+            vec2 currentVariance = vec2(currentLuma, sqr(currentLuma));
+                varianceData = mix(previousAux.xy, currentVariance, alphaVariance);
 
-            rt_light = mix(previous_light.rgb, current_light, alpha_color);
-            variance = sqrt(max0(variance_data.y - sqr(variance_data.x)))
-                     / max(variance_data.x, 1e-8);
+            rtLight = mix(previousLight.rgb, currentLight, alphaColor);
+            variance = sqrt(max0(varianceData.y - sqr(varianceData.x)))
+                     / max(varianceData.x, 1e-8);
                 variance *= max(1.0 + rejection * sqrt(2.0), 4.0 / frames);
             samples = frames;
 
-            lightmap = mix(previous_aux.z, lightmap, max(0.2, 1.0 / frames));
+            lightmap = mix(previousAux.z, lightmap, max(0.2, 1.0 / frames));
         } else {
-            rt_light = spatialColor7x7(texel, variance_data, variance);
+            rtLight = spatialColor7x7(texel, varianceData, variance);
             samples = 1.0;
         }
     }
 
     // Merge the blocklight fallback after AO-finished traced contributions.
-    vec3 current = rt_light + raw_lightmap_weight * blocklight_color * rcp(tau);
+    vec3 current = rtLight + rawLightmapWeight * blocklightColor * rcp(tau);
 
     indirectCurrent = vec4(current, variance);
-    indirectHistory = vec4(rt_light, samples);
+    indirectHistory = vec4(rtLight, samples);
     historyGData = vec4(
-        clamp01(variance_data),
+        clamp01(varianceData),
         lightmap,
-        sqrt(current_distance)
+        sqrt(currentDistance)
     );
 }

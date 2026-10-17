@@ -18,8 +18,8 @@
 
 #include "/lib/global.glsl"
 
-in vec3 cage_normal;
-in vec3 world_pos;
+in vec3 cageNormal;
+in vec3 worldPos;
 flat in vec3 tint;
 
 uniform int frameCounter, frameTime;
@@ -35,7 +35,7 @@ uniform mat4 gbufferProjectionInverse;
 uniform mat4 shadowProjection, shadowProjectionInverse;
 uniform mat4 shadowModelView, shadowModelViewInverse;
 
-layout(location = 0) out vec3 shadowcolor0_out;
+layout(location = 0) out vec3 shadowcolor0Out;
 
 #include "/lib/light/distortion.glsl"
 #include "/lib/util/color.glsl"
@@ -45,7 +45,7 @@ void main() {
 #endif
 
     RayJob ray = RayJob(
-        world_pos - world_offset - 0.01f * cage_normal, // Ray origin
+        worldPos - worldOffset - 0.01f * cageNormal, // Ray origin
         mat3(shadowModelViewInverse) * vec3(0.0f, 0.0f, -1.0f), // Ray direction
         vec3(0.0f),
         vec3(0.0f),
@@ -53,17 +53,17 @@ void main() {
         false
     );
 
-    ray_constraint = ivec3(ray.origin);
-    trace_ray(ray);
+    rayConstraint = ivec3(ray.origin);
+    traceRay(ray);
 
-    if (!ray.result_hit) {
+    if (!ray.resultHit) {
         discard;
     }
 
-    vec4 base_color = vec4(ray.result_color, 1.0f);
+    vec4 baseColor = vec4(ray.resultColor, 1.0f);
 
-    shadowcolor0_out = mix(vec3(1.0), base_color.rgb * tint, base_color.a);
-    shadowcolor0_out
-        = 0.25 * srgb_eotf_inv(shadowcolor0_out) * rec709_to_working_color;
-    shadowcolor0_out *= step(base_color.a, 1.0 - rcp(255.0));
+    shadowcolor0Out = mix(vec3(1.0), baseColor.rgb * tint, baseColor.a);
+    shadowcolor0Out
+        = 0.25 * srgbEotfInv(shadowcolor0Out) * rec709ToWorkingColor;
+    shadowcolor0Out *= step(baseColor.a, 1.0 - rcp(255.0));
 }

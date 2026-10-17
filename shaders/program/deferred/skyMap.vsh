@@ -20,24 +20,24 @@
 
 out vec2 uv;
 
-flat out vec3 ambient_color;
-flat out vec3 light_color;
+flat out vec3 ambientColor;
+flat out vec3 lightColor;
 
 #if defined WORLD_OVERWORLD
-flat out vec3 sun_color;
-flat out vec3 moon_color;
-flat out vec3 sky_color;
+flat out vec3 sunColor;
+flat out vec3 moonColor;
+flat out vec3 skyColor;
 
-flat out float aurora_amount;
-flat out mat2x3 aurora_colors;
+flat out float auroraAmount;
+flat out mat2x3 auroraColors;
 
-flat out float rainbow_amount;
+flat out float rainbowAmount;
 
-#include "/lib/sky/clouds/parameters.glsl"
-flat out CloudsParameters clouds_params;
+#include "/lib/atmos/sky/clouds/core/parameters.glsl"
+flat out CloudsParameters cloudsParams;
 
-#include "/lib/fog/overworld/parameters.glsl"
-flat out OverworldFogParameters fog_params;
+#include "/lib/atmos/fog/overworld/parameters.glsl"
+flat out OverworldFogParameters fogParams;
 #endif
 
 // ------------
@@ -45,6 +45,7 @@ flat out OverworldFogParameters fog_params;
 // ------------
 
 uniform sampler3D depthtex0; // atmospheric scattering LUT
+uniform sampler2D noisetex;
 
 uniform float blindness;
 uniform float eyeAltitude;
@@ -63,31 +64,31 @@ uniform int isEyeInWater;
 
 uniform vec3 fogColor;
 
-uniform vec3 light_dir;
-uniform vec3 sun_dir;
-uniform vec3 moon_dir;
+uniform vec3 lightDir;
+uniform vec3 sunDir;
+uniform vec3 moonDir;
 
-uniform float world_age;
-uniform float eye_skylight;
+uniform float worldAge;
+uniform float eyeSkylight;
 
-uniform float time_sunrise;
-uniform float time_noon;
-uniform float time_sunset;
-uniform float time_midnight;
+uniform float timeSunrise;
+uniform float timeNoon;
+uniform float timeSunset;
+uniform float timeMidnight;
 
-uniform float biome_cave;
-uniform float biome_temperate;
-uniform float biome_arid;
-uniform float biome_snowy;
-uniform float biome_taiga;
-uniform float biome_jungle;
-uniform float biome_swamp;
-uniform float biome_may_rain;
-uniform float biome_may_snow;
-uniform float biome_temperature;
-uniform float biome_humidity;
+uniform float biomeCave;
+uniform float biomeTemperate;
+uniform float biomeArid;
+uniform float biomeSnowy;
+uniform float biomeTaiga;
+uniform float biomeJungle;
+uniform float biomeSwamp;
+uniform float biomeMayRain;
+uniform float biomeMaySnow;
+uniform float biomeTemperature;
+uniform float biomeHumidity;
 
-uniform float desert_sandstorm;
+uniform float desertSandstormWeather;
 
 // ------------
 //   Includes
@@ -105,7 +106,7 @@ uniform float desert_sandstorm;
 #define LUSTER_INCLUDE_WEATHER_COLOR
 #include "/lib/light/colors.glsl"
 #undef LUSTER_INCLUDE_WEATHER_COLOR
-#include "/lib/sky/auroraColors.glsl"
+#include "/lib/atmos/sky/aurora.glsl"
 #include "/lib/weather/clouds.glsl"
 #include "/lib/weather/fog.glsl"
 #include "/lib/weather/rainbow.glsl"
@@ -114,85 +115,85 @@ uniform float desert_sandstorm;
 #include "/lib/util/color.glsl"
 
 #if defined WORLD_NETHER
-vec3 get_light_color() { return vec3(0.0); }
+vec3 getLightColor() { return vec3(0.0); }
 
-vec3 get_ambient_color() {
+vec3 getAmbientColor() {
 #ifdef netherUseBiomeColor
-    vec3 nether_color = srgb_eotf_inv(fogColor) * rec709_to_working_color;
-    nether_color /= max(dot(nether_color, luminance_weights), eps);
-    nether_color = mix(vec3(1.0), nether_color, netherS);
-    nether_color *= 0.05 * netherI;
+    vec3 netherColor = srgbEotfInv(fogColor) * rec709ToWorkingColor;
+    netherColor /= max(dot(netherColor, luminanceWeights), eps);
+    netherColor = mix(vec3(1.0), netherColor, netherS);
+    netherColor *= 0.05 * netherI;
 #else
-    vec3 nether_color
-        = from_display(vec3(netherR, netherG, netherB)) * 0.1 * netherI;
+    vec3 netherColor
+        = fromDisplay(vec3(netherR, netherG, netherB)) * 0.1 * netherI;
 #endif
 
-    return nether_color;
+    return netherColor;
 }
 #elif defined WORLD_END
-vec3 get_light_color() {
-    return from_display(vec3(endLightR, endLightG, endLightB)) * endLightI;
+vec3 getLightColor() {
+    return fromDisplay(vec3(endLightR, endLightG, endLightB)) * endLightI;
 }
 
-vec3 get_ambient_color() {
-    return from_display(vec3(endAmbientR, endAmbientG, endAmbientB))
+vec3 getAmbientColor() {
+    return fromDisplay(vec3(endAmbientR, endAmbientG, endAmbientB))
         * endAmbientI;
 }
 #endif
 #if defined WORLD_OVERWORLD
-vec3 get_ambient_color() {
-    sun_color = get_sun_exposure() * get_sun_tint();
-    moon_color = get_moon_exposure() * get_moon_tint();
+vec3 getAmbientColor() {
+    sunColor = getSunExposure() * getSunTint();
+    moonColor = getMoonExposure() * getMoonTint();
 
-    const vec3 sky_dir = normalize(
+    const vec3 skyDir = normalize(
         vec3(0.0, 1.0, -0.8)
     ); // don't point direcly upwards to avoid the sun halo when the sun path
        // rotation is 0
-    sky_color = atmosphere_scattering(
-        sky_dir,
-        sun_color,
-        sun_dir,
-        moon_color,
-        moon_dir,
+    skyColor = atmosphereScattering(
+        skyDir,
+        sunColor,
+        sunDir,
+        moonColor,
+        moonDir,
         false
     );
-    sky_color = tau * sky_color * 1.13;
+    skyColor = tau * skyColor * 1.13;
 #ifdef desertSandstorm
 
 
-    sky_color = mix(
-        sky_color,
-        tau * get_weather_color(),
-        clamp01(rainStrength + desert_sandstorm)
+    skyColor = mix(
+        skyColor,
+        tau * getWeatherColor(),
+        clamp01(rainStrength + desertSandstormWeather)
     );
 #else
-    sky_color = mix(sky_color, tau * get_weather_color(), rainStrength);
+    skyColor = mix(skyColor, tau * getWeatherColor(), rainStrength);
 #endif
 
-    return sky_color;
+    return skyColor;
 }
 #endif
 
 void main() {
     uv = gl_MultiTexCoord0.xy;
 
-    light_color = get_light_color();
-    ambient_color = get_ambient_color();
+    lightColor = getLightColor();
+    ambientColor = getAmbientColor();
 
 #if defined WORLD_OVERWORLD
-    aurora_amount = get_aurora_amount();
-    aurora_colors = get_aurora_colors();
+    auroraAmount = getAuroraAmount();
+    auroraColors = getAuroraColors();
 
-    Weather weather = get_weather();
-    rainbow_amount = get_rainbow_amount(weather);
-    clouds_params = get_clouds_parameters(weather);
-    fog_params = get_fog_parameters(weather);
+    Weather weather = getWeather();
+    rainbowAmount = getRainbowAmount(weather);
+    cloudsParams = getCloudsParameters(weather);
+    fogParams = getFogParameters(weather);
 
 
-    vec3 aurora_lighting
-        = mix(aurora_colors[0], aurora_colors[1], 0.25) * aurora_amount;
-    sky_color += auroraCloudLighting * aurora_lighting;
-    ambient_color += auroraGroundLighting * aurora_lighting;
+    vec3 auroraLighting
+        = mix(auroraColors[0], auroraColors[1], 0.25) * auroraAmount;
+    skyColor += auroraCloudLighting * auroraLighting;
+    ambientColor += auroraGroundLighting * auroraLighting;
 #endif
 
     gl_Position = vec4(gl_Vertex.xy * 2.0 - 1.0, 0.0, 1.0);

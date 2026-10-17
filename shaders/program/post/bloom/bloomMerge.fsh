@@ -18,7 +18,7 @@
 
 #include "/lib/global.glsl"
 
-layout(location = 0) out vec3 bloom_tiles;
+layout(location = 0) out vec3 bloomTiles;
 
 /* RENDERTARGETS: 0 */
 
@@ -26,13 +26,13 @@ in vec2 uv;
 
 uniform sampler2D colortex0;
 
-uniform vec2 view_res;
+uniform vec2 viewRes;
 
 void main() {
-    int tile_index = int(-log2(1.0 - uv.x));
+    int tileIndex = int(-log2(1.0 - uv.x));
 
-    if ((tile_index & 1) == 1) {
-        bloom_tiles = texelFetch(colortex0, ivec2(gl_FragCoord.xy), 0).rgb;
+    if ((tileIndex & 1) == 1) {
+        bloomTiles = texelFetch(colortex0, ivec2(gl_FragCoord.xy), 0).rgb;
     } else {
         discard;
     }

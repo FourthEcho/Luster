@@ -19,7 +19,7 @@
 #if !defined INCLUDE_VERTEX_UTILITY
 #define INCLUDE_VERTEX_UTILITY
 
-uint get_material_mask() {
+uint getMaterialMask() {
 #if defined PROGRAM_GBUFFERS_TERRAIN || defined PROGRAM_GBUFFERS_WATER
     // Terrain
     return uint(max0(mc_Entity.x - 10000.0));
@@ -28,8 +28,8 @@ uint get_material_mask() {
     // Entities
     uint id = uint(max(entityId - 10000, 0));
 #ifdef IS_IRIS
-    uint item_id = uint(max(currentRenderedItemId - 10000, 0));
-    id = id == 100 ? item_id : id;
+    uint itemId = uint(max(currentRenderedItemId - 10000, 0));
+    id = id == 100 ? itemId : id;
 #endif
     return id;
 #elif defined PROGRAM_GBUFFERS_BLOCK \
@@ -41,7 +41,7 @@ uint get_material_mask() {
     return uint(max(currentRenderedItemId - 10000, 0));
 #elif defined PROGRAM_GBUFFERS_BEACONBEAM || defined PROGRAM_GBUFFERS_SPIDEREYES
     // Glowing stuff
-    light_levels.x = 1.0;
+    lightLevels.x = 1.0;
     return 32u; // full emissive
 #else
     // Other
@@ -49,7 +49,7 @@ uint get_material_mask() {
 #endif
 }
 
-mat3 get_tbn_matrix() {
+mat3 getTbnMatrix() {
     mat3 tbn;
     tbn[0] = mat3(gbufferModelViewInverse)
         * normalize(gl_NormalMatrix * at_tangent.xyz);

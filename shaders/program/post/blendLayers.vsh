@@ -20,12 +20,12 @@
 
 out vec2 uv;
 
-flat out vec3 ambient_color;
-flat out vec3 light_color;
+flat out vec3 ambientColor;
+flat out vec3 lightColor;
 
 #if defined WORLD_OVERWORLD
-#include "/lib/fog/overworld/parameters.glsl"
-flat out OverworldFogParameters fog_params;
+#include "/lib/atmos/fog/overworld/parameters.glsl"
+flat out OverworldFogParameters fogParams;
 #endif
 
 // ------------
@@ -40,30 +40,30 @@ uniform float sunAngle;
 uniform int worldTime;
 uniform int worldDay;
 
-uniform vec3 sun_dir;
+uniform vec3 sunDir;
 
 uniform float wetness;
 
-uniform float eye_skylight;
+uniform float eyeSkylight;
 
-uniform float biome_temperate;
-uniform float biome_arid;
-uniform float biome_snowy;
-uniform float biome_taiga;
-uniform float biome_jungle;
-uniform float biome_swamp;
-uniform float biome_may_rain;
-uniform float biome_may_snow;
-uniform float biome_temperature;
-uniform float biome_humidity;
+uniform float biomeTemperate;
+uniform float biomeArid;
+uniform float biomeSnowy;
+uniform float biomeTaiga;
+uniform float biomeJungle;
+uniform float biomeSwamp;
+uniform float biomeMayRain;
+uniform float biomeMaySnow;
+uniform float biomeTemperature;
+uniform float biomeHumidity;
 
-uniform float world_age;
-uniform float time_sunrise;
-uniform float time_noon;
-uniform float time_sunset;
-uniform float time_midnight;
+uniform float worldAge;
+uniform float timeSunrise;
+uniform float timeNoon;
+uniform float timeSunset;
+uniform float timeMidnight;
 
-uniform float desert_sandstorm;
+uniform float desertSandstormWeather;
 
 #if defined WORLD_OVERWORLD
 #include "/lib/weather/fog.glsl"
@@ -72,13 +72,13 @@ uniform float desert_sandstorm;
 void main() {
     uv = gl_MultiTexCoord0.xy;
 
-    light_color = texelFetch(colortex4, ivec2(191, 0), 0).rgb;
-    ambient_color = texelFetch(colortex4, ivec2(191, 1), 0).rgb;
+    lightColor = texelFetch(colortex4, ivec2(191, 0), 0).rgb;
+    ambientColor = texelFetch(colortex4, ivec2(191, 1), 0).rgb;
 
 #if defined WORLD_OVERWORLD
-    fog_params = get_fog_parameters(get_weather());
+    fogParams = getFogParameters(getWeather());
 #endif
 
-    vec2 vertex_pos = gl_Vertex.xy * taau_render_scale;
-    gl_Position = vec4(vertex_pos * 2.0 - 1.0, 0.0, 1.0);
+    vec2 vertexPos = gl_Vertex.xy * taauViewportScale;
+    gl_Position = vec4(vertexPos * 2.0 - 1.0, 0.0, 1.0);
 }

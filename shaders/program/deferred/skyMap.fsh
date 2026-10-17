@@ -18,30 +18,30 @@
 
 #include "/lib/global.glsl"
 
-layout(location = 0) out vec3 sky_map;
+layout(location = 0) out vec3 skyMap;
 
 /* RENDERTARGETS: 4 */
 
 in vec2 uv;
 
-flat in vec3 ambient_color;
-flat in vec3 light_color;
+flat in vec3 ambientColor;
+flat in vec3 lightColor;
 
 #if defined WORLD_OVERWORLD
-flat in vec3 sun_color;
-flat in vec3 moon_color;
-flat in vec3 sky_color;
+flat in vec3 sunColor;
+flat in vec3 moonColor;
+flat in vec3 skyColor;
 
-flat in float aurora_amount;
-flat in mat2x3 aurora_colors;
+flat in float auroraAmount;
+flat in mat2x3 auroraColors;
 
-flat in float rainbow_amount;
+flat in float rainbowAmount;
 
-#include "/lib/sky/clouds/parameters.glsl"
-flat in CloudsParameters clouds_params;
+#include "/lib/atmos/sky/clouds/core/parameters.glsl"
+flat in CloudsParameters cloudsParams;
 
-#include "/lib/fog/overworld/parameters.glsl"
-flat in OverworldFogParameters fog_params;
+#include "/lib/atmos/fog/overworld/parameters.glsl"
+flat in OverworldFogParameters fogParams;
 #endif
 
 // ------------
@@ -57,7 +57,7 @@ uniform sampler3D cumulusCurl;
 
 #if defined WORLD_OVERWORLD && defined galaxy
 uniform sampler2D colortex13;
-#define galaxy_sampler colortex13
+#define galaxySampler colortex13
 #endif
 
 uniform sampler3D depthtex0; // atmospheric scattering LUT
@@ -93,28 +93,28 @@ uniform float frameTimeCounter;
 uniform int isEyeInWater;
 uniform float eyeAltitude;
 uniform float rainStrength;
-uniform float desert_sandstorm;
+uniform float desertSandstormWeather;
 uniform float blindness;
 uniform float darknessFactor;
 
-uniform vec3 light_dir;
-uniform vec3 sun_dir;
-uniform vec3 moon_dir;
+uniform vec3 lightDir;
+uniform vec3 sunDir;
+uniform vec3 moonDir;
 
-uniform vec2 view_res;
-uniform vec2 view_pixel_size;
-uniform vec2 taa_offset;
+uniform vec2 viewRes;
+uniform vec2 viewPixelSize;
+uniform vec2 taaOffset;
 
-uniform float world_age;
-uniform float eye_skylight;
+uniform float worldAge;
+uniform float eyeSkylight;
 
-uniform float time_sunrise;
-uniform float time_noon;
-uniform float time_sunset;
-uniform float time_midnight;
+uniform float timeSunrise;
+uniform float timeNoon;
+uniform float timeSunset;
+uniform float timeMidnight;
 
-uniform float biome_cave;
-uniform float biome_may_snow;
+uniform float biomeCave;
+uniform float biomeMaySnow;
 
 // ------------
 //   Includes
@@ -127,42 +127,42 @@ uniform float biome_may_snow;
 #endif
 
 #if defined WORLD_OVERWORLD
-#include "/lib/fog/overworld/analytic.glsl"
-#include "/lib/sky/aurora.glsl"
+#include "/lib/atmos/fog/overworld/analytic.glsl"
+#include "/lib/atmos/sky/aurora.glsl"
 #endif
 
-#include "/lib/sky/projection.glsl"
-#include "/lib/sky/sky.glsl"
+#include "/lib/atmos/projection.glsl"
+#include "/lib/atmos/sky/sky.glsl"
 
 void main() {
     ivec2 texel = ivec2(gl_FragCoord.xy);
 
-    if (texel.x == sky_map_res.x) { // Store lighting colors
-        sky_map = vec3(0.0);
+    if (texel.x == skyMapRes.x) { // Store lighting colors
+        skyMap = vec3(0.0);
         switch (texel.y) {
             case 0:
-                sky_map = light_color;
+                skyMap = lightColor;
                 break;
 
             case 1:
-                sky_map = ambient_color;
+                skyMap = ambientColor;
                 break;
         }
     } else { // Draw sky map
-        vec3 ray_dir = unproject_sky(uv);
+        vec3 rayDir = unprojectSky(uv);
 
-        sky_map = draw_sky(ray_dir);
+        skyMap = drawSky(rayDir);
 
 #if defined WORLD_OVERWORLD
         // Apply analytic fog over sky
-        mat2x3 fog = air_fog_analytic(
+        mat2x3 fog = airFogAnalytic(
             cameraPosition,
-            cameraPosition + ray_dir,
+            cameraPosition + rayDir,
             true,
-            eye_skylight,
+            eyeSkylight,
             1.0
         );
-        sky_map = sky_map * fog[1] + fog[0];
+        skyMap = skyMap * fog[1] + fog[0];
 #endif
     }
 }

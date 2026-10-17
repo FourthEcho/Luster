@@ -18,12 +18,12 @@
 
 #include "/lib/global.glsl"
 
-out vec2 light_levels;
-out vec3 scene_pos;
+out vec2 lightLevels;
+out vec3 scenePos;
 out vec3 normal;
 out vec3 color;
 
-flat out uint material_mask;
+flat out uint materialMask;
 
 // ------------
 //   Uniforms
@@ -33,10 +33,10 @@ uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
 uniform mat4 dhProjection;
 uniform vec3 cameraPosition;
-uniform vec2 taa_offset;
+uniform vec2 taaOffset;
 
 void main() {
-    light_levels = linear_step(
+    lightLevels = linearStep(
         vec2(1.0 / 32.0),
         vec2(31.0 / 32.0),
         (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy
@@ -53,7 +53,7 @@ void main() {
     // Set material mask based on dhMaterialId
     switch (dhMaterialId) {
         case DH_BLOCK_LEAVES:
-            material_mask = 5; // Leaves
+            materialMask = 5; // Leaves
             break;
 
         case DH_BLOCK_GRASS:
@@ -61,55 +61,55 @@ void main() {
         case DH_BLOCK_STONE:
         case DH_BLOCK_DEEPSLATE:
         case DH_BLOCK_NETHER_STONE:
-            material_mask = 6; // Dirts, stones, deepslate and netherrack
+            materialMask = 6; // Dirts, stones, deepslate and netherrack
             break;
 
         case DH_BLOCK_SAND:
             if (color.r > color.b * 2.0) {
-                material_mask = 9; // Red sand
+                materialMask = 9; // Red sand
             } else {
-                material_mask = 7; // Sand
+                materialMask = 7; // Sand
             }
             break;
 
         case DH_BLOCK_WOOD:
-            material_mask = 10; // Woods
+            materialMask = 10; // Woods
             break;
 
         case DH_BLOCK_METAL:
-            material_mask = 12; // Metals
+            materialMask = 12; // Metals
             break;
 
         case DH_BLOCK_LAVA:
-            material_mask = 39; // Lava
+            materialMask = 39; // Lava
             break;
 
         case DH_BLOCK_ILLUMINATED:
-            material_mask = 36; // Other light sources
+            materialMask = 36; // Other light sources
             break;
 
         default:
-            material_mask = 0;
+            materialMask = 0;
             break;
     }
 
-    vec3 camera_offset = fract(cameraPosition);
+    vec3 cameraOffset = fract(cameraPosition);
 
     vec3 pos = gl_Vertex.xyz;
-    pos = floor(pos + camera_offset + 0.5) - camera_offset;
+    pos = floor(pos + cameraOffset + 0.5) - cameraOffset;
     pos = transform(gl_ModelViewMatrix, pos);
 
-    scene_pos = transform(gbufferModelViewInverse, pos);
+    scenePos = transform(gbufferModelViewInverse, pos);
 
-    vec4 clip_pos = dhProjection * vec4(pos, 1.0);
+    vec4 clipPos = dhProjection * vec4(pos, 1.0);
 
 #if defined taa && defined taau
-    clip_pos.xy = clip_pos.xy * taau_render_scale
-        + clip_pos.w * (taau_render_scale - 1.0);
-    clip_pos.xy += taa_offset * clip_pos.w;
+    clipPos.xy = clipPos.xy * taauViewportScale
+        + clipPos.w * (taauViewportScale - 1.0);
+    clipPos.xy += taaOffset * clipPos.w;
 #elif defined taa
-    clip_pos.xy += taa_offset * clip_pos.w * 0.66;
+    clipPos.xy += taaOffset * clipPos.w * 0.66;
 #endif
 
-    gl_Position = clip_pos;
+    gl_Position = clipPos;
 }

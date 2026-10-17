@@ -22,51 +22,51 @@
 
 // Reference setup: every triangle factor is normalized to these, so the
 // shipped defaults reproduce the pre-physical look exactly.
-const float camera_reference_fstops = 3.2;
-const float camera_reference_shutter = 60.0; // 1/60 s
-const float camera_reference_iso = 100.0;
+const float cameraReferenceFstops = 3.2;
+const float cameraReferenceShutter = 60.0; // 1/60 s
+const float cameraReferenceIso = 100.0;
 
 // Focal length in millimetres from the vertical FOV and the sensor height
 // (sensor width shared across axes, height derived from aspect ratio).
-float camera_sensor_height_mm(float aspect_ratio) {
-    return float(camSensorWidth) / max(aspect_ratio, 1e-4);
+float cameraSensorHeightMm(float frameAspect) {
+    return float(camSensorWidth) / max(frameAspect, 1e-4);
 }
 
-float camera_focal_length_mm(float projection_11, float aspect_ratio) {
-    float sensor_h = camera_sensor_height_mm(aspect_ratio);
-    return 0.5 * sensor_h * projection_11;
+float cameraFocalLengthMm(float projection11, float frameAspect) {
+    float sensorH = cameraSensorHeightMm(frameAspect);
+    return 0.5 * sensorH * projection11;
 }
 
 // Thin-lens circle of confusion as a fraction of screen height:
 // CoC = (f^2 / N) * |1/S - 1/D|, distances in metres.
-float camera_coc_height_fraction(
-    float focal_mm,
-    float sensor_h,
-    float focus_m,
-    float dist_m
+float cameraCocHeightFraction(
+    float focalMm,
+    float sensorH,
+    float focusM,
+    float distM
 ) {
-    float coc_mm = focal_mm * focal_mm / max(camFstops, 1e-4)
-        * abs(1.0 / (focus_m * 1000.0) - 1.0 / (dist_m * 1000.0));
-    return coc_mm / max(sensor_h, 1e-4);
+    float cocMm = focalMm * focalMm / max(camFstops, 1e-4)
+        * abs(1.0 / (focusM * 1000.0) - 1.0 / (distM * 1000.0));
+    return cocMm / max(sensorH, 1e-4);
 }
 
 // Shutter trail factor relative to the 60Hz reference capture.
-float camera_shutter_trail_factor() {
-    return camera_reference_shutter / float(camShutterSpeed);
+float cameraShutterTrailFactor() {
+    return cameraReferenceShutter / float(camShutterSpeed);
 }
 
 // Closed-triangle exposure factor: t * ISO / N^2, normalized to the
 // reference setup, times the EV compensation dial.
-float camera_exposure_triangle_factor() {
-    float t = camera_shutter_trail_factor();
-    float iso = float(camIso) / camera_reference_iso;
-    float n = camera_reference_fstops / max(camFstops, 1e-4);
+float cameraExposureTriangleFactor() {
+    float t = cameraShutterTrailFactor();
+    float iso = float(camIso) / cameraReferenceIso;
+    float n = cameraReferenceFstops / max(camFstops, 1e-4);
     return t * iso * n * n * exp2(camExposureCompensation);
 }
 
 #endif // INCLUDE_CAMERA_CAMERA
 
-layout(location = 0) out vec3 scene_color;
+layout(location = 0) out vec3 sceneColor;
 
 /* RENDERTARGETS: 0 */
 
@@ -95,21 +95,21 @@ uniform float frameTime;
 uniform float near;
 uniform float far;
 
-uniform vec2 view_res;
-uniform vec2 view_pixel_size;
-uniform vec2 taa_offset;
+uniform vec2 viewRes;
+uniform vec2 viewPixelSize;
+uniform vec2 taaOffset;
 
 #define TEMPORAL_REPROJECTION
 #include "/lib/util/spaceConversion.glsl"
 
 void main() {
     ivec2 texel = ivec2(gl_FragCoord.xy);
-    ivec2 view_texel = ivec2(gl_FragCoord.xy * taau_render_scale);
+    ivec2 viewTexel = ivec2(gl_FragCoord.xy * taauViewportScale);
 
-    float depth = texelFetch(depthtex0, view_texel, 0).x;
+    float depth = texelFetch(depthtex0, viewTexel, 0).x;
 
-    if (depth < hand_depth) {
-        scene_color = texelFetch(colortex0, texel, 0).rgb;
+    if (depth < handDepth) {
+        sceneColor = texelFetch(colortex0, texel, 0).rgb;
         return;
     }
 
@@ -117,28 +117,28 @@ void main() {
 
 
     vec2 increment
-        = (0.5 * camera_shutter_trail_factor() * motionBlurScale
+        = (0.5 * cameraShutterTrailFactor() * motionBlurScale
             / float(motionBlurSamples))
         * velocity;
 
     // Centered gather: span uv -/+ trail/2 instead of smearing one way
     vec2 pos = uv - increment * (0.5 * float(motionBlurSamples));
 
-    vec3 color_sum = vec3(0.0);
-    float weight_sum = 0.0;
+    vec3 colorSum = vec3(0.0);
+    float weightSum = 0.0;
 
     for (uint i = 0u; i < motionBlurSamples; ++i, pos += increment) {
-        ivec2 tap = ivec2(pos * view_res);
-        ivec2 view_tap = ivec2(pos * view_res * taau_render_scale);
+        ivec2 tap = ivec2(pos * viewRes);
+        ivec2 viewTap = ivec2(pos * viewRes * taauViewportScale);
 
         vec3 color = texelFetch(colortex0, tap, 0).rgb;
-        float depth = texelFetch(depthtex0, view_tap, 0).x;
-        float weight = (clamp01(pos) == pos && depth > hand_depth) ? 1.0 : 0.0;
+        float depth = texelFetch(depthtex0, viewTap, 0).x;
+        float weight = (clamp01(pos) == pos && depth > handDepth) ? 1.0 : 0.0;
 
-        color_sum += color * weight;
-        weight_sum += weight;
+        colorSum += color * weight;
+        weightSum += weight;
     }
 
-    scene_color = weight_sum > eps ? color_sum * rcp(weight_sum)
+    sceneColor = weightSum > eps ? colorSum * rcp(weightSum)
                                    : texelFetch(colortex0, texel, 0).rgb;
 }

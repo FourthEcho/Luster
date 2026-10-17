@@ -19,7 +19,7 @@
 #include "/lib/global.glsl"
 #include "/lib/util/color.glsl"
 
-layout(location = 0) out vec3 scene_color;
+layout(location = 0) out vec3 sceneColor;
 
 /* RENDERTARGETS: 0 */
 
@@ -27,30 +27,30 @@ in vec2 uv;
 
 uniform sampler2D colortex0;
 
-uniform vec2 view_pixel_size;
+uniform vec2 viewPixelSize;
 
-const int max_iterations = 12;
+const int maxIterations = 12;
 const float[12] quality
     = float[12](1.0, 1.0, 1.0, 1.0, 1.0, 1.5, 2.0, 2.0, 2.0, 2.0, 4.0, 8.0);
 
-const float edge_threshold_min = 0.0312;
-const float edge_threshold_max = 0.125;
+const float edgeThresholdMin = 0.0312;
+const float edgeThresholdMax = 0.125;
 
-// subpixel_quality of 0.75 is multiplied by the slider value:
+// subpixelQuality of 0.75 is multiplied by the slider value:
 
 
-const float subpixel_quality = 0.75 * fxaaIntensity;
+const float subpixelQuality = 0.75 * fxaaIntensity;
 
-float get_luma(vec3 rgb) {
+float getLuma(vec3 rgb) {
     // fxaa runs on display-linear color (working == display here).
-    return sqrt(dot(rgb, luminance_weights));
+    return sqrt(dot(rgb, luminanceWeights));
 }
 
-float min_of(float a, float b, float c, float d, float e) {
+float minOf(float a, float b, float c, float d, float e) {
     return min(a, min(b, min(c, min(d, e))));
 }
 
-float max_of(float a, float b, float c, float d, float e) {
+float maxOf(float a, float b, float c, float d, float e) {
     return max(a, max(b, max(c, max(d, e))));
 }
 
@@ -74,120 +74,120 @@ void main() {
     vec3 i = texelFetch(colortex0, texel + ivec2(1, -1), 0).rgb;
 
     // Luma at the current fragment
-    float luma = get_luma(e);
+    float luma = getLuma(e);
 
     // Luma at the four direct neighbors of the current fragment
-    float luma_u = get_luma(b);
-    float luma_l = get_luma(d);
-    float luma_r = get_luma(f);
-    float luma_d = get_luma(h);
+    float lumaU = getLuma(b);
+    float lumaL = getLuma(d);
+    float lumaR = getLuma(f);
+    float lumaD = getLuma(h);
 
     // Maximum and minimum luma around the current fragment
-    float luma_min = min_of(luma, luma_d, luma_u, luma_l, luma_r);
-    float luma_max = max_of(luma, luma_d, luma_u, luma_l, luma_r);
+    float lumaMin = minOf(luma, lumaD, lumaU, lumaL, lumaR);
+    float lumaMax = maxOf(luma, lumaD, lumaU, lumaL, lumaR);
 
     // Compute the delta
-    float luma_range = luma_max - luma_min;
+    float lumaRange = lumaMax - lumaMin;
 
     // If the luma variation is lower that a threshold (or if we are in a really
     // dark area), we are not on an edge, don't perform any AA.
-    if (luma_range < max(edge_threshold_min, luma_max * edge_threshold_max)) {
-        scene_color = e;
+    if (lumaRange < max(edgeThresholdMin, lumaMax * edgeThresholdMax)) {
+        sceneColor = e;
         return;
     }
 
     // Estimating gradient and choosing edge direction
 
     // Get the lumas of the four remaining corners
-    float luma_ul = get_luma(a);
-    float luma_ur = get_luma(c);
-    float luma_dl = get_luma(g);
-    float luma_dr = get_luma(i);
+    float lumaUl = getLuma(a);
+    float lumaUr = getLuma(c);
+    float lumaDl = getLuma(g);
+    float lumaDr = getLuma(i);
 
     // Combine the four edges lumas (using intermediary variables for future
     // computations with the same values)
-    float luma_horizontal = luma_d + luma_u;
-    float luma_vertical = luma_l + luma_r;
+    float lumaHorizontal = lumaD + lumaU;
+    float lumaVertical = lumaL + lumaR;
 
     // Same for the corners
-    float luma_left_corners = luma_dl + luma_ul;
-    float luma_down_corners = luma_dl + luma_dr;
-    float luma_right_corners = luma_dr + luma_ur;
-    float luma_up_corners = luma_ul + luma_ur;
+    float lumaLeftCorners = lumaDl + lumaUl;
+    float lumaDownCorners = lumaDl + lumaDr;
+    float lumaRightCorners = lumaDr + lumaUr;
+    float lumaUpCorners = lumaUl + lumaUr;
 
     // Compute an estimation of the gradient along the horizontal and vertical
     // axis.
-    float edge_horizontal = abs(-2.0 * luma_l + luma_left_corners)
-        + abs(-2.0 * luma + luma_vertical) * 2.0
-        + abs(-2.0 * luma_r + luma_right_corners);
-    float edge_vertical = abs(-2.0 * luma_u + luma_up_corners)
-        + abs(-2.0 * luma + luma_horizontal) * 2.0
-        + abs(-2.0 * luma_d + luma_down_corners);
+    float edgeHorizontal = abs(-2.0 * lumaL + lumaLeftCorners)
+        + abs(-2.0 * luma + lumaVertical) * 2.0
+        + abs(-2.0 * lumaR + lumaRightCorners);
+    float edgeVertical = abs(-2.0 * lumaU + lumaUpCorners)
+        + abs(-2.0 * luma + lumaHorizontal) * 2.0
+        + abs(-2.0 * lumaD + lumaDownCorners);
 
     // Is the local edge horizontal or vertical?
-    bool is_horizontal = edge_horizontal >= edge_vertical;
+    bool isHorizontal = edgeHorizontal >= edgeVertical;
 
     // Choosing edge orientation
 
     // Select the two neighboring texels lumas in the opposite direction to the
     // local edge
-    float luma1 = is_horizontal ? luma_d : luma_l;
-    float luma2 = is_horizontal ? luma_u : luma_r;
+    float luma1 = isHorizontal ? lumaD : lumaL;
+    float luma2 = isHorizontal ? lumaU : lumaR;
 
     // Compute gradients in this direction
     float gradient1 = luma1 - luma;
     float gradient2 = luma2 - luma;
 
     // Which direction is the steepest?
-    bool is_1_steepest = abs(gradient1) >= abs(gradient2);
+    bool is1Steepest = abs(gradient1) >= abs(gradient2);
 
     // Gradient in the corresponding direction, normalized
-    float gradient_scaled = 0.25 * max(abs(gradient1), abs(gradient2));
+    float gradientScaled = 0.25 * max(abs(gradient1), abs(gradient2));
 
     // Choose the step size (one pixel) according to the edge direction
-    float step_length = is_horizontal ? view_pixel_size.y : view_pixel_size.x;
+    float stepLength = isHorizontal ? viewPixelSize.y : viewPixelSize.x;
 
     // Average luma in the correct direction
-    float luma_local_average;
-    if (is_1_steepest) {
+    float lumaLocalAverage;
+    if (is1Steepest) {
         // Switch the direction
-        step_length = -step_length;
-        luma_local_average = 0.5 * (luma1 + luma);
+        stepLength = -stepLength;
+        lumaLocalAverage = 0.5 * (luma1 + luma);
     } else {
-        luma_local_average = 0.5 * (luma2 + luma);
+        lumaLocalAverage = 0.5 * (luma2 + luma);
     }
 
     // Shift UV in the correct direction by half a pixel
-    vec2 current_uv = uv;
-    if (is_horizontal) {
-        current_uv.y += step_length * 0.5;
+    vec2 currentUv = uv;
+    if (isHorizontal) {
+        currentUv.y += stepLength * 0.5;
     } else {
-        current_uv.x += step_length * 0.5;
+        currentUv.x += stepLength * 0.5;
     }
 
     // First iteration exploration
 
     // Compute offste (for each iteration step) in the right direction
-    vec2 offset = is_horizontal ? vec2(view_pixel_size.x, 0.0)
-                                : vec2(0.0, view_pixel_size.y);
+    vec2 offset = isHorizontal ? vec2(viewPixelSize.x, 0.0)
+                                : vec2(0.0, viewPixelSize.y);
 
     // Compute UVs to explore on each side of the edge, orthogonally. "quality"
     // allows us to step faster
-    vec2 uv1 = current_uv - offset;
-    vec2 uv2 = current_uv + offset;
+    vec2 uv1 = currentUv - offset;
+    vec2 uv2 = currentUv + offset;
 
     // Read the lumas at both current extremities of the exploration segment,
     // and compute the delta wrt the local average luma
-    float luma_end_1 = get_luma(textureLod(colortex0, uv1, 0).rgb);
-    float luma_end_2 = get_luma(textureLod(colortex0, uv2, 0).rgb);
-    luma_end_1 -= luma_local_average;
-    luma_end_2 -= luma_local_average;
+    float lumaEnd1 = getLuma(textureLod(colortex0, uv1, 0).rgb);
+    float lumaEnd2 = getLuma(textureLod(colortex0, uv2, 0).rgb);
+    lumaEnd1 -= lumaLocalAverage;
+    lumaEnd2 -= lumaLocalAverage;
 
     // If the luma deltas at the current extremities are larger than the local
     // gradient, we have reached the side of the edge
-    bool reached1 = abs(luma_end_1) >= gradient_scaled;
-    bool reached2 = abs(luma_end_2) >= gradient_scaled;
-    bool reached_both = reached1 && reached2;
+    bool reached1 = abs(lumaEnd1) >= gradientScaled;
+    bool reached2 = abs(lumaEnd2) >= gradientScaled;
+    bool reachedBoth = reached1 && reached2;
 
     // If the side is not reached, we continue to explore in this direction
     if (!reached1) {
@@ -200,24 +200,24 @@ void main() {
     // Iterating
 
     // If both sides have not been reached, continue to explore
-    if (!reached_both) {
-        for (int i = 2; i < max_iterations; ++i) {
+    if (!reachedBoth) {
+        for (int i = 2; i < maxIterations; ++i) {
             // If needed, read luma in 1st direction, compute delta
             if (!reached1) {
-                luma_end_1 = get_luma(textureLod(colortex0, uv1, 0).rgb);
-                luma_end_1 -= luma_local_average;
+                lumaEnd1 = getLuma(textureLod(colortex0, uv1, 0).rgb);
+                lumaEnd1 -= lumaLocalAverage;
             }
             // If needed, read luma in the opposite direction, compute delta
             if (!reached2) {
-                luma_end_2 = get_luma(textureLod(colortex0, uv2, 0).rgb);
-                luma_end_2 -= luma_local_average;
+                lumaEnd2 = getLuma(textureLod(colortex0, uv2, 0).rgb);
+                lumaEnd2 -= lumaLocalAverage;
             }
 
             // If the luma deltas at the current extremities is larger than the
             // local gradient, we have reached the side of the edge
-            reached1 = abs(luma_end_1) >= gradient_scaled;
-            reached2 = abs(luma_end_2) >= gradient_scaled;
-            reached_both = reached1 && reached2;
+            reached1 = abs(lumaEnd1) >= gradientScaled;
+            reached2 = abs(lumaEnd2) >= gradientScaled;
+            reachedBoth = reached1 && reached2;
 
             // If the side is not reached, we continue to explore in this
             // direction, with a variable quality
@@ -229,7 +229,7 @@ void main() {
             }
 
             // If both sides have been reached, stop the exploration
-            if (reached_both) {
+            if (reachedBoth) {
                 break;
             }
         }
@@ -238,62 +238,62 @@ void main() {
     // Estimating offset
 
     // Compute the distance to each extremity of the edge
-    float distance1 = is_horizontal ? (uv.x - uv1.x) : (uv.y - uv1.y);
-    float distance2 = is_horizontal ? (uv2.x - uv.x) : (uv2.y - uv.y);
+    float distance1 = isHorizontal ? (uv.x - uv1.x) : (uv.y - uv1.y);
+    float distance2 = isHorizontal ? (uv2.x - uv.x) : (uv2.y - uv.y);
 
     // In which direction is the extremity of the edge closer?
-    bool is_direction_1 = distance1 < distance2;
-    float distance_final = min(distance1, distance2);
+    bool isDirection1 = distance1 < distance2;
+    float distanceFinal = min(distance1, distance2);
 
     // Length of the edge
-    float edge_thickness = distance1 + distance2;
+    float edgeThickness = distance1 + distance2;
 
     // UV offset: read in the direction of the closest side of the edge
-    float pixel_offset = -distance_final / edge_thickness + 0.5;
+    float pixelOffset = -distanceFinal / edgeThickness + 0.5;
 
     // Is the luma at center smaller than the local average?
-    bool is_luma_center_smaller = luma < luma_local_average;
+    bool isLumaCenterSmaller = luma < lumaLocalAverage;
 
     // If the luma at center is smaller than at its neighbour, the delta luma at
     // each end should be positive (same variation)
-    bool correct_variation = ((is_direction_1 ? luma_end_1 : luma_end_2) < 0.0)
-        != is_luma_center_smaller;
+    bool correctVariation = ((isDirection1 ? lumaEnd1 : lumaEnd2) < 0.0)
+        != isLumaCenterSmaller;
 
     // If the luma variation is incorrect, do not offset
-    float final_offset = correct_variation ? pixel_offset : 0.0;
+    float finalOffset = correctVariation ? pixelOffset : 0.0;
 
     // Subpixel antialiasing
 
     // Full weighted average of the luma over the 3x3 neighborhood
-    float luma_average = rcp(12.0)
-        * (2.0 * (luma_horizontal + luma_vertical) + luma_left_corners
-           + luma_right_corners);
+    float lumaAverage = rcp(12.0)
+        * (2.0 * (lumaHorizontal + lumaVertical) + lumaLeftCorners
+           + lumaRightCorners);
 
     // Ratio of the delta between the global average and the center luma, over
     // the luma range in the 3x3 neighborhood
-    float sub_pixel_offset_1 = clamp01(abs(luma_average - luma) / luma_range);
-    float sub_pixel_offset_2 = (-2.0 * sub_pixel_offset_1 + 3.0)
-        * sub_pixel_offset_1 * sub_pixel_offset_1;
+    float subPixelOffset1 = clamp01(abs(lumaAverage - luma) / lumaRange);
+    float subPixelOffset2 = (-2.0 * subPixelOffset1 + 3.0)
+        * subPixelOffset1 * subPixelOffset1;
 
     // Compute a sub-pixel offset based on this delta.
-    float sub_pixel_offset_final
-        = sub_pixel_offset_2 * sub_pixel_offset_2 * subpixel_quality;
+    float subPixelOffsetFinal
+        = subPixelOffset2 * subPixelOffset2 * subpixelQuality;
 
     // Pick the biggest of the two offsets.
-    final_offset = max(final_offset, sub_pixel_offset_final);
+    finalOffset = max(finalOffset, subPixelOffsetFinal);
 
     // Final read
 
     // Compute the final UV uvinates
-    vec2 final_uv = uv;
-    if (is_horizontal) {
-        final_uv.y += final_offset * step_length;
+    vec2 finalUv = uv;
+    if (isHorizontal) {
+        finalUv.y += finalOffset * stepLength;
     } else {
-        final_uv.x += final_offset * step_length;
+        finalUv.x += finalOffset * stepLength;
     }
 
     // Return the color at the new UV uvinates
-    scene_color = textureLod(colortex0, final_uv, 0).rgb;
+    sceneColor = textureLod(colortex0, finalUv, 0).rgb;
 }
 
 #ifndef fxaa

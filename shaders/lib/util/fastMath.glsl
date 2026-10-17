@@ -28,7 +28,7 @@
 // https://seblagarde.wordpress.com/2014/12/01/inverse-trigonometric-functions-gpu-optimization-for-amd-gcn-architecture/#more-3316
 
 
-float fast_acos(float x) {
+float fastAcos(float x) {
     const float C0 = 1.57018;
     const float C1 = -0.201877;
     const float C2 = 0.0464619;
@@ -39,7 +39,7 @@ float fast_acos(float x) {
     return x >= 0 ? res : pi - res; // Undo range reduction
 }
 
-vec2 fast_acos(vec2 v) { return vec2(fast_acos(v.x), fast_acos(v.y)); }
+vec2 fastAcos(vec2 v) { return vec2(fastAcos(v.x), fastAcos(v.y)); }
 
 // -------------------
 //   Power functions
@@ -76,60 +76,60 @@ float pow1d5(float x) { return x * sqrt(x); }
 //   Vector helper functions
 // ---------------------------
 
-float rcp_length(vec2 v) { return inversesqrt(dot(v, v)); }
+float rcpLength(vec2 v) { return inversesqrt(dot(v, v)); }
 
-float rcp_length(vec3 v) { return inversesqrt(dot(v, v)); }
+float rcpLength(vec3 v) { return inversesqrt(dot(v, v)); }
 
 // Computes the length of a vector and normalizes it using one inversesqrt
-void length_normalize(vec2 v, out vec2 normalized, out float len) {
-    float len_sq = length_squared(v);
-    if (len_sq < eps) {
+void lengthNormalize(vec2 v, out vec2 normalized, out float len) {
+    float lenSq = lengthSquared(v);
+    if (lenSq < eps) {
         normalized = vec2(0.0);
         len = 0.0;
         return;
     }
-    float rcp_len = inversesqrt(len_sq);
-    len = len_sq * rcp_len;
-    normalized = rcp_len * v;
+    float rcpLen = inversesqrt(lenSq);
+    len = lenSq * rcpLen;
+    normalized = rcpLen * v;
 }
 
-void length_normalize(vec3 v, out vec3 normalized, out float len) {
-    float len_sq = length_squared(v);
-    if (len_sq < eps) {
+void lengthNormalize(vec3 v, out vec3 normalized, out float len) {
+    float lenSq = lengthSquared(v);
+    if (lenSq < eps) {
         normalized = vec3(0.0);
         len = 0.0;
         return;
     }
-    float rcp_len = inversesqrt(len_sq);
-    len = len_sq * rcp_len;
-    normalized = rcp_len * v;
+    float rcpLen = inversesqrt(lenSq);
+    len = lenSq * rcpLen;
+    normalized = rcpLen * v;
 }
 
-vec2 clamp_length(vec2 v, float min_len, float max_len) {
+vec2 clampLength(vec2 v, float minLen, float maxLen) {
     float len;
     vec2 normalized;
-    length_normalize(v, normalized, len);
+    lengthNormalize(v, normalized, len);
 
-    return normalized * clamp(len, min_len, max_len);
+    return normalized * clamp(len, minLen, maxLen);
 }
 
-vec3 clamp_length(vec3 v, float min_len, float max_len) {
+vec3 clampLength(vec3 v, float minLen, float maxLen) {
     float len;
     vec3 normalized;
-    length_normalize(v, normalized, len);
+    lengthNormalize(v, normalized, len);
 
-    return normalized * clamp(len, min_len, max_len);
+    return normalized * clamp(len, minLen, maxLen);
 }
 
 // Compute the length of a vector, knowing its direction
 // I don't know if this is really faster
-float length_knowing_direction(vec3 v, vec3 v_norm) {
-    if (v_norm.x != 0.0) {
-        return abs(v.x / v_norm.x);
-    } else if (v_norm.y != 0.0) {
-        return abs(v.y / v_norm.y);
+float lengthKnowingDirection(vec3 v, vec3 vNorm) {
+    if (vNorm.x != 0.0) {
+        return abs(v.x / vNorm.x);
+    } else if (vNorm.y != 0.0) {
+        return abs(v.y / vNorm.y);
     } else {
-        return abs(v.z / v_norm.z);
+        return abs(v.z / vNorm.z);
     }
 }
 
@@ -137,9 +137,9 @@ float length_knowing_direction(vec3 v, vec3 v_norm) {
 //   f16 helper functions
 // ------------------------
 
-#define rcp_f16(x) (f16(1.0) / (x))
-#define clamp01_f16(x) clamp(x, f16(0.0), f16(1.0))
-#define max0_f16(x) max(x, f16(0.0))
-#define min1_f16(x) min(x, f16(1.0))
+#define rcpF16(x) (f16(1.0) / (x))
+#define clamp01F16(x) clamp(x, f16(0.0), f16(1.0))
+#define max0F16(x) max(x, f16(0.0))
+#define min1F16(x) min(x, f16(1.0))
 
 #endif // INCLUDE_UTILITY_FAST_MATH

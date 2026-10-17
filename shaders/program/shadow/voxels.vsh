@@ -30,8 +30,8 @@ uniform vec3 cameraPosition;
 
 #include "/lib/light/distortion.glsl"
 
-out vec3 cage_normal;
-out vec3 world_pos;
+out vec3 cageNormal;
+out vec3 worldPos;
 flat out vec3 tint;
 
 void main() {
@@ -40,13 +40,13 @@ void main() {
 #if !defined WORLD_NETHER
     vec3 pos = transform(gl_ModelViewMatrix, gl_Vertex.xyz);
 
-    cage_normal = gl_Normal;
-    world_pos = transform(shadowModelViewInverse, pos) + cameraPosition;
+    cageNormal = gl_Normal;
+    worldPos = transform(shadowModelViewInverse, pos) + cameraPosition;
 
-    vec3 shadow_clip_pos = project_ortho(gl_ProjectionMatrix, pos);
-    shadow_clip_pos = distort_shadow_space(shadow_clip_pos);
+    vec3 shadowClipPos = projectOrtho(gl_ProjectionMatrix, pos);
+    shadowClipPos = distortShadowSpace(shadowClipPos);
 
-    gl_Position = vec4(shadow_clip_pos, 1.0);
+    gl_Position = vec4(shadowClipPos, 1.0);
 
 #else
     // No shadows, discard vertices now

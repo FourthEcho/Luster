@@ -19,37 +19,37 @@
 #if !defined INCLUDE_UTILITY_COLOR
 #define INCLUDE_UTILITY_COLOR
 
-const vec3 luminance_weights_rec709 = vec3(0.2126, 0.7152, 0.0722);
-const vec3 luminance_weights_rec2020 = vec3(0.2627, 0.6780, 0.0593);
-const vec3 luminance_weights_ap1 = vec3(0.2722, 0.6741, 0.0537);
-const vec3 luminance_weights_display_p3 = vec3(0.2289746, 0.6917385, 0.0792869);
-const vec3 luminance_weights_adobe_rgb = vec3(0.2973769, 0.6273491, 0.0752741);
+const vec3 luminanceWeightsRec709 = vec3(0.2126, 0.7152, 0.0722);
+const vec3 luminanceWeightsRec2020 = vec3(0.2627, 0.6780, 0.0593);
+const vec3 luminanceWeightsAp1 = vec3(0.2722, 0.6741, 0.0537);
+const vec3 luminanceWeightsDisplayP3 = vec3(0.2289746, 0.6917385, 0.0792869);
+const vec3 luminanceWeightsAdobeRgb = vec3(0.2973769, 0.6273491, 0.0752741);
 
 
 #if displayGamut == displayGamutDciP3 || displayGamut == displayGamutDisplayP3
-#define luminance_weights luminance_weights_display_p3
+#define luminanceWeights luminanceWeightsDisplayP3
 #elif displayGamut == displayGamutRec2020
-#define luminance_weights luminance_weights_rec2020
+#define luminanceWeights luminanceWeightsRec2020
 #elif displayGamut == displayGamutAdobeRgb
-#define luminance_weights luminance_weights_adobe_rgb
+#define luminanceWeights luminanceWeightsAdobeRgb
 #else // displayGamutSrgb
-#define luminance_weights luminance_weights_rec709
+#define luminanceWeights luminanceWeightsRec709
 #endif
 
 // closest wavelengths to RGB primaries
-const vec3 primary_wavelengths_rec709 = vec3(660.0, 550.0, 440.0);
-const vec3 primary_wavelengths_rec2020 = vec3(660.0, 550.0, 440.0);
-const vec3 primary_wavelengths_ap1 = vec3(630.0, 530.0, 465.0);
-const vec3 primary_wavelengths_display_p3 = vec3(660.0, 550.0, 440.0);
-const vec3 primary_wavelengths_adobe_rgb = vec3(660.0, 550.0, 440.0);
+const vec3 primaryWavelengthsRec709 = vec3(660.0, 550.0, 440.0);
+const vec3 primaryWavelengthsRec2020 = vec3(660.0, 550.0, 440.0);
+const vec3 primaryWavelengthsAp1 = vec3(630.0, 530.0, 465.0);
+const vec3 primaryWavelengthsDisplayP3 = vec3(660.0, 550.0, 440.0);
+const vec3 primaryWavelengthsAdobeRgb = vec3(660.0, 550.0, 440.0);
 #if displayGamut == displayGamutSrgb
-#define primary_wavelengths primary_wavelengths_rec709
+#define primaryWavelengths primaryWavelengthsRec709
 #elif displayGamut == displayGamutAdobeRgb
-#define primary_wavelengths primary_wavelengths_adobe_rgb
+#define primaryWavelengths primaryWavelengthsAdobeRgb
 #elif displayGamut == displayGamutDciP3 || displayGamut == displayGamutDisplayP3
-#define primary_wavelengths primary_wavelengths_display_p3
+#define primaryWavelengths primaryWavelengthsDisplayP3
 #else // REC2020
-#define primary_wavelengths primary_wavelengths_rec2020
+#define primaryWavelengths primaryWavelengthsRec2020
 #endif
 
 // -----------------------------------
@@ -59,67 +59,67 @@ const vec3 primary_wavelengths_adobe_rgb = vec3(660.0, 550.0, 440.0);
 // Working == display, so display<->working is identity. Vanilla Rec.709
 // (sRGB) content still needs conversion into the active working gamut.
 #if displayGamut == displayGamutDciP3
-#define xyz_to_working_color (xyz_to_display_p3 * d65_to_dci_p3_white)
-#define working_to_xyz_color (dci_p3_white_to_d65 * display_p3_to_xyz)
-#define rec709_to_working_color (rec709_to_xyz * xyz_to_working_color)
-#define display_to_working_color mat3(1.0)
+#define xyzToWorkingColor (xyzToDisplayP3 * d65ToDciP3White)
+#define workingToXyzColor (dciP3WhiteToD65 * displayP3ToXyz)
+#define rec709ToWorkingColor (rec709ToXyz * xyzToWorkingColor)
+#define displayToWorkingColor mat3(1.0)
 #elif displayGamut == displayGamutDisplayP3
-#define xyz_to_working_color xyz_to_display_p3
-#define working_to_xyz_color display_p3_to_xyz
-#define rec709_to_working_color (rec709_to_xyz * xyz_to_display_p3)
-#define display_to_working_color mat3(1.0)
+#define xyzToWorkingColor xyzToDisplayP3
+#define workingToXyzColor displayP3ToXyz
+#define rec709ToWorkingColor (rec709ToXyz * xyzToDisplayP3)
+#define displayToWorkingColor mat3(1.0)
 #elif displayGamut == displayGamutRec2020
-#define xyz_to_working_color xyz_to_rec2020
-#define working_to_xyz_color rec2020_to_xyz
-#define rec709_to_working_color rec709_to_rec2020
-#define display_to_working_color mat3(1.0)
+#define xyzToWorkingColor xyzToRec2020
+#define workingToXyzColor rec2020ToXyz
+#define rec709ToWorkingColor rec709ToRec2020
+#define displayToWorkingColor mat3(1.0)
 #elif displayGamut == displayGamutAdobeRgb
-#define xyz_to_working_color xyz_to_adobe_rgb
-#define working_to_xyz_color adobe_rgb_to_xyz
-#define rec709_to_working_color (rec709_to_xyz * xyz_to_adobe_rgb)
-#define display_to_working_color mat3(1.0)
+#define xyzToWorkingColor xyzToAdobeRgb
+#define workingToXyzColor adobeRgbToXyz
+#define rec709ToWorkingColor (rec709ToXyz * xyzToAdobeRgb)
+#define displayToWorkingColor mat3(1.0)
 #else // displayGamutSrgb
-#define xyz_to_working_color xyz_to_rec709
-#define working_to_xyz_color rec709_to_xyz
-#define rec709_to_working_color mat3(1.0)
-#define display_to_working_color mat3(1.0)
+#define xyzToWorkingColor xyzToRec709
+#define workingToXyzColor rec709ToXyz
+#define rec709ToWorkingColor mat3(1.0)
+#define displayToWorkingColor mat3(1.0)
 #endif
 
 
-#define working_to_display_color mat3(1.0)
+#define workingToDisplayColor mat3(1.0)
 // Working back to linear sRGB (for tonemap cores fitted to sRGB, e.g. AgX).
 // Generic via XYZ so every branch stays exact; constant-folds at compile.
-#define working_to_rec709_color (working_to_xyz_color * xyz_to_rec709)
+#define workingToRec709Color (workingToXyzColor * xyzToRec709)
 
 
 #if displayGamut == displayGamutDciP3
-#define from_display(x) (pow(x, vec3(2.6)))
+#define fromDisplay(x) (pow(x, vec3(2.6)))
 #elif displayGamut == displayGamutDisplayP3
-#define from_display(x) (pow(x, vec3(2.2)))
+#define fromDisplay(x) (pow(x, vec3(2.2)))
 #elif displayGamut == displayGamutRec2020
-#define from_display(x) (pow(x, vec3(2.4)))
+#define fromDisplay(x) (pow(x, vec3(2.4)))
 #elif displayGamut == displayGamutAdobeRgb
-#define from_display(x) (pow(x, vec3(2.2)))
+#define fromDisplay(x) (pow(x, vec3(2.2)))
 #else // displayGamutSrgb
-#define from_display(x) (pow(x, vec3(2.2)))
+#define fromDisplay(x) (pow(x, vec3(2.2)))
 #endif
 
 
 #if displayGamut == displayGamutRec2020
-const float working_gamut_chroma = 1.35;
+const float workingGamutChroma = 1.35;
 #elif displayGamut == displayGamutDciP3 || displayGamut == displayGamutDisplayP3
-const float working_gamut_chroma = 1.18;
+const float workingGamutChroma = 1.18;
 #elif displayGamut == displayGamutAdobeRgb
-const float working_gamut_chroma = 1.12;
+const float workingGamutChroma = 1.12;
 #else // displayGamutSrgb
-const float working_gamut_chroma = 1.0;
+const float workingGamutChroma = 1.0;
 #endif
 
 
-#define gamut_expand(c) max(mix(vec3(dot((c), luminance_weights)), (c), working_gamut_chroma), vec3(0.0))
+#define gamutExpand(c) max(mix(vec3(dot((c), luminanceWeights)), (c), workingGamutChroma), vec3(0.0))
 
 // Rec. 709 (sRGB primaries)
-const mat3 xyz_to_rec709 = mat3(
+const mat3 xyzToRec709 = mat3(
     3.2406,
     -1.5372,
     -0.4986,
@@ -130,7 +130,7 @@ const mat3 xyz_to_rec709 = mat3(
     -0.2040,
     1.0570
 );
-const mat3 rec709_to_xyz = mat3(
+const mat3 rec709ToXyz = mat3(
     0.4124,
     0.3576,
     0.1805,
@@ -143,7 +143,7 @@ const mat3 rec709_to_xyz = mat3(
 );
 
 // Rec. 2020 (working color space)
-const mat3 xyz_to_rec2020 = mat3(
+const mat3 xyzToRec2020 = mat3(
     1.7166084,
     -0.3556621,
     -0.2533601,
@@ -154,7 +154,7 @@ const mat3 xyz_to_rec2020 = mat3(
     -0.0427763,
     0.94222867
 );
-const mat3 rec2020_to_xyz = mat3(
+const mat3 rec2020ToXyz = mat3(
     0.6369736,
     0.1446172,
     0.1688585,
@@ -166,11 +166,11 @@ const mat3 rec2020_to_xyz = mat3(
     1.0608437
 );
 
-const mat3 rec709_to_rec2020 = rec709_to_xyz * xyz_to_rec2020;
-const mat3 rec2020_to_rec709 = rec2020_to_xyz * xyz_to_rec709;
+const mat3 rec709ToRec2020 = rec709ToXyz * xyzToRec2020;
+const mat3 rec2020ToRec709 = rec2020ToXyz * xyzToRec709;
 
 // Display P3 (D65 primaries)
-const mat3 display_p3_to_xyz = mat3(
+const mat3 displayP3ToXyz = mat3(
     0.4865709,
     0.2656677,
     0.1982173,
@@ -181,7 +181,7 @@ const mat3 display_p3_to_xyz = mat3(
     0.0451134,
     1.0439444
 );
-const mat3 xyz_to_display_p3 = mat3(
+const mat3 xyzToDisplayP3 = mat3(
     2.4934969,
     -0.9313836,
     -0.4027108,
@@ -194,7 +194,7 @@ const mat3 xyz_to_display_p3 = mat3(
 );
 
 // Adobe RGB (1998, D65)
-const mat3 adobe_rgb_to_xyz = mat3(
+const mat3 adobeRgbToXyz = mat3(
     0.5767309,
     0.1855540,
     0.1881852,
@@ -205,7 +205,7 @@ const mat3 adobe_rgb_to_xyz = mat3(
     0.0706872,
     0.9911085
 );
-const mat3 xyz_to_adobe_rgb = mat3(
+const mat3 xyzToAdobeRgb = mat3(
     2.0413690,
     -0.5649464,
     -0.3446944,
@@ -217,13 +217,13 @@ const mat3 xyz_to_adobe_rgb = mat3(
     1.0154096
 );
 
-const mat3 rec2020_to_display_p3 = rec2020_to_xyz * xyz_to_display_p3;
-const mat3 display_p3_to_rec2020 = display_p3_to_xyz * xyz_to_rec2020;
-const mat3 rec2020_to_adobe_rgb = rec2020_to_xyz * xyz_to_adobe_rgb;
-const mat3 adobe_rgb_to_rec2020 = adobe_rgb_to_xyz * xyz_to_rec2020;
+const mat3 rec2020ToDisplayP3 = rec2020ToXyz * xyzToDisplayP3;
+const mat3 displayP3ToRec2020 = displayP3ToXyz * xyzToRec2020;
+const mat3 rec2020ToAdobeRgb = rec2020ToXyz * xyzToAdobeRgb;
+const mat3 adobeRgbToRec2020 = adobeRgbToXyz * xyzToRec2020;
 
 
-const mat3 srgb_to_lms = mat3(
+const mat3 srgbToLms = mat3(
     0.4122214708,
     0.5363325363,
     0.0514459929,
@@ -234,7 +234,7 @@ const mat3 srgb_to_lms = mat3(
     0.2817188376,
     0.6299787005
 );
-const mat3 lms_to_srgb = mat3(
+const mat3 lmsToSrgb = mat3(
     4.0767416621,
     -3.3077115913,
     0.2309699292,
@@ -245,11 +245,11 @@ const mat3 lms_to_srgb = mat3(
     -0.7034186147,
     1.7076147010
 );
-const mat3 xyz_to_lms = xyz_to_rec709 * srgb_to_lms;
-const mat3 lms_to_xyz = lms_to_srgb * rec709_to_xyz;
+const mat3 xyzToLms = xyzToRec709 * srgbToLms;
+const mat3 lmsToXyz = lmsToSrgb * rec709ToXyz;
 
 // Bradford chromatic adaptation D65 -> DCI-P3 theater white (0.314, 0.351)
-const mat3 d65_to_dci_p3_white = mat3(
+const mat3 d65ToDciP3White = mat3(
     0.976537,
     -0.015456,
     -0.016647,
@@ -261,7 +261,7 @@ const mat3 d65_to_dci_p3_white = mat3(
     0.871363
 );
 // Inverse (DCI theater white -> D65) for working==display DCI-P3 round-trips.
-const mat3 dci_p3_white_to_d65 = mat3(
+const mat3 dciP3WhiteToD65 = mat3(
     1.024541,
     0.015184,
     0.019639,
@@ -272,53 +272,53 @@ const mat3 dci_p3_white_to_d65 = mat3(
     -0.012253,
     1.147696
 );
-const mat3 rec2020_to_dci_p3
-    = rec2020_to_display_p3 * d65_to_dci_p3_white;
+const mat3 rec2020ToDciP3
+    = rec2020ToDisplayP3 * d65ToDciP3White;
 
 // ------------------------------
 //   Transfer functions (gamma)
 // ------------------------------
 
-vec3 srgb_eotf(vec3 linear) { // linear -> sRGB
+vec3 srgbEotf(vec3 linear) { // linear -> sRGB
     return 1.14374
         * (-0.126893 * linear + sqrt(linear)); // from Jodie in #snippets
 }
 
-vec3 srgb_eotf_inv(vec3 srgb) { // sRGB -> linear
+vec3 srgbEotfInv(vec3 srgb) { // sRGB -> linear
     return srgb
         * (srgb * (srgb * 0.305306011 + 0.682171111)
            + 0.012522878); // https://chilliant.blogspot.com/2012/08/srgb-approximations-for-hlsl.html
 }
 
 // DCI-P3 theater transfer (gamma 2.6 power law)
-vec3 dci_p3_eotf(vec3 linear) { return pow(linear, vec3(1.0 / 2.6)); }
+vec3 dciP3Eotf(vec3 linear) { return pow(linear, vec3(1.0 / 2.6)); }
 
-vec3 dci_p3_eotf_inv(vec3 encoded) { return pow(encoded, vec3(2.6)); }
+vec3 dciP3EotfInv(vec3 encoded) { return pow(encoded, vec3(2.6)); }
 
 // Rec. 2020 SDR transfer (BT.1886 gamma 2.4 approximation)
-vec3 rec2020_eotf(vec3 linear) { return pow(linear, vec3(1.0 / 2.4)); }
+vec3 rec2020Eotf(vec3 linear) { return pow(linear, vec3(1.0 / 2.4)); }
 
-vec3 rec2020_eotf_inv(vec3 encoded) { return pow(encoded, vec3(2.4)); }
+vec3 rec2020EotfInv(vec3 encoded) { return pow(encoded, vec3(2.4)); }
 
 // Adobe RGB (1998) transfer (gamma 2.2 power law)
-vec3 adobe_rgb_eotf(vec3 linear) { return pow(linear, vec3(1.0 / 2.2)); }
+vec3 adobeRgbEotf(vec3 linear) { return pow(linear, vec3(1.0 / 2.2)); }
 
-vec3 adobe_rgb_eotf_inv(vec3 encoded) { return pow(encoded, vec3(2.2)); }
+vec3 adobeRgbEotfInv(vec3 encoded) { return pow(encoded, vec3(2.2)); }
 
 // Display encoding follows displayGamut (Display P3 shares the sRGB
 // transfer function, so it needs no dedicated EOTF)
 #if displayGamut == displayGamutDciP3
-#define display_eotf dci_p3_eotf
-#define display_eotf_inv dci_p3_eotf_inv
+#define displayEotf dciP3Eotf
+#define displayEotfInv dciP3EotfInv
 #elif displayGamut == displayGamutRec2020
-#define display_eotf rec2020_eotf
-#define display_eotf_inv rec2020_eotf_inv
+#define displayEotf rec2020Eotf
+#define displayEotfInv rec2020EotfInv
 #elif displayGamut == displayGamutAdobeRgb
-#define display_eotf adobe_rgb_eotf
-#define display_eotf_inv adobe_rgb_eotf_inv
+#define displayEotf adobeRgbEotf
+#define displayEotfInv adobeRgbEotfInv
 #else // displayGamutSrgb / displayGamutDisplayP3
-#define display_eotf srgb_eotf
-#define display_eotf_inv srgb_eotf_inv
+#define displayEotf srgbEotf
+#define displayEotfInv srgbEotfInv
 #endif
 
 // -------------------------------------------------
@@ -327,7 +327,7 @@ vec3 adobe_rgb_eotf_inv(vec3 encoded) { return pow(encoded, vec3(2.2)); }
 
 
 // from https://gist.github.com/983/e170a24ae8eba2cd174f
-vec3 rgb_to_hsv(vec3 c) {
+vec3 rgbToHsv(vec3 c) {
     const vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
 
     vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
@@ -339,7 +339,7 @@ vec3 rgb_to_hsv(vec3 c) {
     return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
 }
 
-vec3 hsv_to_rgb(vec3 c) {
+vec3 hsvToRgb(vec3 c) {
     c.yz = clamp01(c.yz);
 
     vec3 rgb = clamp(
@@ -354,19 +354,19 @@ vec3 hsv_to_rgb(vec3 c) {
 // RGB <-> YCoCg
 
 // from https://en.wikipedia.org/wiki/YCoCg#Conversion_with_the_RGB_color_model
-vec3 rgb_to_ycocg(vec3 rgb) {
+vec3 rgbToYcocg(vec3 rgb) {
     const mat3 cm = mat3(0.25, 0.5, 0.25, 0.5, 0.0, -0.5, -0.25, 0.5, -0.25);
     return rgb * cm;
 }
 
-vec3 ycocg_to_rgb(vec3 ycocg) {
+vec3 ycocgToRgb(vec3 ycocg) {
     float tmp = ycocg.x - ycocg.z;
     return vec3(tmp + ycocg.y, ycocg.x + ycocg.z, tmp - ycocg.y);
 }
 
 // XYZ <-> LAB
 
-float cie_lab_f_inv(float t) {
+float cieLabFInv(float t) {
     const float delta = 6.0 / 29.0;
 
     if (t > delta) {
@@ -376,24 +376,24 @@ float cie_lab_f_inv(float t) {
     }
 }
 
-vec3 lab_to_xyz(vec3 lab) {
-    const vec3 xyz_n = vec3(95.0489, 100.0, 108.8840);
+vec3 labToXyz(vec3 lab) {
+    const vec3 xyzN = vec3(95.0489, 100.0, 108.8840);
 
     float y = lab.x * rcp(116.0) + (16.0 / 116.0);
 
-    vec3 f_inv = vec3(
-        cie_lab_f_inv(y + lab.y * rcp(500.0)),
-        cie_lab_f_inv(y),
-        cie_lab_f_inv(y - lab.z * rcp(200.0))
+    vec3 fInv = vec3(
+        cieLabFInv(y + lab.y * rcp(500.0)),
+        cieLabFInv(y),
+        cieLabFInv(y - lab.z * rcp(200.0))
     );
 
-    return xyz_n * f_inv;
+    return xyzN * fInv;
 }
 
 // Original source:
 // https://github.com/Jessie-LC/open-source-utility-code/blob/main/advanced/blackbody.glsl
 vec3 blackbody(float temperature) {
-    const vec3 lambda = primary_wavelengths;
+    const vec3 lambda = primaryWavelengths;
     const vec3 lambda2 = lambda * lambda;
     const vec3 lambda5 = lambda2 * lambda2 * lambda;
 
@@ -406,11 +406,11 @@ vec3 blackbody(float temperature) {
     vec3 d = exp(b / temperature);
 
     vec3 rgb = a * d - a;
-    return min_of(rgb) / rgb;
+    return minOf(rgb) / rgb;
 }
 
 // Isolate a range of hues (takes an HSV vector: hue, saturation, value)
-float isolate_hue(vec3 hsv, float center, float width) {
+float isolateHue(vec3 hsv, float center, float width) {
     if (hsv.y < 1e-2 || hsv.z < 1e-2) {
         return 0.0; // black/gray colors with no hue
     }

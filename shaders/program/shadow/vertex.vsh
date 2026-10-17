@@ -20,19 +20,19 @@
 
 out vec2 uv;
 
-flat out uint material_mask;
+flat out uint materialMask;
 flat out vec3 tint;
 
 #ifdef waterCaustics
-out vec3 scene_pos;
+out vec3 scenePos;
 #endif
 
 
 #if defined pom && defined pomDepthWrite && !defined COLORWHEEL && (defined PROGRAM_SHADOW_SOLID || defined PROGRAM_SHADOW_CUTOUT)
-out vec2 atlas_tile_coord;
-out float pom_view_distance;
-flat out vec2 atlas_tile_offset;
-flat out vec2 atlas_tile_scale;
+out vec2 atlasTileCoord;
+out float pomViewDistance;
+flat out vec2 atlasTileOffset;
+flat out vec2 atlasTileScale;
 flat out mat3 tbn;
 #endif
 
@@ -69,16 +69,16 @@ uniform float frameTimeCounter;
 uniform float rainStrength;
 uniform float wetness;
 
-uniform vec2 taa_offset;
-uniform vec3 light_dir;
+uniform vec2 taaOffset;
+uniform vec3 lightDir;
 
-uniform float world_age;
-uniform float time_sunrise;
-uniform float time_noon;
-uniform float time_sunset;
-uniform float time_midnight;
-uniform float biome_temperature;
-uniform float biome_humidity;
+uniform float worldAge;
+uniform float timeSunrise;
+uniform float timeNoon;
+uniform float timeSunset;
+uniform float timeMidnight;
+uniform float biomeTemperature;
+uniform float biomeHumidity;
 
 // ------------
 //   Includes
@@ -89,19 +89,19 @@ uniform float biome_humidity;
 
 void main() {
     uv = gl_MultiTexCoord0.xy;
-    material_mask = uint(mc_Entity.x - 10000.0);
+    materialMask = uint(mc_Entity.x - 10000.0);
     tint = gl_Color.rgb;
 
 #if defined WORLD_NETHER
     // No shadows, discard vertices now
 #ifdef waterCaustics
-    scene_pos = vec3(0.0);
+    scenePos = vec3(0.0);
 #endif
     gl_Position = vec4(-1.0);
     return;
 #endif
 
-    bool is_top_vertex = uv.y < mc_midTexCoord.y;
+    bool isTopVertex = uv.y < mc_midTexCoord.y;
 
     vec3 pos = transform(gl_ModelViewMatrix, gl_Vertex.xyz);
 
@@ -109,38 +109,38 @@ void main() {
     // Animations
     pos = transform(shadowModelViewInverse, pos);
     pos = pos + cameraPosition;
-    pos = animate_vertex(
+    pos = animateVertex(
         pos,
-        is_top_vertex,
+        isTopVertex,
         clamp01(rcp(240.0) * gl_MultiTexCoord1.y),
-        material_mask
+        materialMask
     );
     pos = pos - cameraPosition;
 
 #ifdef waterCaustics
-    scene_pos = pos;
+    scenePos = pos;
 #endif
 
 #if defined pom && defined pomDepthWrite && !defined COLORWHEEL && (defined PROGRAM_SHADOW_SOLID || defined PROGRAM_SHADOW_CUTOUT)
     // Same tile / TBN construction as gbuffers_all_solid.vsh, but with the
     // shadow view matrices, so the tangent frame matches the gbuffer's.
     {
-        vec2 uv_minus_mid = uv - mc_midTexCoord;
-        atlas_tile_offset = min(uv, mc_midTexCoord - uv_minus_mid);
-        atlas_tile_scale = abs(uv_minus_mid) * 2.0;
-        atlas_tile_coord = sign(uv_minus_mid) * 0.5 + 0.5;
+        vec2 uvMinusMid = uv - mc_midTexCoord;
+        atlasTileOffset = min(uv, mc_midTexCoord - uvMinusMid);
+        atlasTileScale = abs(uvMinusMid) * 2.0;
+        atlasTileCoord = sign(uvMinusMid) * 0.5 + 0.5;
 
-        mat3 pom_tbn;
-        pom_tbn[0] = mat3(shadowModelViewInverse)
+        mat3 pomTbn;
+        pomTbn[0] = mat3(shadowModelViewInverse)
             * normalize(gl_NormalMatrix * at_tangent.xyz);
-        pom_tbn[2] = mat3(shadowModelViewInverse)
+        pomTbn[2] = mat3(shadowModelViewInverse)
             * normalize(gl_NormalMatrix * gl_Normal);
-        pom_tbn[1] = cross(pom_tbn[0], pom_tbn[2]) * sign(at_tangent.w);
-        tbn = pom_tbn;
+        pomTbn[1] = cross(pomTbn[0], pomTbn[2]) * sign(at_tangent.w);
+        tbn = pomTbn;
 
         // Camera-relative distance: drives the same pom distance fade as
         // the gbuffer pass so shadow and depth displacement agree.
-        pom_view_distance = length(pos);
+        pomViewDistance = length(pos);
     }
 #endif
 
@@ -148,8 +148,8 @@ void main() {
     ;
 #endif
 
-    vec3 shadow_clip_pos = project_ortho(gl_ProjectionMatrix, pos);
-    shadow_clip_pos = distort_shadow_space(shadow_clip_pos);
+    vec3 shadowClipPos = projectOrtho(gl_ProjectionMatrix, pos);
+    shadowClipPos = distortShadowSpace(shadowClipPos);
 
-    gl_Position = vec4(shadow_clip_pos, 1.0);
+    gl_Position = vec4(shadowClipPos, 1.0);
 }

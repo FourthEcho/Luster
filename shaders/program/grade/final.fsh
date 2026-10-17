@@ -18,7 +18,7 @@
 
 #include "/lib/global.glsl"
 
-layout(location = 0) out vec3 fragment_color;
+layout(location = 0) out vec3 fragmentColor;
 
 in vec2 uv;
 
@@ -51,33 +51,33 @@ uniform float frameTimeCounter;
 
   Usage:
 
-  // Call begin_text to initialize the text renderer. You can scale the fragment
-position to adjust the size of the text begin_text(ivec2(gl_FragCoord.xy),
+  // Call beginText to initialize the text renderer. You can scale the fragment
+position to adjust the size of the text beginText(ivec2(gl_FragCoord.xy),
 ivec2(0, viewHeight)); ^ fragment position     ^ text box position (upper left
 corner)
 
   // You can print various data types
-  print_bool(false);
-  print_float(sqrt(-1.0)); // Prints "NaN"
-  print_int(42);
-  print_vec3(sky_color);
+  printBool(false);
+  printFloat(sqrt(-1.0)); // Prints "NaN"
+  printInt(42);
+  printVec3(skyColor);
 
   // ...or arbitrarily long strings
   print((_H, _e, _l, _l, _o, _comma, _space, _w, _o, _r, _l, _d));
 
   // To start a new line, use
-  print_line();
+  printLine();
 
   // You can also configure the text color on the fly
-  text.fg_col = vec4(1.0, 0.0, 0.0, 1.0);
-  text.bg_col = vec4(0.0, 0.0, 0.0, 1.0);
+  text.fgCol = vec4(1.0, 0.0, 0.0, 1.0);
+  text.bgCol = vec4(0.0, 0.0, 0.0, 1.0);
 
   // ...as well as the number base and number of decimal places to print
   text.base = 16;
-  text.fp_precision = 4;
+  text.fpPrecision = 4;
 
-  // Finally, call end_text to blend the current fragment color with the text
-  end_text(scene_color);
+  // Finally, call endText to blend the current fragment color with the text
+  endText(sceneColor);
 
   Important: any variables you display must be the same for all fragments, or
   at least all of the fragments that the text covers. Otherwise, different
@@ -163,91 +163,91 @@ const uint _colon = 0x02000020u;
 const uint _underscore = 0x000007Cu; // _
 const uint _quote = 0x52800000u; // "
 const uint _bang = 0x21084010u; // !
-const uint _open_bracket = 0x11084208u; // (
-const uint _close_bracket = 0x41084220u; // )
-const uint _open_square_bracket = 0x3908421Cu; // [
-const uint _close_square_bracket = 0xE1084270u; // ]
-const uint _open_chevron = 0x00888208u; // <
-const uint _close_chevron = 0x02082220u; // >
+const uint _openBracket = 0x11084208u; // (
+const uint _closeBracket = 0x41084220u; // )
+const uint _openSquareBracket = 0x3908421Cu; // [
+const uint _closeSquareBracket = 0xE1084270u; // ]
+const uint _openChevron = 0x00888208u; // <
+const uint _closeChevron = 0x02082220u; // >
 const uint _block = 0xFFFFFFFCu; // █
 const uint _copyright = 0x03AB9AB8u; // ©️
 
-const int char_width = 5;
-const int char_height = 6;
-const int char_spacing = 1;
-const int line_spacing = 1;
+const int charWidth = 5;
+const int charHeight = 6;
+const int charSpacing = 1;
+const int lineSpacing = 1;
 
-const ivec2 char_size = ivec2(char_width, char_height);
-const ivec2 space_size = char_size + ivec2(char_spacing, line_spacing);
+const ivec2 charSize = ivec2(charWidth, charHeight);
+const ivec2 spaceSize = charSize + ivec2(charSpacing, lineSpacing);
 
 // Text renderer
 
 struct Text {
     vec4 result; // Output color from the text renderer
-    vec4 fg_col; // Text foreground color
-    vec4 bg_col; // Text background color
-    ivec2 frag_pos; // The position of the fragment (can be scaled to adjust the
+    vec4 fgCol; // Text foreground color
+    vec4 bgCol; // Text background color
+    ivec2 fragPos; // The position of the fragment (can be scaled to adjust the
                     // size of the text)
-    ivec2 text_pos; // The position of the top-left corner of the text
-    ivec2 char_pos; // The position of the next character in the text
+    ivec2 textPos; // The position of the top-left corner of the text
+    ivec2 charPos; // The position of the next character in the text
     int base; // Number base
-    int fp_precision; // Number of decimal places to print
+    int fpPrecision; // Number of decimal places to print
 } text;
 
 // Fills the global text object with default values
-void begin_text(ivec2 frag_pos, ivec2 text_pos) {
+void beginText(ivec2 fragPos, ivec2 textPos) {
     text.result = vec4(0.0);
-    text.fg_col = vec4(1.0);
-    text.bg_col = vec4(0.0, 0.0, 0.0, 0.6);
-    text.frag_pos = frag_pos;
-    text.text_pos = text_pos;
-    text.char_pos = ivec2(0);
+    text.fgCol = vec4(1.0);
+    text.bgCol = vec4(0.0, 0.0, 0.0, 0.6);
+    text.fragPos = fragPos;
+    text.textPos = textPos;
+    text.charPos = ivec2(0);
     text.base = 10;
-    text.fp_precision = 2;
+    text.fpPrecision = 2;
 }
 
 // Applies the rendered text to the fragment
-void end_text(inout vec3 scene_color) {
-    scene_color = mix(scene_color.rgb, text.result.rgb, text.result.a);
+void endText(inout vec3 sceneColor) {
+    sceneColor = mix(sceneColor.rgb, text.result.rgb, text.result.a);
 }
 
-void print_line() {
-    text.char_pos.x = 0;
-    ++text.char_pos.y;
+void printLine() {
+    text.charPos.x = 0;
+    ++text.charPos.y;
 }
 
-void print_char(uint character) {
-    ivec2 pos = text.frag_pos - text.text_pos
-        - space_size * text.char_pos * ivec2(1, -1) + ivec2(0, space_size.y);
+void printChar(uint character) {
+    ivec2 pos = text.fragPos - text.textPos
+        - spaceSize * text.charPos * ivec2(1, -1) + ivec2(0, spaceSize.y);
 
-    uint index = uint(char_width - pos.x + pos.y * char_width + 1);
+    uint index = uint(charWidth - pos.x + pos.y * charWidth + 1);
 
     // Draw background
-    if (clamp(pos, ivec2(0), space_size - 1) == pos) {
-        text.result = mix(text.result, text.bg_col, text.bg_col.a);
+    if (clamp(pos, ivec2(0), spaceSize - 1) == pos) {
+        text.result = mix(text.result, text.bgCol, text.bgCol.a);
     }
 
     // Draw character
-    if (clamp(pos, ivec2(0), char_size - 1) == pos) {
+    if (clamp(pos, ivec2(0), charSize - 1) == pos) {
         text.result = mix(
             text.result,
-            text.fg_col,
-            text.fg_col.a * float(character >> index & 1u)
+            text.fgCol,
+            text.fgCol.a * float(character >> index & 1u)
         );
     }
 
     // Advance to next character
-    text.char_pos.x++;
+    text.charPos.x++;
 }
 
 #define print(string) \
     { \
         uint[] characters = uint[] string; \
         for (int i = 0; i < characters.length(); ++i) \
-            print_char(characters[i]); \
+            printChar(characters[i]); \
     }
 
-void print_unsigned_int(uint value, int len) {
+void printUnsignedInt(uint value, int len) {
     const uint[36] digits = uint[](
         _0,
         _1,
@@ -288,39 +288,39 @@ void print_unsigned_int(uint value, int len) {
     );
 
     // Advance to end of the number
-    text.char_pos.x += len - 1;
+    text.charPos.x += len - 1;
 
     // Write number backwards
     for (int i = 0; i < len; ++i) {
-        print_char(digits[int(value) % text.base]);
+        printChar(digits[int(value) % text.base]);
         value /= text.base;
-        text.char_pos.x -= 2;
+        text.charPos.x -= 2;
     }
 
     // Return to end of the number
-    text.char_pos.x += len + 1;
+    text.charPos.x += len + 1;
 }
 
-void print_unsigned_int(uint value) {
-    float log_value = log(float(value)) + 1e-6;
-    float log_base = log(float(text.base));
+void printUnsignedInt(uint value) {
+    float logValue = log(float(value)) + 1e-6;
+    float logBase = log(float(text.base));
 
-    int len = int(ceil(log_value / log_base));
+    int len = int(ceil(logValue / logBase));
     len = max(len, 1);
 
-    print_unsigned_int(value, len);
+    printUnsignedInt(value, len);
 }
 
-void print_int(int value) {
+void printInt(int value) {
     if (value < 0) {
-        print_char(_minus);
+        printChar(_minus);
     }
-    print_unsigned_int(uint(abs(value)));
+    printUnsignedInt(uint(abs(value)));
 }
 
-void print_float(float value) {
+void printFloat(float value) {
     if (value < 0.0) {
-        print_char(_minus);
+        printChar(_minus);
     }
 
     if (isnan(value)) {
@@ -330,17 +330,17 @@ void print_float(float value) {
     } else {
         float i, f = modf(abs(value), i);
 
-        uint integral_part = uint(i);
-        uint fractional_part
-            = uint(f * pow(float(text.base), float(text.fp_precision)));
+        uint integralPart = uint(i);
+        uint fractionalPart
+            = uint(f * pow(float(text.base), float(text.fpPrecision)));
 
-        print_unsigned_int(integral_part);
-        print_char(_dot);
-        print_unsigned_int(fractional_part, text.fp_precision);
+        printUnsignedInt(integralPart);
+        printChar(_dot);
+        printUnsignedInt(fractionalPart, text.fpPrecision);
     }
 }
 
-void print_bool(bool value) {
+void printBool(bool value) {
     if (value) {
         print((_t, _r, _u, _e));
     } else {
@@ -348,12 +348,12 @@ void print_bool(bool value) {
     }
 }
 
-void print_vec3(vec3 value) {
-    print_float(value.x);
+void printVec3(vec3 value) {
+    printFloat(value.x);
     print((_comma, _space));
-    print_float(value.y);
+    printFloat(value.y);
     print((_comma, _space));
-    print_float(value.z);
+    printFloat(value.z);
 }
 
 #endif // INCLUDE_UTILITY_TEXT_RENDERING
@@ -361,7 +361,7 @@ void print_vec3(vec3 value) {
 
 // https://github.com/GPUOpen-Effects/FidelityFX-cas
 
-vec3 image_sharpen_filter(
+vec3 imageSharpenFilter(
     sampler2D sampler,
     ivec2 texel,
     vec3 center,
@@ -369,10 +369,10 @@ vec3 image_sharpen_filter(
 ) {
     if (amount <= 0.0) return center;
 
-    vec3 left  = display_eotf(texelFetch(sampler, texel + ivec2(-1, 0), 0).rgb);
-    vec3 right = display_eotf(texelFetch(sampler, texel + ivec2( 1, 0), 0).rgb);
-    vec3 up    = display_eotf(texelFetch(sampler, texel + ivec2(0, -1), 0).rgb);
-    vec3 down  = display_eotf(texelFetch(sampler, texel + ivec2(0,  1), 0).rgb);
+    vec3 left  = displayEotf(texelFetch(sampler, texel + ivec2(-1, 0), 0).rgb);
+    vec3 right = displayEotf(texelFetch(sampler, texel + ivec2( 1, 0), 0).rgb);
+    vec3 up    = displayEotf(texelFetch(sampler, texel + ivec2(0, -1), 0).rgb);
+    vec3 down  = displayEotf(texelFetch(sampler, texel + ivec2(0,  1), 0).rgb);
 
     vec3 neighborhood = 0.25 * (left + right + up + down);
     vec3 detail = center - neighborhood;
@@ -383,9 +383,9 @@ vec3 image_sharpen_filter(
     return clamp(sharpened, lo, hi);
 }
 
-vec3 cas_filter(sampler2D sampler, ivec2 texel, const float sharpness) {
+vec3 casFilter(sampler2D sampler, ivec2 texel, const float sharpness) {
 #ifndef cas
-    return display_eotf(texelFetch(sampler, texel, 0).rgb);
+    return displayEotf(texelFetch(sampler, texel, 0).rgb);
 #endif
 
     // Fetch 3x3 neighborhood
@@ -403,25 +403,25 @@ vec3 cas_filter(sampler2D sampler, ivec2 texel, const float sharpness) {
     vec3 i = texelFetch(sampler, texel + ivec2(1, 1), 0).rgb;
 
     // Convert to sRGB before performing cas
-    a = display_eotf(a);
-    b = display_eotf(b);
-    c = display_eotf(c);
-    d = display_eotf(d);
-    e = display_eotf(e);
-    f = display_eotf(f);
-    g = display_eotf(g);
-    h = display_eotf(h);
-    i = display_eotf(i);
+    a = displayEotf(a);
+    b = displayEotf(b);
+    c = displayEotf(c);
+    d = displayEotf(d);
+    e = displayEotf(e);
+    f = displayEotf(f);
+    g = displayEotf(g);
+    h = displayEotf(h);
+    i = displayEotf(i);
 
     // Soft min and max. These are 2x bigger (factored out the extra multiply)
-    vec3 min_color = min_of(d, e, f, b, h);
-    min_color += min_of(min_color, a, c, g, i);
+    vec3 minColor = minOf(d, e, f, b, h);
+    minColor += minOf(minColor, a, c, g, i);
 
-    vec3 max_color = max_of(d, e, f, b, h);
-    max_color += max_of(max_color, a, c, g, i);
+    vec3 maxColor = maxOf(d, e, f, b, h);
+    maxColor += maxOf(maxColor, a, c, g, i);
 
     // Smooth minimum distance to the signal limit divided by smooth max
-    vec3 w = clamp01(min(min_color, 2.0 - max_color) / max_color);
+    vec3 w = clamp01(min(minColor, 2.0 - maxColor) / maxColor);
     w = 1.0 - sqr(1.0 - w); // Shaping amount of sharpening
     w *= -1.0 / mix(8.0, 5.0, sharpness);
 
@@ -429,8 +429,8 @@ vec3 cas_filter(sampler2D sampler, ivec2 texel, const float sharpness) {
     // 0 w 0
     // w 1 w
     // 0 w 0
-    vec3 weight_sum = 1.0 + 4.0 * w;
-    return clamp01((b + d + f + h) * w + e) / weight_sum;
+    vec3 weightSum = 1.0 + 4.0 * w;
+    return clamp01((b + d + f + h) * w + e) / weightSum;
 }
 #ifdef distanceView
 uniform sampler2D depthtex0;
@@ -440,8 +440,8 @@ uniform mat4 gbufferModelViewInverse;
 uniform mat4 gbufferProjection;
 uniform mat4 gbufferProjectionInverse;
 
-uniform vec2 view_res;
-uniform vec2 taa_offset;
+uniform vec2 viewRes;
+uniform vec2 taaOffset;
 
 uniform float near;
 uniform float far;
@@ -450,8 +450,8 @@ uniform float far;
 #include "/lib/util/spaceConversion.glsl"
 #endif
 
-const int debug_text_scale = 2;
-ivec2 debug_text_position = ivec2(0, int(viewHeight) / debug_text_scale);
+const int debugTextScale = 2;
+ivec2 debugTextPosition = ivec2(0, int(viewHeight) / debugTextScale);
 
 #if debugView == debugViewWeather
 #if !defined INCLUDE_MISC_DEBUG_WEATHER
@@ -464,66 +464,66 @@ uniform float sunAngle;
 uniform float rainStrength;
 uniform float wetness;
 
-uniform vec3 light_dir;
-uniform vec3 sun_dir;
-uniform vec3 moon_dir;
+uniform vec3 lightDir;
+uniform vec3 sunDir;
+uniform vec3 moonDir;
 
-uniform float world_age;
+uniform float worldAge;
 
-uniform float time_sunrise;
-uniform float time_noon;
-uniform float time_sunset;
-uniform float time_midnight;
+uniform float timeSunrise;
+uniform float timeNoon;
+uniform float timeSunset;
+uniform float timeMidnight;
 
-uniform float biome_cave;
-uniform float biome_temperate;
-uniform float biome_arid;
-uniform float biome_snowy;
-uniform float biome_taiga;
-uniform float biome_jungle;
-uniform float biome_swamp;
-uniform float biome_may_rain;
-uniform float biome_may_snow;
-uniform float biome_temperature;
-uniform float biome_humidity;
+uniform float biomeCave;
+uniform float biomeTemperate;
+uniform float biomeArid;
+uniform float biomeSnowy;
+uniform float biomeTaiga;
+uniform float biomeJungle;
+uniform float biomeSwamp;
+uniform float biomeMayRain;
+uniform float biomeMaySnow;
+uniform float biomeTemperature;
+uniform float biomeHumidity;
 
-uniform float desert_sandstorm;
+uniform float desertSandstormWeather;
 
 #include "/lib/weather/clouds.glsl"
 #include "/lib/weather/core.glsl"
 
-void debug_weather(inout vec3 color) {
-    const int number_col = 30;
+void debugWeather(inout vec3 color) {
+    const int numberCol = 30;
 
-    Weather weather = get_weather();
-    CloudsParameters clouds_params = get_clouds_parameters(weather);
+    Weather weather = getWeather();
+    CloudsParameters cloudsParams = getCloudsParameters(weather);
 
-    begin_text(ivec2(gl_FragCoord.xy) / debug_text_scale, debug_text_position);
-    text.bg_col = vec4(0.0);
+    beginText(ivec2(gl_FragCoord.xy) / debugTextScale, debugTextPosition);
+    text.bgCol = vec4(0.0);
     print((_W, _E, _A, _T, _H, _E, _R));
-    print_line();
+    printLine();
     print((_T, _e, _m, _p, _e, _r, _a, _t, _u, _r, _e));
-    text.char_pos.x = number_col;
-    print_float(weather.temperature);
-    print_line();
+    text.charPos.x = numberCol;
+    printFloat(weather.temperature);
+    printLine();
     print((_H, _u, _m, _i, _d, _i, _d, _i, _t, _y));
-    text.char_pos.x = number_col;
-    print_float(weather.humidity);
-    print_line();
+    text.charPos.x = numberCol;
+    printFloat(weather.humidity);
+    printLine();
     print(
         (_B, _i, _o, _m, _e, _space, _t, _e, _m, _p, _e, _r, _a, _t, _u, _r, _e)
     );
-    text.char_pos.x = number_col;
-    print_float(biome_temperature);
-    print_line();
+    text.charPos.x = numberCol;
+    printFloat(biomeTemperature);
+    printLine();
     print((_B, _i, _o, _m, _e, _space, _r, _a, _i, _n, _f, _a, _l, _l));
-    text.char_pos.x = number_col;
-    print_float(biome_humidity);
-    print_line();
+    text.charPos.x = numberCol;
+    printFloat(biomeHumidity);
+    printLine();
     print((_W, _i, _n, _d));
-    text.char_pos.x = number_col;
-    print_float(weather.wind);
-    print_line();
+    text.charPos.x = numberCol;
+    printFloat(weather.wind);
+    printLine();
     print(
         (_T,
          _u,
@@ -536,12 +536,12 @@ void debug_weather(inout vec3 color) {
          _c,
          _e)
     );
-    text.char_pos.x = number_col;
-    print_float(weather.turbulence);
-    print_line();
-    print_line();
+    text.charPos.x = numberCol;
+    printFloat(weather.turbulence);
+    printLine();
+    printLine();
     print((_C, _L, _O, _U, _D, _S));
-    print_line();
+    printLine();
     print(
         (_C,
          _u,
@@ -567,9 +567,9 @@ void debug_weather(inout vec3 color) {
          _n,
          _d)
     );
-    text.char_pos.x = number_col;
-    print_float(clouds_params.cumulus_congestus_blend);
-    print_line();
+    text.charPos.x = numberCol;
+    printFloat(cloudsParams.cumulusCongestusBlend);
+    printLine();
     print(
         (_L,
          _a,
@@ -592,9 +592,9 @@ void debug_weather(inout vec3 color) {
          _i,
          _n)
     );
-    text.char_pos.x = number_col;
-    print_float(clouds_params.l0_coverage.x);
-    print_line();
+    text.charPos.x = numberCol;
+    printFloat(cloudsParams.l0Coverage.x);
+    printLine();
     print(
         (_L,
          _a,
@@ -617,9 +617,9 @@ void debug_weather(inout vec3 color) {
          _a,
          _x)
     );
-    text.char_pos.x = number_col;
-    print_float(clouds_params.l0_coverage.y);
-    print_line();
+    text.charPos.x = numberCol;
+    printFloat(cloudsParams.l0Coverage.y);
+    printLine();
     print(
         (_L,
          _a,
@@ -651,9 +651,9 @@ void debug_weather(inout vec3 color) {
          _n,
          _d)
     );
-    text.char_pos.x = number_col;
-    print_float(clouds_params.l0_cumulus_stratus_blend);
-    print_line();
+    text.charPos.x = numberCol;
+    printFloat(cloudsParams.l0CumulusStratusBlend);
+    printLine();
     print(
         (_L,
          _a,
@@ -676,9 +676,9 @@ void debug_weather(inout vec3 color) {
          _i,
          _n)
     );
-    text.char_pos.x = number_col;
-    print_float(clouds_params.l1_coverage.x);
-    print_line();
+    text.charPos.x = numberCol;
+    printFloat(cloudsParams.l1Coverage.x);
+    printLine();
     print(
         (_L,
          _a,
@@ -701,9 +701,9 @@ void debug_weather(inout vec3 color) {
          _a,
          _x)
     );
-    text.char_pos.x = number_col;
-    print_float(clouds_params.l1_coverage.y);
-    print_line();
+    text.charPos.x = numberCol;
+    printFloat(cloudsParams.l1Coverage.y);
+    printLine();
     print(
         (_L,
          _a,
@@ -735,13 +735,13 @@ void debug_weather(inout vec3 color) {
          _n,
          _d)
     );
-    text.char_pos.x = number_col;
-    print_float(clouds_params.l1_cumulus_stratus_blend);
-    print_line();
+    text.charPos.x = numberCol;
+    printFloat(cloudsParams.l1CumulusStratusBlend);
+    printLine();
     print((_C, _i, _r, _r, _u, _s, _space, _a, _m, _o, _u, _n, _t));
-    text.char_pos.x = number_col;
-    print_float(clouds_params.cirrus_amount);
-    print_line();
+    text.charPos.x = numberCol;
+    printFloat(cloudsParams.cirrusAmount);
+    printLine();
     print(
         (_C,
          _i,
@@ -763,9 +763,9 @@ void debug_weather(inout vec3 color) {
          _n,
          _t)
     );
-    text.char_pos.x = number_col;
-    print_float(clouds_params.cirrocumulus_amount);
-    print_line();
+    text.charPos.x = numberCol;
+    printFloat(cloudsParams.cirrocumulusAmount);
+    printLine();
     print(
         (_N,
          _o,
@@ -786,9 +786,9 @@ void debug_weather(inout vec3 color) {
          _n,
          _t)
     );
-    text.char_pos.x = number_col;
-    print_float(clouds_params.noctilucent_amount);
-    print_line();
+    text.charPos.x = numberCol;
+    printFloat(cloudsParams.noctilucentAmount);
+    printLine();
     print(
         (_C,
          _r,
@@ -814,10 +814,10 @@ void debug_weather(inout vec3 color) {
          _n,
          _t)
     );
-    text.char_pos.x = number_col;
-    print_float(clouds_params.crepuscular_rays_amount);
-    print_line();
-    end_text(color);
+    text.charPos.x = numberCol;
+    printFloat(cloudsParams.crepuscularRaysAmount);
+    printLine();
+    endText(color);
 }
 
 #endif // INCLUDE_MISC_DEBUG_WEATHER
@@ -826,7 +826,7 @@ void debug_weather(inout vec3 color) {
 #ifdef framingTool
 // Composition-guide line profile shared by the thirds/aspect/safe
 // overlays at the end of main.
-float framing_line_profile(float d) {
+float framingLineProfile(float d) {
     return 1.0 - smoothstep(
         framingLineWidth * 0.5 - 0.5,
         framingLineWidth * 0.5 + 0.5,
@@ -839,63 +839,63 @@ void main() {
     ivec2 texel = ivec2(gl_FragCoord.xy);
 
     if (abs(MC_RENDER_QUALITY - 1.0) < 0.01) {
-        fragment_color
-            = cas_filter(colortex0, texel, 0.50 * 2.0 - 1.0);
+        fragmentColor
+            = casFilter(colortex0, texel, 0.50 * 2.0 - 1.0);
     } else {
-        fragment_color = catmull_rom_filter_fast_rgb(colortex0, uv, 0.6);
-        fragment_color = display_eotf(fragment_color);
+        fragmentColor = catmullRomFilterFastRgb(colortex0, uv, 0.6);
+        fragmentColor = displayEotf(fragmentColor);
     }
 
-    fragment_color = image_sharpen_filter(
+    fragmentColor = imageSharpenFilter(
         colortex0,
         texel,
-        fragment_color,
+        fragmentColor,
         0.50
     );
 
-    fragment_color = dither_8bit(fragment_color, bayer16(vec2(texel)));
+    fragmentColor = dither8bit(fragmentColor, bayer16(vec2(texel)));
 
 #if debugView == debugViewSampler
     if (clamp(texel, ivec2(0), ivec2(textureSize(debugSampler, 0))) == texel) {
-        fragment_color = texelFetch(debugSampler, texel, 0).rgb;
-        fragment_color = display_eotf(fragment_color);
+        fragmentColor = texelFetch(debugSampler, texel, 0).rgb;
+        fragmentColor = displayEotf(fragmentColor);
     }
 #elif debugView == debugViewWeather
-    debug_weather(fragment_color);
+    debugWeather(fragmentColor);
 #endif
 
 #ifdef distanceView
     float depth
-        = texelFetch(depthtex0, ivec2(uv * view_res * taau_render_scale), 0).x;
+        = texelFetch(depthtex0, ivec2(uv * viewRes * taauViewportScale), 0).x;
 
-    vec3 position_screen = vec3(uv, depth);
-    vec3 position_view
-        = screen_to_view_space(gbufferProjectionInverse, position_screen, true);
+    vec3 positionScreen = vec3(uv, depth);
+    vec3 positionView
+        = screenToViewSpace(gbufferProjectionInverse, positionScreen, true);
 
-    bool is_sky = depth == 1.0;
+    bool isSky = depth == 1.0;
 
 #ifdef LOD_MOD_ACTIVE
-    float depth_lod = texelFetch(lod_depth_tex, texel, 0).x;
-    bool is_lod = is_lod_terrain(depth, depth_lod);
+    float depthLod = texelFetch(lodDepthTex, texel, 0).x;
+    bool isLod = isLodTerrain(depth, depthLod);
 
-    if (is_lod) {
-        position_view = screen_to_view_space(
-            lod_projection_matrix_inverse,
-            vec3(uv, depth_lod),
+    if (isLod) {
+        positionView = screenToViewSpace(
+            lodProjectionMatrixInverse,
+            vec3(uv, depthLod),
             true
         );
     }
 
-    is_sky = is_sky && depth_lod == 1.0;
+    isSky = isSky && depthLod == 1.0;
 #endif
 
 #if distanceViewMethod == distanceViewDistance
-    float dist = length(position_view);
+    float dist = length(positionView);
 #elif distanceViewMethod == distanceViewDepth
-    float dist = -position_view.z;
+    float dist = -positionView.z;
 #endif
 
-    fragment_color = is_sky
+    fragmentColor = isSky
         ? vec3(1.0)
         : vec3(clamp01(dist * rcp(distanceViewMaxDistance)));
 #endif
@@ -904,11 +904,11 @@ void main() {
     // Composition guides: rule-of-thirds grid, target aspect box and
     // safe-area rect. Overlaid last so grading never tints the guides.
     {
-        vec2 framing_res = vec2(viewWidth, viewHeight);
+        vec2 framingRes = vec2(viewWidth, viewHeight);
         float guide = 0.0;
 #ifdef framingThirds
-        vec2 third = framing_res / 3.0;
-        float thirds_dist = min(
+        vec2 third = framingRes / 3.0;
+        float thirdsDist = min(
             min(
                 abs(gl_FragCoord.x - third.x),
                 abs(gl_FragCoord.x - 2.0 * third.x)
@@ -918,32 +918,32 @@ void main() {
                 abs(gl_FragCoord.y - 2.0 * third.y)
             )
         );
-        guide = max(guide, framing_line_profile(thirds_dist));
+        guide = max(guide, framingLineProfile(thirdsDist));
 #endif
 #ifdef framingAspect
-        float screen_aspect = framing_res.x / max(framing_res.y, 1.0);
-        float aspect_dist;
-        if (screen_aspect > framingAspectRatio) {
-            float half_w = 0.5 * framing_res.y * framingAspectRatio;
-            aspect_dist = min(
-                abs(gl_FragCoord.x - (0.5 * framing_res.x - half_w)),
-                abs(gl_FragCoord.x - (0.5 * framing_res.x + half_w))
+        float screenAspect = framingRes.x / max(framingRes.y, 1.0);
+        float aspectDist;
+        if (screenAspect > framingAspectRatio) {
+            float halfW = 0.5 * framingRes.y * framingAspectRatio;
+            aspectDist = min(
+                abs(gl_FragCoord.x - (0.5 * framingRes.x - halfW)),
+                abs(gl_FragCoord.x - (0.5 * framingRes.x + halfW))
             );
         } else {
-            float half_h = 0.5 * framing_res.x / max(framingAspectRatio, 1e-4);
-            aspect_dist = min(
-                abs(gl_FragCoord.y - (0.5 * framing_res.y - half_h)),
-                abs(gl_FragCoord.y - (0.5 * framing_res.y + half_h))
+            float halfH = 0.5 * framingRes.x / max(framingAspectRatio, 1e-4);
+            aspectDist = min(
+                abs(gl_FragCoord.y - (0.5 * framingRes.y - halfH)),
+                abs(gl_FragCoord.y - (0.5 * framingRes.y + halfH))
             );
         }
-        guide = max(guide, framing_line_profile(aspect_dist));
-        vec2 safe_q = abs(gl_FragCoord.xy - 0.5 * framing_res)
-            - 0.5 * framing_res * framingSafeArea;
-        float safe_dist = length(max(safe_q, vec2(0.0)))
-            + min(max(safe_q.x, safe_q.y), 0.0);
-        guide = max(guide, framing_line_profile(abs(safe_dist)));
+        guide = max(guide, framingLineProfile(aspectDist));
+        vec2 safeQ = abs(gl_FragCoord.xy - 0.5 * framingRes)
+            - 0.5 * framingRes * framingSafeArea;
+        float safeDist = length(max(safeQ, vec2(0.0)))
+            + min(max(safeQ.x, safeQ.y), 0.0);
+        guide = max(guide, framingLineProfile(abs(safeDist)));
 #endif
-        fragment_color = mix(fragment_color, vec3(1.0), guide * framingOpacity);
+        fragmentColor = mix(fragmentColor, vec3(1.0), guide * framingOpacity);
     }
 #endif
 }

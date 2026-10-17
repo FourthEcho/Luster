@@ -21,7 +21,7 @@
 layout(
     location = 0
 ) out vec4 ambient; // ao, ambient sss, octahedrally encoded bent normal
-layout(location = 1) out vec2 ambient_history_data; // depth, pixel age
+layout(location = 1) out vec2 ambientHistoryData; // depth, pixel age
 
 /* RENDERTARGETS: 6,14 */
 
@@ -56,9 +56,9 @@ uniform float far;
 
 uniform int frameCounter;
 
-uniform vec2 view_res;
-uniform vec2 view_pixel_size;
-uniform vec2 taa_offset;
+uniform vec2 viewRes;
+uniform vec2 viewPixelSize;
+uniform vec2 taaOffset;
 
 // ------------
 //   Includes
@@ -74,16 +74,16 @@ uniform vec2 taa_offset;
 #include "/lib/util/random.glsl"
 // Spherical linear interpolation of two unit vectors
 vec3 slerp(vec3 v0, vec3 v1, float t) {
-    float cos_theta = clamp(dot(v0, v1), -1.0, 1.0);
-    if (cos_theta > 0.999) {
+    float cosTheta = clamp(dot(v0, v1), -1.0, 1.0);
+    if (cosTheta > 0.999) {
         return v0;
     }
 
-    float theta = fast_acos(cos_theta);
-    float rcp_sin_theta = rcp(max(sin(theta), 1e-4));
+    float theta = fastAcos(cosTheta);
+    float rcpSinTheta = rcp(max(sin(theta), 1e-4));
 
-    float w0 = rcp_sin_theta * sin((1.0 - t) * theta);
-    float w1 = rcp_sin_theta * sin(t * theta);
+    float w0 = rcpSinTheta * sin((1.0 - t) * theta);
+    float w1 = rcpSinTheta * sin(t * theta);
 
     return v0 * w0 + v1 * w1;
 }
@@ -99,81 +99,81 @@ vec3 slerp(vec3 v0, vec3 v1, float t) {
 
 // DSSAO paired-depth sampling adapted from the BSL-derived method credited
 // by Kappa v5.3 to Capt Tatsu (used with permission).
-vec2 get_dssao_sample_offset(float radius_step) {
-    float angle = fract(radius_step * 8.0) * pi;
-    return vec2(cos(angle), sin(angle)) * radius_step;
+vec2 getDssaoSampleOffset(float radiusStep) {
+    float angle = fract(radiusStep * 8.0) * pi;
+    return vec2(cos(angle), sin(angle)) * radiusStep;
 }
 
-float compute_dssao(
-    vec3 position_screen,
-    vec3 scene_normal,
+float computeDssao(
+    vec3 positionScreen,
+    vec3 sceneNormal,
     vec2 dither
 ) {
-    const float max_occlusion_distance = tau;
-    const float anti_bleed_exponent = 0.71;
+    const float maxOcclusionDistance = tau;
+    const float antiBleedExponent = 0.71;
 
-    float current_depth = screen_to_view_space_depth(
-        combined_projection_matrix_inverse,
-        position_screen.z
+    float currentDepth = screenToViewSpaceDepth(
+        combinedProjectionMatrixInverse,
+        positionScreen.z
     );
 
-    float orientation_scale = 0.75
-        + abs(1.0 - clamp(dot(normalize(scene_normal), vec3(0.0, 1.0, 0.0)), -1.0, 1.0)) * 0.5;
-    float radius = max(ssaoRadius, 0.25) * orientation_scale;
+    float orientationScale = 0.75
+        + abs(1.0 - clamp(dot(normalize(sceneNormal), vec3(0.0, 1.0, 0.0)), -1.0, 1.0)) * 0.5;
+    float radius = max(ssaoRadius, 0.25) * orientationScale;
 
-    float fov_scale = abs(combined_projection_matrix[1][1]) / 1.37;
-    float aspect_inverse = view_res.y / max(view_res.x, 1.0);
-    vec2 screen_scale = radius * vec2(aspect_inverse, 1.0)
-        * fov_scale / max(current_depth, 5.0);
+    float fovScale = abs(combinedProjectionMatrix[1][1]) / 1.37;
+    float aspectInverse = viewRes.y / max(viewRes.x, 1.0);
+    vec2 screenScale = radius * vec2(aspectInverse, 1.0)
+        * fovScale / max(currentDepth, 5.0);
 
-    int sample_count = max(ssaoSteps, 1);
-    float sample_step = 1.2 / float(sample_count);
-    float radius_step = sample_step * (1.0 + dither.x);
-    float depth_scale = 0.7 / max(radius, 1e-3);
-    vec2 texel_half = 0.5 / vec2(textureSize(combined_depth_tex, 0));
-    vec2 uv_min = texel_half;
-    vec2 uv_max = vec2(1.0) - texel_half;
+    int sampleCount = max(ssaoSteps, 1);
+    float sampleStep = 1.2 / float(sampleCount);
+    float radiusStep = sampleStep * (1.0 + dither.x);
+    float depthScale = 0.7 / max(radius, 1e-3);
+    vec2 texelHalf = 0.5 / vec2(textureSize(combinedDepthTex, 0));
+    vec2 uvMin = texelHalf;
+    vec2 uvMax = vec2(1.0) - texelHalf;
 
     float visibility = 0.0;
 
-    for (int i = 0; i < sample_count; ++i) {
-        vec2 offset = get_dssao_sample_offset(radius_step) * screen_scale;
-        vec2 sample_uv_a = clamp(position_screen.xy + offset, uv_min, uv_max);
-        vec2 sample_uv_b = clamp(position_screen.xy - offset, uv_min, uv_max);
+    for (int i = 0; i < sampleCount; ++i) {
+        vec2 offset = getDssaoSampleOffset(radiusStep) * screenScale;
+        vec2 sampleUvA = clamp(positionScreen.xy + offset, uvMin, uvMax);
+        vec2 sampleUvB = clamp(positionScreen.xy - offset, uvMin, uvMax);
 
-        float sample_depth_a = texture(combined_depth_tex, sample_uv_a).x;
-        float sample_depth_b = texture(combined_depth_tex, sample_uv_b).x;
-        float linear_depth_a = screen_to_view_space_depth(
-            combined_projection_matrix_inverse,
-            sample_depth_a
+        float sampleDepthA = texture(combinedDepthTex, sampleUvA).x;
+        float sampleDepthB = texture(combinedDepthTex, sampleUvB).x;
+        float linearDepthA = screenToViewSpaceDepth(
+            combinedProjectionMatrixInverse,
+            sampleDepthA
         );
-        float linear_depth_b = screen_to_view_space_depth(
-            combined_projection_matrix_inverse,
-            sample_depth_b
-        );
-
-        float sample_delta_a = (current_depth - linear_depth_a) * depth_scale;
-        float sample_delta_b = (current_depth - linear_depth_b) * depth_scale;
-
-        float anti_bleed_a = 1.0 - rcp(
-            1.0 + max0(abs(linear_depth_a - current_depth) - max_occlusion_distance)
-                * anti_bleed_exponent
-        );
-        float anti_bleed_b = 1.0 - rcp(
-            1.0 + max0(abs(linear_depth_b - current_depth) - max_occlusion_distance)
-                * anti_bleed_exponent
+        float linearDepthB = screenToViewSpaceDepth(
+            combinedProjectionMatrixInverse,
+            sampleDepthB
         );
 
-        float angle = mix(clamp01(0.5 - sample_delta_a), 0.5, anti_bleed_a);
-        float distance_term = mix(clamp01(0.25 * sample_delta_a - 1.0), 0.5, anti_bleed_a);
-        angle += mix(clamp01(0.5 - sample_delta_b), 0.5, anti_bleed_b);
-        distance_term += mix(clamp01(0.25 * sample_delta_b - 1.0), 0.5, anti_bleed_b);
+        float sampleDeltaA = (currentDepth - linearDepthA) * depthScale;
+        float sampleDeltaB = (currentDepth - linearDepthB) * depthScale;
 
-        visibility += clamp01(angle + distance_term);
-        radius_step += sample_step;
+        float antiBleedA = 1.0 - rcp(
+            1.0 + max0(abs(linearDepthA - currentDepth) - maxOcclusionDistance)
+                * antiBleedExponent
+        );
+        float antiBleedB = 1.0 - rcp(
+            1.0 + max0(abs(linearDepthB - currentDepth) - maxOcclusionDistance)
+                * antiBleedExponent
+        );
+
+        float angle = mix(clamp01(0.5 - sampleDeltaA), 0.5, antiBleedA);
+        float distanceTerm = mix(clamp01(0.25 * sampleDeltaA - 1.0), 0.5, antiBleedA);
+        angle += mix(clamp01(0.5 - sampleDeltaB), 0.5, antiBleedB);
+        distanceTerm += mix(clamp01(0.25 * sampleDeltaB - 1.0), 0.5, antiBleedB);
+
+        visibility += clamp01(angle + distanceTerm);
+        radiusStep += sampleStep;
     }
 
-    return clamp01(visibility / float(sample_count));
+    return clamp01(visibility / float(sampleCount));
 }
 
 #endif // INCLUDE_LIGHTING_INDIRECT_LIGHTING_SSAO
@@ -187,160 +187,160 @@ float compute_dssao(
 #include "/lib/util/fastMath.glsl"
 #include "/lib/util/spaceConversion.glsl"
 
-float integrate_arc(vec2 h, float n, float cos_n) {
-    vec2 tmp = cos_n + 2.0 * h * sin(n) - cos(2.0 * h - n);
+float integrateArc(vec2 h, float n, float cosN) {
+    vec2 tmp = cosN + 2.0 * h * sin(n) - cos(2.0 * h - n);
     return 0.25 * (tmp.x + tmp.y);
 }
 
-float compute_maximum_horizon_angle(
-    vec3 view_slice_dir,
-    vec3 viewer_dir,
-    vec3 screen_pos,
-    vec3 view_pos,
+float computeMaximumHorizonAngle(
+    vec3 viewSliceDir,
+    vec3 viewerDir,
+    vec3 screenPos,
+    vec3 viewPos,
     float radius,
     float dither,
-    bool is_lod
+    bool isLod
 ) {
-    float step_size = (gtaoRadius * rcp(float(gtaoHorizonSteps))) * radius;
+    float stepSize = (gtaoRadius * rcp(float(gtaoHorizonSteps))) * radius;
 
-    float max_cos_theta = -1.0;
+    float maxCosTheta = -1.0;
 
-    vec2 ray_step
-        = (view_to_screen_space(
-               view_pos + view_slice_dir * step_size,
+    vec2 rayStep
+        = (viewToScreenSpace(
+               viewPos + viewSliceDir * stepSize,
                true,
-               is_lod
+               isLod
            )
-           - screen_pos)
+           - screenPos)
               .xy;
-    vec2 ray_pos = screen_pos.xy
-        + ray_step * (dither + max_of(view_pixel_size) * rcp_length(ray_step));
+    vec2 rayPos = screenPos.xy
+        + rayStep * (dither + maxOf(viewPixelSize) * rcpLength(rayStep));
 
-    for (int i = 0; i < gtaoHorizonSteps; ++i, ray_pos += ray_step) {
+    for (int i = 0; i < gtaoHorizonSteps; ++i, rayPos += rayStep) {
         ivec2 texel
-            = ivec2(clamp01(ray_pos) * view_res * taau_render_scale + 0.5);
-        float depth = texelFetch(combined_depth_tex, texel, 0).x;
+            = ivec2(clamp01(rayPos) * viewRes * taauViewportScale + 0.5);
+        float depth = texelFetch(combinedDepthTex, texel, 0).x;
 
-        if (depth == 1.0 || depth < hand_depth || depth == screen_pos.z) {
+        if (depth == 1.0 || depth < handDepth || depth == screenPos.z) {
             continue;
         }
 
-        vec3 offset = screen_to_view_space(
-                          combined_projection_matrix_inverse,
-                          vec3(ray_pos, depth),
+        vec3 offset = screenToViewSpace(
+                          combinedProjectionMatrixInverse,
+                          vec3(rayPos, depth),
                           true
                       )
-            - view_pos;
+            - viewPos;
 
-        float len_sq = length_squared(offset);
+        float lenSq = lengthSquared(offset);
 
         // Self-sample: zero offset would make inversesqrt diverge
-        if (len_sq < eps) {
+        if (lenSq < eps) {
             continue;
         }
 
-        float norm = inversesqrt(len_sq);
+        float norm = inversesqrt(lenSq);
 
-        float distance_falloff = linear_step(
+        float distanceFalloff = linearStep(
             gtaoFalloffStart * gtaoRadius,
             gtaoRadius,
-            len_sq * norm * rcp(radius)
+            lenSq * norm * rcp(radius)
         );
 
-        float cos_theta = dot(viewer_dir, offset) * norm;
-        cos_theta = mix(cos_theta, -1.0, distance_falloff);
+        float cosTheta = dot(viewerDir, offset) * norm;
+        cosTheta = mix(cosTheta, -1.0, distanceFalloff);
 
-        max_cos_theta = max(cos_theta, max_cos_theta);
+        maxCosTheta = max(cosTheta, maxCosTheta);
     }
 
-    return fast_acos(clamp(max_cos_theta, -1.0, 1.0));
+    return fastAcos(clamp(maxCosTheta, -1.0, 1.0));
 }
 
-vec2 compute_gtao(
-    vec3 screen_pos,
-    vec3 view_pos,
-    vec3 view_normal,
+vec2 computeGtao(
+    vec3 screenPos,
+    vec3 viewPos,
+    vec3 viewNormal,
     vec2 dither,
-    bool is_lod,
-    float surface_albedo,
-    out vec3 bent_normal
+    bool isLod,
+    float surfaceAlbedo,
+    out vec3 bentNormal
 ) {
     float ao = 0.0;
-    float ambient_sss = 0.0;
-    bent_normal = vec3(0.0);
+    float ambientSss = 0.0;
+    bentNormal = vec3(0.0);
 
     // Construct local working space. Looking straight up/down makes the
-    // up-cross degenerate, so fall back to +X like get_tbn_matrix does.
-    vec3 viewer_dir = normalize(-view_pos);
-    vec3 viewer_right = abs(viewer_dir.y) > 1.0 - 1e-4
+    // up-cross degenerate, so fall back to +X like getTbnMatrix does.
+    vec3 viewerDir = normalize(-viewPos);
+    vec3 viewerRight = abs(viewerDir.y) > 1.0 - 1e-4
         ? vec3(1.0, 0.0, 0.0)
-        : normalize(cross(vec3(0.0, 1.0, 0.0), viewer_dir));
-    vec3 viewer_up = cross(viewer_dir, viewer_right);
-    mat3 local_to_view = mat3(viewer_right, viewer_up, viewer_dir);
+        : normalize(cross(vec3(0.0, 1.0, 0.0), viewerDir));
+    vec3 viewerUp = cross(viewerDir, viewerRight);
+    mat3 localToView = mat3(viewerRight, viewerUp, viewerDir);
 
     // Reduce AO radius very close up, makes some screen-space artifacts less
     // obvious
-    float ao_radius = max(
-        0.25 + 0.75 * smoothstep(0.0, 81.0, length_squared(view_pos)),
+    float aoRadius = max(
+        0.25 + 0.75 * smoothstep(0.0, 81.0, lengthSquared(viewPos)),
         0.5
     );
 
     // Increase AO radius for LoD terrain (looks nice)
 #ifdef LOD_MOD_ACTIVE
-    if (is_lod) {
-        ao_radius *= 3.0;
+    if (isLod) {
+        aoRadius *= 3.0;
     }
 #endif
 
     for (int i = 0; i < gtaoSlices; ++i) {
-        float slice_angle = (i + dither.x) * (pi / float(gtaoSlices));
+        float sliceAngle = (i + dither.x) * (pi / float(gtaoSlices));
 
-        vec3 slice_dir = vec3(cos(slice_angle), sin(slice_angle), 0.0);
-        vec3 view_slice_dir = local_to_view * slice_dir;
+        vec3 sliceDir = vec3(cos(sliceAngle), sin(sliceAngle), 0.0);
+        vec3 viewSliceDir = localToView * sliceDir;
 
-        vec3 ortho_dir = slice_dir - dot(slice_dir, viewer_dir) * viewer_dir;
-        vec3 axis = cross(slice_dir, viewer_dir);
-        vec3 projected_normal = view_normal - axis * dot(view_normal, axis);
+        vec3 orthoDir = sliceDir - dot(sliceDir, viewerDir) * viewerDir;
+        vec3 axis = cross(sliceDir, viewerDir);
+        vec3 projectedNormal = viewNormal - axis * dot(viewNormal, axis);
 
-        float len_sq = dot(projected_normal, projected_normal);
-        float norm = inversesqrt(len_sq);
+        float lenSq = dot(projectedNormal, projectedNormal);
+        float norm = inversesqrt(lenSq);
 
-        float sgn_gamma = sign(dot(ortho_dir, projected_normal));
-        float cos_gamma = clamp01(dot(projected_normal, viewer_dir) * norm);
-        float gamma = sgn_gamma * fast_acos(cos_gamma);
+        float sgnGamma = sign(dot(orthoDir, projectedNormal));
+        float cosGamma = clamp01(dot(projectedNormal, viewerDir) * norm);
+        float gamma = sgnGamma * fastAcos(cosGamma);
 
-        vec2 max_horizon_angles;
-        max_horizon_angles.x = compute_maximum_horizon_angle(
-            -view_slice_dir,
-            viewer_dir,
-            screen_pos,
-            view_pos,
-            ao_radius,
+        vec2 maxHorizonAngles;
+        maxHorizonAngles.x = computeMaximumHorizonAngle(
+            -viewSliceDir,
+            viewerDir,
+            screenPos,
+            viewPos,
+            aoRadius,
             dither.y,
-            is_lod
+            isLod
         );
-        max_horizon_angles.y = compute_maximum_horizon_angle(
-            view_slice_dir,
-            viewer_dir,
-            screen_pos,
-            view_pos,
-            ao_radius,
+        maxHorizonAngles.y = computeMaximumHorizonAngle(
+            viewSliceDir,
+            viewerDir,
+            screenPos,
+            viewPos,
+            aoRadius,
             dither.y,
-            is_lod
+            isLod
         );
 
-        ambient_sss += max0(max_horizon_angles.y - half_pi) * rcp_pi;
+        ambientSss += max0(maxHorizonAngles.y - halfPi) * rcpPi;
 
-        max_horizon_angles = gamma
-            + clamp(vec2(-1.0, 1.0) * max_horizon_angles - gamma,
-                    -half_pi,
-                    half_pi);
-        ao += integrate_arc(max_horizon_angles, gamma, cos_gamma) * len_sq
+        maxHorizonAngles = gamma
+            + clamp(vec2(-1.0, 1.0) * maxHorizonAngles - gamma,
+                    -halfPi,
+                    halfPi);
+        ao += integrateArc(maxHorizonAngles, gamma, cosGamma) * lenSq
             * norm;
 
-        float bent_angle = dot(max_horizon_angles, vec2(0.5));
-        bent_normal
-            += viewer_dir * cos(bent_angle) + ortho_dir * sin(bent_angle);
+        float bentAngle = dot(maxHorizonAngles, vec2(0.5));
+        bentNormal
+            += viewerDir * cos(bentAngle) + orthoDir * sin(bentAngle);
     }
 
 
@@ -349,41 +349,41 @@ vec2 compute_gtao(
 
     float albedo = mix(
         0.0,
-        clamp(surface_albedo, 0.02, 0.9),
+        clamp(surfaceAlbedo, 0.02, 0.9),
         gtaoMultibounceIntensity
     );
 
     ao *= rcp(float(gtaoSlices));
-    ambient_sss *= rcp(float(gtaoSlices));
+    ambientSss *= rcp(float(gtaoSlices));
     ao /= albedo * ao + (1.0 - albedo);
 
-    bent_normal = normalize(normalize(bent_normal) - 0.5 * viewer_dir);
+    bentNormal = normalize(normalize(bentNormal) - 0.5 * viewerDir);
 
-    return clamp01(vec2(ao, ambient_sss));
+    return clamp01(vec2(ao, ambientSss));
 }
 
 #endif // INCLUDE_LIGHTING_INDIRECT_LIGHTING_GTAO
 #endif
 
-const float ao_render_scale = 0.5;
+const float aoRenderScale = 0.5;
 
 void main() {
     ivec2 texel = ivec2(gl_FragCoord.xy);
-    ivec2 view_texel
-        = ivec2(gl_FragCoord.xy * (taau_render_scale / ao_render_scale));
+    ivec2 viewTexel
+        = ivec2(gl_FragCoord.xy * (taauViewportScale / aoRenderScale));
 
-    if (clamp(view_texel, ivec2(0), ivec2(view_res)) != view_texel) {
+    if (clamp(viewTexel, ivec2(0), ivec2(viewRes)) != viewTexel) {
         return;
     }
 
-    float depth = texelFetch(combined_depth_tex, view_texel, 0).x;
+    float depth = texelFetch(combinedDepthTex, viewTexel, 0).x;
 
 #ifndef normalMapping
-    vec4 gbuffer_data = texelFetch(colortex1, view_texel, 0);
-    vec4 gbuffer_data_0 = gbuffer_data;
+    vec4 gbufferData = texelFetch(colortex1, viewTexel, 0);
+    vec4 gbufferData0 = gbufferData;
 #else
-    vec4 gbuffer_data = texelFetch(colortex2, view_texel, 0);
-    vec4 gbuffer_data_0 = texelFetch(colortex1, view_texel, 0);
+    vec4 gbufferData = texelFetch(colortex2, viewTexel, 0);
+    vec4 gbufferData0 = texelFetch(colortex1, viewTexel, 0);
 #endif
     vec2 dither = vec2(
         texelFetch(noisetex, texel & 511, 0).b,
@@ -393,156 +393,156 @@ void main() {
     // Distant Horizons support
 
 #ifdef LOD_MOD_ACTIVE
-    float depth_mc = texelFetch(depthtex1, view_texel, 0).x;
-    float depth_lod = texelFetch(lod_depth_tex_shading, view_texel, 0).x;
-    bool is_lod = is_lod_terrain(depth_mc, depth_lod);
+    float depthMc = texelFetch(depthtex1, viewTexel, 0).x;
+    float depthLod = texelFetch(lodDepthTexShading, viewTexel, 0).x;
+    bool isLod = isLodTerrain(depthMc, depthLod);
 #else
-#define depth_mc depth
-    const bool is_lod = false;
+#define depthMc depth
+    const bool isLod = false;
 #endif
 
-    bool is_hand;
-    fix_hand_depth(depth_mc, is_hand);
+    bool isHand;
+    fixHandDepth(depthMc, isHand);
 
-    vec3 screen_pos = vec3(uv, depth);
-    vec3 view_pos = screen_to_view_space(
-        combined_projection_matrix_inverse,
-        screen_pos,
+    vec3 screenPos = vec3(uv, depth);
+    vec3 viewPos = screenToViewSpace(
+        combinedProjectionMatrixInverse,
+        screenPos,
         true
     );
-    vec3 scene_pos = view_to_scene_space(view_pos);
+    vec3 scenePos = viewToSceneSpace(viewPos);
 
-    vec3 previous_screen_pos
-        = reproject_scene_space(scene_pos, is_hand, false);
+    vec3 previousScreenPos
+        = reprojectSceneSpace(scenePos, isHand, false);
 
     if (depth == 1.0) {
         ambient = vec4(1.0, 0.0, 0.0, 0.0);
-        ambient_history_data = vec2(0.0);
+        ambientHistoryData = vec2(0.0);
         return;
     }
 
 #ifdef normalMapping
-    vec3 world_normal = decode_unit_vector(gbuffer_data.xy);
+    vec3 worldNormal = decodeUnitVector(gbufferData.xy);
 
 #ifdef LOD_MOD_ACTIVE
-    if (is_lod) {
-        vec4 gbuffer_data_0 = texelFetch(colortex1, view_texel, 0);
-        world_normal = decode_unit_vector(unpack_unorm_2x8(gbuffer_data_0.z));
+    if (isLod) {
+        vec4 gbufferData0 = texelFetch(colortex1, viewTexel, 0);
+        worldNormal = decodeUnitVector(unpackUnorm2x8(gbufferData0.z));
     }
 #endif
 #else
-    vec3 world_normal = decode_unit_vector(unpack_unorm_2x8(gbuffer_data.z));
+    vec3 worldNormal = decodeUnitVector(unpackUnorm2x8(gbufferData.z));
 #endif
 
-    vec3 view_normal = mat3(gbufferModelView) * world_normal;
+    vec3 viewNormal = mat3(gbufferModelView) * worldNormal;
 
     dither = r2(frameCounter, dither);
 
 
     // approximation used by the merged GTAO implementation — cheap luminance
 
-    vec3 surface_albedo_srgb = vec3(
-        unpack_unorm_2x8(gbuffer_data_0.x),
-        unpack_unorm_2x8(gbuffer_data_0.y).x
+    vec3 surfaceAlbedoSrgb = vec3(
+        unpackUnorm2x8(gbufferData0.x),
+        unpackUnorm2x8(gbufferData0.y).x
     );
-    float surface_albedo
-        = dot(srgb_eotf_inv(surface_albedo_srgb), luminance_weights_rec709);
+    float surfaceAlbedo
+        = dot(srgbEotfInv(surfaceAlbedoSrgb), luminanceWeightsRec709);
 
     // Calculate AO
 
     vec2 ao;
-    vec3 bent_normal;
+    vec3 bentNormal;
 
 #if shaderAo == shaderAoNone
     ao = vec2(1.0, 0.0);
-    bent_normal = view_normal;
+    bentNormal = viewNormal;
 #elif shaderAo == shaderAoSsao
-    ao.x = compute_dssao(screen_pos, world_normal, dither);
+    ao.x = computeDssao(screenPos, worldNormal, dither);
     ao.y = 0.0;
-    bent_normal = view_normal;
+    bentNormal = viewNormal;
 #elif shaderAo == shaderAoGtao
-    ao = compute_gtao(
-        screen_pos,
-        view_pos,
-        view_normal,
+    ao = computeGtao(
+        screenPos,
+        viewPos,
+        viewNormal,
         dither,
-        is_lod,
-        surface_albedo,
-        bent_normal
+        isLod,
+        surfaceAlbedo,
+        bentNormal
     );
 #endif
 
     // Temporal accumulation
 
-    const float max_accumulated_frames = 10.0;
-    const float depth_rejection_strength = 16.0;
-    const float offcenter_rejection_strength = 0.25;
+    const float maxAccumulatedFrames = 10.0;
+    const float depthRejectionStrength = 16.0;
+    const float offcenterRejectionStrength = 0.25;
 
     vec4 history = max0(
-        catmull_rom_filter_fast(colortex6, previous_screen_pos.xy, 0.65)
+        catmullRomFilterFast(colortex6, previousScreenPos.xy, 0.65)
     );
-    vec2 history_data = max0(texture(colortex14, previous_screen_pos.xy).xy);
+    vec2 historyData = max0(texture(colortex14, previousScreenPos.xy).xy);
 
-    if (clamp01(previous_screen_pos.xy) == previous_screen_pos.xy) {
+    if (clamp01(previousScreenPos.xy) == previousScreenPos.xy) {
         // Unpack history data
-        float history_depth = 1.0 - history_data.x;
-        float pixel_age = min(history_data.y, max_accumulated_frames);
+        float historyDepth = 1.0 - historyData.x;
+        float pixelAge = min(historyData.y, maxAccumulatedFrames);
 
-        vec3 history_bent_normal;
-        history_bent_normal.xy = history.zw * 2.0 - 1.0;
-        history_bent_normal.z = sqrt(
-            clamp01(1.0 - dot(history_bent_normal.xy, history_bent_normal.xy))
+        vec3 historyBentNormal;
+        historyBentNormal.xy = history.zw * 2.0 - 1.0;
+        historyBentNormal.z = sqrt(
+            clamp01(1.0 - dot(historyBentNormal.xy, historyBentNormal.xy))
         );
 
         // Reproject bent normal
-        history_bent_normal
-            = history_bent_normal * mat3(gbufferPreviousModelView);
-        history_bent_normal = mat3(gbufferModelView) * history_bent_normal;
+        historyBentNormal
+            = historyBentNormal * mat3(gbufferPreviousModelView);
+        historyBentNormal = mat3(gbufferModelView) * historyBentNormal;
 
         // Depth rejection
-        float view_norm = rcp_length(view_pos);
-        float NoV = abs(dot(view_normal, view_pos))
-            * view_norm; // NoV / sqrt(length(view_pos))
-        float z0 = screen_to_view_space_depth(
-            combined_projection_matrix_inverse,
+        float viewNorm = rcpLength(viewPos);
+        float NoV = abs(dot(viewNormal, viewPos))
+            * viewNorm; // NoV / sqrt(length(viewPos))
+        float z0 = screenToViewSpaceDepth(
+            combinedProjectionMatrixInverse,
             depth
         );
-        float z1 = screen_to_view_space_depth(
-            combined_projection_matrix_inverse,
-            history_depth
+        float z1 = screenToViewSpaceDepth(
+            combinedProjectionMatrixInverse,
+            historyDepth
         );
-        float depth_weight
-            = exp2(-abs(z0 - z1) * depth_rejection_strength * NoV * view_norm);
+        float depthWeight
+            = exp2(-abs(z0 - z1) * depthRejectionStrength * NoV * viewNorm);
 
         // Offcenter rejection from Jessie, which is originally by Zombye
         // Reduces blur in motion
-        vec2 pixel_offset = 1.0
+        vec2 pixelOffset = 1.0
             - abs(2.0
                       * fract(
-                          view_res * ao_render_scale * previous_screen_pos.xy
+                          viewRes * aoRenderScale * previousScreenPos.xy
                       )
                   - 1.0);
-        float offcenter_rejection = sqrt(pixel_offset.x * pixel_offset.y)
-                * offcenter_rejection_strength
-            + (1.0 - offcenter_rejection_strength);
+        float offcenterRejection = sqrt(pixelOffset.x * pixelOffset.y)
+                * offcenterRejectionStrength
+            + (1.0 - offcenterRejectionStrength);
 
-        pixel_age
-            *= depth_weight * offcenter_rejection * float(history_depth != 1.0);
+        pixelAge
+            *= depthWeight * offcenterRejection * float(historyDepth != 1.0);
 
         // Blend with history
-        float history_weight = pixel_age / (pixel_age + 1.0);
+        float historyWeight = pixelAge / (pixelAge + 1.0);
 
-        ao = mix(ao, history.xy, history_weight);
-        bent_normal = slerp(bent_normal, history_bent_normal, history_weight);
+        ao = mix(ao, history.xy, historyWeight);
+        bentNormal = slerp(bentNormal, historyBentNormal, historyWeight);
 
-        ambient = vec4(ao, bent_normal.xy * 0.5 + 0.5);
-        ambient_history_data = vec2(1.0 - depth, pixel_age + 1.0);
+        ambient = vec4(ao, bentNormal.xy * 0.5 + 0.5);
+        ambientHistoryData = vec2(1.0 - depth, pixelAge + 1.0);
     } else {
-        ambient = vec4(ao, bent_normal.xy * 0.5 + 0.5);
-        ambient_history_data = vec2(0.0);
+        ambient = vec4(ao, bentNormal.xy * 0.5 + 0.5);
+        ambientHistoryData = vec2(0.0);
     }
 
-    if (is_hand) {
-        ambient_history_data.x = 1.0;
+    if (isHand) {
+        ambientHistoryData.x = 1.0;
     }
 }

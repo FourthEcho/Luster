@@ -20,21 +20,21 @@
 
 out vec2 uv;
 
-flat out vec3 ambient_color;
-flat out vec3 light_color;
+flat out vec3 ambientColor;
+flat out vec3 lightColor;
 #ifdef hBasisSkylight
-flat out vec3 h_sky[6];
+flat out vec3 hSky[6];
 #endif
 
 #if defined WORLD_OVERWORLD
-flat out vec3 sun_color;
-flat out vec3 moon_color;
+flat out vec3 sunColor;
+flat out vec3 moonColor;
 
-#include "/lib/fog/overworld/parameters.glsl"
-flat out OverworldFogParameters fog_params;
+#include "/lib/atmos/fog/overworld/parameters.glsl"
+flat out OverworldFogParameters fogParams;
 
 
-flat out float rainbow_amount;
+flat out float rainbowAmount;
 #endif
 
 // ------------
@@ -60,28 +60,28 @@ uniform float blindness;
 uniform float nightVision;
 uniform float darknessFactor;
 
-uniform vec3 light_dir;
-uniform vec3 sun_dir;
-uniform vec3 moon_dir;
+uniform vec3 lightDir;
+uniform vec3 sunDir;
+uniform vec3 moonDir;
 
-uniform float biome_cave;
-uniform float biome_may_rain;
-uniform float biome_may_snow;
-uniform float biome_snowy;
-uniform float biome_temperate;
-uniform float biome_arid;
-uniform float biome_taiga;
-uniform float biome_jungle;
-uniform float biome_swamp;
-uniform float biome_temperature;
-uniform float biome_humidity;
-uniform float desert_sandstorm;
+uniform float biomeCave;
+uniform float biomeMayRain;
+uniform float biomeMaySnow;
+uniform float biomeSnowy;
+uniform float biomeTemperate;
+uniform float biomeArid;
+uniform float biomeTaiga;
+uniform float biomeJungle;
+uniform float biomeSwamp;
+uniform float biomeTemperature;
+uniform float biomeHumidity;
+uniform float desertSandstormWeather;
 
-uniform float world_age;
-uniform float time_sunrise;
-uniform float time_noon;
-uniform float time_sunset;
-uniform float time_midnight;
+uniform float worldAge;
+uniform float timeSunrise;
+uniform float timeNoon;
+uniform float timeSunset;
+uniform float timeMidnight;
 
 // ------------
 //   Includes
@@ -97,8 +97,8 @@ uniform float time_midnight;
 #define LUSTER_INCLUDE_LIGHT_COLOR
 #include "/lib/light/colors.glsl"
 #undef LUSTER_INCLUDE_LIGHT_COLOR
-#include "/lib/sky/atmosphere.glsl"
-#include "/lib/sky/projection.glsl"
+#include "/lib/atmos/atmosphere.glsl"
+#include "/lib/atmos/projection.glsl"
 #include "/lib/weather/fog.glsl"
 #include "/lib/weather/rainbow.glsl"
 #endif
@@ -111,9 +111,9 @@ uniform float time_midnight;
 
 // H-basis directional sky ambient.
 
-#include "/lib/sky/projection.glsl"
+#include "/lib/atmos/projection.glsl"
 
-void project_sky_h_basis(out vec3 h[6]) {
+void projectSkyHBasis(out vec3 h[6]) {
     for (int i = 0; i < 6; ++i) {
         h[i] = vec3(0.0);
     }
@@ -126,13 +126,13 @@ void project_sky_h_basis(out vec3 h[6]) {
         );
 
         float phi = tau * u.y;
-        float cos_theta = 2.0 * u.x - 1.0;
-        float sin_theta = sqrt(max(1.0 - cos_theta * cos_theta, 0.0));
+        float cosTheta = 2.0 * u.x - 1.0;
+        float sinTheta = sqrt(max(1.0 - cosTheta * cosTheta, 0.0));
         vec3 d = vec3(
-            sin_theta * cos(phi), cos_theta, sin_theta * sin(phi)
+            sinTheta * cos(phi), cosTheta, sinTheta * sin(phi)
         );
 
-        vec3 radiance = max0(texture(colortex4, project_sky(d)).rgb);
+        vec3 radiance = max0(texture(colortex4, projectSky(d)).rgb);
 
         h[0] += radiance;
         h[1] += radiance * d.x;
@@ -142,13 +142,13 @@ void project_sky_h_basis(out vec3 h[6]) {
         h[5] += radiance * (d.x * d.x - d.z * d.z) * 0.5;
     }
 
-    float inv_n = 1.0 / float(hBasisSkySamples);
+    float invN = 1.0 / float(hBasisSkySamples);
     for (int i = 0; i < 6; ++i) {
-        h[i] *= inv_n;
+        h[i] *= invN;
     }
 }
 
-vec3 evaluate_h_basis_irradiance(vec3 h[6], vec3 normal) {
+vec3 evaluateHBasisIrradiance(vec3 h[6], vec3 normal) {
     vec3 n = normalize(normal);
 
     vec3 result = h[0] * pi;
@@ -164,33 +164,33 @@ vec3 evaluate_h_basis_irradiance(vec3 h[6], vec3 normal) {
 void main() {
     uv = gl_MultiTexCoord0.xy;
 
-    light_color = texelFetch(colortex4, ivec2(191, 0), 0).rgb;
+    lightColor = texelFetch(colortex4, ivec2(191, 0), 0).rgb;
     // Flat average stays for sky/blocky-cloud consumers in this unit;
     // diffuse skylight uses the directional H-basis instead.
-    ambient_color = texelFetch(colortex4, ivec2(191, 1), 0).rgb;
+    ambientColor = texelFetch(colortex4, ivec2(191, 1), 0).rgb;
 #ifdef hBasisSkylight
-    project_sky_h_basis(h_sky);
+    projectSkyHBasis(hSky);
 #endif
 
 #if defined WORLD_OVERWORLD
-    Weather weather = get_weather();
+    Weather weather = getWeather();
 
-    sun_color = get_sun_exposure() * get_sun_tint();
-    moon_color = get_moon_exposure() * get_moon_tint();
+    sunColor = getSunExposure() * getSunTint();
+    moonColor = getMoonExposure() * getMoonTint();
 #ifdef moonPhaseNightAtmosphere
-    moon_color = apply_moon_phase_influence(
-        moon_color,
+    moonColor = applyMoonPhaseInfluence(
+        moonColor,
         moonPhaseNightAtmosphereIntensity * moonPhaseInfluenceIntensity,
         1.00,
         1.00
     );
 #endif
-    fog_params = get_fog_parameters(weather);
+    fogParams = getFogParameters(weather);
 
 
-    rainbow_amount = get_rainbow_amount(weather);
+    rainbowAmount = getRainbowAmount(weather);
 #endif
 
-    vec2 vertex_pos = gl_Vertex.xy * taau_render_scale;
-    gl_Position = vec4(vertex_pos * 2.0 - 1.0, 0.0, 1.0);
+    vec2 vertexPos = gl_Vertex.xy * taauViewportScale;
+    gl_Position = vec4(vertexPos * 2.0 - 1.0, 0.0, 1.0);
 }

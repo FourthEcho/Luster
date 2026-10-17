@@ -22,7 +22,7 @@ out vec2 uv;
 
 #ifdef colorGrading
   #if gradeWhiteBalance != 6500
-flat out mat3 white_balance_matrix;
+flat out mat3 whiteBalanceMatrix;
   #endif
 #endif
 
@@ -34,9 +34,9 @@ void main() {
 
 #ifdef colorGrading
   #if gradeWhiteBalance != 6500
-    vec3 src_xyz = blackbody(float(gradeWhiteBalance)) * rec2020_to_xyz;
-    vec3 dst_xyz = blackbody(6500.0) * rec2020_to_xyz;
-    white_balance_matrix = get_chromatic_adaptation_matrix(src_xyz, dst_xyz);
+    vec3 srcXyz = blackbody(float(gradeWhiteBalance)) * rec2020ToXyz;
+    vec3 dstXyz = blackbody(6500.0) * rec2020ToXyz;
+    whiteBalanceMatrix = getChromaticAdaptationMatrix(srcXyz, dstXyz);
   #endif
 #endif
 

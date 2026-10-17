@@ -1,1060 +1,1057 @@
-# Profiles
-
-
 # Screens
 
-screen.world                           = 世界
-screen.lighting                        = 照明
-screen.clouds_volumetric=Volumetric Clouds
-screen.clouds_planar=Planar Clouds
-screen.fog_general                      = 通用
-screen.fog_environment                  = 环境雾
-screen.materials                       = 材质
-screen.water                           = 水
-screen.post                            = 后处理
-screen.misc                            = 杂项
-screen.tonemap_comparison              = 色调对比
+screen.world=世界
+screen.lighting=照明
+screen.cloudsVolumetric=Volumetric Clouds
+screen.cloudsPlanar=Planar Clouds
+screen.fogGeneral=通用
+screen.fogEnvironment=环境雾
+screen.materials=材质
+screen.water=水
+screen.post=后处理
+screen.misc=杂项
+screen.tonemapComparison=色调对比
 
-screen.weather                         = 天气变化
-screen.purkinje_shift                 = 普尔金耶位移
-screen.rp_settings                     = 资源包设置
-screen.rp_parallax                      = 视差遮蔽映射
-screen.rp_porosity                      = 孔隙度/湿润
-screen.rp_sss                           = 次表面散射
-screen.reflections                     = 反射
-screen.refraction                      = 折射
-screen.light_sources                   = 光源
-screen.shadows_general                 = General
-screen.color_grading                   = 颜色分级
-screen.grading_basic                    = 基础
-screen.grading_wheels                   = 暗部·中间调·高光
-screen.grading_curve                    = 色调曲线
-screen.grading_split_tone               = 分离色调
-screen.grading_selective                = 选择性颜色
-screen.exposure                        = 曝光
-screen.box                             = 选择框
-screen.developer                       = 开发者选项
+screen.weather=天气变化
+screen.purkinjeShiftTransform=普尔金耶位移
+screen.rpSettings=资源包设置
+screen.rpParallax=视差遮蔽映射
+screen.rpPorosity=孔隙度/湿润
+screen.rpSss=次表面散射
+screen.reflections=反射
+screen.refraction=折射
+screen.lightSources=光源
+screen.shadowsGeneral=General
+screen.colorGrading=颜色分级
+screen.gradingBasic=基础
+screen.gradingWheels=暗部·中间调·高光
+screen.gradingCurve=色调曲线
+screen.gradingSplitTone=分离色调
+screen.gradingSelective=选择性颜色
+screen.exposure=曝光
+screen.box=选择框
+screen.developer=开发者选项
 
-screen.distant_horizons                = Distant Horizons
+screen.distantHorizons=Distant Horizons
 
-screen.aurora                          = 极光
-screen.clouds                          = 云层
-screen.stars                           = 星星
-screen.clouds_cumulus                  = 积云设置
-screen.clouds_altocumulus              = 高积云设置
-screen.clouds_cumulus_congestus        = 浓积云设置
-screen.clouds_cirrus                   = 卷云/卷积云设置
-screen.clouds_minecrafty               = 方块云层设置
-screen.clouds_noctilucent              = 夜光云设置
+screen.aurora=极光
+screen.clouds=云层
+screen.stars=星星
+screen.cloudsCumulus=积云设置
+screen.cloudsAltocumulus=高积云设置
+screen.cloudsCumulusCongestus=浓积云设置
+screen.cloudsCirrus=卷云/卷积云设置
+screen.cloudsMinecrafty=方块云层设置
+screen.cloudsNoctilucent=夜光云设置
 
-screen.fog_rlh                         = 瑞利系数
-screen.fog_mie                         = 米氏系数
-screen.fog_ozone                    = 臭氧
-screen.ozone_layer                      = 臭氧层
-screen.sandstorm_layer                  = 沙尘暴
-screen.mist                         = 地面雾
-screen.sunlight_color                  = 阳光颜色
-screen.moonlight_color                 = 月光颜色
-screen.blocklight_color                = 方块光颜色
-screen.sunlight_morning                = 阳光(清晨)
-screen.sunlight_noon                   = 阳光(正午)
-screen.sunlight_evening                = 阳光(夜晚)
-screen.light_nether                    = 下界
-screen.light_end                       = 末地
-screen.fog_rlh_normal                  = 雾气正常颜色
-screen.fog_rlh_rain                    = 雨天雾气颜色
-screen.fog_rlh_arid                    = 干旱/沙漠群系 雾气颜色
-screen.fog_rlh_snowy                   = 积雪群系 雾气颜色
-screen.fog_rlh_taiga                   = 针叶林群系 雾气颜色
-screen.fog_rlh_jungle                  = 丛林群系 雾气颜色
-screen.fog_rlh_swamp                   = 沼泽群系 雾气颜色
-screen.water_waves                     = 水波
-screen.water_surface                    = 水面效果
-screen.water_appearance                 = 外观
-screen.water_fog_surface                = 水上
-screen.water_fog_underwater             = 水下
-screen.water_fog_coeff                 = 水雾系数
+screen.fogRlh=瑞利系数
+screen.fogMie=米氏系数
+screen.fogOzone=臭氧
+screen.ozoneLayer=臭氧层
+screen.sandstormLayer=沙尘暴
+screen.mist=地面雾
+screen.sunlightColor=阳光颜色
+screen.moonlightColor=月光颜色
+screen.blocklightColor=方块光颜色
+screen.sunlightMorning=阳光(清晨)
+screen.sunlightNoon=阳光(正午)
+screen.sunlightEvening=阳光(夜晚)
+screen.lightNether=下界
+screen.lightEnd=末地
+screen.fogRlhNormal=雾气正常颜色
+screen.fogRlhRain=雨天雾气颜色
+screen.fogRlhArid=干旱/沙漠群系 雾气颜色
+screen.fogRlhSnowy=积雪群系 雾气颜色
+screen.fogRlhTaiga=针叶林群系 雾气颜色
+screen.fogRlhJungle=丛林群系 雾气颜色
+screen.fogRlhSwamp=沼泽群系 雾气颜色
+screen.waterWaves=水波
+screen.waterSurface=水面效果
+screen.waterAppearance=外观
+screen.waterFogSurface=水上
+screen.waterFogUnderwater=水下
+screen.waterFogCoeff=水雾系数
 
-screen.end_light_color                 = 末地光照颜色
-screen.end_ambient_color               = 末地环境光颜色
-screen.nether_color                    = 下界基础颜色
+screen.endLightColor=末地光照颜色
+screen.endAmbientColor=末地环境光颜色
+screen.netherColor=下界基础颜色
 
-screen.distance_view                   = 距离视图
+screen.distanceView=距离视图
 
-option.info                            = Luster Shaders
-option.info.comment = Shaderpack information and profile label.
-value.info.0                           = §eBy Fourth Echo
-value.info.1                           = §aBy Fourth Echo
-value.info.2                           = §bBy Fourth Echo
-value.info.3                           = §dBy Fourth Echo
+option.info=Luster Shaders
+option.info.comment=Shaderpack information and profile label.
+value.info.0=§eBy Fourth Echo
+value.info.1=§aBy Fourth Echo
+value.info.2=§bBy Fourth Echo
+value.info.3=§dBy Fourth Echo
 
 # World settings
 
-option.wavingPlants                   = 植物摇晃
-option.wavingPlants.comment           = 在地面随风摇动的植物. 若需添加一个方块到植物摇晃清单, 打开 shaders/block.propenties 文件然后添加它的 ID 到所属的类别中 (10016, 10017 或 10018).
-option.wavingLeaves                   = 树叶摇晃
-option.wavingLeaves.comment           = 随风摇摆的树叶. 若需添加一个方块到树叶摇晃清单, 打开 shaders/block.propenties 文件然后添加它的 ID 到所属的类别中 (10019).
-option.slantedRain                    = 风吹斜的雨
-option.slantedRain.comment            = 倾斜的降雨粒子. 使雨天更具氛围.
-option.edgeHighlight                  = 边缘高亮
-option.edgeHighlight.comment          = 受《我的世界地下城》启发的方块边缘高亮效果.
-option.edgeHighlightScale            = 边缘高亮尺寸
-option.edgeHighlightScale.comment    = 控制边缘高亮的宽度尺寸, 请根据所用资源包的分辨率来进行匹配调节.
-option.moonPhaseAffectsBrightness   = 月相影响照明
-option.moonPhaseAffectsBrightness.comment = 夜晚时间段的亮度受月相变化影响.
-option.desertSandstorm                = 沙漠群系沙尘暴
-option.desertSandstorm.comment        = 沙漠群系在雨天时候刮起的沙尘暴.
-option.endGlow                        = 末地辉光雾
-option.endGlow.comment                = 在末地维度摇曳的辉光效果. 需要启用体积雾.
+option.wavingPlants=植物摇晃
+option.wavingPlants.comment=在地面随风摇动的植物. 若需添加一个方块到植物摇晃清单, 打开 shaders/block.propenties 文件然后添加它的 ID 到所属的类别中 (10016, 10017 或 10018).
+option.wavingLeaves=树叶摇晃
+option.wavingLeaves.comment=随风摇摆的树叶. 若需添加一个方块到树叶摇晃清单, 打开 shaders/block.propenties 文件然后添加它的 ID 到所属的类别中 (10019).
+option.slantedRain=风吹斜的雨
+option.slantedRain.comment=倾斜的降雨粒子. 使雨天更具氛围.
+option.edgeHighlight=边缘高亮
+option.edgeHighlight.comment=受《我的世界地下城》启发的方块边缘高亮效果.
+option.edgeHighlightScale=边缘高亮尺寸
+option.edgeHighlightScale.comment=控制边缘高亮的宽度尺寸, 请根据所用资源包的分辨率来进行匹配调节.
+option.moonPhaseAffectsBrightness=月相影响照明
+option.moonPhaseAffectsBrightness.comment=夜晚时间段的亮度受月相变化影响.
+option.desertSandstorm=沙漠群系沙尘暴
+option.desertSandstorm.comment=沙漠群系在雨天时候刮起的沙尘暴.
+option.endGlow=末地辉光雾
+option.endGlow.comment=在末地维度摇曳的辉光效果. 需要启用体积雾.
 
 # Weather
-option.randomWeatherVariation            = 随机变化
-option.randomWeatherVariation.comment = Controls random variation.
-option.biomeWeatherVariation             = 基于群系的变体
-option.biomeWeatherVariation.comment = Controls biome-based variation.
-option.weatherTemperatureBias            = 温度值偏差
-option.weatherTemperatureBias.comment = Controls temperature bias.
-option.weatherHumidityBias               = 湿度值偏差
-option.weatherHumidityBias.comment = Controls humidity bias.
-option.weatherWindBias                   = 风度值偏差
-option.weatherWindBias.comment = Controls windiness bias.
-option.weatherTemperatureVariationSpeed = 温度偏差变换速度
-option.weatherTemperatureVariationSpeed.comment = Controls temperature variation speed.
-option.weatherHumidityVariationSpeed    = 湿度偏差变化速度
-option.weatherHumidityVariationSpeed.comment = Controls humidity variation speed.
-option.weatherWindVariationSpeed        = 风度偏差变化速度
-option.weatherWindVariationSpeed.comment = Controls windiness variation speed.
+option.randomWeatherVariation=随机变化
+option.randomWeatherVariation.comment=Controls random variation.
+option.biomeWeatherVariation=基于群系的变体
+option.biomeWeatherVariation.comment=Controls biome-based variation.
+option.weatherTemperatureBias=温度值偏差
+option.weatherTemperatureBias.comment=Controls temperature bias.
+option.weatherHumidityBias=湿度值偏差
+option.weatherHumidityBias.comment=Controls humidity bias.
+option.weatherWindBias=风度值偏差
+option.weatherWindBias.comment=Controls windiness bias.
+option.weatherTemperatureVariationSpeed=温度偏差变换速度
+option.weatherTemperatureVariationSpeed.comment=Controls temperature variation speed.
+option.weatherHumidityVariationSpeed=湿度偏差变化速度
+option.weatherHumidityVariationSpeed.comment=Controls humidity variation speed.
+option.weatherWindVariationSpeed=风度偏差变化速度
+option.weatherWindVariationSpeed.comment=Controls windiness variation speed.
 
 # Lighting settings
 
-option.aoInSunlight                  = 应用环境光遮蔽于阳光照射处
-option.aoInSunlight.comment          = 决定是否应用光影的环境光遮蔽在直接的阳光/月光照明区域下.
-option.cloudShadows                   = 云影
-option.cloudShadows.comment           = 由云层投射在地面的阴影.
-option.cloudShadowsIntensity         = 云影强度
-option.cloudShadowsIntensity.comment = 调节云影的强度.
-option.sssSheen                       = 次表面散射光泽
-option.sssSheen.comment               = 在植物和树叶上的高光光泽效果, 有助于高草丛和其他事物更好地和草地高光效果混合.
-option.sssIntensity                   = 次表面散射强度
-option.sssIntensity.comment           = 调节次表面散射(SSS)亮度.
-option.shadingStrength                = 阴影着色
-option.shadingStrength.comment        = 调节直接光照的着色对比度. 减小此选项会使背对太阳且不在阴影中的面变亮; 增大则变暗.
+option.aoInSunlight=应用环境光遮蔽于阳光照射处
+option.aoInSunlight.comment=决定是否应用光影的环境光遮蔽在直接的阳光/月光照明区域下.
+option.cloudShadows=云影
+option.cloudShadows.comment=由云层投射在地面的阴影.
+option.cloudShadowsIntensity=云影强度
+option.cloudShadowsIntensity.comment=调节云影的强度.
+option.sssSheen=次表面散射光泽
+option.sssSheen.comment=在植物和树叶上的高光光泽效果, 有助于高草丛和其他事物更好地和草地高光效果混合.
+option.sssIntensity=次表面散射强度
+option.sssIntensity.comment=调节次表面散射(SSS)亮度.
+option.shadingStrength=阴影着色
+option.shadingStrength.comment=调节直接光照的着色对比度. 减小此选项会使背对太阳且不在阴影中的面变亮; 增大则变暗.
 
-option.shadow                          = Shadows
-option.shadow.comment = Enables shadows cast by the sun and moon onto the world. Disable for maximum performance — no shadows will be rendered.
-option.shadowPcf                      = Shadowmap Filtering
-option.shadowPcf.comment = Softens shadow edges using percentage-closer filtering. When enabled, shadows look smoother and less pixelated.
-option.shadowPcfStepsScale            = Filter Quality
-option.shadowPcfStepsScale.comment    = Scales how many filter taps the shadowmap filtering uses. Higher = smoother, less noisy soft shadows at higher GPU cost.
-option.shadowSsrt                     = Distant Shadows
-option.shadowSsrtSteps               = Distant Shadow Quality
-option.shadowSsrtSteps.comment = Adjusts the number of ray steps for screen-space distant shadows. Higher = more accurate, less noisy far shadows at higher GPU cost.
-option.shadowColor                    = 阴影着色
-option.shadowColor.comment            = 使半透明方块可投射有色的阴影.
-option.shadowColorIntensity            = Tint Strength
-option.shadowColorIntensity.comment    = Adjusts how strongly translucent blocks tint the shadows behind them. Higher = deeper, more saturated color bleed; 0 = plain white shadows.
-option.shadowVps                      = 可变半阴影
-option.shadowVps.comment              = 阴影距离投射点越远越柔和.
-option.shadowMapResolution             = Shadow Resolution
-option.shadowMapResolution.comment = Adjusts the size of the shadow map texture. Higher = sharper, more detailed shadows at higher VRAM and GPU cost.
-option.shadowDistance                  = Shadow Distance
-option.shadowDistance.comment = Maximum distance shadows are rendered, in blocks. Higher values show shadows farther away but reduce detail per block and increase cost.
-option.sunPathRotation                 = Sun Path Tilt
-option.sunPathRotation.comment = Tilts the sun and moon path across the sky in degrees. Negative values tilt south. Affects time-of-day lighting direction.
-option.entityShadows                  = Entity Shadows
-option.entityShadows.comment          = When enabled, living entities and dropped items cast shadows.
+option.shadow=Shadows
+option.shadow.comment=Enables shadows cast by the sun and moon onto the world. Disable for maximum performance — no shadows will be rendered.
+option.shadowPcf=Shadowmap Filtering
+option.shadowPcf.comment=Softens shadow edges using percentage-closer filtering. When enabled, shadows look smoother and less pixelated.
+option.shadowPcfStepsScale=Filter Quality
+option.shadowPcfStepsScale.comment=Scales how many filter taps the shadowmap filtering uses. Higher = smoother, less noisy soft shadows at higher GPU cost.
+option.shadowSsrt=Distant Shadows
+option.shadowSsrtSteps=Distant Shadow Quality
+option.shadowSsrtSteps.comment=Adjusts the number of ray steps for screen-space distant shadows. Higher = more accurate, less noisy far shadows at higher GPU cost.
+option.shadowColor=阴影着色
+option.shadowColor.comment=使半透明方块可投射有色的阴影.
+option.shadowColorIntensity=Tint Strength
+option.shadowColorIntensity.comment=Adjusts how strongly translucent blocks tint the shadows behind them. Higher = deeper, more saturated color bleed; 0 = plain white shadows.
+option.shadowVps=可变半阴影
+option.shadowVps.comment=阴影距离投射点越远越柔和.
+option.shadowMapResolution=Shadow Resolution
+option.shadowMapResolution.comment=Adjusts the size of the shadow map texture. Higher = sharper, more detailed shadows at higher VRAM and GPU cost.
+option.shadowDistance=Shadow Distance
+option.shadowDistance.comment=Maximum distance shadows are rendered, in blocks. Higher values show shadows farther away but reduce detail per block and increase cost.
+option.sunPathRotation=Sun Path Tilt
+option.sunPathRotation.comment=Tilts the sun and moon path across the sky in degrees. Negative values tilt south. Affects time-of-day lighting direction.
+option.entityShadows=Entity Shadows
+option.entityShadows.comment=When enabled, living entities and dropped items cast shadows.
 Disable to improve performance in survival bases with large farms.
-option.blockEntityShadows            = Block Entity Shadows
-option.pixelatedShadows               = Pixelated Shadows
-option.pixelatedShadows.comment       = Shadows snap to the block texel grid, creating a retro pixelated look. For stylistic screenshots.
-option.pixelatedShadowsResolution    = Pixel Size
-option.pixelatedShadowsResolution.comment = Adjusts the texel grid size for pixelated shadows. Lower = chunkier, more blocky pixels.
-option.sssSteps                       = 次表面散射步数
-option.sssSteps.comment               = 增加以减少草丛和其他具有次表面散射(SSS)材质的噪点, 但会牺牲性能.
+option.blockEntityShadows=Block Entity Shadows
+option.pixelatedShadows=Pixelated Shadows
+option.pixelatedShadows.comment=Shadows snap to the block texel grid, creating a retro pixelated look. For stylistic screenshots.
+option.pixelatedShadowsResolution=Pixel Size
+option.pixelatedShadowsResolution.comment=Adjusts the texel grid size for pixelated shadows. Lower = chunkier, more blocky pixels.
+option.sssSteps=次表面散射步数
+option.sssSteps.comment=增加以减少草丛和其他具有次表面散射(SSS)材质的噪点, 但会牺牲性能.
 
-option.shaderAo                       = 光影环境光遮蔽
-option.shaderAo.comment               = 选择环境光遮蔽的算法类型. 关 - 不计算光影的环境光遮蔽算法. SSAO - 需要的采样数不多/闪烁更少但质量较低. GTAO - 更好的视觉质量但需要更多的采样也更多闪烁.
-value.shaderAo.shaderAoNone         = 关
-value.shaderAo.shaderAoSsao         = SSAO
-value.shaderAo.shaderAoGtao         = GTAO
-option.vanillaAo                      = 原版环境光遮蔽
-option.vanillaAo.comment              = 我的世界内置的环境光遮蔽.
-option.hBasisSkylight                = H-Basis Skylight
-option.hBasisSkylight.comment        = Directional sky ambient from a live H-basis projection of the sky map. Off falls back to the flat sky average.
-option.hBasisIntensity               = Ambient Intensity
-option.hBasisIntensity.comment       = Master brightness of directional sky ambient. Higher = brighter sky fill.
-option.hBasisSkySamples             = Projection Samples
-option.hBasisSkySamples.comment     = Sky directions sampled per frame for the H-basis projection. Higher = smoother, more accurate ambient at higher cost.
-option.ssaoRadius                     = SSAO 半径
-option.ssaoRadius.comment             = 调节 SSAO 的半径 - 物体之间可以互相遮蔽的距离.
-option.ssaoSteps                      = SSAO 步数
-option.ssaoSteps.comment              = 控制 SSAO 噪点明显程度.
-option.gtaoRadius                     = GTAO 半径
-option.gtaoRadius.comment             = 调节 GTAO 的半径 - 物体之间可以互相遮蔽的距离.
-option.gtaoHorizonSteps              = GTAO 水平线采样数
-option.gtaoHorizonSteps.comment      = 控制 GTAO 的精确度.
+option.shaderAo=光影环境光遮蔽
+option.shaderAo.comment=选择环境光遮蔽的算法类型. 关 - 不计算光影的环境光遮蔽算法. SSAO - 需要的采样数不多/闪烁更少但质量较低. GTAO - 更好的视觉质量但需要更多的采样也更多闪烁.
+value.shaderAo.shaderAoNone=关
+value.shaderAo.shaderAoSsao=SSAO
+value.shaderAo.shaderAoGtao=GTAO
+option.vanillaAo=原版环境光遮蔽
+option.vanillaAo.comment=我的世界内置的环境光遮蔽.
+option.hBasisSkylight=H-Basis Skylight
+option.hBasisSkylight.comment=Directional sky ambient from a live H-basis projection of the sky map. Off falls back to the flat sky average.
+option.hBasisIntensity=Ambient Intensity
+option.hBasisIntensity.comment=Master brightness of directional sky ambient. Higher = brighter sky fill.
+option.hBasisSkySamples=Projection Samples
+option.hBasisSkySamples.comment=Sky directions sampled per frame for the H-basis projection. Higher = smoother, more accurate ambient at higher cost.
+option.ssaoRadius=SSAO 半径
+option.ssaoRadius.comment=调节 SSAO 的半径 - 物体之间可以互相遮蔽的距离.
+option.ssaoSteps=SSAO 步数
+option.ssaoSteps.comment=控制 SSAO 噪点明显程度.
+option.gtaoRadius=GTAO 半径
+option.gtaoRadius.comment=调节 GTAO 的半径 - 物体之间可以互相遮蔽的距离.
+option.gtaoHorizonSteps=GTAO 水平线采样数
+option.gtaoHorizonSteps.comment=控制 GTAO 的精确度.
 
-option.sunNr                          = §c▍ §fRed — Noon
-option.sunNr.comment = Adjusts the red tint of sunlight at noon. Higher = warmer midday sun.
-option.sunNg                          = §a▍ §fGreen — Noon
-option.sunNg.comment = Adjusts the green tint of sunlight at noon. Higher = less pink, more neutral daylight.
-option.sunNb                          = §9▍ §fBlue — Noon
-option.sunNb.comment = Adjusts the blue tint of sunlight at noon. Higher = cooler, more bluish midday light.
-option.sunMr                          = §c▍ §fRed — Morning
-option.sunMr.comment = Adjusts the red tint of sunlight at sunrise. Higher = warmer, redder dawn light.
-option.sunMg                          = §a▍ §fGreen — Morning
-option.sunMg.comment = Adjusts the green tint of sunlight at sunrise. Affects the balance between orange and yellow dawn.
-option.sunMb                          = §9▍ §fBlue — Morning
-option.sunMb.comment = Adjusts the blue tint of sunlight at sunrise. Higher = less orange, more neutral morning.
-option.sunEr                          = §c▍ §fRed — Evening
-option.sunEr.comment = Adjusts the red tint of sunlight at sunset. Higher = warmer, redder dusk light.
-option.sunEg                          = §a▍ §fGreen — Evening
-option.sunEg.comment = Adjusts the green tint of sunlight at sunset. Affects the balance between orange and yellow dusk.
-option.sunEb                          = §9▍ §fBlue — Evening
-option.sunEb.comment = Adjusts the blue tint of sunlight at sunset. Higher = cooler, less orange evening light.
-option.moonR                          = §c▍ §fRed — Moonlight
-option.moonR.comment = Adjusts the red tint of moonlight. Higher = warmer night light.
-option.moonG                          = §a▍ §fGreen — Moonlight
-option.moonG.comment = Adjusts the green tint of moonlight. Affects the coolness of night lighting.
-option.moonB                          = §9▍ §fBlue — Moonlight
-option.moonB.comment = Adjusts the blue tint of moonlight. Higher = cooler, more bluish nights.
-option.lightningFlash                 = 闪电
-option.lightningFlash.comment = Controls lightning flash.
-option.netherUseBiomeColor          = Use Biome Color
-option.netherUseBiomeColor.comment = When enabled, Nether fog and ambient color adapts to the current biome. When disabled, uses the static color below.
-option.netherI                        = Nether Fog Intensity
-option.netherI.comment = Adjusts the overall brightness of Nether fog and ambient light. Higher = brighter, more washed-out Nether.
-option.netherS                        = Nether Fog Saturation
-option.netherS.comment = Adjusts the color vividness of Nether fog. Higher = more saturated orange/red, lower = more grey.
-option.netherR                        = §c▍ §fRed — Nether
-option.netherR.comment = Adjusts the red tint of the static Nether ambient color (when Use Biome Color is off).
-option.netherG                        = §a▍ §fGreen — Nether
-option.netherG.comment = Adjusts the green tint of the static Nether ambient color. Affects the orange-to-yellow balance.
-option.netherB                        = §9▍ §fBlue — Nether
-option.netherB.comment = Adjusts the blue tint of the static Nether ambient color. Higher = more purple/cooler Nether.
-option.endLightR                     = §c▍ §fRed — End Light
-option.endLightR.comment = Adjusts the red tint of direct light in the End (from the central light source).
-option.endLightG                     = §a▍ §fGreen — End Light
-option.endLightG.comment = Adjusts the green tint of direct light in the End.
-option.endLightB                     = §9▍ §fBlue — End Light
-option.endLightB.comment = Adjusts the blue tint of direct light in the End. Higher = cooler, more bluish End light.
-option.endLightI                     = End Direct Intensity
-option.endLightI.comment = Adjusts the brightness of direct light in the End. Higher = stronger highlights from the End light source.
-option.endAmbientR                   = §c▍ §fRed — End Ambient
-option.endAmbientR.comment = Adjusts the red tint of ambient skylight in the End.
-option.endAmbientG                   = §a▍ §fGreen — End Ambient
-option.endAmbientG.comment = Adjusts the green tint of ambient skylight in the End.
-option.endAmbientB                   = §9▍ §fBlue — End Ambient
-option.endAmbientB.comment = Adjusts the blue tint of ambient skylight in the End. Higher = more violet/blue ambient.
-option.endAmbientI                   = End Ambient Intensity
-option.endAmbientI.comment = Adjusts the brightness of ambient skylight in the End. Higher = less contrast, more evenly lit.
-option.blocklightR                    = §c▍ §fRed — Block Light
-option.blocklightR.comment = Adjusts the red tint of artificial block lights (torches, lanterns, glowstone). Higher = warmer block light.
-option.blocklightG                    = §a▍ §fGreen — Block Light
-option.blocklightG.comment = Adjusts the green tint of block lights. Affects the orange-to-yellow balance of torch light.
-option.blocklightB                    = §9▍ §fBlue — Block Light
-option.blocklightB.comment = Adjusts the blue tint of block lights. Higher = cooler, whiter light.
-option.blocklightI                    = Block Light Intensity
-option.blocklightI.comment = Adjusts the overall brightness of block light sources. Higher = stronger torch and lamp illumination.
+option.sunNr=§c▍ §fRed — Noon
+option.sunNr.comment=Adjusts the red tint of sunlight at noon. Higher = warmer midday sun.
+option.sunNg=§a▍ §fGreen — Noon
+option.sunNg.comment=Adjusts the green tint of sunlight at noon. Higher = less pink, more neutral daylight.
+option.sunNb=§9▍ §fBlue — Noon
+option.sunNb.comment=Adjusts the blue tint of sunlight at noon. Higher = cooler, more bluish midday light.
+option.sunMr=§c▍ §fRed — Morning
+option.sunMr.comment=Adjusts the red tint of sunlight at sunrise. Higher = warmer, redder dawn light.
+option.sunMg=§a▍ §fGreen — Morning
+option.sunMg.comment=Adjusts the green tint of sunlight at sunrise. Affects the balance between orange and yellow dawn.
+option.sunMb=§9▍ §fBlue — Morning
+option.sunMb.comment=Adjusts the blue tint of sunlight at sunrise. Higher = less orange, more neutral morning.
+option.sunEr=§c▍ §fRed — Evening
+option.sunEr.comment=Adjusts the red tint of sunlight at sunset. Higher = warmer, redder dusk light.
+option.sunEg=§a▍ §fGreen — Evening
+option.sunEg.comment=Adjusts the green tint of sunlight at sunset. Affects the balance between orange and yellow dusk.
+option.sunEb=§9▍ §fBlue — Evening
+option.sunEb.comment=Adjusts the blue tint of sunlight at sunset. Higher = cooler, less orange evening light.
+option.moonR=§c▍ §fRed — Moonlight
+option.moonR.comment=Adjusts the red tint of moonlight. Higher = warmer night light.
+option.moonG=§a▍ §fGreen — Moonlight
+option.moonG.comment=Adjusts the green tint of moonlight. Affects the coolness of night lighting.
+option.moonB=§9▍ §fBlue — Moonlight
+option.moonB.comment=Adjusts the blue tint of moonlight. Higher = cooler, more bluish nights.
+option.lightningFlash=闪电
+option.lightningFlash.comment=Controls lightning flash.
+option.netherUseBiomeColor=Use Biome Color
+option.netherUseBiomeColor.comment=When enabled, Nether fog and ambient color adapts to the current biome. When disabled, uses the static color below.
+option.netherI=Nether Fog Intensity
+option.netherI.comment=Adjusts the overall brightness of Nether fog and ambient light. Higher = brighter, more washed-out Nether.
+option.netherS=Nether Fog Saturation
+option.netherS.comment=Adjusts the color vividness of Nether fog. Higher = more saturated orange/red, lower = more grey.
+option.netherR=§c▍ §fRed — Nether
+option.netherR.comment=Adjusts the red tint of the static Nether ambient color (when Use Biome Color is off).
+option.netherG=§a▍ §fGreen — Nether
+option.netherG.comment=Adjusts the green tint of the static Nether ambient color. Affects the orange-to-yellow balance.
+option.netherB=§9▍ §fBlue — Nether
+option.netherB.comment=Adjusts the blue tint of the static Nether ambient color. Higher = more purple/cooler Nether.
+option.endLightR=§c▍ §fRed — End Light
+option.endLightR.comment=Adjusts the red tint of direct light in the End (from the central light source).
+option.endLightG=§a▍ §fGreen — End Light
+option.endLightG.comment=Adjusts the green tint of direct light in the End.
+option.endLightB=§9▍ §fBlue — End Light
+option.endLightB.comment=Adjusts the blue tint of direct light in the End. Higher = cooler, more bluish End light.
+option.endLightI=End Direct Intensity
+option.endLightI.comment=Adjusts the brightness of direct light in the End. Higher = stronger highlights from the End light source.
+option.endAmbientR=§c▍ §fRed — End Ambient
+option.endAmbientR.comment=Adjusts the red tint of ambient skylight in the End.
+option.endAmbientG=§a▍ §fGreen — End Ambient
+option.endAmbientG.comment=Adjusts the green tint of ambient skylight in the End.
+option.endAmbientB=§9▍ §fBlue — End Ambient
+option.endAmbientB.comment=Adjusts the blue tint of ambient skylight in the End. Higher = more violet/blue ambient.
+option.endAmbientI=End Ambient Intensity
+option.endAmbientI.comment=Adjusts the brightness of ambient skylight in the End. Higher = less contrast, more evenly lit.
+option.blocklightR=§c▍ §fRed — Block Light
+option.blocklightR.comment=Adjusts the red tint of artificial block lights (torches, lanterns, glowstone). Higher = warmer block light.
+option.blocklightG=§a▍ §fGreen — Block Light
+option.blocklightG.comment=Adjusts the green tint of block lights. Affects the orange-to-yellow balance of torch light.
+option.blocklightB=§9▍ §fBlue — Block Light
+option.blocklightB.comment=Adjusts the blue tint of block lights. Higher = cooler, whiter light.
+option.blocklightI=Block Light Intensity
+option.blocklightI.comment=Adjusts the overall brightness of block light sources. Higher = stronger torch and lamp illumination.
 
 
 
-suffix.shadowMapResolution             = ²
-suffix.sunPathRotation                 = °
+suffix.shadowMapResolution=²
+suffix.sunPathRotation=°
 
-value.shadowDistance.48.0              = 3 区块
-value.shadowDistance.64.0              = 4 区块
-value.shadowDistance.80.0              = 5 区块
-value.shadowDistance.96.0              = 6 区块
-value.shadowDistance.112.0             = 7 区块
-value.shadowDistance.128.0             = 8 区块
-value.shadowDistance.144.0             = 9 区块
-value.shadowDistance.160.0             = 10 区块
-value.shadowDistance.176.0             = 11 区块
-value.shadowDistance.192.0             = 12 区块
-value.shadowDistance.208.0             = 13 区块
-value.shadowDistance.224.0             = 14 区块
-value.shadowDistance.240.0             = 15 区块
-value.shadowDistance.256.0             = 16 区块
-value.shadowDistance.320.0             = 20 区块
-value.shadowDistance.384.0             = 24 区块
-value.shadowDistance.512.0             = 32 区块
-value.shadowDistance.768.0             = 48 区块
-value.shadowDistance.1024.0            = 64 区块
-value.shadowDistance.2048.0            = 128 区块
-value.shadowDistance.4096.0            = 256 区块
+value.shadowDistance.48.0=3 区块
+value.shadowDistance.64.0=4 区块
+value.shadowDistance.80.0=5 区块
+value.shadowDistance.96.0=6 区块
+value.shadowDistance.112.0=7 区块
+value.shadowDistance.128.0=8 区块
+value.shadowDistance.144.0=9 区块
+value.shadowDistance.160.0=10 区块
+value.shadowDistance.176.0=11 区块
+value.shadowDistance.192.0=12 区块
+value.shadowDistance.208.0=13 区块
+value.shadowDistance.224.0=14 区块
+value.shadowDistance.240.0=15 区块
+value.shadowDistance.256.0=16 区块
+value.shadowDistance.320.0=20 区块
+value.shadowDistance.384.0=24 区块
+value.shadowDistance.512.0=32 区块
+value.shadowDistance.768.0=48 区块
+value.shadowDistance.1024.0=64 区块
+value.shadowDistance.2048.0=128 区块
+value.shadowDistance.4096.0=256 区块
 
 # Sky settings
 
-option.vanillaSun                     = Vanilla Sun Texture
-option.vanillaSun.comment = When enabled, shows Minecraft's default sun texture. When disabled, uses the shader's procedural sun disc.
-option.vanillaMoon                    = Vanilla Moon Texture
-option.vanillaMoon.comment = When enabled, shows Minecraft's default moon texture. When disabled, uses the shader's procedural moon disc.
-option.sunAngularRadius              = Sun Size
-option.sunAngularRadius.comment = Adjusts the apparent size of the sun disc in the sky. Larger = bigger sun and softer shadows due to larger light source.
-option.moonAngularRadius             = Moon Size
-option.moonAngularRadius.comment = Adjusts the apparent size of the moon disc at night. Larger = bigger moon and softer moon shadows.
-option.atmosphereSaturationBoost     = 大气饱和度增益
-option.atmosphereSaturationBoost.comment = 根据一天中的时间不同增加天空和阳光颜色的饱和度.
-option.atmosphereSaturationBoostIntensity = 大气饱和度增益强度
-option.atmosphereSaturationBoostIntensity.comment = 调节大气饱和度增益选项效果的强度.
-option.stars                           = 星星
-option.stars.comment                   = 夜空中的星星. 较低性能影响.
-option.starsIntensity                 = 星星强度
-option.starsIntensity.comment         = 控制夜空中星星的亮度.
-option.starsCoverage                  = 星星覆盖率
-option.starsCoverage.comment          = 控制夜空中行星的数量.
-option.galaxy                          = 星系
-option.galaxy.comment                  = 夜空中的星系图像.
-option.galaxyIntensity                = 星系强度
-option.galaxyIntensity.comment        = 控制夜空中星系的亮度.
-option.crepuscularRays                = Crepuscular Rays
-option.crepuscularRays.comment = Enables god rays (light shafts) visible when the sun is near the horizon through fog and clouds. Best seen at sunrise/sunset.
-option.lightningFlash                 = 闪电闪光
-option.lightningFlash.comment = Controls lightning flash.
-option.rainbows                        = Rainbows
-option.rainbows.comment = When enabled, a faint rainbow appears opposite the sun during and just after rain.
-option.endSunEffect                  = 末地日轮
-option.endSunEffect.comment = Controls end sun effect.
+option.vanillaSun=Vanilla Sun Texture
+option.vanillaSun.comment=When enabled, shows Minecraft's default sun texture. When disabled, uses the shader's procedural sun disc.
+option.vanillaMoon=Vanilla Moon Texture
+option.vanillaMoon.comment=When enabled, shows Minecraft's default moon texture. When disabled, uses the shader's procedural moon disc.
+option.sunAngularRadius=Sun Size
+option.sunAngularRadius.comment=Adjusts the apparent size of the sun disc in the sky. Larger = bigger sun and softer shadows due to larger light source.
+option.moonAngularRadius=Moon Size
+option.moonAngularRadius.comment=Adjusts the apparent size of the moon disc at night. Larger = bigger moon and softer moon shadows.
+option.atmosphereSaturationBoost=大气饱和度增益
+option.atmosphereSaturationBoost.comment=根据一天中的时间不同增加天空和阳光颜色的饱和度.
+option.atmosphereSaturationBoostIntensity=大气饱和度增益强度
+option.atmosphereSaturationBoostIntensity.comment=调节大气饱和度增益选项效果的强度.
+option.stars=星星
+option.stars.comment=夜空中的星星. 较低性能影响.
+option.starsIntensity=星星强度
+option.starsIntensity.comment=控制夜空中星星的亮度.
+option.starsCoverage=星星覆盖率
+option.starsCoverage.comment=控制夜空中行星的数量.
+option.galaxy=星系
+option.galaxy.comment=夜空中的星系图像.
+option.galaxyIntensity=星系强度
+option.galaxyIntensity.comment=控制夜空中星系的亮度.
+option.crepuscularRays=Crepuscular Rays
+option.crepuscularRays.comment=Enables god rays (light shafts) visible when the sun is near the horizon through fog and clouds. Best seen at sunrise/sunset.
+option.lightningFlash=闪电闪光
+option.lightningFlash.comment=Controls lightning flash.
+option.rainbows=Rainbows
+option.rainbows.comment=When enabled, a faint rainbow appears opposite the sun during and just after rain.
+option.endSunEffect=末地日轮
+option.endSunEffect.comment=Controls end sun effect.
 
 # Clouds
-option.cloudsCumulus                       = 积云
-option.cloudsCumulus.comment               = 近似于积云的低层体积云.
-option.cloudsCumulusPrimaryStepsH       = 基础采样数 - 地平线
-option.cloudsCumulusPrimaryStepsH.comment = Controls primary steps - horizon.
-option.cloudsCumulusPrimaryStepsZ       = 基础采样数 - 天顶
-option.cloudsCumulusPrimaryStepsZ.comment = Controls primary steps - zenith.
-option.cloudsCumulusLightingSteps        = 照明采样数
-option.cloudsCumulusLightingSteps.comment = Controls lighting steps.
-option.cloudsCumulusAmbientSteps         = 环境光采样数
-option.cloudsCumulusAmbientSteps.comment = Controls ambient steps.
-option.cloudsCumulusAltitude              = 高度
-option.cloudsCumulusAltitude.comment = Controls altitude.
-suffix.cloudsCumulusAltitude              = m
-option.cloudsCumulusThickness             = 厚度
-option.cloudsCumulusThickness.comment = Controls thickness.
-option.cloudsCumulusDensity               = 浓度
-option.cloudsCumulusDensity.comment = Controls density.
-option.cloudsCumulusCoverage              = 覆盖率
-option.cloudsCumulusCoverage.comment = Controls coverage.
-option.cloudsCumulusSize                  = 尺寸
-option.cloudsCumulusSize.comment = Controls size.
-option.cloudsCumulusDetailStrength       = 细节强度
-option.cloudsCumulusDetailStrength.comment = Controls detail strength.
-option.cloudsCumulusWindSpeed            = 风速
-option.cloudsCumulusWindSpeed.comment = Controls wind speed.
-suffix.cloudsCumulusWindSpeed            = m/s
-option.cloudsCumulusWindAngle            = 风向角
-option.cloudsCumulusWindAngle.comment = Controls wind angle.
-suffix.cloudsCumulusWindAngle            = °
-option.cloudsCumulusPrecomputeLocalCoverage = 预计算局部覆盖率
-option.cloudsCumulusPrecomputeLocalCoverage.comment = 对积云进行激进优化. 减少云可以绘制的最大距离, 并且当镜头移动时云层形状会发生变化, 因而产生更多伪影. 如果想在云层之上拍截图的需求, 请禁用本选项.
+option.cloudsCumulus=积云
+option.cloudsCumulus.comment=近似于积云的低层体积云.
+option.cloudsCumulusPrimaryStepsH=基础采样数 - 地平线
+option.cloudsCumulusPrimaryStepsH.comment=Controls primary steps - horizon.
+option.cloudsCumulusPrimaryStepsZ=基础采样数 - 天顶
+option.cloudsCumulusPrimaryStepsZ.comment=Controls primary steps - zenith.
+option.cloudsCumulusLightingSteps=照明采样数
+option.cloudsCumulusLightingSteps.comment=Controls lighting steps.
+option.cloudsCumulusAmbientSteps=环境光采样数
+option.cloudsCumulusAmbientSteps.comment=Controls ambient steps.
+option.cloudsCumulusAltitude=高度
+option.cloudsCumulusAltitude.comment=Controls altitude.
+suffix.cloudsCumulusAltitude=m
+option.cloudsCumulusThickness=厚度
+option.cloudsCumulusThickness.comment=Controls thickness.
+option.cloudsCumulusDensity=浓度
+option.cloudsCumulusDensity.comment=Controls density.
+option.cloudsCumulusCoverage=覆盖率
+option.cloudsCumulusCoverage.comment=Controls coverage.
+option.cloudsCumulusSize=尺寸
+option.cloudsCumulusSize.comment=Controls size.
+option.cloudsCumulusDetailStrength=细节强度
+option.cloudsCumulusDetailStrength.comment=Controls detail strength.
+option.cloudsCumulusWindSpeed=风速
+option.cloudsCumulusWindSpeed.comment=Controls wind speed.
+suffix.cloudsCumulusWindSpeed=m/s
+option.cloudsCumulusWindAngle=风向角
+option.cloudsCumulusWindAngle.comment=Controls wind angle.
+suffix.cloudsCumulusWindAngle=°
+option.cloudsCumulusPrecomputeLocalCoverage=预计算局部覆盖率
+option.cloudsCumulusPrecomputeLocalCoverage.comment=对积云进行激进优化. 减少云可以绘制的最大距离, 并且当镜头移动时云层形状会发生变化, 因而产生更多伪影. 如果想在云层之上拍截图的需求, 请禁用本选项.
 
-option.cloudsAltocumulus                       = 高积云
-option.cloudsAltocumulus.comment               = 近似于高积云的中层体积云.
-option.cloudsAltocumulusPrimaryStepsH       = 基础采样数 - 地平线
-option.cloudsAltocumulusPrimaryStepsH.comment = Controls primary steps - horizon.
-option.cloudsAltocumulusPrimaryStepsZ       = 基础采样数 - 天顶
-option.cloudsAltocumulusPrimaryStepsZ.comment = Controls primary steps - zenith.
-option.cloudsAltocumulusLightingSteps        = 照明采样数
-option.cloudsAltocumulusLightingSteps.comment = Controls lighting steps.
-option.cloudsAltocumulusAmbientSteps         = 环境光采样数
-option.cloudsAltocumulusAmbientSteps.comment = Controls ambient steps.
-option.cloudsAltocumulusAltitude              = 高度
-option.cloudsAltocumulusAltitude.comment = Controls altitude.
-suffix.cloudsAltocumulusAltitude              = m
-option.cloudsAltocumulusThickness             = 厚度
-option.cloudsAltocumulusThickness.comment = Controls thickness.
-option.cloudsAltocumulusDensity               = 浓度
-option.cloudsAltocumulusDensity.comment = Controls density.
-option.cloudsAltocumulusCoverage              = 覆盖率
-option.cloudsAltocumulusCoverage.comment = Controls coverage.
-option.cloudsAltocumulusSize                  = 尺寸
-option.cloudsAltocumulusSize.comment = Controls size.
-option.cloudsAltocumulusDetailStrength       = 细节强度
-option.cloudsAltocumulusDetailStrength.comment = Controls detail strength.
-option.cloudsAltocumulusWindSpeed            = 风速
-option.cloudsAltocumulusWindSpeed.comment = Controls wind speed.
-suffix.cloudsAltocumulusWindSpeed            = m/s
-option.cloudsAltocumulusWindAngle            = 风向角
-option.cloudsAltocumulusWindAngle.comment = Controls wind angle.
-suffix.cloudsAltocumulusWindAngle            = °
+option.cloudsAltocumulus=高积云
+option.cloudsAltocumulus.comment=近似于高积云的中层体积云.
+option.cloudsAltocumulusPrimaryStepsH=基础采样数 - 地平线
+option.cloudsAltocumulusPrimaryStepsH.comment=Controls primary steps - horizon.
+option.cloudsAltocumulusPrimaryStepsZ=基础采样数 - 天顶
+option.cloudsAltocumulusPrimaryStepsZ.comment=Controls primary steps - zenith.
+option.cloudsAltocumulusLightingSteps=照明采样数
+option.cloudsAltocumulusLightingSteps.comment=Controls lighting steps.
+option.cloudsAltocumulusAmbientSteps=环境光采样数
+option.cloudsAltocumulusAmbientSteps.comment=Controls ambient steps.
+option.cloudsAltocumulusAltitude=高度
+option.cloudsAltocumulusAltitude.comment=Controls altitude.
+suffix.cloudsAltocumulusAltitude=m
+option.cloudsAltocumulusThickness=厚度
+option.cloudsAltocumulusThickness.comment=Controls thickness.
+option.cloudsAltocumulusDensity=浓度
+option.cloudsAltocumulusDensity.comment=Controls density.
+option.cloudsAltocumulusCoverage=覆盖率
+option.cloudsAltocumulusCoverage.comment=Controls coverage.
+option.cloudsAltocumulusSize=尺寸
+option.cloudsAltocumulusSize.comment=Controls size.
+option.cloudsAltocumulusDetailStrength=细节强度
+option.cloudsAltocumulusDetailStrength.comment=Controls detail strength.
+option.cloudsAltocumulusWindSpeed=风速
+option.cloudsAltocumulusWindSpeed.comment=Controls wind speed.
+suffix.cloudsAltocumulusWindSpeed=m/s
+option.cloudsAltocumulusWindAngle=风向角
+option.cloudsAltocumulusWindAngle.comment=Controls wind angle.
+suffix.cloudsAltocumulusWindAngle=°
 
-option.cloudsCumulusCongestus                       = 浓积云
-option.cloudsCumulusCongestus.comment               = 巨大而遥远的体积云.
-option.cloudsCumulusCongestusPrimarySteps       = Primary Steps
-option.cloudsCumulusCongestusPrimarySteps.comment = Controls primary steps.
-option.cloudsCumulusCongestusLightingSteps        = 照明采样数
-option.cloudsCumulusCongestusLightingSteps.comment = Controls lighting steps.
-option.cloudsCumulusCongestusAmbientSteps         = 环境光采样数
-option.cloudsCumulusCongestusAmbientSteps.comment = Controls ambient steps.
-option.cloudsCumulusCongestusAltitude              = 高度
-option.cloudsCumulusCongestusAltitude.comment = Controls altitude.
-suffix.cloudsCumulusCongestusAltitude              = m
-option.cloudsCumulusCongestusThickness             = 厚度
-option.cloudsCumulusCongestusThickness.comment = Controls thickness.
-option.cloudsCumulusCongestusCoverage              = 覆盖率
-option.cloudsCumulusCongestusCoverage.comment = Controls coverage.
-option.cloudsCumulusCongestusSize                  = 尺寸
-option.cloudsCumulusCongestusSize.comment = Controls size.
-option.cloudsCumulusCongestusDetailStrength       = 细节强度
-option.cloudsCumulusCongestusDetailStrength.comment = Controls detail strength.
+option.cloudsCumulusCongestus=浓积云
+option.cloudsCumulusCongestus.comment=巨大而遥远的体积云.
+option.cloudsCumulusCongestusPrimarySteps=Primary Steps
+option.cloudsCumulusCongestusPrimarySteps.comment=Controls primary steps.
+option.cloudsCumulusCongestusLightingSteps=照明采样数
+option.cloudsCumulusCongestusLightingSteps.comment=Controls lighting steps.
+option.cloudsCumulusCongestusAmbientSteps=环境光采样数
+option.cloudsCumulusCongestusAmbientSteps.comment=Controls ambient steps.
+option.cloudsCumulusCongestusAltitude=高度
+option.cloudsCumulusCongestusAltitude.comment=Controls altitude.
+suffix.cloudsCumulusCongestusAltitude=m
+option.cloudsCumulusCongestusThickness=厚度
+option.cloudsCumulusCongestusThickness.comment=Controls thickness.
+option.cloudsCumulusCongestusCoverage=覆盖率
+option.cloudsCumulusCongestusCoverage.comment=Controls coverage.
+option.cloudsCumulusCongestusSize=尺寸
+option.cloudsCumulusCongestusSize.comment=Controls size.
+option.cloudsCumulusCongestusDetailStrength=细节强度
+option.cloudsCumulusCongestusDetailStrength.comment=Controls detail strength.
 
-option.cloudsNoctilucent              = 夜光云
-option.cloudsNoctilucent.comment = Controls noctilucent clouds.
+option.cloudsNoctilucent=夜光云
+option.cloudsNoctilucent.comment=Controls noctilucent clouds.
 
-option.blockyClouds                   = 方块云层
-option.blockyClouds.comment           = 原版风格体积云层. 启用本选项会禁用其他所有类型的云层.
-option.blockyCloudsLayer2           = 第二云层
-option.blockyCloudsLayer2.comment   = 启用第二层 Minecraft 风格体积云. 注意, 启用本选项会使云层性能消耗加倍! 
-option.blockyCloudsThickness         = 厚度
-option.blockyCloudsThickness.comment = 调节云层厚度.
-option.blockyCloudsAltitude          = 第一云层高度
-option.blockyCloudsAltitude.comment  = 调节云层高度.
-option.blockyCloudsAltitude2        = 第二云层高度
-option.blockyCloudsAltitude2.comment = 调节第二云层的高度.
-option.blockyCloudsRoundness         = 云层形状圆润程度
-option.blockyCloudsRoundness.comment = 调节方块云层整体形状的圆润程度.
-option.blockyCloudsSharpness         = 云层边缘锐利程度
-option.blockyCloudsSharpness.comment = 调节方块云层边缘的锐利程度.
+option.blockyClouds=方块云层
+option.blockyClouds.comment=原版风格体积云层. 启用本选项会禁用其他所有类型的云层.
+option.blockyCloudsLayer2=第二云层
+option.blockyCloudsLayer2.comment=启用第二层 Minecraft 风格体积云. 注意, 启用本选项会使云层性能消耗加倍! 
+option.blockyCloudsThickness=厚度
+option.blockyCloudsThickness.comment=调节云层厚度.
+option.blockyCloudsAltitude=第一云层高度
+option.blockyCloudsAltitude.comment=调节云层高度.
+option.blockyCloudsAltitude2=第二云层高度
+option.blockyCloudsAltitude2.comment=调节第二云层的高度.
+option.blockyCloudsRoundness=云层形状圆润程度
+option.blockyCloudsRoundness.comment=调节方块云层整体形状的圆润程度.
+option.blockyCloudsSharpness=云层边缘锐利程度
+option.blockyCloudsSharpness.comment=调节方块云层边缘的锐利程度.
 
-option.cloudsTemporalUpscaling       = 云层时间性升采样
-option.cloudsTemporalUpscaling.comment = Selects the temporal upscaling mode or method.
-option.cloudsAerialPerspectiveBoost = 空中云层透视增益
-option.cloudsAerialPerspectiveBoost.comment = Controls aerial perspective boost.
-option.cloudsScale                    = 云层缩放
-option.cloudsScale.comment            = 对所有云层进行缩放, 以调整云层大小和高度, 使其在游戏中更易于接触. 如果这个值是1.0, 云层将按照现实高度分布, 默认第一层在800个方块的高度. 如果这个值更高, 云层将显得更小, 更贴近地面. 这也会影响云影的大小. 
-suffix.cloudsScale                    = ×
-value.cloudsTemporalUpscaling.1      = 关闭
-value.cloudsTemporalUpscaling.2      = 4×
-value.cloudsTemporalUpscaling.3      = 9×
-value.cloudsTemporalUpscaling.4      = 16×
+option.cloudsTemporalUpscaling=云层时间性升采样
+option.cloudsTemporalUpscaling.comment=Selects the temporal upscaling mode or method.
+option.cloudsAerialPerspectiveBoost=空中云层透视增益
+option.cloudsAerialPerspectiveBoost.comment=Controls aerial perspective boost.
+option.cloudsScale=云层缩放
+option.cloudsScale.comment=对所有云层进行缩放, 以调整云层大小和高度, 使其在游戏中更易于接触. 如果这个值是1.0, 云层将按照现实高度分布, 默认第一层在800个方块的高度. 如果这个值更高, 云层将显得更小, 更贴近地面. 这也会影响云影的大小. 
+suffix.cloudsScale=×
+value.cloudsTemporalUpscaling.1=关闭
+value.cloudsTemporalUpscaling.2=4×
+value.cloudsTemporalUpscaling.3=9×
+value.cloudsTemporalUpscaling.4=16×
 
-option.cloudsCirrus                       = 卷云/卷积云
-option.cloudsCirrus.comment               = 平面卷云和卷积云.
-option.cloudsCirrusLightingSteps        = 照明采样数
-option.cloudsCirrusLightingSteps.comment = Controls lighting steps.
-option.cloudsCirrusAltitude              = 高度
-option.cloudsCirrusAltitude.comment = Controls altitude.
-suffix.cloudsCirrusAltitude              = m
-option.cloudsCirrusThickness             = 厚度
-option.cloudsCirrusThickness.comment = Controls thickness.
-option.cloudsCirrusDensity               = 卷云强度
-option.cloudsCirrusDensity.comment = Controls cirrus density.
-option.cloudsCirrusCoverage              = 卷云覆盖率
-option.cloudsCirrusCoverage.comment = Controls cirrus coverage.
-option.cloudsCirrusSize                  = 卷云尺寸
-option.cloudsCirrusSize.comment = Controls cirrus size.
-option.cloudsCirrusCurlStrength         = 卷云卷曲强度
-option.cloudsCirrusCurlStrength.comment = Controls cirrus curl strength.
-option.cloudsCirrusWindSpeed            = 风速
-option.cloudsCirrusWindSpeed.comment = Controls wind speed.
-suffix.cloudsCirrusWindSpeed            = m/s
-option.cloudsCirrusWindAngle            = 风向角
-option.cloudsCirrusWindAngle.comment = Controls wind angle.
-suffix.cloudsCirrusWindAngle            = °
-option.cloudsCirrocumulusDensity         = 卷积云强度
-option.cloudsCirrocumulusDensity.comment = Controls cirrocumulus density.
-option.cloudsCirrocumulusCoverage        = 卷积云覆盖率
-option.cloudsCirrocumulusCoverage.comment = Controls cirrocumulus coverage.
-option.cloudsCirrocumulusSize            = 卷积云尺寸
-option.cloudsCirrocumulusSize.comment = Controls cirrocumulus size.
-option.cloudsCirrocumulusDetailStrength = 卷积云细节强度
-option.cloudsCirrocumulusDetailStrength.comment = Controls cirrocumulus detail strength.
-option.cloudsCirrocumulusCurlStrength   = 卷积云卷曲强度
-option.cloudsCirrocumulusCurlStrength.comment = Controls cirrocumulus curl strength.
+option.cloudsCirrus=卷云/卷积云
+option.cloudsCirrus.comment=平面卷云和卷积云.
+option.cloudsCirrusLightingSteps=照明采样数
+option.cloudsCirrusLightingSteps.comment=Controls lighting steps.
+option.cloudsCirrusAltitude=高度
+option.cloudsCirrusAltitude.comment=Controls altitude.
+suffix.cloudsCirrusAltitude=m
+option.cloudsCirrusThickness=厚度
+option.cloudsCirrusThickness.comment=Controls thickness.
+option.cloudsCirrusDensity=卷云强度
+option.cloudsCirrusDensity.comment=Controls cirrus density.
+option.cloudsCirrusCoverage=卷云覆盖率
+option.cloudsCirrusCoverage.comment=Controls cirrus coverage.
+option.cloudsCirrusSize=卷云尺寸
+option.cloudsCirrusSize.comment=Controls cirrus size.
+option.cloudsCirrusCurlStrength=卷云卷曲强度
+option.cloudsCirrusCurlStrength.comment=Controls cirrus curl strength.
+option.cloudsCirrusWindSpeed=风速
+option.cloudsCirrusWindSpeed.comment=Controls wind speed.
+suffix.cloudsCirrusWindSpeed=m/s
+option.cloudsCirrusWindAngle=风向角
+option.cloudsCirrusWindAngle.comment=Controls wind angle.
+suffix.cloudsCirrusWindAngle=°
+option.cloudsCirrocumulusDensity=卷积云强度
+option.cloudsCirrocumulusDensity.comment=Controls cirrocumulus density.
+option.cloudsCirrocumulusCoverage=卷积云覆盖率
+option.cloudsCirrocumulusCoverage.comment=Controls cirrocumulus coverage.
+option.cloudsCirrocumulusSize=卷积云尺寸
+option.cloudsCirrocumulusSize.comment=Controls cirrocumulus size.
+option.cloudsCirrocumulusDetailStrength=卷积云细节强度
+option.cloudsCirrocumulusDetailStrength.comment=Controls cirrocumulus detail strength.
+option.cloudsCirrocumulusCurlStrength=卷积云卷曲强度
+option.cloudsCirrocumulusCurlStrength.comment=Controls cirrocumulus curl strength.
 
-option.cloudsNoctilucentIntensity    = 夜光云强度
-option.cloudsNoctilucentIntensity.comment = Controls intensity.
-option.cloudsNoctilucentRarity       = 稀有度
-option.cloudsNoctilucentRarity.comment = Controls rarity.
+option.cloudsNoctilucentIntensity=夜光云强度
+option.cloudsNoctilucentIntensity.comment=Controls intensity.
+option.cloudsNoctilucentRarity=稀有度
+option.cloudsNoctilucentRarity.comment=Controls rarity.
 
-option.auroraNormal                   = 全群系极光
-option.auroraNormal.comment = Selects the aurora in any biome mode or method.
-option.auroraSnow                     = 积雪群系极光
-option.auroraSnow.comment = Selects the aurora in snow biome mode or method.
-option.auroraBrightness               = 极光亮度
-option.auroraBrightness.comment = Toggles aurora brightness.
-option.auroraFrequency                = 极光频率
-option.auroraFrequency.comment = Toggles aurora frequency.
-option.auroraCloudLighting           = 云层照明贡献率
-option.auroraCloudLighting.comment = Toggles cloud light contribution.
-option.auroraGroundLighting           = 地面光照贡献
-option.auroraGroundLighting.comment         = 控制极光向地面光照的贡献量。数值越高，地形、水面等受天空照明的表面会被极光颜色照亮得越明显。
+option.auroraNormal=全群系极光
+option.auroraNormal.comment=Selects the aurora in any biome mode or method.
+option.auroraSnow=积雪群系极光
+option.auroraSnow.comment=Selects the aurora in snow biome mode or method.
+option.auroraBrightness=极光亮度
+option.auroraBrightness.comment=Toggles aurora brightness.
+option.auroraFrequency=极光频率
+option.auroraFrequency.comment=Toggles aurora frequency.
+option.auroraCloudLighting=云层照明贡献率
+option.auroraCloudLighting.comment=Toggles cloud light contribution.
+option.auroraGroundLighting=地面光照贡献
+option.auroraGroundLighting.comment=控制极光向地面光照的贡献量。数值越高，地形、水面等受天空照明的表面会被极光颜色照亮得越明显。
 
-value.auroraNormal.auroraNever       = 关闭
-value.auroraNormal.auroraRarely      = 小概率
-value.auroraNormal.auroraAlways      = 保持开启
+value.auroraNormal.auroraNever=关闭
+value.auroraNormal.auroraRarely=小概率
+value.auroraNormal.auroraAlways=保持开启
 
-value.auroraSnow.auroraNever         = 关闭
-value.auroraSnow.auroraRarely        = 小概率
-value.auroraSnow.auroraAlways        = 保持开启
+value.auroraSnow.auroraNever=关闭
+value.auroraSnow.auroraRarely=小概率
+value.auroraSnow.auroraAlways=保持开启
 
 # Fog settings
 
-option.borderFog                      = 边界雾气
-option.borderFog.comment              = 渲染视距边缘被浓雾笼罩以隐藏区块边界.
-option.caveFog                        = 洞穴雾气
-option.caveFog.comment                = 在地下洞穴区域应用稍微发光的雾气. 可以使巨型洞穴氛围更棒, 也有助于看清洞穴形状.
-option.bloomyFog                      = 泛光雾
-option.bloomyFog.comment              = 雾气的强烈泛光. 使得明亮事物发出的光像是在雾气中散射, 并且照亮后方区域. 几乎没有性能消耗.
-option.bloomyFogIntensity            = 泛光雾强度
-option.bloomyFogIntensity.comment    = 调节泛光雾的强度.
-option.overworldFogIntensity         = 主世界雾气强度
-option.overworldFogIntensity.comment = Controls overworld fog intensity.
-value.mistMode.mistModeOff           = Off
-value.mistMode.mistModeBasic         = Basic
-value.mistMode.mistModeAdvanced      = Advanced
-option.mistMode                        = Ground Mist
-option.mistMode.comment                = Ground-hugging haze layer. Off = disabled. Basic = two-octave noise mist with density-varying phase and wetness coupling. Advanced = adds per-step sun self-shadowing with cloud occlusion and grazing-angle cost gating.
-option.mistModeOff                    = Off
-option.mistModeBasic                  = Basic
-option.mistModeAdvanced               = Advanced
-option.mistDensity                     = Mist Density
-option.mistDensity.comment            = Overall thickness of the mist layer. Higher values produce denser, more opaque ground fog.
-option.mistAltitude                   = Mist Ceiling
-option.mistAltitude.comment           = Maximum altitude (blocks) above which mist cannot exist. Lower values keep mist close to the ground.
-option.mistFalloffRate               = Mist Falloff Rate
-option.mistFalloffRate.comment       = How quickly mist thins with altitude above sea level. Higher = thinner layer, lower = mist reaches higher.
-option.mistSeaLevelBias             = Mist Sea Level Bias
-option.mistSeaLevelBias.comment     = Shifts the mist base up or down relative to the configured sea level. Positive = mist starts higher, negative = mist starts lower.
-option.mistShadowSteps               = Mist Shadow Steps
-option.mistShadowSteps.comment       = Number of ray-march steps toward the sun for mist self-shadowing (Advanced mode only). Higher = more accurate self-shadowing at higher GPU cost.
-option.ozoneLayer                         = 臭氧吸收层
-option.ozoneLayer.comment = 向大气模型中添加可调节的平流层臭氧层（查普伊斯吸收带，400-650nm）。影响阳光、月光、云层照明、天空、雾、薄雾与地面反弹光。在黎明和黄昏最为明显。
-option.ozoneAmount                        = 臭氧含量
-option.ozoneAmount.comment = 臭氧层的强度。1.00 为自然含量；更高的值会加深暮光时天顶的蓝色并使地平线光更偏红；0 则禁用吸收。
-option.ozoneAltitude                      = 臭氧层高度
-option.ozoneAltitude.comment = 臭氧层的峰值高度（公里）。真实臭氧层约在 20-30 公里处达到峰值；层越高，地平线掠射路径的饱和越弱。
-option.ozoneThickness                     = 臭氧层厚度
-option.ozoneThickness.comment = 层的厚度（公里）。薄层集中吸收并放大地平线掠射路径；厚层则分散吸收。
-option.ozoneSky                           = 臭氧天空吸收
-option.ozoneSky.comment = 将臭氧层应用于天空：对大气施加视线与光路吸收，加深暮光时的蓝色天顶并暖化地平线光。
-option.ozoneFog                           = 臭氧雾散射
-option.ozoneFog.comment = 将臭氧层应用于空气雾：臭氧感知的多重散射近似，散射阶数越高，绿红分量被臭氧吸收带吸收得越多。
-option.ozoneMist                          = 臭氧薄雾色调
-option.ozoneMist.comment = 将臭氧层应用于地面薄雾：黎明与黄昏时，薄雾色调会带上经臭氧过滤的暮光光谱。
-option.ozonePlanetBounce                 = 臭氧地面反弹
-option.ozonePlanetBounce.comment = 将臭氧层应用于地面反弹光：从地面反弹的光在向上回到天空途中再次经过臭氧层过滤。
-option.renderBelowPlanet             = Render Below Planet
-option.renderBelowPlanet.comment    = Renders the planet ground disc for below-horizon rays instead of stretching the horizon sky downward.
-option.renderBelowPlanetIntensity  = Below Planet Brightness
-option.renderBelowPlanetIntensity.comment = Brightness of the planet ground rendered below the horizon.
-option.vl                              = 体积雾
-option.vl.comment                      = 添加光轴和可变雾气密度.
-option.airFogCloudyNoise            = 云雾
-option.airFogCloudyNoise.comment    = 为雾气边缘添加微妙的云层形状, 在清晨更容易看清楚. 需要启用体积雾!
-option.airFogColoredLightShafts    = 光轴着色
-option.airFogColoredLightShafts.comment = 光轴穿过半透明事物时会被其颜色所沾染.
+option.borderFog=边界雾气
+option.borderFog.comment=渲染视距边缘被浓雾笼罩以隐藏区块边界.
+option.caveFog=洞穴雾气
+option.caveFog.comment=在地下洞穴区域应用稍微发光的雾气. 可以使巨型洞穴氛围更棒, 也有助于看清洞穴形状.
+option.bloomyFog=泛光雾
+option.bloomyFog.comment=雾气的强烈泛光. 使得明亮事物发出的光像是在雾气中散射, 并且照亮后方区域. 几乎没有性能消耗.
+option.bloomyFogIntensity=泛光雾强度
+option.bloomyFogIntensity.comment=调节泛光雾的强度.
+option.overworldFogIntensity=主世界雾气强度
+option.overworldFogIntensity.comment=Controls overworld fog intensity.
+value.mistMode.mistModeOff=Off
+value.mistMode.mistModeBasic=Basic
+value.mistMode.mistModeAdvanced=Advanced
+option.mistMode=Ground Mist
+option.mistMode.comment=Ground-hugging haze layer. Off = disabled. Basic = two-octave noise mist with density-varying phase and wetness coupling. Advanced = adds per-step sun self-shadowing with cloud occlusion and grazing-angle cost gating.
+option.mistModeOff=Off
+option.mistModeBasic=Basic
+option.mistModeAdvanced=Advanced
+option.mistDensity=Mist Density
+option.mistDensity.comment=Overall thickness of the mist layer. Higher values produce denser, more opaque ground fog.
+option.mistAltitude=Mist Ceiling
+option.mistAltitude.comment=Maximum altitude (blocks) above which mist cannot exist. Lower values keep mist close to the ground.
+option.mistFalloffRate=Mist Falloff Rate
+option.mistFalloffRate.comment=How quickly mist thins with altitude above sea level. Higher = thinner layer, lower = mist reaches higher.
+option.mistSeaLevelBias=Mist Sea Level Bias
+option.mistSeaLevelBias.comment=Shifts the mist base up or down relative to the configured sea level. Positive = mist starts higher, negative = mist starts lower.
+option.mistShadowSteps=Mist Shadow Steps
+option.mistShadowSteps.comment=Number of ray-march steps toward the sun for mist self-shadowing (Advanced mode only). Higher = more accurate self-shadowing at higher GPU cost.
+option.ozoneLayer=臭氧吸收层
+option.ozoneLayer.comment=向大气模型中添加可调节的平流层臭氧层（查普伊斯吸收带，400-650nm）。影响阳光、月光、云层照明、天空、雾、薄雾与地面反弹光。在黎明和黄昏最为明显。
+option.ozoneAmount=臭氧含量
+option.ozoneAmount.comment=臭氧层的强度。1.00 为自然含量；更高的值会加深暮光时天顶的蓝色并使地平线光更偏红；0 则禁用吸收。
+option.ozoneAltitude=臭氧层高度
+option.ozoneAltitude.comment=臭氧层的峰值高度（公里）。真实臭氧层约在 20-30 公里处达到峰值；层越高，地平线掠射路径的饱和越弱。
+option.ozoneThickness=臭氧层厚度
+option.ozoneThickness.comment=层的厚度（公里）。薄层集中吸收并放大地平线掠射路径；厚层则分散吸收。
+option.ozoneSky=臭氧天空吸收
+option.ozoneSky.comment=将臭氧层应用于天空：对大气施加视线与光路吸收，加深暮光时的蓝色天顶并暖化地平线光。
+option.ozoneFog=臭氧雾散射
+option.ozoneFog.comment=将臭氧层应用于空气雾：臭氧感知的多重散射近似，散射阶数越高，绿红分量被臭氧吸收带吸收得越多。
+option.ozoneMist=臭氧薄雾色调
+option.ozoneMist.comment=将臭氧层应用于地面薄雾：黎明与黄昏时，薄雾色调会带上经臭氧过滤的暮光光谱。
+option.ozonePlanetBounce=臭氧地面反弹
+option.ozonePlanetBounce.comment=将臭氧层应用于地面反弹光：从地面反弹的光在向上回到天空途中再次经过臭氧层过滤。
+option.renderBelowPlanet=Render Below Planet
+option.renderBelowPlanet.comment=Renders the planet ground disc for below-horizon rays instead of stretching the horizon sky downward.
+option.renderBelowPlanetIntensity=Below Planet Brightness
+option.renderBelowPlanetIntensity.comment=Brightness of the planet ground rendered below the horizon.
+option.vl=体积雾
+option.vl.comment=添加光轴和可变雾气密度.
+option.airFogCloudyNoise=云雾
+option.airFogCloudyNoise.comment=为雾气边缘添加微妙的云层形状, 在清晨更容易看清楚. 需要启用体积雾!
+option.airFogColoredLightShafts=光轴着色
+option.airFogColoredLightShafts.comment=光轴穿过半透明事物时会被其颜色所沾染.
 
 # LPV VL
 
 # Rayleigh Fog
-option.airFogRayleighFalloffStart     = 瑞利 - 雾气消散起始位置
-option.airFogRayleighFalloffStart.comment = 瑞利雾气开始消散的海拔高度.
-option.airFogRayleighFalloffHalfLife = 瑞利 - 雾气密度减半位置
-option.airFogRayleighFalloffHalfLife.comment = 从瑞利雾气消散起始位置开始后雾气密度减半所需的高度.
+option.airFogRayleighFalloffStart=瑞利 - 雾气消散起始位置
+option.airFogRayleighFalloffStart.comment=瑞利雾气开始消散的海拔高度.
+option.airFogRayleighFalloffHalfLife=瑞利 - 雾气密度减半位置
+option.airFogRayleighFalloffHalfLife.comment=从瑞利雾气消散起始位置开始后雾气密度减半所需的高度.
 
-option.airFogRayleighDensity        = Normal Density
-option.airFogRayleighDensity.comment = Adjusts the base density/thickness of Rayleigh (air) fog under clear weather. Higher = hazier sky.
-option.airFogRayleighR              = §c▍ §fRed — Normal
-option.airFogRayleighR.comment = Adjusts the red tint of normal Rayleigh fog. Together with green/blue it sets the fog's clear-weather color.
-option.airFogRayleighG              = §a▍ §fGreen — Normal
-option.airFogRayleighG.comment = Adjusts the green tint of normal Rayleigh fog.
-option.airFogRayleighB              = §9▍ §fBlue — Normal
-option.airFogRayleighB.comment = Adjusts the blue tint of normal Rayleigh fog. Higher = more bluish haze.
+option.airFogRayleighDensity=Normal Density
+option.airFogRayleighDensity.comment=Adjusts the base density/thickness of Rayleigh (air) fog under clear weather. Higher = hazier sky.
+option.airFogRayleighR=§c▍ §fRed — Normal
+option.airFogRayleighR.comment=Adjusts the red tint of normal Rayleigh fog. Together with green/blue it sets the fog's clear-weather color.
+option.airFogRayleighG=§a▍ §fGreen — Normal
+option.airFogRayleighG.comment=Adjusts the green tint of normal Rayleigh fog.
+option.airFogRayleighB=§9▍ §fBlue — Normal
+option.airFogRayleighB.comment=Adjusts the blue tint of normal Rayleigh fog. Higher = more bluish haze.
 
-option.airFogRayleighDensityRain   = 雨天雾气 密度
-option.airFogRayleighDensityRain.comment = Controls rain density.
-option.airFogRayleighRRain         = §4红色比重
-option.airFogRayleighRRain.comment = Controls ▍ red.
-option.airFogRayleighGRain         = §2绿色比重
-option.airFogRayleighGRain.comment = Controls ▍ green.
-option.airFogRayleighBRain         = §1蓝色比重
-option.airFogRayleighBRain.comment = Controls ▍ blue.
+option.airFogRayleighDensityRain=雨天雾气 密度
+option.airFogRayleighDensityRain.comment=Controls rain density.
+option.airFogRayleighRRain=§4红色比重
+option.airFogRayleighRRain.comment=Controls ▍ red.
+option.airFogRayleighGRain=§2绿色比重
+option.airFogRayleighGRain.comment=Controls ▍ green.
+option.airFogRayleighBRain=§1蓝色比重
+option.airFogRayleighBRain.comment=Controls ▍ blue.
 
-option.airFogRayleighDensityArid   = 干旱/沙漠群系 雾气密度
-option.airFogRayleighDensityArid.comment = Controls arid/desert density.
-option.airFogRayleighRArid         = §4红色比重
-option.airFogRayleighRArid.comment = Controls ▍ red.
-option.airFogRayleighGArid         = §2绿色比重
-option.airFogRayleighGArid.comment = Controls ▍ green.
-option.airFogRayleighBArid         = §1蓝色比重
-option.airFogRayleighBArid.comment = Controls ▍ blue.
+option.airFogRayleighDensityArid=干旱/沙漠群系 雾气密度
+option.airFogRayleighDensityArid.comment=Controls arid/desert density.
+option.airFogRayleighRArid=§4红色比重
+option.airFogRayleighRArid.comment=Controls ▍ red.
+option.airFogRayleighGArid=§2绿色比重
+option.airFogRayleighGArid.comment=Controls ▍ green.
+option.airFogRayleighBArid=§1蓝色比重
+option.airFogRayleighBArid.comment=Controls ▍ blue.
 
-option.airFogRayleighDensitySnowy  = 积雪群系 雾气密度
-option.airFogRayleighDensitySnowy.comment = Controls snowy density.
-option.airFogRayleighRSnowy        = §4红色比重
-option.airFogRayleighRSnowy.comment = Controls ▍ red.
-option.airFogRayleighGSnowy        = §2绿色比重
-option.airFogRayleighGSnowy.comment = Controls ▍ green.
-option.airFogRayleighBSnowy        = §1蓝色比重
-option.airFogRayleighBSnowy.comment = Controls ▍ blue.
+option.airFogRayleighDensitySnowy=积雪群系 雾气密度
+option.airFogRayleighDensitySnowy.comment=Controls snowy density.
+option.airFogRayleighRSnowy=§4红色比重
+option.airFogRayleighRSnowy.comment=Controls ▍ red.
+option.airFogRayleighGSnowy=§2绿色比重
+option.airFogRayleighGSnowy.comment=Controls ▍ green.
+option.airFogRayleighBSnowy=§1蓝色比重
+option.airFogRayleighBSnowy.comment=Controls ▍ blue.
 
-option.airFogRayleighDensityTaiga  = 针叶林群系 雾气密度
-option.airFogRayleighDensityTaiga.comment = Controls taiga density.
-option.airFogRayleighRTaiga        = §4红色比重
-option.airFogRayleighRTaiga.comment = Controls ▍ red.
-option.airFogRayleighGTaiga        = §2绿色比重
-option.airFogRayleighGTaiga.comment = Controls ▍ green.
-option.airFogRayleighBTaiga        = §1蓝色比重
-option.airFogRayleighBTaiga.comment = Controls ▍ blue.
+option.airFogRayleighDensityTaiga=针叶林群系 雾气密度
+option.airFogRayleighDensityTaiga.comment=Controls taiga density.
+option.airFogRayleighRTaiga=§4红色比重
+option.airFogRayleighRTaiga.comment=Controls ▍ red.
+option.airFogRayleighGTaiga=§2绿色比重
+option.airFogRayleighGTaiga.comment=Controls ▍ green.
+option.airFogRayleighBTaiga=§1蓝色比重
+option.airFogRayleighBTaiga.comment=Controls ▍ blue.
 
-option.airFogRayleighDensityJungle = 丛林群系 雾气密度
-option.airFogRayleighDensityJungle.comment = Controls jungle density.
-option.airFogRayleighRJungle       = §4红色比重
-option.airFogRayleighRJungle.comment = Controls ▍ red.
-option.airFogRayleighGJungle       = §2绿色比重
-option.airFogRayleighGJungle.comment = Controls ▍ green.
-option.airFogRayleighBJungle       = §1蓝色比重
-option.airFogRayleighBJungle.comment = Controls ▍ blue.
+option.airFogRayleighDensityJungle=丛林群系 雾气密度
+option.airFogRayleighDensityJungle.comment=Controls jungle density.
+option.airFogRayleighRJungle=§4红色比重
+option.airFogRayleighRJungle.comment=Controls ▍ red.
+option.airFogRayleighGJungle=§2绿色比重
+option.airFogRayleighGJungle.comment=Controls ▍ green.
+option.airFogRayleighBJungle=§1蓝色比重
+option.airFogRayleighBJungle.comment=Controls ▍ blue.
 
-option.airFogRayleighDensitySwamp  = 沼泽群系 雾气密度
-option.airFogRayleighDensitySwamp.comment = Controls swamp density.
-option.airFogRayleighRSwamp        = §4红色比重
-option.airFogRayleighRSwamp.comment = Controls ▍ red.
-option.airFogRayleighGSwamp        = §2绿色比重
-option.airFogRayleighGSwamp.comment = Controls ▍ green.
-option.airFogRayleighBSwamp        = §1蓝色比重
-option.airFogRayleighBSwamp.comment = Controls ▍ blue.
+option.airFogRayleighDensitySwamp=沼泽群系 雾气密度
+option.airFogRayleighDensitySwamp.comment=Controls swamp density.
+option.airFogRayleighRSwamp=§4红色比重
+option.airFogRayleighRSwamp.comment=Controls ▍ red.
+option.airFogRayleighGSwamp=§2绿色比重
+option.airFogRayleighGSwamp.comment=Controls ▍ green.
+option.airFogRayleighBSwamp=§1蓝色比重
+option.airFogRayleighBSwamp.comment=Controls ▍ blue.
 
 # Mie Fog
-option.airFogMieDensityMorning     = 清晨密度
-option.airFogMieDensityMorning.comment = Controls morning density.
-option.airFogMieDensityNoon        = 正午密度
-option.airFogMieDensityNoon.comment = Controls noon density.
-option.airFogMieDensityEvening     = 傍晚密度
-option.airFogMieDensityEvening.comment = Controls evening density.
-option.airFogMieDensityMidnight    = 午夜密度
-option.airFogMieDensityMidnight.comment = Controls midnight density.
-option.airFogMieDensityRain        = 雨天密度
-option.airFogMieDensityRain.comment = Controls rain density.
-option.airFogMieDensitySnow               = Snow Density
-option.airFogMieDensitySnow.comment = Controls snow density.
-option.airFogMieDensityBlueHour   = 黎明/黄昏 密度
-option.airFogMieDensityBlueHour.comment = Controls dawn/dusk density.
-option.airFogMieFalloffStart          = 米氏 - 渐消起始位置
-option.airFogMieFalloffStart.comment  = 米氏雾气开始消散的海拔高度.
-option.airFogMieFalloffHalfLife      = 米氏 - 渐消中部位置
-option.airFogMieFalloffHalfLife.comment = 从米氏雾气消散起始位置开始后雾气密度减半所需的高度.
+option.airFogMieDensityMorning=清晨密度
+option.airFogMieDensityMorning.comment=Controls morning density.
+option.airFogMieDensityNoon=正午密度
+option.airFogMieDensityNoon.comment=Controls noon density.
+option.airFogMieDensityEvening=傍晚密度
+option.airFogMieDensityEvening.comment=Controls evening density.
+option.airFogMieDensityMidnight=午夜密度
+option.airFogMieDensityMidnight.comment=Controls midnight density.
+option.airFogMieDensityRain=雨天密度
+option.airFogMieDensityRain.comment=Controls rain density.
+option.airFogMieDensitySnow=Snow Density
+option.airFogMieDensitySnow.comment=Controls snow density.
+option.airFogMieDensityBlueHour=黎明/黄昏 密度
+option.airFogMieDensityBlueHour.comment=Controls dawn/dusk density.
+option.airFogMieFalloffStart=米氏 - 渐消起始位置
+option.airFogMieFalloffStart.comment=米氏雾气开始消散的海拔高度.
+option.airFogMieFalloffHalfLife=米氏 - 渐消中部位置
+option.airFogMieFalloffHalfLife.comment=从米氏雾气消散起始位置开始后雾气密度减半所需的高度.
 
 
 # Materials settings
 
-option.normalMapping                  = 法线贴图
-option.normalMapping.comment          = 决定是否使用由资源包提供的法线贴图. 请在使用 “PBR” 资源包时启用本选项.
-option.specularMapping                = 高光贴图
-option.specularMapping.comment        = 决定是否使用由资源包提供的高光贴图. 请在使用 “PBR” 资源包时启用本选项.
-option.pom                             = Parallax Occlusion Mapping
-option.pom.comment = Enables parallax occlusion mapping — a high-quality technique that adds depth to block surfaces by offsetting texture coordinates. Significant performance impact on lower-end hardware.
-option.pomShadow                    = POM Self-Shadowing
-option.pomSlopeNormals               = Slope Normals
-option.pomSlopeNormals.comment       = Uses the POM height field gradient to add relief-aware surface normals to lighting. Disable to keep the underlying normal map unchanged.
-option.pomDepthWrite              = Depth Write
-option.pomDepthWrite.comment      = Writes POM relief into the depth buffer so sunlight, skylight and SSPT respect surface height. Disable for compatibility or speed.
-option.pomShadow.comment            = Adds self-shadowing inside the POM height field from the main light direction. Higher sample counts improve quality at a performance cost.
-option.textureFormat                  = 资源包格式
-option.textureFormat.comment          = 资源包所用的纹理格式. 大多数现代资源包使用 labPBR 格式, 但仍有部分包是专门为 SEUS 设计而使用的 OldPBR 格式.
-option.hardcodedSpecular              = 硬编码 高光
-option.hardcodedSpecular.comment      = 为某些方块硬编码高光反射(例如金属).
-option.hardcodedEmission              = 硬编码 发光
-option.hardcodedEmission.comment      = 为某些方块硬编码自发光(例如火把).
+option.normalMapping=法线贴图
+option.normalMapping.comment=决定是否使用由资源包提供的法线贴图. 请在使用 “PBR” 资源包时启用本选项.
+option.specularMapping=高光贴图
+option.specularMapping.comment=决定是否使用由资源包提供的高光贴图. 请在使用 “PBR” 资源包时启用本选项.
+option.pom=Parallax Occlusion Mapping
+option.pom.comment=Enables parallax occlusion mapping — a high-quality technique that adds depth to block surfaces by offsetting texture coordinates. Significant performance impact on lower-end hardware.
+option.pomShadow=POM Self-Shadowing
+option.pomSlopeNormals=Slope Normals
+option.pomSlopeNormals.comment=Uses the POM height field gradient to add relief-aware surface normals to lighting. Disable to keep the underlying normal map unchanged.
+option.pomDepthWrite=Depth Write
+option.pomDepthWrite.comment=Writes POM relief into the depth buffer so sunlight, skylight and SSPT respect surface height. Disable for compatibility or speed.
+option.pomShadow.comment=Adds self-shadowing inside the POM height field from the main light direction. Higher sample counts improve quality at a performance cost.
+option.textureFormat=资源包格式
+option.textureFormat.comment=资源包所用的纹理格式. 大多数现代资源包使用 labPBR 格式, 但仍有部分包是专门为 SEUS 设计而使用的 OldPBR 格式.
+option.hardcodedSpecular=硬编码 高光
+option.hardcodedSpecular.comment=为某些方块硬编码高光反射(例如金属).
+option.hardcodedEmission=硬编码 发光
+option.hardcodedEmission.comment=为某些方块硬编码自发光(例如火把).
 option.globalEmissionCurve=Emission Curve
 option.globalEmissionCurve.comment=Reshapes emission response (1.0 = neutral). Lower lifts dim glow, higher crushes it toward bright cores.
 option.globalEmissionIntensity=Emission Intensity
 option.globalEmissionIntensity.comment=Overall emissive brightness after the curve is applied.
-option.hardcodedSss                   = 硬编码 次表面散射
-option.hardcodedSss.comment           = 为某些方块硬编码次表面散射(例如树叶).
-option.rainPuddles                    = 雨水坑
-option.rainPuddles.comment = Controls rain puddles on the ground while it's raining.
-option.rainPuddlesIntensity          = 雨水坑强度
-option.rainPuddlesIntensity.comment = Controls rain puddles intensity.
-option.directionalLightmaps           = 指向性光图
-option.directionalLightmaps.comment   = 使方块光和天空光可影响法线贴图. 由于算法限制, 可能会导致一些视觉问题.
-option.directionalLightmapsIntensity = 指向性光图强度
-option.directionalLightmapsIntensity.comment = 调节指向性光图的强度.
-option.pomDepth                       = 视差深度
-option.pomDepth.comment               = 视差效果陷入方块的深度.
-option.pomSamples                     = 视差采样值
-option.pomShadowSamples              = POM Self-Shadow Samples
-option.pomShadowSamples.comment      = Controls the number of height-field samples used for POM self-shadowing. Higher values improve detail but cost more performance.
-option.pomSamples.comment             = 以性能为代价调节视差的质量.
-option.pomDistance                    = 视差距离
-option.pomDistance.comment = Toggles pom distance.
-option.refraction                      = 折射
-option.refraction.comment = Selects the refraction mode or method.
-value.refraction.refractionOff        = 关
-value.refraction.refractionAll        = 全开
-value.refraction.refractionWaterOnly = 仅水体
-option.refractionIntensity            = 折射强度
-option.refractionIntensity.comment    = 调节水体的折射强度.
+option.hardcodedSss=硬编码 次表面散射
+option.hardcodedSss.comment=为某些方块硬编码次表面散射(例如树叶).
+option.rainPuddles=雨水坑
+option.rainPuddles.comment=Controls rain puddles on the ground while it's raining.
+option.rainPuddlesIntensity=雨水坑强度
+option.rainPuddlesIntensity.comment=Controls rain puddles intensity.
+option.directionalLightmaps=指向性光图
+option.directionalLightmaps.comment=使方块光和天空光可影响法线贴图. 由于算法限制, 可能会导致一些视觉问题.
+option.directionalLightmapsIntensity=指向性光图强度
+option.directionalLightmapsIntensity.comment=调节指向性光图的强度.
+option.pomDepth=视差深度
+option.pomDepth.comment=视差效果陷入方块的深度.
+option.pomSamples=视差采样值
+option.pomShadowSamples=POM Self-Shadow Samples
+option.pomShadowSamples.comment=Controls the number of height-field samples used for POM self-shadowing. Higher values improve detail but cost more performance.
+option.pomSamples.comment=以性能为代价调节视差的质量.
+option.pomDistance=视差距离
+option.pomDistance.comment=Toggles pom distance.
+option.refraction=折射
+option.refraction.comment=Selects the refraction mode or method.
+value.refraction.refractionOff=关
+value.refraction.refractionAll=全开
+value.refraction.refractionWaterOnly=仅水体
+option.refractionIntensity=折射强度
+option.refractionIntensity.comment=调节水体的折射强度.
 
-suffix.pomDepth                       = m
-suffix.pomDistance                    = m
+suffix.pomDepth=m
+suffix.pomDistance=m
 
-value.textureFormat.textureFormatLab = labPBR
-value.textureFormat.textureFormatOld = Old PBR
+value.textureFormat.textureFormatLab=labPBR
+value.textureFormat.textureFormatOld=Old PBR
 
-option.environmentReflections         = 环境反射
-option.environmentReflections.comment = 屏幕空间反射. 使水和光滑的方块表面反射他们对应的环境. 较大性能影响.
-option.skyReflections                 = 天空反射
-option.skyReflections.comment         = 使水和光滑方块表面反射天空.
-option.ssrRoughnessSupport           = 粗糙反射支持
-option.ssrRoughnessSupport.comment   = 使在粗糙表面的反射确实显得粗糙. 较大性能影响.
-option.ssrRayCount                   = 追踪采样数
-option.ssrRayCount.comment           = 粗糙反射的追踪光路数. 更多光路意味着更少噪点但会使性能变糟糕.
-option.ssrIntersectionStepsSmooth   = 求交步进次数 - 平滑
-option.ssrIntersectionStepsSmooth.comment = 以性能为代价调节平滑反射的精确度.
-option.ssrIntersectionStepsRough    = 求交步进次数 - 粗糙
-option.ssrIntersectionStepsRough.comment = 以性能为代价调节粗糙反射的精确度.
-option.ssrRefinementSteps            = 细化步进次数
-option.ssrRefinementSteps.comment    = 以性能为代价调节所有反射的精确度.
-option.ssrRoughnessThreshold         = 粗糙度阈值
-option.ssrRoughnessThreshold.comment = 调节表面需要多光滑才能出现反射.
+option.environmentReflections=环境反射
+option.environmentReflections.comment=屏幕空间反射. 使水和光滑的方块表面反射他们对应的环境. 较大性能影响.
+option.skyReflections=天空反射
+option.skyReflections.comment=使水和光滑方块表面反射天空.
+option.ssrRoughnessSupport=粗糙反射支持
+option.ssrRoughnessSupport.comment=使在粗糙表面的反射确实显得粗糙. 较大性能影响.
+option.ssrRayCount=追踪采样数
+option.ssrRayCount.comment=粗糙反射的追踪光路数. 更多光路意味着更少噪点但会使性能变糟糕.
+option.ssrIntersectionStepsSmooth=求交步进次数 - 平滑
+option.ssrIntersectionStepsSmooth.comment=以性能为代价调节平滑反射的精确度.
+option.ssrIntersectionStepsRough=求交步进次数 - 粗糙
+option.ssrIntersectionStepsRough.comment=以性能为代价调节粗糙反射的精确度.
+option.ssrRefinementSteps=细化步进次数
+option.ssrRefinementSteps.comment=以性能为代价调节所有反射的精确度.
+option.ssrRoughnessThreshold=粗糙度阈值
+option.ssrRoughnessThreshold.comment=调节表面需要多光滑才能出现反射.
 
 # Water settings
 
-option.waterCaustics                  = 水体焦散
-option.waterCaustics.comment          = 水下摇曳的光线.
-option.waterCausticsIntensity        = 水体焦散强度
-option.waterCausticsIntensity.comment = Controls water caustics intensity.
-option.rainRipples                     = 雨滴涟漪
-option.rainRippleStrength             = 雨滴涟漪强度
-option.waterCaustics.comment          = 调节水体焦散线的亮度.
-option.waterEdgeHighlight            = 水体边缘高亮
-option.waterEdgeHighlight.comment    = 与地形交互的水面边缘白色高亮效果. 在一些场景下有助于提高水的可见度.
-option.waterEdgeHighlightIntensity  = 水体边缘高亮强度
-option.waterEdgeHighlightIntensity.comment = Controls water edge highlight intensity.
-option.snellsWindow                   = 斯涅耳窗
-option.snellsWindow.comment           = 水下内部全局反射.
-option.waterTexture                   = 水面贴图
-option.waterTexture.comment           = 如何使用原版水体纹理. 关 = 不使用水体纹理. 高亮 = 在水面添加高亮水体纹理, 类似于基岩版的 RTX 水面. 原版 = 像是使用其他纹理一样应用水体纹理到水体中.
-option.biomeWaterColor               = 基于群系的水体颜色
-option.biomeWaterColor.comment       = 水体吸收考虑生物群系水体颜色.
+option.waterCaustics=水体焦散
+option.waterCaustics.comment=水下摇曳的光线.
+option.waterCausticsIntensity=水体焦散强度
+option.waterCausticsIntensity.comment=Controls water caustics intensity.
+option.rainRipples=雨滴涟漪
+option.rainRippleStrength=雨滴涟漪强度
+option.waterCaustics.comment=调节水体焦散线的亮度.
+option.waterEdgeHighlight=水体边缘高亮
+option.waterEdgeHighlight.comment=与地形交互的水面边缘白色高亮效果. 在一些场景下有助于提高水的可见度.
+option.waterEdgeHighlightIntensity=水体边缘高亮强度
+option.waterEdgeHighlightIntensity.comment=Controls water edge highlight intensity.
+option.snellsWindow=斯涅耳窗
+option.snellsWindow.comment=水下内部全局反射.
+option.waterTexture=水面贴图
+option.waterTexture.comment=如何使用原版水体纹理. 关 = 不使用水体纹理. 高亮 = 在水面添加高亮水体纹理, 类似于基岩版的 RTX 水面. 原版 = 像是使用其他纹理一样应用水体纹理到水体中.
+option.biomeWaterColor=基于群系的水体颜色
+option.biomeWaterColor.comment=水体吸收考虑生物群系水体颜色.
 
-value.waterTexture.waterTextureOff                   = 关闭
-value.waterTexture.waterTextureHighlight             = 高亮
-value.waterTexture.waterTextureVanilla               = 原版
-value.waterTexture.waterTextureHighlightUnderground = 高亮 (仅位于地下时)
+value.waterTexture.waterTextureOff=关闭
+value.waterTexture.waterTextureHighlight=高亮
+value.waterTexture.waterTextureVanilla=原版
+value.waterTexture.waterTextureHighlightUnderground=高亮 (仅位于地下时)
 
-option.waterWaves                     = 水波
-option.waterWaves.comment = Controls enabled.
-option.waterWaveIterations           = 迭代次数
-option.waterWaveIterations.comment = Controls iterations.
-option.waterWaveStrength             = 强度
-option.waterWaveStrength.comment = Controls intensity.
-option.waterWaveFrequency            = 频率
-option.waterWaveFrequency.comment = Controls frequency.
-option.waterWaveSpeedStill          = 速度 (静止)
-option.waterWaveSpeedStill.comment = Controls speed (still).
-option.waterWaveSpeedFlowing        = 速度 (流动)
-option.waterWaveSpeedFlowing.comment = Controls speed (flowing).
-option.waterWavePersistence          = 水波持续时间
-option.waterWavePersistence.comment = Controls persistence.
-option.waterWaveLacunarity           = 水波间隙
-option.waterWaveLacunarity.comment = Controls lacunarity.
-option.waterParallax                  = 水面视差
-option.waterParallax.comment          = 使水波呈 3D 样式.
-option.waterDisplacement              = 水面置换式波浪
-option.waterDisplacement.comment      = 类似于树叶摇晃的工作方式, 它使水体本身的几何形状轻微摇晃, 可使水体边缘不那么扁平.
-option.waterWavesHeightVariation    = 局部水波高度变化
-option.waterWavesHeightVariation.comment   = 在空间尺度上水波的高度各不相同.
+option.waterWaves=水波
+option.waterWaves.comment=Controls enabled.
+option.waterWaveIterations=迭代次数
+option.waterWaveIterations.comment=Controls iterations.
+option.waterWaveStrength=强度
+option.waterWaveStrength.comment=Controls intensity.
+option.waterWaveFrequency=频率
+option.waterWaveFrequency.comment=Controls frequency.
+option.waterWaveSpeedStill=速度 (静止)
+option.waterWaveSpeedStill.comment=Controls speed (still).
+option.waterWaveSpeedFlowing=速度 (流动)
+option.waterWaveSpeedFlowing.comment=Controls speed (flowing).
+option.waterWavePersistence=水波持续时间
+option.waterWavePersistence.comment=Controls persistence.
+option.waterWaveLacunarity=水波间隙
+option.waterWaveLacunarity.comment=Controls lacunarity.
+option.waterParallax=水面视差
+option.waterParallax.comment=使水波呈 3D 样式.
+option.waterDisplacement=水面置换式波浪
+option.waterDisplacement.comment=类似于树叶摇晃的工作方式, 它使水体本身的几何形状轻微摇晃, 可使水体边缘不那么扁平.
+option.waterWavesHeightVariation=局部水波高度变化
+option.waterWavesHeightVariation.comment=在空间尺度上水波的高度各不相同.
 
-option.waterAbsorptionR              = 红色吸收
-option.waterAbsorptionR.comment = Controls the ▍ red absorption color channel.
-option.waterAbsorptionG              = 绿色吸收
-option.waterAbsorptionG.comment = Controls the ▍ green absorption color channel.
-option.waterAbsorptionB              = 蓝色吸收
-option.waterAbsorptionB.comment = Controls the ▍ blue absorption color channel.
-option.waterScattering                = 水体散射
-option.waterScattering.comment = Controls scattering.
+option.waterAbsorptionR=红色吸收
+option.waterAbsorptionR.comment=Controls the ▍ red absorption color channel.
+option.waterAbsorptionG=绿色吸收
+option.waterAbsorptionG.comment=Controls the ▍ green absorption color channel.
+option.waterAbsorptionB=蓝色吸收
+option.waterAbsorptionB.comment=Controls the ▍ blue absorption color channel.
+option.waterScattering=水体散射
+option.waterScattering.comment=Controls scattering.
 
-option.waterAbsorptionRUnderwater   = 红色吸收 - 水下
-option.waterAbsorptionRUnderwater.comment = Controls ▍ red absorption - underwater.
-option.waterAbsorptionGUnderwater   = 绿色吸收 - 水下
-option.waterAbsorptionGUnderwater.comment = Controls ▍ green absorption - underwater.
-option.waterAbsorptionBUnderwater   = 蓝色吸收 - 水下
-option.waterAbsorptionBUnderwater.comment = Controls ▍ blue absorption - underwater.
-option.waterScatteringUnderwater     = 水体散射 - 水下
-option.waterScatteringUnderwater.comment = Controls scattering - underwater.
+option.waterAbsorptionRUnderwater=红色吸收 - 水下
+option.waterAbsorptionRUnderwater.comment=Controls ▍ red absorption - underwater.
+option.waterAbsorptionGUnderwater=绿色吸收 - 水下
+option.waterAbsorptionGUnderwater.comment=Controls ▍ green absorption - underwater.
+option.waterAbsorptionBUnderwater=蓝色吸收 - 水下
+option.waterAbsorptionBUnderwater.comment=Controls ▍ blue absorption - underwater.
+option.waterScatteringUnderwater=水体散射 - 水下
+option.waterScatteringUnderwater.comment=Controls scattering - underwater.
 
 # Post-processing settings
 
-option.bloom                           = 泛光
-option.bloom.comment                   = 明亮区域和光源周围的柔和泛光效果.
-option.bloomIntensity                 = 泛光强度
-option.bloomIntensity.comment         = 调节泛光效果影响最终图像的强度.
-option.dof                             = 景深
-option.dof.comment                     = 镜头聚焦效果 - 模糊非聚焦区域.
-option.dofSamples                     = 景深采样值
-option.dofSamples.comment             = 景深所用的采样值数量. 更高的采样值计数可提高模糊区域的质量, 但需要消耗更多性能.
-option.dofFocus                       = 景深对焦模式
-option.dofFocus.comment               = 景深对焦距离.
-option.motionBlur                     = 运动模糊
-option.motionBlur.comment             = 电影常用的运动模糊. 对于低帧率情况平滑画面下也有用, 但可能部分人会晕.
-option.taa                             = 时间性抗锯齿[TAA]
-option.taa.comment                     = 时间性抗锯齿. 大幅提高图像质量和噪点等级, 但也会引入闪烁和重影等时间性算法产生的缺陷视觉效果. 时间性升采样需启用本选项!
-option.fxaa                            = 快速近似抗锯齿[FXAA]
-option.fxaa.comment                    = 软化边缘. 和 TAA 协同生效, 特别是镜头运动时. 对 TAAU 功能也十分有帮助.
-option.taau                            = 时间性升采样[TAAU]
-option.taau.comment                    = 降分辨率渲染场景颜色并且通过 TAA 去升采样回来. 大幅提高性能但会引入时间性算法产生的缺陷视觉效果.
-option.taauRenderScale               = TAAU 渲染比例
-option.taauRenderScale.comment       = 启用 TAAU 选项后的场景颜色的渲染比例. 若原始分辨率为 1920x1080 且 TAAU 渲染比例设为 0.75(默认), 场景颜色将以 1440x810 进行渲染.
-option.cas                             = 图像锐化
-option.cas.comment                     = 最终图像的锐化程度(对比度自适应锐化)
-option.vignette                        = 暗角
-option.vignette.comment                = 暗化屏幕边缘.
-option.vignetteIntensity              = 暗角强度
-option.vignetteIntensity.comment      = 调节暗角效果的强度.
+option.bloom=泛光
+option.bloom.comment=明亮区域和光源周围的柔和泛光效果.
+option.bloomIntensity=泛光强度
+option.bloomIntensity.comment=调节泛光效果影响最终图像的强度.
+option.dof=景深
+option.dof.comment=镜头聚焦效果 - 模糊非聚焦区域.
+option.dofSamples=景深采样值
+option.dofSamples.comment=景深所用的采样值数量. 更高的采样值计数可提高模糊区域的质量, 但需要消耗更多性能.
+option.dofFocus=景深对焦模式
+option.dofFocus.comment=景深对焦距离.
+option.motionBlur=运动模糊
+option.motionBlur.comment=电影常用的运动模糊. 对于低帧率情况平滑画面下也有用, 但可能部分人会晕.
+option.taa=时间性抗锯齿[TAA]
+option.taa.comment=时间性抗锯齿. 大幅提高图像质量和噪点等级, 但也会引入闪烁和重影等时间性算法产生的缺陷视觉效果. 时间性升采样需启用本选项!
+option.fxaa=快速近似抗锯齿[FXAA]
+option.fxaa.comment=软化边缘. 和 TAA 协同生效, 特别是镜头运动时. 对 TAAU 功能也十分有帮助.
+option.taau=时间性升采样[TAAU]
+option.taau.comment=降分辨率渲染场景颜色并且通过 TAA 去升采样回来. 大幅提高性能但会引入时间性算法产生的缺陷视觉效果.
+option.taauRenderScale=TAAU 渲染比例
+option.taauRenderScale.comment=启用 TAAU 选项后的场景颜色的渲染比例. 若原始分辨率为 1920x1080 且 TAAU 渲染比例设为 0.75(默认), 场景颜色将以 1440x810 进行渲染.
+option.cas=图像锐化
+option.cas.comment=最终图像的锐化程度(对比度自适应锐化)
+option.vignette=暗角
+option.vignette.comment=暗化屏幕边缘.
+option.vignetteIntensity=暗角强度
+option.vignetteIntensity.comment=调节暗角效果的强度.
 
-value.dofFocus.-1.0                   = 自动
+value.dofFocus.-1.0=自动
 
-option.tonemap                         = 色调操控
-option.tonemap.comment = Selects the tonemap operator mode or method.
+option.tonemap=色调操控
+option.tonemap.comment=Selects the tonemap operator mode or method.
 
-value.tonemap.tonemap_aces_fit         = ACES Fit
-value.tonemap.tonemap_aces_full        = ACES Full
-value.tonemap.tonemap_hejl_2015        = Hejl 2015
-value.tonemap.tonemap_hejl_burgess     = Hejl-Burgess
-value.tonemap.tonemap_lottes           = Lottes
-value.tonemap.tonemap_uncharted_2      = Uncharted 2
-value.tonemap.tonemap_tech             = Tech
-value.tonemap.tonemap_ozius            = Ozius
-value.tonemap.tonemap_reinhard         = Reinhard
-value.tonemap.tonemap_reinhard_jodie   = Reinhard-Jodie
+value.tonemap.tonemapAcesFit=ACES Fit
+value.tonemap.tonemapAcesFull=ACES Full
+value.tonemap.tonemapHejl2015=Hejl 2015
+value.tonemap.tonemapHejlBurgess=Hejl-Burgess
+value.tonemap.tonemapLottes=Lottes
+value.tonemap.tonemapUncharted2=Uncharted 2
+value.tonemap.tonemapTech=Tech
+value.tonemap.tonemapOzius=Ozius
+value.tonemap.tonemapReinhard=Reinhard
+value.tonemap.tonemapReinhardJodie=Reinhard-Jodie
 
 # Color Grading
 
-option.gradeBrightness                = 亮度
-option.gradeBrightness.comment = Controls brightness.
-option.gradeContrast                  = 对比度
-option.gradeContrast.comment = Controls contrast.
-option.gradeSaturation                = 饱和度
-option.gradeSaturation.comment = Controls saturation.
-option.gradeWhiteBalance             = 白平衡
-option.gradeWhiteBalance.comment = Controls white balance.
-option.gradeOrangeSatBoost          = 橙色饱和度倍增
-option.gradeOrangeSatBoost.comment = Controls ▍ orange saturation boost.
-option.gradeTealSatBoost            = 青色饱和度倍增
-option.gradeTealSatBoost.comment = Controls ▍ teal saturation boost.
-option.gradeGreenSatBoost           = 绿色饱和度倍增
-option.gradeGreenSatBoost.comment = Controls ▍ green saturation boost.
-option.gradeGreenHueShift           = 绿调偏移
-option.gradeGreenHueShift.comment = Controls ▍ green hue shift.
-suffix.gradeWhiteBalance             = K
-suffix.gradeGreenHueShift           = °
+option.gradeBrightness=亮度
+option.gradeBrightness.comment=Controls brightness.
+option.gradeContrast=对比度
+option.gradeContrast.comment=Controls contrast.
+option.gradeSaturation=饱和度
+option.gradeSaturation.comment=Controls saturation.
+option.gradeWhiteBalance=白平衡
+option.gradeWhiteBalance.comment=Controls white balance.
+option.gradeOrangeSatBoost=橙色饱和度倍增
+option.gradeOrangeSatBoost.comment=Controls ▍ orange saturation boost.
+option.gradeTealSatBoost=青色饱和度倍增
+option.gradeTealSatBoost.comment=Controls ▍ teal saturation boost.
+option.gradeGreenSatBoost=绿色饱和度倍增
+option.gradeGreenSatBoost.comment=Controls ▍ green saturation boost.
+option.gradeGreenHueShift=绿调偏移
+option.gradeGreenHueShift.comment=Controls ▍ green hue shift.
+suffix.gradeWhiteBalance=K
+suffix.gradeGreenHueShift=°
 
-option.purkinjeShift                  = 柏金赫偏移
-option.purkinjeShift.comment          = 模拟人眼在低光照环境下的视觉; 对所有颜色去饱和并使用红色调暗化.
-option.purkinjeShiftIntensity        = 柏金赫偏移强度
-option.purkinjeShiftIntensity.comment = Controls purkinje shift intensity.
+option.purkinjeShift=柏金赫偏移
+option.purkinjeShift.comment=模拟人眼在低光照环境下的视觉; 对所有颜色去饱和并使用红色调暗化.
+option.purkinjeShiftIntensity=柏金赫偏移强度
+option.purkinjeShiftIntensity.comment=Controls purkinje shift intensity.
 
 # Exposure
 
-option.autoExposure                         = 自动曝光
-option.autoExposure.comment = Enables advanced global auto exposure. Automatically adjusts exposure based on scene brightness.
+option.autoExposure=自动曝光
+option.autoExposure.comment=Enables advanced global auto exposure. Automatically adjusts exposure based on scene brightness.
 
-option.localExposure                         = Local Exposure
-option.localExposure.comment                 = Applies spatially adaptive HDR exposure while preserving the global exposure and protecting highlight and shadow detail.
-option.autoExposureMin                     = 最小曝光值
-option.autoExposureMin.comment = Toggles minimum exposure.
-option.autoExposureMax                     = 最大曝光值
-option.autoExposureMax.comment = Toggles maximum exposure.
-option.autoExposureRateDimToBright      = Adaptation Speed — Brightening
-option.autoExposureRateDimToBright.comment = Adjusts how quickly exposure adapts when the scene gets brighter (e.g., looking from a cave to the sky). Higher = faster adaptation.
-option.autoExposureRateBrightToDim      = Adaptation Speed — Darkening
-option.autoExposureRateBrightToDim.comment = Adjusts how quickly exposure adapts when the scene gets darker (e.g., entering a cave). Higher = faster dimming.
-option.manualExposureValue                 = 手动曝光值
-option.manualExposureValue.comment = Controls manual exposure value.
-option.manualExposureUseScreenBrightness = 基于亮度滑块
-option.manualExposureUseScreenBrightness.comment = 将最小曝光和最大曝光间的数值插值集成到视频设置的亮度滑块中.
-option.histogramBins                        = 柱状图栏
-option.histogramBins.comment = Controls histogram bins.
-option.histogramTarget                      = 柱状图目标 CDF 值
-option.histogramTarget.comment = Controls histogram target cdf value.
+option.localExposure=Local Exposure
+option.localExposure.comment=Applies spatially adaptive HDR exposure while preserving the global exposure and protecting highlight and shadow detail.
+option.autoExposureMin=最小曝光值
+option.autoExposureMin.comment=Toggles minimum exposure.
+option.autoExposureMax=最大曝光值
+option.autoExposureMax.comment=Toggles maximum exposure.
+option.autoExposureRateDimToBright=Adaptation Speed — Brightening
+option.autoExposureRateDimToBright.comment=Adjusts how quickly exposure adapts when the scene gets brighter (e.g., looking from a cave to the sky). Higher = faster adaptation.
+option.autoExposureRateBrightToDim=Adaptation Speed — Darkening
+option.autoExposureRateBrightToDim.comment=Adjusts how quickly exposure adapts when the scene gets darker (e.g., entering a cave). Higher = faster dimming.
+option.manualExposureValue=手动曝光值
+option.manualExposureValue.comment=Controls manual exposure value.
+option.manualExposureUseScreenBrightness=基于亮度滑块
+option.manualExposureUseScreenBrightness.comment=将最小曝光和最大曝光间的数值插值集成到视频设置的亮度滑块中.
+option.histogramBins=柱状图栏
+option.histogramBins.comment=Controls histogram bins.
+option.histogramTarget=柱状图目标 CDF 值
+option.histogramTarget.comment=Controls histogram target cdf value.
 
 
 # Misc settings
 
-option.debugView                      = 调试视图
-option.debugView.comment = Selects the debug view mode or method.
-option.debugSampler                   = 采样器调试
-option.debugSampler.comment = Selects the debug sampler mode or method.
-option.tonemapComparison              = 色调对比
-option.tonemapComparison.comment      = 用于比较屏幕左半部分和右半部分的两个色调映射之间的区别的功能.
-option.tonemap_left                    = 左侧色调
-option.tonemap_left.comment = Selects the left tonemap mode or method.
-option.tonemap_right                   = 右侧色调
-option.tonemap_right.comment = Selects the right tonemap mode or method.
-option.tonemapComparisonSplit          = 比较分界
-option.tonemapComparisonSplit.comment  = 控制左右色调映射的分界位置。50% 表示从屏幕正中央分界。
+option.debugView=调试视图
+option.debugView.comment=Selects the debug view mode or method.
+option.debugSampler=采样器调试
+option.debugSampler.comment=Selects the debug sampler mode or method.
+option.tonemapComparison=色调对比
+option.tonemapComparison.comment=用于比较屏幕左半部分和右半部分的两个色调映射之间的区别的功能.
+option.tonemapLeft=左侧色调
+option.tonemapLeft.comment=Selects the left tonemap mode or method.
+option.tonemapRight=右侧色调
+option.tonemapRight.comment=Selects the right tonemap mode or method.
+option.tonemapComparisonSplit=比较分界
+option.tonemapComparisonSplit.comment=控制左右色调映射的分界位置。50% 表示从屏幕正中央分界。
 
-value.debugView.debugViewNone       = 关
-value.debugView.debugViewSampler    = 采样器
-value.debugView.debugViewHistogram  = 柱状图
-value.debugView.debugViewWeather    = 天气
+value.debugView.debugViewNone=关
+value.debugView.debugViewSampler=采样器
+value.debugView.debugViewHistogram=柱状图
+value.debugView.debugViewWeather=天气
 
-value.tonemap_left.tonemap_aces_fit       = ACES Fit
-value.tonemap_left.tonemap_aces_full      = ACES Full
-value.tonemap_left.tonemap_lottes         = Lottes
-value.tonemap_left.tonemap_hejl_2015      = Hejl 2015
-value.tonemap_left.tonemap_hejl_burgess   = Hejl-Burgess
-value.tonemap_left.tonemap_uncharted_2    = Uncharted 2
-value.tonemap_left.tonemap_tech           = Tech
-value.tonemap_left.tonemap_ozius          = Ozius
-value.tonemap_left.tonemap_reinhard       = Reinhard
-value.tonemap_left.tonemap_reinhard_jodie = Reinhard-Jodie
+value.tonemapLeft.tonemapAcesFit=ACES Fit
+value.tonemapLeft.tonemapAcesFull=ACES Full
+value.tonemapLeft.tonemapLottes=Lottes
+value.tonemapLeft.tonemapHejl2015=Hejl 2015
+value.tonemapLeft.tonemapHejlBurgess=Hejl-Burgess
+value.tonemapLeft.tonemapUncharted2=Uncharted 2
+value.tonemapLeft.tonemapTech=Tech
+value.tonemapLeft.tonemapOzius=Ozius
+value.tonemapLeft.tonemapReinhard=Reinhard
+value.tonemapLeft.tonemapReinhardJodie=Reinhard-Jodie
 
-value.tonemap_right.tonemap_aces_fit       = ACES Fit
-value.tonemap_right.tonemap_aces_full      = ACES Full
-value.tonemap_right.tonemap_lottes         = Lottes
-value.tonemap_right.tonemap_hejl_burgess   = Hejl-Burgess
-value.tonemap_right.tonemap_hejl_2015      = Hejl 2015
-value.tonemap_right.tonemap_uncharted_2    = Uncharted 2
-value.tonemap_right.tonemap_tech           = Tech
-value.tonemap_right.tonemap_ozius          = Ozius
-value.tonemap_right.tonemap_reinhard       = Reinhard
-value.tonemap_right.tonemap_reinhard_jodie = Reinhard-Jodie
+value.tonemapRight.tonemapAcesFit=ACES Fit
+value.tonemapRight.tonemapAcesFull=ACES Full
+value.tonemapRight.tonemapLottes=Lottes
+value.tonemapRight.tonemapHejlBurgess=Hejl-Burgess
+value.tonemapRight.tonemapHejl2015=Hejl 2015
+value.tonemapRight.tonemapUncharted2=Uncharted 2
+value.tonemapRight.tonemapTech=Tech
+value.tonemapRight.tonemapOzius=Ozius
+value.tonemapRight.tonemapReinhard=Reinhard
+value.tonemapRight.tonemapReinhardJodie=Reinhard-Jodie
 
 # Distance View 
 
-option.distanceView                   = 启用
-option.distanceView.comment = Controls enabled.
-option.distanceViewMethod            = 视图模式
-option.distanceViewMethod.comment = Selects the method mode or method.
-option.distanceViewMaxDistance      = 最大距离
-option.distanceViewMaxDistance.comment = Controls max distance.
-suffix.distanceViewMaxDistance      = m
+option.distanceView=启用
+option.distanceView.comment=Controls enabled.
+option.distanceViewMethod=视图模式
+option.distanceViewMethod.comment=Selects the method mode or method.
+option.distanceViewMaxDistance=最大距离
+option.distanceViewMaxDistance.comment=Controls max distance.
+suffix.distanceViewMaxDistance=m
 
-value.distanceViewMethod.distanceViewDistance = 距离
-value.distanceViewMethod.distanceViewDepth    = 深度
+value.distanceViewMethod.distanceViewDistance=距离
+value.distanceViewMethod.distanceViewDepth=深度
 
 # Box
 
-option.boxMode                 = 选择框模式
-option.boxMode.comment         = 选择框颜色模式. 无: 默认. 自定义颜色: 用户自定义的颜色. 彩虹: 炫酷 RGB 效果.
-value.boxMode.boxModeNone    = 无
-value.boxMode.boxModeColor   = 自定义颜色
-value.boxMode.boxModeRainbow = 彩虹
-option.boxColorR              = 红色比重
-option.boxColorR.comment = Controls the ▍ red color channel.
-option.boxColorG              = 绿色比重
-option.boxColorG.comment = Controls the ▍ green color channel.
-option.boxColorB              = 蓝色比重
-option.boxColorB.comment = Controls the ▍ blue color channel.
-option.boxEmission             = 框线发光
-option.boxEmission.comment     = 框线发光强度. 需要启用泛光.
-option.boxLineWidth           = 框线宽度
+option.boxMode=选择框模式
+option.boxMode.comment=选择框颜色模式. 无: 默认. 自定义颜色: 用户自定义的颜色. 彩虹: 炫酷 RGB 效果.
+value.boxMode.boxModeNone=无
+value.boxMode.boxModeColor=自定义颜色
+value.boxMode.boxModeRainbow=彩虹
+option.boxColorR=红色比重
+option.boxColorR.comment=Controls the ▍ red color channel.
+option.boxColorG=绿色比重
+option.boxColorG.comment=Controls the ▍ green color channel.
+option.boxColorB=蓝色比重
+option.boxColorB.comment=Controls the ▍ blue color channel.
+option.boxEmission=框线发光
+option.boxEmission.comment=框线发光强度. 需要启用泛光.
+option.boxLineWidth=框线宽度
 
 # Additional Comments
 
 # Lighting settings
-option.shadowSsrt.comment = Extends shadows beyond the shadow map distance using screen-space ray tracing. Fills in far shadows without increasing shadow map size. Moderate performance cost.
-option.blockEntityShadows.comment = When enabled, chests, signs, banners and other block entities cast shadows. Lower cost than full entity shadows.
+option.shadowSsrt.comment=Extends shadows beyond the shadow map distance using screen-space ray tracing. Fills in far shadows without increasing shadow map size. Moderate performance cost.
+option.blockEntityShadows.comment=When enabled, chests, signs, banners and other block entities cast shadows. Lower cost than full entity shadows.
 
 # Box
-option.boxLineWidth.comment          = 选择框的框线宽度.
+option.boxLineWidth.comment=选择框的框线宽度.
 
 # Distant Horizons
 
-option.dhOverdrawDistance    = DH 过度绘制距离
-option.dhOverdrawDistance.comment = Controls overdraw distance.
-option.dhOverdrawFadeLength = DH 过度绘制淡出长度
-option.dhOverdrawFadeLength.comment = Controls overdraw fade length.
-option.noiseOnDhTerrain     = DH 地形噪声
-option.noiseOnDhTerrain.comment = Controls noise on dh terrain.
+option.dhOverdrawDistance=DH 过度绘制距离
+option.dhOverdrawDistance.comment=Controls overdraw distance.
+option.dhOverdrawFadeLength=DH 过度绘制淡出长度
+option.dhOverdrawFadeLength.comment=Controls overdraw fade length.
+option.noiseOnDhTerrain=DH 地形噪声
+option.noiseOnDhTerrain.comment=Controls noise on dh terrain.
 
 
 # English fallback labels for UI completeness
-screen.direct_lighting = Direct Light
-screen.ambient_lighting = Ambient Light
-screen.framing_tool = Framing Tool
-screen.moon_phase_influence             = Moon Phase Influence
-option.vanillaAoLift                   = Vanilla AO Lift
-option.vanillaAoLift.comment           = Lifts the darkest vanilla AO shadows toward flat lighting. Higher = shallower, more washed-out crevices; 0 = full-depth vanilla AO.
-option.atmosphereRainDesaturation                   = Atmosphere Rain Desaturation
-option.atmosphereRainDesaturation.comment           = Desaturates the atmosphere during rain, making for colder looking rain
-option.atmosphereRainDesaturationIntensity         = Desaturation Intensity
-option.atmosphereRainDesaturationIntensity.comment = Adjust the intensity of Atmosphere Rain Desaturation
-suffix.blockyCloudsAltitude            = m
-suffix.blockyCloudsAltitude2          = m
-option.blockyCloudsPrimarySteps       = Primary Steps
-option.blockyCloudsPrimarySteps.comment = Controls primary steps.
-option.blockyCloudsLightingSteps      = Lighting Steps
-option.blockyCloudsLightingSteps.comment = Controls lighting steps.
-option.blockyCloudsDensity             = Density
-option.blockyCloudsDensity.comment     = Adjusts the density of the clouds. Higher values increase noise
-option.blockyCloudsBrightness          = Brightness
-option.blockyCloudsBrightness.comment = Controls brightness.
-option.blockyCloudsBottomlight         = Bottom Brightness
-option.blockyCloudsBottomlight.comment = Increases the brightness of the undersides of clouds
-option.blockyCloudsSize                = Size
-option.blockyCloudsSize.comment = Controls size.
-option.blockyCloudsAtmosphericScattering         = Atmospheric Scattering
-option.blockyCloudsAtmosphericScattering.comment = When enabled, tints clouds slightly red. This effect increases with distance
-option.blockyCloudsWindSpeed          = Wind Speed
-option.blockyCloudsWindSpeed.comment = Controls wind speed.
-suffix.blockyCloudsWindSpeed          = m/s
-option.blockyCloudsWindAngle          = Wind Angle
-option.blockyCloudsWindAngle.comment = Controls wind angle.
-suffix.blockyCloudsWindAngle          = °
-option.bloomUpsamplingFilter         = Bloom Filter
-option.bloomUpsamplingFilter.comment = Selects the bloom upsampling filter mode or method.
-value.bloomUpsamplingFilter.texture  = Bilinear
-value.bloomUpsamplingFilter.bicubic_filter = Bicubic
+screen.directLighting=Direct Light
+screen.ambientLighting=Ambient Light
+screen.framingTool=Framing Tool
+screen.moonPhaseInfluence=Moon Phase Influence
+option.vanillaAoLift=Vanilla AO Lift
+option.vanillaAoLift.comment=Lifts the darkest vanilla AO shadows toward flat lighting. Higher = shallower, more washed-out crevices; 0 = full-depth vanilla AO.
+option.atmosphereRainDesaturation=Atmosphere Rain Desaturation
+option.atmosphereRainDesaturation.comment=Desaturates the atmosphere during rain, making for colder looking rain
+option.atmosphereRainDesaturationIntensity=Desaturation Intensity
+option.atmosphereRainDesaturationIntensity.comment=Adjust the intensity of Atmosphere Rain Desaturation
+suffix.blockyCloudsAltitude=m
+suffix.blockyCloudsAltitude2=m
+option.blockyCloudsPrimarySteps=Primary Steps
+option.blockyCloudsPrimarySteps.comment=Controls primary steps.
+option.blockyCloudsLightingSteps=Lighting Steps
+option.blockyCloudsLightingSteps.comment=Controls lighting steps.
+option.blockyCloudsDensity=Density
+option.blockyCloudsDensity.comment=Adjusts the density of the clouds. Higher values increase noise
+option.blockyCloudsBrightness=Brightness
+option.blockyCloudsBrightness.comment=Controls brightness.
+option.blockyCloudsBottomlight=Bottom Brightness
+option.blockyCloudsBottomlight.comment=Increases the brightness of the undersides of clouds
+option.blockyCloudsSize=Size
+option.blockyCloudsSize.comment=Controls size.
+option.blockyCloudsAtmosphericScattering=Atmospheric Scattering
+option.blockyCloudsAtmosphericScattering.comment=When enabled, tints clouds slightly red. This effect increases with distance
+option.blockyCloudsWindSpeed=Wind Speed
+option.blockyCloudsWindSpeed.comment=Controls wind speed.
+suffix.blockyCloudsWindSpeed=m/s
+option.blockyCloudsWindAngle=Wind Angle
+option.blockyCloudsWindAngle.comment=Controls wind angle.
+suffix.blockyCloudsWindAngle=°
+option.bloomUpsamplingFilter=Bloom Filter
+option.bloomUpsamplingFilter.comment=Selects the bloom upsampling filter mode or method.
+value.bloomUpsamplingFilter.texture=Bilinear
+value.bloomUpsamplingFilter.bicubicFilter=Bicubic
 screen.aa=Anti-Aliasing
-screen.motion_blur=Motion Blur
+screen.motionBlur=Motion Blur
 screen.dof=Depth of Field
 screen.vignette=Vignette
 screen.bloom=Bloom
 option.moonPhaseInfluenceIntensity=Moon Phase Influence Intensity
-option.moonPhaseInfluenceIntensity.comment = Adjusts how strongly the current moon phase affects all moon-phased effects below. 0 = no effect, 1 = full effect.
-option.moonPhaseNightAtmosphere = Moon-Phased Night Atmosphere
-option.moonPhaseNightAtmosphere.comment = When enabled, fog and sky atmosphere at night vary with the lunar cycle.
+option.moonPhaseInfluenceIntensity.comment=Adjusts how strongly the current moon phase affects all moon-phased effects below. 0 = no effect, 1 = full effect.
+option.moonPhaseNightAtmosphere=Moon-Phased Night Atmosphere
+option.moonPhaseNightAtmosphere.comment=When enabled, fog and sky atmosphere at night vary with the lunar cycle.
 option.moonPhaseNightAtmosphereIntensity=Night Atmosphere Intensity
-option.moonPhaseNightAtmosphereIntensity.comment = Adjusts how strongly the moon phase affects atmospheric fog brightness at night.
-option.moonPhaseReflections = Moon-Phased Reflections
-option.moonPhaseReflections.comment = When enabled, the brightness and color of reflections vary with the lunar cycle.
+option.moonPhaseNightAtmosphereIntensity.comment=Adjusts how strongly the moon phase affects atmospheric fog brightness at night.
+option.moonPhaseReflections=Moon-Phased Reflections
+option.moonPhaseReflections.comment=When enabled, the brightness and color of reflections vary with the lunar cycle.
 option.moonPhaseReflectionsIntensity=Reflections Intensity
-option.moonPhaseReflectionsIntensity.comment = Adjusts how strongly the moon phase affects reflection brightness at night.
+option.moonPhaseReflectionsIntensity.comment=Adjusts how strongly the moon phase affects reflection brightness at night.
 option.fogSmoothing=Fog Smoothing
-option.fogSmoothing.comment = When enabled, smoothly blends fog between frames to reduce flickering. Small performance cost.
+option.fogSmoothing.comment=When enabled, smoothly blends fog between frames to reduce flickering. Small performance cost.
 option.fogSmoothingRadius=Fog Blur Radius
-option.fogSmoothingRadius.comment = Adjusts the spatial blur radius for fog smoothing. Higher = softer, more blended fog at higher cost.
+option.fogSmoothingRadius.comment=Adjusts the spatial blur radius for fog smoothing. Higher = softer, more blended fog at higher cost.
 option.materialMappingMode=Material Mapping Mode
-option.materialMappingMode.comment = Controls how PBR material textures (specular/normal maps via labPBR or OldSchoolPBR conventions) are decoded from resource packs. OFF disables, HARDCODED uses built-in per-block values, SPECULAR_ONLY reads just the specular map, NORMALS_ONLY reads just the normal map, SPECULAR_NORMALS reads both.
+option.materialMappingMode.comment=Controls how PBR material textures (specular/normal maps via labPBR or OldSchoolPBR conventions) are decoded from resource packs. OFF disables, HARDCODED uses built-in per-block values, SPECULAR_ONLY reads just the specular map, NORMALS_ONLY reads just the normal map, SPECULAR_NORMALS reads both.
 option.porosityMode=Porosity Mode
 option.porosityMode.comment=Off disables wetness. Hardcoded uses built-in per-block porosity. Maps reads the labPBR specular B channel when a resource pack provides it, with no fallback on vanilla texels.
 value.porosityMode.porosityOff=Off
 value.porosityMode.porosityHardcoded=Hardcoded
 value.porosityMode.porosityMaps=LabPBR
 option.porosityStrength=Porosity Strength
-option.porosityStrength.comment = Multiplier for the porosity darkening effect.
+option.porosityStrength.comment=Multiplier for the porosity darkening effect.
 option.sssMode=Subsurface Scattering Mode
 option.sssMode.comment=Off disables SSS. Hardcoded uses built-in scattering profiles for leaves and plants. Maps reads the labPBR specular B channel when a resource pack provides it, with no fallback on vanilla texels. Sheen follows the map automatically.
 value.sssMode.sssOff=Off
 value.sssMode.sssHardcoded=Hardcoded
 value.sssMode.sssMaps=LabPBR
 option.sssSheenIntensity=SSS Sheen Intensity
-option.sssSheenIntensity.comment = Brightness multiplier for the subsurface sheen effect.
+option.sssSheenIntensity.comment=Brightness multiplier for the subsurface sheen effect.
 option.fxaaIntensity=FXAA Strength
-option.fxaaIntensity.comment = Adjusts the strength of fast approximate anti-aliasing. Higher = smoother edges but softer image.
+option.fxaaIntensity.comment=Adjusts the strength of fast approximate anti-aliasing. Higher = smoother edges but softer image.
 option.waterWavesNoiseStrength=Water Waves Noise Strength
-option.waterWavesNoiseStrength.comment = Controls water waves noise strength.
+option.waterWavesNoiseStrength.comment=Controls water waves noise strength.
 option.waterTextureIntensity=Water Texture Intensity
-option.waterTextureIntensity.comment = Controls water texture intensity.
+option.waterTextureIntensity.comment=Controls water texture intensity.
 option.snellsWindowIntensity=Snell's Window Intensity
-option.snellsWindowIntensity.comment = Controls snell's window intensity.
+option.snellsWindowIntensity.comment=Controls snell's window intensity.
 option.biomeWaterColorIntensity=Biome Water Color Intensity
-option.biomeWaterColorIntensity.comment = Controls the biome water color intensity color channel.
+option.biomeWaterColorIntensity.comment=Controls the biome water color intensity color channel.
 option.borderFogIntensity=Border Fog Intensity
-option.borderFogIntensity.comment = Controls border fog intensity.
+option.borderFogIntensity.comment=Controls border fog intensity.
 option.caveFogIntensity=Cave Fog Intensity
-option.caveFogIntensity.comment = Controls cave fog intensity.
+option.caveFogIntensity.comment=Controls cave fog intensity.
 option.desertSandstormIntensity=Desert Sandstorm Intensity
-option.desertSandstormIntensity.comment = Controls desert sandstorm intensity.
+option.desertSandstormIntensity.comment=Controls desert sandstorm intensity.
 option.rainbowsIntensity=Rainbow Visibility
-option.rainbowsIntensity.comment = Adjusts the opacity and vividness of rainbows during/after rain. Higher = brighter, more saturated rainbow.
+option.rainbowsIntensity.comment=Adjusts the opacity and vividness of rainbows during/after rain. Higher = brighter, more saturated rainbow.
 value.materialMappingMode.materialMappingOff=Off
 value.materialMappingMode.materialMappingHardcoded=Hardcoded Specular
 value.materialMappingMode.materialMappingSpecularOnly=Specular Only
@@ -1097,10 +1094,10 @@ Controls the strength of the color tinting applied to light shafts
 
 
 
-screen.academy_color = Academy Color (ACES)
+screen.academyColor=Academy Color (ACES)
 
 
-screen.rp_emission                      = Emissions
+screen.rpEmission=Emissions
 option.textureAo=Texture AO
 option.textureAo.comment=Occludes the lightmap using AO from the resource pack normal map (blue channel in LabPBR, normal length in OldPBR). Needs a normal-mapped pack; does nothing on vanilla textures. Off by default.
 
@@ -1115,206 +1112,206 @@ option.moonI=Moonlight Intensity
 option.moonI.comment=Adjusts the overall brightness of moonlight. Higher = brighter nights, more visible shadows at night.
 
 # Untranslated fallback (English) - synced from en_US.lang; translate as needed.
-screen.world_vegetation                 = Vegetation
-screen.atmosphere                      = Atmosphere
-screen.atmo_space                       = Space
-screen.atmo_sky                         = Sky
-screen.atmo_air                         = Air
-screen.atmo_ground                      = Fog
-screen.sky_celestial_bodies             = Sun & Moon
-screen.rainbows = Rainbows
-screen.planet                          = Planet
-screen.sky_atmosphere                   = Atmosphere Color
-screen.camera                          = Camera
-screen.lens_flare                      = Lens Flare
-screen.misc_debug                      = Debug
-screen.shadows_quality                  = Shadow Quality
-screen.shadows_coverage                 = Shadow Coverage
-screen.shadows_style                    = Shadow Style
-screen.space_galaxy                     = Galaxy
-screen.fog_mie_density                 = Mie Density
-screen.fog_mie_color                   = Mie Color
-screen.ozone_color                     = Ozone Color
-screen.mist_shape                      = Mist Shape
-screen.mist_color                      = Mist Color
-option.weatherTurbulenceBias             = Turbulence Bias
-option.weatherTurbulenceBias.comment = Shifts baseline turbulence. Higher values tear clouds into broken, wispy detail.
-option.weatherTurbulenceVariationSpeed  = Turbulence Variation Speed
-option.weatherTurbulenceVariationSpeed.comment = How fast turbulence drifts. Higher values make cloud detail churn faster.
-option.caveLightingI                  = Cave Ambient
-option.caveLightingI.comment = Adjusts the base brightness of underground ambient light when no direct light is present. Higher = caves appear less pitch-black.
-option.planetBounce                   = Planet Bounce Light
-option.planetBounce.comment           = Ground-bounced sun and moonlight re-scattered through the air. Warms the horizon and downward views almost for free.
-option.mistColorR                       = §c▍ §fRed — Mist
-option.mistColorR.comment               = Red tint of ground mist over its time-of-day hue. 1.00 is neutral; lower cools, higher warms.
-option.mistColorG                       = §a▍ §fGreen — Mist
-option.mistColorG.comment               = Green tint of ground mist. Multiplies the mist's time-of-day hue; 1.00 leaves it unchanged.
-option.mistColorB                       = §9▍ §fBlue — Mist
-option.mistColorB.comment               = Blue tint of ground mist. Multiplies the mist's time-of-day hue; 1.00 leaves it unchanged, higher values push it cooler.
-option.mistShadowStepLength                = Mist Shadow Step Length
-option.mistShadowStepLength.comment        = Distance in blocks between mist self-shadow samples (Advanced mode only). Smaller steps are more accurate but cover a shorter range (range = steps x length); larger steps reach further but can look coarse.
-option.ozoneColorR                      = §c▍ §fRed — Ozone
-option.ozoneColorR.comment              = Ozone absorption of red light. 1.00 is natural; higher removes more red from twilight, lower lets more through.
-option.ozoneColorG                      = §a▍ §fGreen — Ozone
-option.ozoneColorG.comment              = How strongly the ozone layer absorbs green light. Green is the strongest absorption band, so this has the biggest effect on the twilight hue.
-option.ozoneColorB                      = §9▍ §fBlue — Ozone
-option.ozoneColorB.comment              = How strongly the ozone layer absorbs blue light. 1.00 is the natural spectrum; raising it dulls the twilight blue.
-option.sandstormLayer                     = Sandstorm Sky Layer
-option.sandstormLayer.comment = Dust-dimmed direct sun and moonlight during desert storms. Follows the live storm amount.
-option.sandstormSky                       = Sandstorm Sky Scattering
-option.sandstormSky.comment = Dusty sky during desert storms. Hazes the horizon and dims the sun disk to match the fog.
-option.sandstormMist                      = Sandstorm Mist Tint
-option.sandstormMist.comment = Applies the desert sandstorm to ground mist: while a storm is active the mist tint blends toward the warm dust spectrum.
-option.sandstormBounce                    = Sandstorm Planet Bounce
-option.sandstormBounce.comment = Applies the desert sandstorm to planet bounce light: ground-bounced light is re-filtered through the dust layer on its way back up into the sky.
-option.airFogColoredLightShaftsIntensity         = Colored Light Shafts Intensity
-option.airFogColoredLightShaftsIntensity.comment = Controls the strength of the color tinting applied to light shafts
-option.mieAnisotropy                     = Sky Mie Anisotropy
-option.mieAnisotropy.comment             = Mie scattering directionality. Higher concentrates the haze glow around sun and moon; lower spreads it. Default 0.77.
-option.fogMieAnisotropy                 = Fog Mie Anisotropy
-option.fogMieAnisotropy.comment         = Forward-scattering strength of fog. Higher glows toward sun and moon; 0 scatters evenly. Default 0.50.
-option.mieColorR                        = §c▍ §fRed — Mie
-option.mieColorR.comment                = Red tint of Mie scattering (sky haze and air fog). 1.00 is the physical value; lowering it removes red from the haze, raising it warms it.
-option.mieColorG                        = §a▍ §fGreen — Mie
-option.mieColorG.comment                = Green tint of Mie scattering (sky haze and air fog). 1.00 is the physical value.
-option.mieColorB                        = §9▍ §fBlue — Mie
-option.mieColorB.comment                = Blue tint of Mie scattering (sky haze and air fog). 1.00 is the physical value; raising it cools the haze.
-option.dispersionIntensity         = Dispersion Intensity
-option.dispersionIntensity.comment = Adds chromatic dispersion (RGB fringing) to refracted water/glass, like light splitting through a prism
-option.rainRipples.comment            = Expanding raindrop ripple rings on still, sky-exposed water. Costs one texture sample per water texel.
-option.rainRippleStrength.comment    = Adjusts how strongly rain ripples distort the water surface normal. Higher = more pronounced, choppier ripples.
-option.chromaticDispersion            = Chromatic Dispersion
-option.chromaticDispersion.comment      = Radial spectral fringing scaled by defocus, simulating real camera lens dispersion. In-focus regions stay clean; blurred areas fringe with color.
-option.chromaticDispersionStrength   = Dispersion Strength
-option.chromaticDispersionStrength.comment = Adjusts the strength of the chromatic dispersion fringing. Higher values widen the red/blue separation in out-of-focus areas.
-option.dofMaxRadius                  = DoF Max Radius
-option.dofMaxRadius.comment             = Caps the circle of confusion as a fraction of screen height. Lower values keep backgrounds sharper and save performance; higher values allow creamier blur.
-option.motionBlurSamples             = Motion Blur Samples
-option.motionBlurSamples.comment        = Number of samples along the motion trail. Higher values give smoother streaks at higher GPU cost.
-option.motionBlurScale               = Motion Blur Scale
-option.motionBlurScale.comment          = Artistic multiplier on the shutter-driven trail length. Shutter speed sets the physical baseline; this scales it.
-option.lensFlare                      = Lens Flare
-option.lensFlare.comment                 = Ghosts, halo and anamorphic streak from bright lights scattering inside the lens. Computed pre-tonemap so flare grades with the scene.
-option.lensFlareHalo                 = Flare Halo
-option.lensFlareHalo.comment            = Halo ring around the sun on top of the ghost chain.
-option.lensFlareIntensity            = Flare Intensity
-option.lensFlareIntensity.comment       = Overall strength of ghosts, halo and streak.
-option.lensFlareThreshold            = Flare Threshold
-option.lensFlareThreshold.comment       = Scene luminance above which highlights seed flare. Lower values let lamps and glints flare; higher isolates the sun.
-option.lensFlareGhosts               = Ghost Count
-option.lensFlareGhosts.comment          = Number of ghosts strung along the sun axis. More ghosts cost performance.
-option.lensFlareSpacing              = Ghost Spacing
-option.lensFlareSpacing.comment         = Spacing of the ghost chain along the sun-to-center axis.
-option.lensFlareHaloRadius          = Halo Radius
-option.lensFlareHaloRadius.comment     = Radius of the halo ring around the sun.
-option.lensFlareHaloWidth           = Halo Width
-option.lensFlareHaloWidth.comment      = Thickness of the halo ring.
-option.camSensorWidth                = Sensor Width
-option.camSensorWidth.comment           = Camera sensor width in millimetres. Larger sensors give shallower depth of field at the same aperture.
-option.camFstops                      = Aperture F-Stops
-option.camFstops.comment                 = Lens aperture. Low values (f/0.8) give razor-thin focus; high values (f/16) keep the scene sharp deep into the distance.
-option.camShutterSpeed               = Shutter Speed
-option.camShutterSpeed.comment          = Camera shutter speed as 1/N seconds. Slower speeds streak motion blur longer; 1/60 matches the old neutral look.
-option.camIso                         = ISO Sensitivity
-option.camIso.comment                    = Sensor sensitivity. Doubling ISO doubles exposure brightness across manual and auto exposure alike.
-option.camExposureCompensation       = Exposure Compensation
-option.camExposureCompensation.comment   = EV compensation dial for the exposure triangle. Brightens or darkens around the aperture/shutter/ISO result, like aperture-priority mode on a real camera.
-option.vignetteStart                  = Vignette Start
-option.vignetteStart.comment             = Radial distance from screen center where the vignette falloff begins.
-option.vignetteEnd                    = Vignette End
-option.vignetteEnd.comment               = Radial distance where the vignette reaches full strength.
-option.vignetteExponent                 = Vignette Rolloff
-option.vignetteExponent.comment          = Shapes the vignette falloff curve. Higher values concentrate darkening toward the corners.
-option.gradePivot                     = Contrast Pivot
-option.gradePivot.comment             = Luminance anchor for contrast (0–1 linear). 0.18 is photographic middle grey.
-option.gradeVibrance                  = Vibrance
-option.gradeVibrance.comment          = Gentle saturation for muted colors only. Lifts dull areas without oversaturating vivid ones; negatives mute vivid areas.
-option.gradeLiftR                    = §c▍ §fShadow Lift — Red
-option.gradeLiftR.comment            = Raises or lowers the red channel in the darkest parts of the image (shadows/blacks). Positive = warm shadows, negative = cool shadows.
-option.gradeLiftG                    = §a▍ §fShadow Lift — Green
-option.gradeLiftG.comment            = Raises or lowers the green channel in shadows. Combine with red and blue lift to tint the darkest tones any color.
-option.gradeLiftB                    = §9▍ §fShadow Lift — Blue
-option.gradeLiftB.comment            = Raises or lowers the blue channel in shadows. Positive = blue-tinted blacks, negative = yellow-tinted blacks.
-option.gradeGammaR                   = §c▍ §fMidtone Gamma — Red
-option.gradeGammaR.comment           = Power-curve adjustment for the red channel in midtones. Above 1.0 brightens reds in the middle range; below 1.0 darkens them.
-option.gradeGammaG                   = §a▍ §fMidtone Gamma — Green
-option.gradeGammaG.comment           = Power-curve adjustment for the green channel in midtones. Useful for shifting the overall midtone hue toward magenta or green.
-option.gradeGammaB                   = §9▍ §fMidtone Gamma — Blue
-option.gradeGammaB.comment           = Power-curve adjustment for the blue channel in midtones. Above 1.0 adds a cool blue cast to midtones.
-option.gradeGainR                    = §c▍ §fHighlight Gain — Red
-option.gradeGainR.comment            = Multiplies the red channel in the brightest parts of the image. Above 1.0 warms highlights; below 1.0 cools them.
-option.gradeGainG                    = §a▍ §fHighlight Gain — Green
-option.gradeGainG.comment            = Multiplies the green channel in highlights. Combine with red and blue gain to tint the brightest tones.
-option.gradeGainB                    = §9▍ §fHighlight Gain — Blue
-option.gradeGainB.comment            = Multiplies the blue channel in highlights. Positive = cool blue highlights, negative = warm yellow highlights.
-option.gradeOklabPivot               = Perceptual Contrast Pivot
-option.gradeOklabPivot.comment       = The lightness value in Oklab space (0–1) that stays fixed when the perceptual contrast slider is applied. 0.5 = perceptual midpoint.
-option.gradeOklabContrast            = Perceptual Contrast
-option.gradeOklabContrast.comment    = Perceptual contrast in Oklab space. Preserves hue in saturated areas, unlike linear contrast.
-option.gradeShadowLow                = Shadow Range — Low
-option.gradeShadowLow.comment        = The lower luminance boundary of the shadow tonal range used by the three-way color wheel. Pixels below this value are fully in the shadow zone.
-option.gradeShadowHigh               = Shadow Range — High
-option.gradeShadowHigh.comment       = The upper luminance boundary of the shadow zone. Pixels between Shadow Low and Shadow High blend between shadow and midtone color wheels.
-option.gradeHighlightLow             = Highlight Range — Low
-option.gradeHighlightLow.comment     = The lower luminance boundary of the highlight zone. Pixels between Highlight Low and Highlight High blend between midtone and highlight color wheels.
-option.gradeHighlightHigh            = Highlight Range — High
-option.gradeHighlightHigh.comment    = The upper luminance boundary of the highlight zone. Pixels above this value are fully in the highlight zone.
-option.gradeShadowStrength           = Shadow Tint Strength
-option.gradeShadowStrength.comment   = How strongly the shadow color wheel hue is applied to dark areas. 0 = no tint, 1 = full tint at the chosen shadow hue and saturation.
-option.gradeMidStrength              = Midtone Tint Strength
-option.gradeMidStrength.comment      = How strongly the midtone color wheel hue is applied to middle-luminance areas.
-option.gradeHighlightStrength        = Highlight Tint Strength
-option.gradeHighlightStrength.comment = How strongly the highlight color wheel hue is applied to bright areas.
-option.gradeShadowHue                = Shadow Hue
-option.gradeShadowHue.comment        = The hue angle (0–360°) of the color tint applied to shadows when Shadow Tint Strength > 0. 220° = cool blue-purple, 30° = warm orange.
-option.gradeMidHue                   = Midtone Hue
-option.gradeMidHue.comment           = The hue angle of the color tint applied to midtones when Midtone Tint Strength > 0.
-option.gradeHighlightHue             = Highlight Hue
-option.gradeHighlightHue.comment     = The hue angle of the color tint applied to highlights when Highlight Tint Strength > 0. 45° = warm golden highlights.
-option.gradeShadowTintHue           = Shadow Tint Hue
-option.gradeShadowTintHue.comment   = Hue angle for the dedicated shadow tint pass (separate from the three-way wheel). Lets you add a subtle color cast to just the darkest tones.
-option.gradeShadowTintSat           = Shadow Tint Saturation
-option.gradeShadowTintSat.comment   = Saturation of the dedicated shadow tint. 0 = no tint, 1 = fully saturated shadow cast at the chosen hue.
-option.gradeHighlightTintHue        = Highlight Tint Hue
-option.gradeHighlightTintHue.comment = Hue angle for the dedicated highlight tint pass. Adds a color cast to only the brightest parts of the image.
-option.gradeHighlightTintSat        = Highlight Tint Saturation
-option.gradeHighlightTintSat.comment = Saturation of the dedicated highlight tint. 0 = no tint, 1 = fully saturated highlight cast.
-option.gradeSelectiveBlend           = Selective Grade Blend
-option.gradeSelectiveBlend.comment   = Master blend weight for all selective color adjustments (orange/teal/green saturation and green hue shift). 0 = no selective grading, 1 = full effect.
-option.gradeBlackPoint               = Black Point
-option.gradeBlackPoint.comment       = Raises the minimum output level, lifting blacks toward grey. Useful for a faded/matte look or to match a display with elevated black levels. 0 = true black.
-option.gradeWhitePoint               = White Point
-option.gradeWhitePoint.comment       = Lowers the maximum output level, compressing highlights toward grey. Useful for a filmic, low-contrast look. 0 = full white.
-option.purkinjeShiftR                = §c▍ §fPurkinje Response — Red
-option.purkinjeShiftR.comment         = Red channel weight of the scotopic tint. Lower values push night vision cooler.
-option.purkinjeShiftG                = §a▍ §fPurkinje Response — Green
-option.purkinjeShiftG.comment         = Green channel weight of the scotopic tint. Rods peak in blue-green, so this dominates the night hue.
-option.purkinjeShiftB                = §9▍ §fPurkinje Response — Blue
-option.purkinjeShiftB.comment         = Blue channel weight of the scotopic tint. Higher values deepen the classic blue night shift.
-option.histogramShadowWeight               = Meter Shadow Weight
-option.histogramShadowWeight.comment       = Weight of the shadow population in the three-population exposure meter. Higher values protect shadow detail from crushing.
-option.histogramHighlightWeight            = Meter Highlight Weight
-option.histogramHighlightWeight.comment    = Weight of the highlight population in the exposure meter. Higher values protect bright areas like sunsets from blowing out.
-option.localExposureRegional               = Local Regional Blend
-option.localExposureRegional.comment       = Blends the fine bilateral correction toward area-scale dodge and burn. Higher values adapt whole regions; 0 keeps pixel-local detail only.
-option.localExposureRange                  = Local Regional Range
-option.localExposureRange.comment          = Maximum exposure shift in stops the regional adaptation may apply. Caps grading so it never overrides global exposure.
-option.localExposureDetail                 = Local Detail Strength
-option.localExposureDetail.comment         = Scales the fine bilateral detail correction. Lower values leave only the area-scale regional grading.
-option.displayGamut                   = Display Gamut
-option.displayGamut.comment           = Native working/output gamut (needs Iris 1.6.4+ color correction). Keep the Iris client space on sRGB; fog, light and sky follow this setting.
-option.displayGamutSrgb              = sRGB
-option.displayGamutDciP3            = DCI-P3
-option.displayGamutDisplayP3        = Display P3
-option.displayGamutRec2020           = Rec.2020
-option.displayGamutAdobeRgb         = Adobe RGB
-value.displayGamut.displayGamutSrgb       = sRGB
-value.displayGamut.displayGamutDciP3     = DCI-P3
-value.displayGamut.displayGamutDisplayP3 = Display P3
-value.displayGamut.displayGamutRec2020    = Rec.2020
-value.displayGamut.displayGamutAdobeRgb  = Adobe RGB
-screen.indirect_lighting=Indirect Light
-screen.sspt_filter=SVGF Filter
+screen.worldVegetation=Vegetation
+screen.atmosphere=Atmosphere
+screen.atmoSpace=Space
+screen.atmoSky=Sky
+screen.atmoAir=Air
+screen.atmoGround=Fog
+screen.skyCelestialBodies=Sun & Moon
+screen.rainbows=Rainbows
+screen.planet=Planet
+screen.skyAtmosphere=Atmosphere Color
+screen.camera=Camera
+screen.lensFlare=Lens Flare
+screen.miscDebug=Debug
+screen.shadowsQuality=Shadow Quality
+screen.shadowsCoverage=Shadow Coverage
+screen.shadowsStyle=Shadow Style
+screen.spaceGalaxy=Galaxy
+screen.fogMieDensity=Mie Density
+screen.fogMieColor=Mie Color
+screen.ozoneColor=Ozone Color
+screen.mistShape=Mist Shape
+screen.mistColor=Mist Color
+option.weatherTurbulenceBias=Turbulence Bias
+option.weatherTurbulenceBias.comment=Shifts baseline turbulence. Higher values tear clouds into broken, wispy detail.
+option.weatherTurbulenceVariationSpeed=Turbulence Variation Speed
+option.weatherTurbulenceVariationSpeed.comment=How fast turbulence drifts. Higher values make cloud detail churn faster.
+option.caveLightingI=Cave Ambient
+option.caveLightingI.comment=Adjusts the base brightness of underground ambient light when no direct light is present. Higher = caves appear less pitch-black.
+option.planetBounce=Planet Bounce Light
+option.planetBounce.comment=Ground-bounced sun and moonlight re-scattered through the air. Warms the horizon and downward views almost for free.
+option.mistColorR=§c▍ §fRed — Mist
+option.mistColorR.comment=Red tint of ground mist over its time-of-day hue. 1.00 is neutral; lower cools, higher warms.
+option.mistColorG=§a▍ §fGreen — Mist
+option.mistColorG.comment=Green tint of ground mist. Multiplies the mist's time-of-day hue; 1.00 leaves it unchanged.
+option.mistColorB=§9▍ §fBlue — Mist
+option.mistColorB.comment=Blue tint of ground mist. Multiplies the mist's time-of-day hue; 1.00 leaves it unchanged, higher values push it cooler.
+option.mistShadowStepLength=Mist Shadow Step Length
+option.mistShadowStepLength.comment=Distance in blocks between mist self-shadow samples (Advanced mode only). Smaller steps are more accurate but cover a shorter range (range = steps x length); larger steps reach further but can look coarse.
+option.ozoneColorR=§c▍ §fRed — Ozone
+option.ozoneColorR.comment=Ozone absorption of red light. 1.00 is natural; higher removes more red from twilight, lower lets more through.
+option.ozoneColorG=§a▍ §fGreen — Ozone
+option.ozoneColorG.comment=How strongly the ozone layer absorbs green light. Green is the strongest absorption band, so this has the biggest effect on the twilight hue.
+option.ozoneColorB=§9▍ §fBlue — Ozone
+option.ozoneColorB.comment=How strongly the ozone layer absorbs blue light. 1.00 is the natural spectrum; raising it dulls the twilight blue.
+option.sandstormLayer=Sandstorm Sky Layer
+option.sandstormLayer.comment=Dust-dimmed direct sun and moonlight during desert storms. Follows the live storm amount.
+option.sandstormSky=Sandstorm Sky Scattering
+option.sandstormSky.comment=Dusty sky during desert storms. Hazes the horizon and dims the sun disk to match the fog.
+option.sandstormMist=Sandstorm Mist Tint
+option.sandstormMist.comment=Applies the desert sandstorm to ground mist: while a storm is active the mist tint blends toward the warm dust spectrum.
+option.sandstormBounce=Sandstorm Planet Bounce
+option.sandstormBounce.comment=Applies the desert sandstorm to planet bounce light: ground-bounced light is re-filtered through the dust layer on its way back up into the sky.
+option.airFogColoredLightShaftsIntensity=Colored Light Shafts Intensity
+option.airFogColoredLightShaftsIntensity.comment=Controls the strength of the color tinting applied to light shafts
+option.mieAnisotropy=Sky Mie Anisotropy
+option.mieAnisotropy.comment=Mie scattering directionality. Higher concentrates the haze glow around sun and moon; lower spreads it. Default 0.77.
+option.fogMieAnisotropy=Fog Mie Anisotropy
+option.fogMieAnisotropy.comment=Forward-scattering strength of fog. Higher glows toward sun and moon; 0 scatters evenly. Default 0.50.
+option.mieColorR=§c▍ §fRed — Mie
+option.mieColorR.comment=Red tint of Mie scattering (sky haze and air fog). 1.00 is the physical value; lowering it removes red from the haze, raising it warms it.
+option.mieColorG=§a▍ §fGreen — Mie
+option.mieColorG.comment=Green tint of Mie scattering (sky haze and air fog). 1.00 is the physical value.
+option.mieColorB=§9▍ §fBlue — Mie
+option.mieColorB.comment=Blue tint of Mie scattering (sky haze and air fog). 1.00 is the physical value; raising it cools the haze.
+option.dispersionIntensity=Dispersion Intensity
+option.dispersionIntensity.comment=Adds chromatic dispersion (RGB fringing) to refracted water/glass, like light splitting through a prism
+option.rainRipples.comment=Expanding raindrop ripple rings on still, sky-exposed water. Costs one texture sample per water texel.
+option.rainRippleStrength.comment=Adjusts how strongly rain ripples distort the water surface normal. Higher = more pronounced, choppier ripples.
+option.chromaticDispersion=Chromatic Dispersion
+option.chromaticDispersion.comment=Radial spectral fringing scaled by defocus, simulating real camera lens dispersion. In-focus regions stay clean; blurred areas fringe with color.
+option.chromaticDispersionStrength=Dispersion Strength
+option.chromaticDispersionStrength.comment=Adjusts the strength of the chromatic dispersion fringing. Higher values widen the red/blue separation in out-of-focus areas.
+option.dofMaxRadius=DoF Max Radius
+option.dofMaxRadius.comment=Caps the circle of confusion as a fraction of screen height. Lower values keep backgrounds sharper and save performance; higher values allow creamier blur.
+option.motionBlurSamples=Motion Blur Samples
+option.motionBlurSamples.comment=Number of samples along the motion trail. Higher values give smoother streaks at higher GPU cost.
+option.motionBlurScale=Motion Blur Scale
+option.motionBlurScale.comment=Artistic multiplier on the shutter-driven trail length. Shutter speed sets the physical baseline; this scales it.
+option.lensFlare=Lens Flare
+option.lensFlare.comment=Ghosts, halo and anamorphic streak from bright lights scattering inside the lens. Computed pre-tonemap so flare grades with the scene.
+option.lensFlareHalo=Flare Halo
+option.lensFlareHalo.comment=Halo ring around the sun on top of the ghost chain.
+option.lensFlareIntensity=Flare Intensity
+option.lensFlareIntensity.comment=Overall strength of ghosts, halo and streak.
+option.lensFlareThreshold=Flare Threshold
+option.lensFlareThreshold.comment=Scene luminance above which highlights seed flare. Lower values let lamps and glints flare; higher isolates the sun.
+option.lensFlareGhosts=Ghost Count
+option.lensFlareGhosts.comment=Number of ghosts strung along the sun axis. More ghosts cost performance.
+option.lensFlareSpacing=Ghost Spacing
+option.lensFlareSpacing.comment=Spacing of the ghost chain along the sun-to-center axis.
+option.lensFlareHaloRadius=Halo Radius
+option.lensFlareHaloRadius.comment=Radius of the halo ring around the sun.
+option.lensFlareHaloWidth=Halo Width
+option.lensFlareHaloWidth.comment=Thickness of the halo ring.
+option.camSensorWidth=Sensor Width
+option.camSensorWidth.comment=Camera sensor width in millimetres. Larger sensors give shallower depth of field at the same aperture.
+option.camFstops=Aperture F-Stops
+option.camFstops.comment=Lens aperture. Low values (f/0.8) give razor-thin focus; high values (f/16) keep the scene sharp deep into the distance.
+option.camShutterSpeed=Shutter Speed
+option.camShutterSpeed.comment=Camera shutter speed as 1/N seconds. Slower speeds streak motion blur longer; 1/60 matches the old neutral look.
+option.camIso=ISO Sensitivity
+option.camIso.comment=Sensor sensitivity. Doubling ISO doubles exposure brightness across manual and auto exposure alike.
+option.camExposureCompensation=Exposure Compensation
+option.camExposureCompensation.comment=EV compensation dial for the exposure triangle. Brightens or darkens around the aperture/shutter/ISO result, like aperture-priority mode on a real camera.
+option.vignetteStart=Vignette Start
+option.vignetteStart.comment=Radial distance from screen center where the vignette falloff begins.
+option.vignetteEnd=Vignette End
+option.vignetteEnd.comment=Radial distance where the vignette reaches full strength.
+option.vignetteExponent=Vignette Rolloff
+option.vignetteExponent.comment=Shapes the vignette falloff curve. Higher values concentrate darkening toward the corners.
+option.gradePivot=Contrast Pivot
+option.gradePivot.comment=Luminance anchor for contrast (0–1 linear). 0.18 is photographic middle grey.
+option.gradeVibrance=Vibrance
+option.gradeVibrance.comment=Gentle saturation for muted colors only. Lifts dull areas without oversaturating vivid ones; negatives mute vivid areas.
+option.gradeLiftR=§c▍ §fShadow Lift — Red
+option.gradeLiftR.comment=Raises or lowers the red channel in the darkest parts of the image (shadows/blacks). Positive = warm shadows, negative = cool shadows.
+option.gradeLiftG=§a▍ §fShadow Lift — Green
+option.gradeLiftG.comment=Raises or lowers the green channel in shadows. Combine with red and blue lift to tint the darkest tones any color.
+option.gradeLiftB=§9▍ §fShadow Lift — Blue
+option.gradeLiftB.comment=Raises or lowers the blue channel in shadows. Positive = blue-tinted blacks, negative = yellow-tinted blacks.
+option.gradeGammaR=§c▍ §fMidtone Gamma — Red
+option.gradeGammaR.comment=Power-curve adjustment for the red channel in midtones. Above 1.0 brightens reds in the middle range; below 1.0 darkens them.
+option.gradeGammaG=§a▍ §fMidtone Gamma — Green
+option.gradeGammaG.comment=Power-curve adjustment for the green channel in midtones. Useful for shifting the overall midtone hue toward magenta or green.
+option.gradeGammaB=§9▍ §fMidtone Gamma — Blue
+option.gradeGammaB.comment=Power-curve adjustment for the blue channel in midtones. Above 1.0 adds a cool blue cast to midtones.
+option.gradeGainR=§c▍ §fHighlight Gain — Red
+option.gradeGainR.comment=Multiplies the red channel in the brightest parts of the image. Above 1.0 warms highlights; below 1.0 cools them.
+option.gradeGainG=§a▍ §fHighlight Gain — Green
+option.gradeGainG.comment=Multiplies the green channel in highlights. Combine with red and blue gain to tint the brightest tones.
+option.gradeGainB=§9▍ §fHighlight Gain — Blue
+option.gradeGainB.comment=Multiplies the blue channel in highlights. Positive = cool blue highlights, negative = warm yellow highlights.
+option.gradeOklabPivot=Perceptual Contrast Pivot
+option.gradeOklabPivot.comment=The lightness value in Oklab space (0–1) that stays fixed when the perceptual contrast slider is applied. 0.5 = perceptual midpoint.
+option.gradeOklabContrast=Perceptual Contrast
+option.gradeOklabContrast.comment=Perceptual contrast in Oklab space. Preserves hue in saturated areas, unlike linear contrast.
+option.gradeShadowLow=Shadow Range — Low
+option.gradeShadowLow.comment=The lower luminance boundary of the shadow tonal range used by the three-way color wheel. Pixels below this value are fully in the shadow zone.
+option.gradeShadowHigh=Shadow Range — High
+option.gradeShadowHigh.comment=The upper luminance boundary of the shadow zone. Pixels between Shadow Low and Shadow High blend between shadow and midtone color wheels.
+option.gradeHighlightLow=Highlight Range — Low
+option.gradeHighlightLow.comment=The lower luminance boundary of the highlight zone. Pixels between Highlight Low and Highlight High blend between midtone and highlight color wheels.
+option.gradeHighlightHigh=Highlight Range — High
+option.gradeHighlightHigh.comment=The upper luminance boundary of the highlight zone. Pixels above this value are fully in the highlight zone.
+option.gradeShadowStrength=Shadow Tint Strength
+option.gradeShadowStrength.comment=How strongly the shadow color wheel hue is applied to dark areas. 0 = no tint, 1 = full tint at the chosen shadow hue and saturation.
+option.gradeMidStrength=Midtone Tint Strength
+option.gradeMidStrength.comment=How strongly the midtone color wheel hue is applied to middle-luminance areas.
+option.gradeHighlightStrength=Highlight Tint Strength
+option.gradeHighlightStrength.comment=How strongly the highlight color wheel hue is applied to bright areas.
+option.gradeShadowHue=Shadow Hue
+option.gradeShadowHue.comment=The hue angle (0–360°) of the color tint applied to shadows when Shadow Tint Strength > 0. 220° = cool blue-purple, 30° = warm orange.
+option.gradeMidHue=Midtone Hue
+option.gradeMidHue.comment=The hue angle of the color tint applied to midtones when Midtone Tint Strength > 0.
+option.gradeHighlightHue=Highlight Hue
+option.gradeHighlightHue.comment=The hue angle of the color tint applied to highlights when Highlight Tint Strength > 0. 45° = warm golden highlights.
+option.gradeShadowTintHue=Shadow Tint Hue
+option.gradeShadowTintHue.comment=Hue angle for the dedicated shadow tint pass (separate from the three-way wheel). Lets you add a subtle color cast to just the darkest tones.
+option.gradeShadowTintSat=Shadow Tint Saturation
+option.gradeShadowTintSat.comment=Saturation of the dedicated shadow tint. 0 = no tint, 1 = fully saturated shadow cast at the chosen hue.
+option.gradeHighlightTintHue=Highlight Tint Hue
+option.gradeHighlightTintHue.comment=Hue angle for the dedicated highlight tint pass. Adds a color cast to only the brightest parts of the image.
+option.gradeHighlightTintSat=Highlight Tint Saturation
+option.gradeHighlightTintSat.comment=Saturation of the dedicated highlight tint. 0 = no tint, 1 = fully saturated highlight cast.
+option.gradeSelectiveBlend=Selective Grade Blend
+option.gradeSelectiveBlend.comment=Master blend weight for all selective color adjustments (orange/teal/green saturation and green hue shift). 0 = no selective grading, 1 = full effect.
+option.gradeBlackPoint=Black Point
+option.gradeBlackPoint.comment=Raises the minimum output level, lifting blacks toward grey. Useful for a faded/matte look or to match a display with elevated black levels. 0 = true black.
+option.gradeWhitePoint=White Point
+option.gradeWhitePoint.comment=Lowers the maximum output level, compressing highlights toward grey. Useful for a filmic, low-contrast look. 0 = full white.
+option.purkinjeShiftR=§c▍ §fPurkinje Response — Red
+option.purkinjeShiftR.comment=Red channel weight of the scotopic tint. Lower values push night vision cooler.
+option.purkinjeShiftG=§a▍ §fPurkinje Response — Green
+option.purkinjeShiftG.comment=Green channel weight of the scotopic tint. Rods peak in blue-green, so this dominates the night hue.
+option.purkinjeShiftB=§9▍ §fPurkinje Response — Blue
+option.purkinjeShiftB.comment=Blue channel weight of the scotopic tint. Higher values deepen the classic blue night shift.
+option.histogramShadowWeight=Meter Shadow Weight
+option.histogramShadowWeight.comment=Weight of the shadow population in the three-population exposure meter. Higher values protect shadow detail from crushing.
+option.histogramHighlightWeight=Meter Highlight Weight
+option.histogramHighlightWeight.comment=Weight of the highlight population in the exposure meter. Higher values protect bright areas like sunsets from blowing out.
+option.localExposureRegional=Local Regional Blend
+option.localExposureRegional.comment=Blends the fine bilateral correction toward area-scale dodge and burn. Higher values adapt whole regions; 0 keeps pixel-local detail only.
+option.localExposureRange=Local Regional Range
+option.localExposureRange.comment=Maximum exposure shift in stops the regional adaptation may apply. Caps grading so it never overrides global exposure.
+option.localExposureDetail=Local Detail Strength
+option.localExposureDetail.comment=Scales the fine bilateral detail correction. Lower values leave only the area-scale regional grading.
+option.displayGamut=Display Gamut
+option.displayGamut.comment=Native working/output gamut (needs Iris 1.6.4+ color correction). Keep the Iris client space on sRGB; fog, light and sky follow this setting.
+option.displayGamutSrgb=sRGB
+option.displayGamutDciP3=DCI-P3
+option.displayGamutDisplayP3=Display P3
+option.displayGamutRec2020=Rec.2020
+option.displayGamutAdobeRgb=Adobe RGB
+value.displayGamut.displayGamutSrgb=sRGB
+value.displayGamut.displayGamutDciP3=DCI-P3
+value.displayGamut.displayGamutDisplayP3=Display P3
+value.displayGamut.displayGamutRec2020=Rec.2020
+value.displayGamut.displayGamutAdobeRgb=Adobe RGB
+screen.indirectLighting=Indirect Light
+screen.ssptFilter=SVGF Filter
 option.ssptEnabled=SSPT
 option.ssptEnabled.comment=Screen-space path traced emission and colored lighting. Big performance impact.
 option.ssptFullRangeRT=Long Range SSPT
@@ -1365,24 +1362,24 @@ option.svgfStrictness.comment=How aggressively the filter preserves brightness d
 option.svgfNormalexp=Normal Weight
 option.svgfNormalexp.comment=How strongly surface normal differences block filtering across edges.
 option.netherSmoke=Nether Smoke
-option.netherSmoke.comment = Turbulent Nether smoke replacing the flat fog glow, with ember-bright proximity glow. Falls back to classic fog when off.
+option.netherSmoke.comment=Turbulent Nether smoke replacing the flat fog glow, with ember-bright proximity glow. Falls back to classic fog when off.
 option.netherSmokeIntensity=Nether Smoke Intensity
-option.netherSmokeIntensity.comment = Brightness multiplier for the Nether Smoke v2 glow/emission. Only has an effect when Nether Smoke is enabled.
+option.netherSmokeIntensity.comment=Brightness multiplier for the Nether Smoke v2 glow/emission. Only has an effect when Nether Smoke is enabled.
 option.planetBounceIntensity=Planet Bounce Intensity
-option.planetBounceIntensity.comment = Adjusts the strength of ground-bounced light re-entering the sky. Higher = brighter, warmer horizon glow; 0 disables the contribution entirely.
-option.colorGrading                    = Color Grading
-option.colorGrading.comment            = Full color grading pipeline: brightness, contrast, white balance, ASC CDL, Oklab contrast, selective hues and tints. Off passes tonemapper output through.
-option.academyRrtExposure            = ACES RRT Exposure
-option.academyRrtExposure.comment    = Exposure in stops before the RRT. Moves the scene along the filmic S-curve itself.
-option.academyRrtGlow                = ACES RRT Glow
-option.academyRrtGlow.comment        = RRT glow lifting dim saturated colors. Higher means dreamier highlights; 0.10 is default.
-option.academyRrtSat                 = ACES RRT Saturation
-option.academyRrtSat.comment         = Global desaturation inside the RRT sweeteners. Lower = more filmic muted response before the tonescale. 0.96 matches the reference fit.
-option.academyOdtSat                 = ACES ODT Saturation
-option.academyOdtSat.comment         = Desaturation in the output device transform compensating luminance differences. Lower tames oversaturated brights after the tonescale.
-option.academyRrtGamma               = ACES RRT Gamma
-option.academyRrtGamma.comment       = Gamma shaping applied inside the RRT before the tonescale. Above 1.0 darkens midtones into the curve, below 1.0 lifts them.
-option.shadowVpsQuality = VPS Quality
-option.shadowVpsQuality.comment = Controls the blocker-search sample count for Variable Penumbra Shadows. Higher values improve penumbra stability at additional GPU cost.
-option.bloomSpread = Bloom Spread
-option.bloomSpread.comment = Controls the size of the bloom blur. Higher values spread the glow over a larger area.
+option.planetBounceIntensity.comment=Adjusts the strength of ground-bounced light re-entering the sky. Higher = brighter, warmer horizon glow; 0 disables the contribution entirely.
+option.colorGrading=Color Grading
+option.colorGrading.comment=Full color grading pipeline: brightness, contrast, white balance, ASC CDL, Oklab contrast, selective hues and tints. Off passes tonemapper output through.
+option.academyRrtExposure=ACES RRT Exposure
+option.academyRrtExposure.comment=Exposure in stops before the RRT. Moves the scene along the filmic S-curve itself.
+option.academyRrtGlow=ACES RRT Glow
+option.academyRrtGlow.comment=RRT glow lifting dim saturated colors. Higher means dreamier highlights; 0.10 is default.
+option.academyRrtSat=ACES RRT Saturation
+option.academyRrtSat.comment=Global desaturation inside the RRT sweeteners. Lower = more filmic muted response before the tonescale. 0.96 matches the reference fit.
+option.academyOdtSat=ACES ODT Saturation
+option.academyOdtSat.comment=Desaturation in the output device transform compensating luminance differences. Lower tames oversaturated brights after the tonescale.
+option.academyRrtGamma=ACES RRT Gamma
+option.academyRrtGamma.comment=Gamma shaping applied inside the RRT before the tonescale. Above 1.0 darkens midtones into the curve, below 1.0 lifts them.
+option.shadowVpsQuality=VPS Quality
+option.shadowVpsQuality.comment=Controls the blocker-search sample count for Variable Penumbra Shadows. Higher values improve penumbra stability at additional GPU cost.
+option.bloomSpread=Bloom Spread
+option.bloomSpread.comment=Controls the size of the bloom blur. Higher values spread the glow over a larger area.

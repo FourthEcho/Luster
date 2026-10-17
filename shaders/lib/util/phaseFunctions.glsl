@@ -21,34 +21,34 @@
 
 #include "/lib/util/fastMath.glsl"
 
-const float isotropic_phase = 0.25 / pi;
+const float isotropicPhase = 0.25 / pi;
 
-float henyey_greenstein_phase(float nu, float g) {
+float henyeyGreensteinPhase(float nu, float g) {
     float gg = g * g;
 
-    return (isotropic_phase - isotropic_phase * gg)
+    return (isotropicPhase - isotropicPhase * gg)
         / pow1d5(1.0 + gg - 2.0 * g * nu);
 }
 
-float cornette_shanks_phase(float nu, float g) {
+float cornetteShanksPhase(float nu, float g) {
     float gg = g * g;
 
     float p1 = 1.5 * (1.0 - gg) / (2.0 + gg);
     float p2 = (1.0 + nu * nu) / pow1d5((1.0 + gg - 2.0 * g * nu));
 
-    return p1 * p2 * isotropic_phase;
+    return p1 * p2 * isotropicPhase;
 }
 
 // Far closer to an actual aerosol phase function than Henyey-Greenstein or
 // Cornette-Shanks
-float klein_nishina_phase(float nu, float e) {
+float kleinNishinaPhase(float nu, float e) {
     return e / (tau * (e - e * nu + 1.0) * log(2.0 * e + 1.0));
 }
 
-float klein_nishina_phase_area(float nu, float e, float radius) {
-    float radius_eff = max(radius, eps); // Prevent divide by 0
-    float cosr = cos(radius_eff);
-    float sinr = sin(radius_eff);
+float kleinNishinaPhaseArea(float nu, float e, float radius) {
+    float radiusEff = max(radius, eps); // Prevent divide by 0
+    float cosr = cos(radiusEff);
+    float sinr = sin(radiusEff);
     // shifted cosine with clamp to avoid dark hole
     float mu = nu * cosr + sqrt(max(0.0, 1.0 - nu * nu)) * sinr;
     if (nu > cosr) {
@@ -58,10 +58,10 @@ float klein_nishina_phase_area(float nu, float e, float radius) {
 }
 
 
-float nvidia_phase_area(float nu, float g, float a, float radius) {
-    float radius_eff = max(radius, eps); // Prevent divide by 0
-    float cosr = cos(radius_eff);
-    float sinr = sin(radius_eff);
+float nvidiaPhaseArea(float nu, float g, float a, float radius) {
+    float radiusEff = max(radius, eps); // Prevent divide by 0
+    float cosr = cos(radiusEff);
+    float sinr = sin(radiusEff);
     float mu = nu * cosr + sqrt(max(0.0, 1.0 - nu * nu)) * sinr;
     if (nu > cosr) {
         mu = 1.0; // keep center bright

@@ -19,141 +19,141 @@
 #if !defined INCLUDE_MATERIAL_PARALLAX
 #define INCLUDE_MATERIAL_PARALLAX
 
-vec2 get_uv_from_local_coord(vec2 local_coord) {
-    return atlas_tile_offset + atlas_tile_scale * fract(local_coord);
+vec2 getUvFromLocalCoord(vec2 localCoord) {
+    return atlasTileOffset + atlasTileScale * fract(localCoord);
 }
 
-vec2 get_local_coord_from_uv(vec2 uv) {
-    return (uv - atlas_tile_offset) * rcp(atlas_tile_scale);
+vec2 getLocalCoordFromUv(vec2 uv) {
+    return (uv - atlasTileOffset) * rcp(atlasTileScale);
 }
 
-float get_height_value(vec2 local_coord, mat2 uv_gradient) {
-    vec2 uv = get_uv_from_local_coord(local_coord);
-    return textureGrad(normals, uv, uv_gradient[0], uv_gradient[1]).w;
+float getHeightValue(vec2 localCoord, mat2 uvGradient) {
+    vec2 uv = getUvFromLocalCoord(localCoord);
+    return textureGrad(normals, uv, uvGradient[0], uvGradient[1]).w;
 }
 
-float get_depth_value(vec2 local_coord, mat2 uv_gradient) {
-    return 1.0 - get_height_value(local_coord, uv_gradient);
-}
-
-
-float get_pom_distance_fade(float view_distance) {
-    return linear_step(0.75 * pomDistance, pomDistance, view_distance);
-}
-
-float get_pom_relief_scale(float view_distance) {
-    return 1.0 - get_pom_distance_fade(view_distance);
+float getDepthValue(vec2 localCoord, mat2 uvGradient) {
+    return 1.0 - getHeightValue(localCoord, uvGradient);
 }
 
 
-float get_pom_world_relief(float pom_depth, float view_distance) {
-    return pom_depth * pomDepth * get_pom_relief_scale(view_distance);
+float getPomDistanceFade(float viewDistance) {
+    return linearStep(0.75 * pomDistance, pomDistance, viewDistance);
 }
 
-vec3 get_pom_slope_normal(vec2 local_coord, mat2 uv_gradient) {
+float getPomReliefScale(float viewDistance) {
+    return 1.0 - getPomDistanceFade(viewDistance);
+}
 
 
-    vec2 texel = rcp(atlas_tile_scale * vec2(textureSize(normals, 0)));
+float getPomWorldRelief(float pomDepthNorm, float viewDistance) {
+    return pomDepthNorm * pomDepth * getPomReliefScale(viewDistance);
+}
+
+vec3 getPomSlopeNormal(vec2 localCoord, mat2 uvGradient) {
 
 
-    vec2 uv_footprint = vec2(
-        max(abs(uv_gradient[0].x), abs(uv_gradient[1].x)),
-        max(abs(uv_gradient[0].y), abs(uv_gradient[1].y))
+    vec2 texel = rcp(atlasTileScale * vec2(textureSize(normals, 0)));
+
+
+    vec2 uvFootprint = vec2(
+        max(abs(uvGradient[0].x), abs(uvGradient[1].x)),
+        max(abs(uvGradient[0].y), abs(uvGradient[1].y))
     );
-    vec2 sample_step = max(texel, uv_footprint * rcp(atlas_tile_scale));
-    sample_step = min(sample_step, vec2(0.25));
+    vec2 sampleStep = max(texel, uvFootprint * rcp(atlasTileScale));
+    sampleStep = min(sampleStep, vec2(0.25));
 
-    float depth_dx
-        = (get_depth_value(local_coord + vec2(sample_step.x, 0.0), uv_gradient)
-         - get_depth_value(local_coord - vec2(sample_step.x, 0.0), uv_gradient))
-        * rcp(2.0 * sample_step.x);
-    float depth_dy
-        = (get_depth_value(local_coord + vec2(0.0, sample_step.y), uv_gradient)
-         - get_depth_value(local_coord - vec2(0.0, sample_step.y), uv_gradient))
-        * rcp(2.0 * sample_step.y);
+    float depthDx
+        = (getDepthValue(localCoord + vec2(sampleStep.x, 0.0), uvGradient)
+         - getDepthValue(localCoord - vec2(sampleStep.x, 0.0), uvGradient))
+        * rcp(2.0 * sampleStep.x);
+    float depthDy
+        = (getDepthValue(localCoord + vec2(0.0, sampleStep.y), uvGradient)
+         - getDepthValue(localCoord - vec2(0.0, sampleStep.y), uvGradient))
+        * rcp(2.0 * sampleStep.y);
 
     // The pom height field is displaced by pomDepth in tangent space.
 
 
-    return vec3(pomDepth * depth_dx, pomDepth * depth_dy, 0.0);
+    return vec3(pomDepth * depthDx, pomDepth * depthDy, 0.0);
 }
 
-vec2 get_parallax_uv(
-    vec3 tangent_dir,
-    mat2 uv_gradient,
-    float view_distance,
+vec2 getParallaxUv(
+    vec3 tangentDir,
+    mat2 uvGradient,
+    float viewDistance,
     float dither,
-    out vec3 previous_ray_pos,
-    out float pom_depth
+    out vec3 previousRayPos,
+    out float pomDepthNorm
 ) {
-    const float depth_step = rcp(float(pomSamples));
+    const float depthStep = rcp(float(pomSamples));
 
     // Perform one pom step at the original position, fixes pom tiling
     // Thanks to Null for teaching me this
-    float depth_value = get_depth_value(atlas_tile_coord, uv_gradient);
-    if (depth_value < rcp(255.0)) {
-        previous_ray_pos = vec3(atlas_tile_coord, 0.0);
-        pom_depth = 0.0;
+    float depthValue = getDepthValue(atlasTileCoord, uvGradient);
+    if (depthValue < rcp(255.0)) {
+        previousRayPos = vec3(atlasTileCoord, 0.0);
+        pomDepthNorm = 0.0;
         return uv;
     }
 
-    float relief_scale = get_pom_relief_scale(view_distance);
+    float reliefScale = getPomReliefScale(viewDistance);
 
-    vec3 ray_step = vec3(
-                        tangent_dir.xy * rcp(-tangent_dir.z) * pomDepth
-                            * relief_scale,
+    vec3 rayStep = vec3(
+                        tangentDir.xy * rcp(-tangentDir.z) * pomDepth
+                            * reliefScale,
                         1.0
                     )
-        * depth_step;
-    vec3 curr_pos = vec3(atlas_tile_coord + ray_step.xy * dither, 0.0);
-    vec3 prev_pos = curr_pos;
+        * depthStep;
+    vec3 currPos = vec3(atlasTileCoord + rayStep.xy * dither, 0.0);
+    vec3 prevPos = currPos;
 
     // Signed distance of the ray above the height field: > 0 while the ray
     // is still above the surface, <= 0 once it has gone under it.
-    float curr_diff = get_depth_value(curr_pos.xy, uv_gradient) - curr_pos.z;
-    float prev_diff = curr_diff;
+    float currDiff = getDepthValue(currPos.xy, uvGradient) - currPos.z;
+    float prevDiff = currDiff;
 
-    for (int i = 0; i < pomSamples && curr_diff > 0.0; ++i) {
-        prev_pos = curr_pos;
-        prev_diff = curr_diff;
-        curr_pos += ray_step;
-        curr_diff = get_depth_value(curr_pos.xy, uv_gradient) - curr_pos.z;
+    for (int i = 0; i < pomSamples && currDiff > 0.0; ++i) {
+        prevPos = currPos;
+        prevDiff = currDiff;
+        currPos += rayStep;
+        currDiff = getDepthValue(currPos.xy, uvGradient) - currPos.z;
     }
 
 
-    float hit_t = clamp01(prev_diff * rcp(max(prev_diff - curr_diff, 1e-5)));
-    vec3 hit_pos = mix(prev_pos, curr_pos, hit_t);
+    float hitT = clamp01(prevDiff * rcp(max(prevDiff - currDiff, 1e-5)));
+    vec3 hitPos = mix(prevPos, currPos, hitT);
 
-    previous_ray_pos = prev_pos;
-    pom_depth = clamp01(hit_pos.z);
+    previousRayPos = prevPos;
+    pomDepthNorm = clamp01(hitPos.z);
 
-    return get_uv_from_local_coord(hit_pos.xy);
+    return getUvFromLocalCoord(hitPos.xy);
 }
 
-bool get_parallax_shadow(
+bool getParallaxShadow(
     vec3 pos,
-    mat2 uv_gradient,
-    float view_distance,
+    mat2 uvGradient,
+    float viewDistance,
     float dither
 ) {
-    float relief_scale = get_pom_relief_scale(view_distance);
+    float reliefScale = getPomReliefScale(viewDistance);
 
-    vec3 tangent_dir = light_dir * tbn;
-    vec3 ray_step = vec3(
-                        tangent_dir.xy * rcp(tangent_dir.z) * pomDepth
-                            * relief_scale,
+    vec3 tangentDir = lightDir * tbn;
+    vec3 rayStep = vec3(
+                        tangentDir.xy * rcp(tangentDir.z) * pomDepth
+                            * reliefScale,
                         -1.0
                     )
         * pos.z * rcp(float(pomShadowSamples));
 
-    pos.xy += ray_step.xy * dither;
+    pos.xy += rayStep.xy * dither;
 
-    float max_height = get_depth_value(pos.xy, uv_gradient);
+    float maxHeight = getDepthValue(pos.xy, uvGradient);
     for (int i = 0; i < pomShadowSamples; ++i) {
-        pos += ray_step;
-        float offset_height = get_depth_value(pos.xy, uv_gradient);
-        float diff = pos.z - offset_height;
-        if (diff > 0.0 && max_height - offset_height > eps) {
+        pos += rayStep;
+        float offsetHeight = getDepthValue(pos.xy, uvGradient);
+        float diff = pos.z - offsetHeight;
+        if (diff > 0.0 && maxHeight - offsetHeight > eps) {
             return true;
         }
     }

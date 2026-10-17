@@ -18,7 +18,7 @@
 
 #include "/lib/global.glsl"
 
-layout(location = 0) out vec4 frag_color;
+layout(location = 0) out vec4 fragColor;
 
 /* RENDERTARGETS: 13 */
 
@@ -35,41 +35,41 @@ uniform sampler2D gtexture;
 uniform int moonPhase;
 uniform int frameCounter;
 
-uniform vec3 sun_dir;
+uniform vec3 sunDir;
 
-uniform float desert_sandstorm;
+uniform float desertSandstormWeather;
 uniform float rainStrength;
 
-uniform vec2 taa_offset;
-uniform vec2 view_pixel_size;
+uniform vec2 taaOffset;
+uniform vec2 viewPixelSize;
 
-uniform float biome_may_snow;
+uniform float biomeMaySnow;
 
 #define LUSTER_INCLUDE_WEATHER_COLOR
 #include "/lib/light/colors.glsl"
 #undef LUSTER_INCLUDE_WEATHER_COLOR
 #include "/lib/util/encoding.glsl"
 
-const uint rain_flag = 253u;
-const uint snow_flag = 254u;
+const uint rainFlag = 253u;
+const uint snowFlag = 254u;
 
 void main() {
 #if defined taa && defined taau
-    vec2 coord = gl_FragCoord.xy * view_pixel_size * rcp(taau_render_scale);
+    vec2 coord = gl_FragCoord.xy * viewPixelSize * rcp(taauViewportScale);
     if (clamp01(coord) != coord) {
         discard;
     }
 #endif
 
-    vec4 base_color = texture(gtexture, uv);
-    if (base_color.a < 0.1) {
+    vec4 baseColor = texture(gtexture, uv);
+    if (baseColor.a < 0.1) {
         discard;
     }
 
-    bool is_rain = (abs(base_color.r - base_color.b) > eps);
+    bool isRain = (abs(baseColor.r - baseColor.b) > eps);
 
-    frag_color = is_rain
-        ? vec4(get_rain_color(), 0.25 * base_color.a) * tint
-        : vec4(get_snow_color(), 0.75 * base_color.a) * tint;
-    frag_color.rgb *= frag_color.a;
+    fragColor = isRain
+        ? vec4(getRainColor(), 0.25 * baseColor.a) * tint
+        : vec4(getSnowColor(), 0.75 * baseColor.a) * tint;
+    fragColor.rgb *= fragColor.a;
 }

@@ -18,23 +18,23 @@
 
 #include "/lib/global.glsl"
 
-#define bloom_tile_scale(i) 0.5 * exp2(-(i))
-#define bloom_tile_offset(i) \
+#define bloomTileScale(i) 0.5 * exp2(-(i))
+#define bloomTileOffset(i) \
     vec2(1.0 - exp2(-(i)), float((i) & 1) * (1.0 - 0.5 * exp2(-(i))))
 
-layout(location = 0) out vec3 bloom_tile;
+layout(location = 0) out vec3 bloomTile;
 
 /* RENDERTARGETS: 0 */
 
 in vec2 uv;
 
-uniform vec2 view_pixel_size;
+uniform vec2 viewPixelSize;
 
-const float tile_scale = bloom_tile_scale(BLOOM_TILE_INDEX);
-const vec2 tile_offset = bloom_tile_offset(BLOOM_TILE_INDEX);
+const float tileScale = bloomTileScale(BLOOM_TILE_INDEX);
+const vec2 tileOffset = bloomTileOffset(BLOOM_TILE_INDEX);
 
-const float src_tile_scale = bloom_tile_scale(BLOOM_TILE_INDEX + 1);
-const vec2 src_tile_offset = bloom_tile_offset(BLOOM_TILE_INDEX + 1);
+const float srcTileScale = bloomTileScale(BLOOM_TILE_INDEX + 1);
+const vec2 srcTileOffset = bloomTileOffset(BLOOM_TILE_INDEX + 1);
 
 uniform sampler2D colortex0;
 #define SRC_SAMPLER colortex0
@@ -44,11 +44,11 @@ uniform sampler2D colortex0;
 void main() {
     ivec2 texel = ivec2(gl_FragCoord.xy);
 
-    vec2 pad_amount = 3.0 * view_pixel_size * rcp(tile_scale);
-    vec2 uv_src = clamp(uv, pad_amount, 1.0 - pad_amount) * src_tile_scale
-        + src_tile_offset;
+    vec2 padAmount = 3.0 * viewPixelSize * rcp(tileScale);
+    vec2 uvSrc = clamp(uv, padAmount, 1.0 - padAmount) * srcTileScale
+        + srcTileOffset;
 
-    const float src_weight = mix(0.25, 0.90, 0.5 * 1.00);
-    bloom_tile = texelFetch(SRC_SAMPLER, texel, 0).rgb * (1.0 - src_weight); // Destination tile.
-    bloom_tile += bloomUpsamplingFilter(SRC_SAMPLER, uv_src).rgb * src_weight; // Source tile.
+    const float srcWeight = mix(0.25, 0.90, 0.5 * 1.00);
+    bloomTile = texelFetch(SRC_SAMPLER, texel, 0).rgb * (1.0 - srcWeight); // Destination tile.
+    bloomTile += bloomUpsamplingFilter(SRC_SAMPLER, uvSrc).rgb * srcWeight; // Source tile.
 }

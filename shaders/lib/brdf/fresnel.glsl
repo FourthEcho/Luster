@@ -21,13 +21,13 @@
 
 #include "/lib/util/fastMath.glsl"
 
-float f0_to_ior(float f0) {
-    float sqrt_f0 = sqrt(f0) * 0.99999;
-    return (1.0 + sqrt_f0) / (1.0 - sqrt_f0);
+float f0ToIor(float f0) {
+    float sqrtF0 = sqrt(f0) * 0.99999;
+    return (1.0 + sqrtF0) / (1.0 - sqrtF0);
 }
 
-vec3 fresnel_schlick(float cos_theta, vec3 f0) {
-    float f = pow5(1.0 - cos_theta);
+vec3 fresnelSchlick(float cosTheta, vec3 f0) {
+    float f = pow5(1.0 - cosTheta);
     return f + f0 * (1.0 - f);
 }
 
@@ -35,41 +35,41 @@ float fresnelSchlickInverse(float f0, float VoH) {
     return 1.0 - clamp01(f0 + (1.0 - f0) * pow5(1.0 - VoH));
 }
 
-vec3 fresnel_dielectric_n(float cos_theta, float n) {
-    float g_sq = sqr(n) + sqr(cos_theta) - 1.0;
+vec3 fresnelDielectricN(float cosTheta, float n) {
+    float gSq = sqr(n) + sqr(cosTheta) - 1.0;
 
-    if (g_sq < 0.0) {
+    if (gSq < 0.0) {
         return vec3(1.0); // Imaginary g => TIR
     }
 
-    float g = sqrt(g_sq);
-    float a = g - cos_theta;
-    float b = g + cos_theta;
+    float g = sqrt(gSq);
+    float a = g - cosTheta;
+    float b = g + cosTheta;
 
     return vec3(
         0.5 * sqr(a / b)
-        * (1.0 + sqr((b * cos_theta - 1.0) / (a * cos_theta + 1.0)))
+        * (1.0 + sqr((b * cosTheta - 1.0) / (a * cosTheta + 1.0)))
     );
 }
 
-vec3 fresnel_dielectric(float cos_theta, float f0) {
-    float n = f0_to_ior(f0);
-    return fresnel_dielectric_n(cos_theta, n);
+vec3 fresnelDielectric(float cosTheta, float f0) {
+    float n = f0ToIor(f0);
+    return fresnelDielectricN(cosTheta, n);
 }
 
 
-vec3 fresnel_conductor(float cos_theta, vec3 n, vec3 k) {
-    float cos2 = cos_theta * cos_theta;
+vec3 fresnelConductor(float cosTheta, vec3 n, vec3 k) {
+    float cos2 = cosTheta * cosTheta;
     vec3 nk2 = n * n + k * k;
-    vec3 two_n_cos = 2.0 * n * cos_theta;
+    vec3 twoNCos = 2.0 * n * cosTheta;
 
-    vec3 rs_num = nk2 - two_n_cos + cos2;
-    vec3 rs_den = nk2 + two_n_cos + cos2;
+    vec3 rsNum = nk2 - twoNCos + cos2;
+    vec3 rsDen = nk2 + twoNCos + cos2;
 
-    vec3 rp_num = nk2 * cos2 - two_n_cos + 1.0;
-    vec3 rp_den = nk2 * cos2 + two_n_cos + 1.0;
+    vec3 rpNum = nk2 * cos2 - twoNCos + 1.0;
+    vec3 rpDen = nk2 * cos2 + twoNCos + 1.0;
 
-    return clamp01(0.5 * (rs_num / rs_den + rp_num / rp_den));
+    return clamp01(0.5 * (rsNum / rsDen + rpNum / rpDen));
 }
 
 // Modified by Jessie to correctly account for fresnel

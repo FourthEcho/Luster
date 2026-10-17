@@ -18,20 +18,20 @@
 
 #include "/lib/global.glsl"
 
-layout(location = 0) out vec3 frag_color;
+layout(location = 0) out vec3 fragColor;
 
 /* RENDERTARGETS: 0 */
 
 in vec2 uv;
-in vec3 view_pos;
+in vec3 viewPos;
 
 #if MC_VERSION >= 260100
-in vec2 uv_mid;
+in vec2 uvMid;
 #endif
 
 flat in vec3 tint;
-flat in vec3 sun_color;
-flat in vec3 moon_color;
+flat in vec3 sunColor;
+flat in vec3 moonColor;
 
 // ------------
 //   Uniforms
@@ -42,53 +42,53 @@ uniform sampler2D gtexture;
 uniform int moonPhase;
 uniform int renderStage;
 
-uniform vec3 view_sun_dir;
+uniform vec3 viewSunDir;
 
-uniform float desert_sandstorm;
+uniform float desertSandstormWeather;
 uniform float rainStrength;
 
-#include "/lib/sky/atmosphere.glsl"
+#include "/lib/atmos/atmosphere.glsl"
 #include "/lib/util/color.glsl"
 
-const float vanilla_sun_luminance = 10.0;
-const float moon_luminance = 10.0;
+const float vanillaSunLuminance = 10.0;
+const float moonLuminance = 10.0;
 
 void main() {
-    vec2 new_uv = uv;
+    vec2 newUv = uv;
     vec2 offset;
 
     if (renderStage == MC_RENDER_STAGE_CUSTOM_SKY) {
-        frag_color = vec3(0.0);
-    } else if (dot(view_pos, view_sun_dir) > 0.0) {
+        fragColor = vec3(0.0);
+    } else if (dot(viewPos, viewSunDir) > 0.0) {
         // Sun
 
         // NB: not using renderStage to distinguish sun and moon because it's
         // broken in Iris for Minecraft 1.21.4
 
         // Cut out the sun itself (discard the halo around it)
-        if (max_of(abs(offset)) > 0.25) {
+        if (maxOf(abs(offset)) > 0.25) {
             discard;
         }
         offset = uv * 2.0 - 1.0;
 
 #ifdef vanillaSun
-        frag_color = texture(gtexture, new_uv).rgb;
-        frag_color = srgb_eotf_inv(frag_color) * rec709_to_working_color;
-        frag_color *= dot(frag_color, luminance_weights)
-            * (sunlight_color * vanilla_sun_luminance) * sun_color;
+        fragColor = texture(gtexture, newUv).rgb;
+        fragColor = srgbEotfInv(fragColor) * rec709ToWorkingColor;
+        fragColor *= dot(fragColor, luminanceWeights)
+            * (sunlightColor * vanillaSunLuminance) * sunColor;
 #else
-        frag_color = vec3(0.0);
+        fragColor = vec3(0.0);
 #endif
     } else {
         // Moon
 #ifdef vanillaMoon
-        frag_color
-            = texture(gtexture, new_uv).rgb * vec3(moonR, moonG, moonB);
+        fragColor
+            = texture(gtexture, newUv).rgb * vec3(moonR, moonG, moonB);
 
-        frag_color = srgb_eotf_inv(frag_color) * rec709_to_working_color;
-        frag_color *= sunlight_color * moon_luminance;
+        fragColor = srgbEotfInv(fragColor) * rec709ToWorkingColor;
+        fragColor *= sunlightColor * moonLuminance;
 #else
-        frag_color = vec3(0.0);
+        fragColor = vec3(0.0);
 #endif
     }
 }

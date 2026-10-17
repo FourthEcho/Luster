@@ -21,15 +21,15 @@
 out vec2 uv;
 
 #if defined WORLD_OVERWORLD
-flat out vec3 sun_color;
-flat out vec3 moon_color;
-flat out vec3 sky_color;
+flat out vec3 sunColor;
+flat out vec3 moonColor;
+flat out vec3 skyColor;
 
-flat out float aurora_amount;
-flat out mat2x3 aurora_colors;
+flat out float auroraAmount;
+flat out mat2x3 auroraColors;
 
-#include "/lib/sky/clouds/parameters.glsl"
-flat out CloudsParameters clouds_params;
+#include "/lib/atmos/sky/clouds/core/parameters.glsl"
+flat out CloudsParameters cloudsParams;
 #endif
 
 // ------------
@@ -37,6 +37,7 @@ flat out CloudsParameters clouds_params;
 // ------------
 
 uniform sampler3D depthtex0; // atmospheric scattering LUT
+uniform sampler2D noisetex;
 
 uniform int worldTime;
 uniform int worldDay;
@@ -51,30 +52,30 @@ uniform float eyeAltitude;
 uniform float rainStrength;
 uniform float wetness;
 
-uniform vec3 light_dir;
-uniform vec3 sun_dir;
-uniform vec3 moon_dir;
+uniform vec3 lightDir;
+uniform vec3 sunDir;
+uniform vec3 moonDir;
 
-uniform float world_age;
+uniform float worldAge;
 
-uniform float time_sunrise;
-uniform float time_noon;
-uniform float time_sunset;
-uniform float time_midnight;
+uniform float timeSunrise;
+uniform float timeNoon;
+uniform float timeSunset;
+uniform float timeMidnight;
 
-uniform float biome_cave;
-uniform float biome_temperate;
-uniform float biome_arid;
-uniform float biome_snowy;
-uniform float biome_taiga;
-uniform float biome_jungle;
-uniform float biome_swamp;
-uniform float biome_may_rain;
-uniform float biome_may_snow;
-uniform float biome_temperature;
-uniform float biome_humidity;
+uniform float biomeCave;
+uniform float biomeTemperate;
+uniform float biomeArid;
+uniform float biomeSnowy;
+uniform float biomeTaiga;
+uniform float biomeJungle;
+uniform float biomeSwamp;
+uniform float biomeMayRain;
+uniform float biomeMaySnow;
+uniform float biomeTemperature;
+uniform float biomeHumidity;
 
-uniform float desert_sandstorm;
+uniform float desertSandstormWeather;
 
 // ------------
 //   Includes
@@ -92,8 +93,8 @@ uniform float desert_sandstorm;
 #define LUSTER_INCLUDE_WEATHER_COLOR
 #include "/lib/light/colors.glsl"
 #undef LUSTER_INCLUDE_WEATHER_COLOR
-#include "/lib/sky/atmosphere.glsl"
-#include "/lib/sky/auroraColors.glsl"
+#include "/lib/atmos/atmosphere.glsl"
+#include "/lib/atmos/sky/aurora.glsl"
 #include "/lib/weather/clouds.glsl"
 #endif
 
@@ -101,33 +102,33 @@ void main() {
     uv = gl_MultiTexCoord0.xy;
 
 #if defined WORLD_OVERWORLD
-    sun_color = get_sun_exposure() * get_sun_tint();
-    moon_color = get_moon_exposure() * get_moon_tint();
+    sunColor = getSunExposure() * getSunTint();
+    moonColor = getMoonExposure() * getMoonTint();
 
-    const vec3 sky_dir = normalize(
+    const vec3 skyDir = normalize(
         vec3(0.0, 1.0, -0.8)
     ); // don't point direcly upwards to avoid the sun halo when the sun path
        // rotation is 0
-    sky_color = atmosphere_scattering(
-        sky_dir,
-        sun_color,
-        sun_dir,
-        moon_color,
-        moon_dir,
-        /* use_klein_nishina_phase */ false
+    skyColor = atmosphereScattering(
+        skyDir,
+        sunColor,
+        sunDir,
+        moonColor,
+        moonDir,
+        /* useKleinNishinaPhase */ false
     );
-    sky_color = (tau * 1.13) * sky_color;
-    sky_color = mix(sky_color, tau * get_weather_color(), rainStrength);
+    skyColor = (tau * 1.13) * skyColor;
+    skyColor = mix(skyColor, tau * getWeatherColor(), rainStrength);
 
-    aurora_amount = get_aurora_amount();
-    aurora_colors = get_aurora_colors();
+    auroraAmount = getAuroraAmount();
+    auroraColors = getAuroraColors();
 
-    clouds_params = get_clouds_parameters(get_weather());
+    cloudsParams = getCloudsParameters(getWeather());
 
-    sky_color += aurora_amount * auroraCloudLighting
-        * mix(aurora_colors[0], aurora_colors[1], 0.25);
+    skyColor += auroraAmount * auroraCloudLighting
+        * mix(auroraColors[0], auroraColors[1], 0.25);
 #endif
 
-    vec2 vertex_pos = gl_Vertex.xy * taau_render_scale;
-    gl_Position = vec4(vertex_pos * 2.0 - 1.0, 0.0, 1.0);
+    vec2 vertexPos = gl_Vertex.xy * taauViewportScale;
+    gl_Position = vec4(vertexPos * 2.0 - 1.0, 0.0, 1.0);
 }

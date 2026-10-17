@@ -18,7 +18,7 @@
 
 #include "/lib/global.glsl"
 
-layout(location = 0) out vec4 ao_history;
+layout(location = 0) out vec4 aoHistory;
 
 /* RENDERTARGETS: 6 */
 
@@ -26,5 +26,5 @@ uniform sampler2D colortex6;
 
 void main() {
     ivec2 texel = ivec2(gl_FragCoord.xy);
-    ao_history = texelFetch(colortex6, texel, 0);
+    aoHistory = texelFetch(colortex6, texel, 0);
 }

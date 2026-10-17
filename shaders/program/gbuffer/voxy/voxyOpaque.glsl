@@ -19,12 +19,12 @@
 #include "/lib/global.glsl"
 #include "/lib/util/encoding.glsl"
 
-layout(location = 0) out vec4 gbuffer_data_0;
+layout(location = 0) out vec4 gbufferData0;
 
 void voxy_emitFragment(VoxyFragmentParameters parameters) {
     // Get base properties
 
-    vec3 base_color = parameters.sampledColour.rgb * parameters.tinting.rgb;
+    vec3 baseColor = parameters.sampledColour.rgb * parameters.tinting.rgb;
 
     // from Cortex
     vec3 normal = vec3(
@@ -34,15 +34,15 @@ void voxy_emitFragment(VoxyFragmentParameters parameters) {
                   )
         * (float(int(parameters.face) & 1) * 2.0 - 1.0);
 
-    uint material_mask = max(parameters.customId - 10000u, 0u);
+    uint materialMask = max(parameters.customId - 10000u, 0u);
 
     // Encode gbuffer data
 
-    gbuffer_data_0.x = pack_unorm_2x8(base_color.rg);
-    gbuffer_data_0.y = pack_unorm_2x8(
-        base_color.b,
-        clamp01(float(material_mask) * rcp(255.0))
+    gbufferData0.x = packUnorm2x8(baseColor.rg);
+    gbufferData0.y = packUnorm2x8(
+        baseColor.b,
+        clamp01(float(materialMask) * rcp(255.0))
     );
-    gbuffer_data_0.z = pack_unorm_2x8(encode_unit_vector(normal));
-    gbuffer_data_0.w = pack_unorm_2x8(parameters.lightMap);
+    gbufferData0.z = packUnorm2x8(encodeUnitVector(normal));
+    gbufferData0.w = packUnorm2x8(parameters.lightMap);
 }

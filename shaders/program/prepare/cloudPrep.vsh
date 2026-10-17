@@ -20,8 +20,8 @@
 
 out vec2 uv;
 
-#include "/lib/sky/clouds/parameters.glsl"
-flat out CloudsParameters clouds_params;
+#include "/lib/atmos/sky/clouds/core/parameters.glsl"
+flat out CloudsParameters cloudsParams;
 
 
 // ------------
@@ -40,31 +40,31 @@ uniform float frameTimeCounter;
 
 uniform int moonPhase;
 
-uniform vec3 light_dir;
-uniform vec3 sun_dir;
-uniform vec3 moon_dir;
+uniform vec3 lightDir;
+uniform vec3 sunDir;
+uniform vec3 moonDir;
 
-uniform float world_age;
-uniform float eye_skylight;
+uniform float worldAge;
+uniform float eyeSkylight;
 
-uniform float time_sunrise;
-uniform float time_noon;
-uniform float time_sunset;
-uniform float time_midnight;
+uniform float timeSunrise;
+uniform float timeNoon;
+uniform float timeSunset;
+uniform float timeMidnight;
 
-uniform float biome_cave;
-uniform float biome_temperate;
-uniform float biome_arid;
-uniform float biome_snowy;
-uniform float biome_taiga;
-uniform float biome_jungle;
-uniform float biome_swamp;
-uniform float biome_may_rain;
-uniform float biome_may_snow;
-uniform float biome_temperature;
-uniform float biome_humidity;
+uniform float biomeCave;
+uniform float biomeTemperate;
+uniform float biomeArid;
+uniform float biomeSnowy;
+uniform float biomeTaiga;
+uniform float biomeJungle;
+uniform float biomeSwamp;
+uniform float biomeMayRain;
+uniform float biomeMaySnow;
+uniform float biomeTemperature;
+uniform float biomeHumidity;
 
-uniform float desert_sandstorm;
+uniform float desertSandstormWeather;
 
 #include "/lib/weather/clouds.glsl"
 
@@ -72,8 +72,8 @@ uniform float desert_sandstorm;
 void main() {
     uv = gl_MultiTexCoord0.xy;
 
-    Weather weather = get_weather();
-    clouds_params = get_clouds_parameters(weather);
+    Weather weather = getWeather();
+    cloudsParams = getCloudsParameters(weather);
 
 
     gl_Position = vec4(gl_Vertex.xy * 2.0 - 1.0, 0.0, 1.0);

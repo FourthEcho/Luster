@@ -18,25 +18,25 @@
 
 #include "/lib/global.glsl"
 
-layout(location = 0) out vec4 scene_color;
+layout(location = 0) out vec4 sceneColor;
 layout(
     location = 1
-) out vec4 gbuffer_data_0; // albedo, block ID, flat normal, light levels
+) out vec4 gbufferData0; // albedo, block ID, flat normal, light levels
 layout(
     location = 2
-) out vec4 gbuffer_data_1; // detailed normal, specular map (optional)
+) out vec4 gbufferData1; // detailed normal, specular map (optional)
 
 /* RENDERTARGETS: 0,1,2 */
 
-flat in vec2 light_levels;
+flat in vec2 lightLevels;
 flat in vec4 tint;
 
 // ------------
 //   Uniforms
 // ------------
 
-uniform vec2 view_res;
-uniform vec2 view_pixel_size;
+uniform vec2 viewRes;
+uniform vec2 viewPixelSize;
 
 uniform int renderStage;
 uniform float frameTimeCounter;
@@ -51,13 +51,13 @@ const vec3 normal = vec3(0.0, 1.0, 0.0);
 // This shader and vanilla are still both affected by Z-fighting in some areas,
 
 
-float fixup_translucent(float alpha) {
+float fixupTranslucent(float alpha) {
     return mix(alpha * 0.25, alpha, step(0.9, alpha));
 }
 
 void main() {
 #if defined taa && defined taau
-    vec2 coord = gl_FragCoord.xy * view_pixel_size * rcp(taau_render_scale);
+    vec2 coord = gl_FragCoord.xy * viewPixelSize * rcp(taauViewportScale);
     if (clamp01(coord) != coord) {
         discard;
     }
@@ -69,47 +69,47 @@ void main() {
         discard;
     }
 
-    vec4 base_color = tint;
-    vec2 adjusted_light_levels = light_levels;
+    vec4 baseColor = tint;
+    vec2 adjustedLightLevels = lightLevels;
 
 #if defined PROGRAM_GBUFFERS_LINE && boxMode != boxModeNone
     if (renderStage == MC_RENDER_STAGE_OUTLINE) {
 #if boxMode == boxModeColor
-        base_color.rgb = vec3(boxColorR, boxColorG, boxColorB);
+        baseColor.rgb = vec3(boxColorR, boxColorG, boxColorB);
 #else // boxModeRainbow
-        vec2 uv = gl_FragCoord.xy * view_pixel_size;
-        base_color.rgb = hsv_to_rgb(
+        vec2 uv = gl_FragCoord.xy * viewPixelSize;
+        baseColor.rgb = hsvToRgb(
             vec3(fract(uv.y + uv.x * uv.y + frameTimeCounter * 0.1), 1.0, 1.0)
         );
 #endif
 
-        adjusted_light_levels.x
-            = clamp01(adjusted_light_levels.x + boxEmission);
+        adjustedLightLevels.x
+            = clamp01(adjustedLightLevels.x + boxEmission);
     }
 #endif
 
-    scene_color.rgb = srgb_eotf_inv(base_color.rgb) * rec709_to_working_color;
+    sceneColor.rgb = srgbEotfInv(baseColor.rgb) * rec709ToWorkingColor;
     // see note in function
-    scene_color.a = fixup_translucent(tint.a);
+    sceneColor.a = fixupTranslucent(tint.a);
 
     if (renderStage == MC_RENDER_STAGE_OUTLINE) {
-        scene_color.rgb *= 1.0 + boxEmission;
+        sceneColor.rgb *= 1.0 + boxEmission;
     }
 
-    vec2 encoded_normal = encode_unit_vector(normal);
+    vec2 encodedNormal = encodeUnitVector(normal);
 
-    gbuffer_data_0.x = pack_unorm_2x8(base_color.rg);
-    gbuffer_data_0.y = pack_unorm_2x8(base_color.b, 0.0);
-    gbuffer_data_0.z = pack_unorm_2x8(encode_unit_vector(normal));
-    gbuffer_data_0.w = pack_unorm_2x8(adjusted_light_levels);
+    gbufferData0.x = packUnorm2x8(baseColor.rg);
+    gbufferData0.y = packUnorm2x8(baseColor.b, 0.0);
+    gbufferData0.z = packUnorm2x8(encodeUnitVector(normal));
+    gbufferData0.w = packUnorm2x8(adjustedLightLevels);
 
 #ifdef normalMapping
-    gbuffer_data_1.xy = encoded_normal;
+    gbufferData1.xy = encodedNormal;
 #endif
 
 #ifdef specularMapping
-    const vec4 specular_map = vec4(0.0);
-    gbuffer_data_1.z = pack_unorm_2x8(specular_map.xy);
-    gbuffer_data_1.w = pack_unorm_2x8(specular_map.zw);
+    const vec4 specularMap = vec4(0.0);
+    gbufferData1.z = packUnorm2x8(specularMap.xy);
+    gbufferData1.w = packUnorm2x8(specularMap.zw);
 #endif
 }

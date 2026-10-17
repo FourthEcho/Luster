@@ -18,19 +18,19 @@
 
 #include "/lib/global.glsl"
 
-layout(location = 0) out vec3 fog_transmittance;
-layout(location = 1) out vec3 fog_scattering;
+layout(location = 0) out vec3 fogTransmittance;
+layout(location = 1) out vec3 fogScattering;
 
 /* RENDERTARGETS: 6,7 */
 
 in vec2 uv;
 
-flat in vec3 ambient_color;
-flat in vec3 light_color;
+flat in vec3 ambientColor;
+flat in vec3 lightColor;
 
 #if defined WORLD_OVERWORLD
-#include "/lib/fog/overworld/parameters.glsl"
-flat in OverworldFogParameters fog_params;
+#include "/lib/atmos/fog/overworld/parameters.glsl"
+flat in OverworldFogParameters fogParams;
 #endif
 
 // ------------
@@ -85,38 +85,38 @@ uniform int worldTime;
 uniform int moonPhase;
 uniform int frameCounter;
 
-uniform float world_age;
+uniform float worldAge;
 
-uniform vec3 light_dir;
-uniform vec3 sun_dir;
-uniform vec3 moon_dir;
+uniform vec3 lightDir;
+uniform vec3 sunDir;
+uniform vec3 moonDir;
 
-uniform vec2 view_res;
-uniform vec2 view_pixel_size;
-uniform vec2 taa_offset;
+uniform vec2 viewRes;
+uniform vec2 viewPixelSize;
+uniform vec2 taaOffset;
 
-uniform float eye_skylight;
-uniform float desert_sandstorm;
+uniform float eyeSkylight;
+uniform float desertSandstormWeather;
 
-uniform float time_sunrise;
-uniform float time_noon;
-uniform float time_sunset;
-uniform float time_midnight;
+uniform float timeSunrise;
+uniform float timeNoon;
+uniform float timeSunset;
+uniform float timeMidnight;
 
 // ------------
 //   Includes
 // ------------
 
 #if defined WORLD_OVERWORLD
-#include "/lib/fog/overworld/raymarched.glsl"
+#include "/lib/atmos/fog/overworld/raymarched.glsl"
 #endif
 
 #if defined WORLD_END
-#include "/lib/fog/endFogVl.glsl"
+#include "/lib/atmos/fog/volumetric/end.glsl"
 #endif
 
-#include "/lib/fog/waterFogVl.glsl"
-#include "/lib/fog/netherFogVl.glsl"
+#include "/lib/atmos/fog/volumetric/water.glsl"
+#include "/lib/atmos/fog/volumetric/nether.glsl"
 #include "/lib/misc/lodModSupport.glsl"
 #include "/lib/util/dithering.glsl"
 #include "/lib/util/encoding.glsl"
@@ -124,56 +124,56 @@ uniform float time_midnight;
 #include "/lib/util/spaceConversion.glsl"
 
 void main() {
-    ivec2 fog_texel = ivec2(gl_FragCoord.xy);
-    ivec2 view_texel
-        = ivec2(gl_FragCoord.xy * taau_render_scale * rcp(0.50));
+    ivec2 fogTexel = ivec2(gl_FragCoord.xy);
+    ivec2 viewTexel
+        = ivec2(gl_FragCoord.xy * taauViewportScale * rcp(0.50));
 
-    float depth0 = texelFetch(depthtex0, view_texel, 0).x;
-    float depth1 = texelFetch(depthtex1, view_texel, 0).x;
-    vec4 gbuffer_data_0 = texelFetch(colortex1, view_texel, 0);
+    float depth0 = texelFetch(depthtex0, viewTexel, 0).x;
+    float depth1 = texelFetch(depthtex1, viewTexel, 0).x;
+    vec4 gbufferData0 = texelFetch(colortex1, viewTexel, 0);
 
 #ifdef LOD_MOD_ACTIVE
-    mat4 projection_matrix, projection_matrix_inverse;
-    bool is_lod;
-    float depth_lod = texelFetch(lod_depth_tex, view_texel, 0).x;
+    mat4 projectionMatrix, projectionMatrixInverse;
+    bool isLod;
+    float depthLod = texelFetch(lodDepthTex, viewTexel, 0).x;
 
     if (depth0 == 1.0) {
-        is_lod = true;
-        depth0 = depth_lod;
-        depth1 = depth_lod;
-        projection_matrix = lod_projection_matrix;
-        projection_matrix_inverse = lod_projection_matrix_inverse;
+        isLod = true;
+        depth0 = depthLod;
+        depth1 = depthLod;
+        projectionMatrix = lodProjectionMatrix;
+        projectionMatrixInverse = lodProjectionMatrixInverse;
     } else {
-        is_lod = false;
-        projection_matrix = gbufferProjection;
-        projection_matrix_inverse = gbufferProjectionInverse;
+        isLod = false;
+        projectionMatrix = gbufferProjection;
+        projectionMatrixInverse = gbufferProjectionInverse;
     }
 #else
-#define is_lod false
-#define projection_matrix gbufferProjection
-#define projection_matrix_inverse gbufferProjectionInverse
+#define isLod false
+#define projectionMatrix gbufferProjection
+#define projectionMatrixInverse gbufferProjectionInverse
 #endif
 
-    float skylight = unpack_unorm_2x8(gbuffer_data_0.w).y;
+    float skylight = unpackUnorm2x8(gbufferData0.w).y;
 
-    vec3 view_pos = screen_to_view_space(
-        projection_matrix_inverse,
+    vec3 viewPos = screenToViewSpace(
+        projectionMatrixInverse,
         vec3(uv, depth0),
         true
     );
-    vec3 scene_pos = view_to_scene_space(view_pos);
-    vec3 world_pos = scene_pos + cameraPosition;
+    vec3 scenePos = viewToSceneSpace(viewPos);
+    vec3 worldPos = scenePos + cameraPosition;
 
-    vec3 view_back_pos = screen_to_view_space(vec3(uv, depth1), true);
-    vec3 scene_back_pos = view_to_scene_space(view_back_pos);
-    vec3 world_back_pos = scene_back_pos + cameraPosition;
+    vec3 viewBackPos = screenToViewSpace(vec3(uv, depth1), true);
+    vec3 sceneBackPos = viewToSceneSpace(viewBackPos);
+    vec3 worldBackPos = sceneBackPos + cameraPosition;
 
 
     // Replaces the old white-noise noisetex tap.
-    float dither = interleaved_gradient_noise(vec2(fog_texel), frameCounter);
+    float dither = interleavedGradientNoise(vec2(fogTexel), frameCounter);
 
-    vec3 world_start_pos = gbufferModelViewInverse[3].xyz + cameraPosition;
-    vec3 world_end_pos = world_pos;
+    vec3 worldStartPos = gbufferModelViewInverse[3].xyz + cameraPosition;
+    vec3 worldEndPos = worldPos;
 
     // Volumetric lighting
 
@@ -181,50 +181,50 @@ void main() {
     switch (isEyeInWater) {
         case 0:
 #if defined WORLD_OVERWORLD
-            mat2x3 fog = raymarch_air_fog(
-                world_start_pos,
-                world_end_pos,
+            mat2x3 fog = raymarchAirFog(
+                worldStartPos,
+                worldEndPos,
                 depth0 == 1.0,
                 skylight,
                 dither
             );
 #elif defined WORLD_NETHER
-            mat2x3 fog = raymarch_nether_fog(
-                world_start_pos,
-                world_end_pos,
+            mat2x3 fog = raymarchNetherFog(
+                worldStartPos,
+                worldEndPos,
                 depth0 == 1.0,
                 dither
             );
 #elif defined WORLD_END
-            mat2x3 fog = raymarch_end_fog(
-                world_start_pos,
-                world_end_pos,
+            mat2x3 fog = raymarchEndFog(
+                worldStartPos,
+                worldEndPos,
                 depth0 == 1.0,
                 dither
             );
 #endif
 
-            fog_scattering = fog[0];
-            fog_transmittance = fog[1];
+            fogScattering = fog[0];
+            fogTransmittance = fog[1];
 
             break;
 
         case 1:
-            mat2x3 water_fog = raymarch_water_fog(
-                world_start_pos,
-                world_end_pos,
+            mat2x3 waterFog = raymarchWaterFog(
+                worldStartPos,
+                worldEndPos,
                 depth0 == 1.0,
                 dither
             );
 
-            fog_scattering = water_fog[0];
-            fog_transmittance = water_fog[1];
+            fogScattering = waterFog[0];
+            fogTransmittance = waterFog[1];
 
             break;
 
         default:
-            fog_scattering = vec3(0.0);
-            fog_transmittance = vec3(1.0);
+            fogScattering = vec3(0.0);
+            fogTransmittance = vec3(1.0);
 
             break;
 
@@ -233,8 +233,8 @@ void main() {
             break;
     }
 #else
-    fog_scattering = vec3(0.0);
-    fog_transmittance = vec3(1.0);
+    fogScattering = vec3(0.0);
+    fogTransmittance = vec3(1.0);
 #endif
 
 }

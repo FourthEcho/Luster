@@ -41,9 +41,9 @@
 uniform vec3 eyePosition;
 
 #ifdef waterDisplacement
-float gerstner_wave(
+float gerstnerWave(
     vec2 coord,
-    vec2 wave_dir,
+    vec2 waveDir,
     float t,
     float noise,
     float wavelength
@@ -54,22 +54,22 @@ float gerstner_wave(
     float k = tau / wavelength;
     float w = sqrt(g * k);
 
-    float x = w * t - k * (dot(wave_dir, coord) + noise);
+    float x = w * t - k * (dot(waveDir, coord) + noise);
 
     return sqr(sin(x) * 0.5 + 0.5);
 }
 
-float get_water_displacement(vec3 world_pos, float skylight) {
-    const float wave_frequency = 0.3 * waterWaveFrequency;
-    const float wave_speed = 0.37 * waterWaveSpeedStill;
-    const float wave_angle = 30.0 * degree;
+float getWaterDisplacement(vec3 worldPos, float skylight) {
+    const float waveFrequency = 0.3 * waterWaveFrequency;
+    const float waveSpeed = 0.37 * waterWaveSpeedStill;
+    const float waveAngle = 30.0 * degree;
     const float wavelength = 1.0;
-    const vec2 wave_dir = vec2(cos(wave_angle), sin(wave_angle));
+    const vec2 waveDir = vec2(cos(waveAngle), sin(waveAngle));
 
-    float wave = gerstner_wave(
-        world_pos.xy * wave_frequency,
-        wave_dir,
-        frameTimeCounter * wave_speed,
+    float wave = gerstnerWave(
+        worldPos.xy * waveFrequency,
+        waveDir,
+        frameTimeCounter * waveSpeed,
         0.0,
         wavelength
     );
@@ -78,7 +78,7 @@ float get_water_displacement(vec3 world_pos, float skylight) {
 #ifdef LOD_MOD_ACTIVE
     // Attenuate displacement towards the edge of the render distance, to
     // prevent seam between vanilla and LoD terrain
-    float fade = cubic_length(world_pos.xz - cameraPosition.xz) / far;
+    float fade = cubicLength(worldPos.xz - cameraPosition.xz) / far;
 
     wave *= exp2(-8.0 * cube(fade));
     ;
@@ -89,117 +89,117 @@ float get_water_displacement(vec3 world_pos, float skylight) {
 #endif
 
 #if defined wavingPlants || defined wavingLeaves
-vec3 get_wind_displacement(
-    vec3 world_pos,
-    float wind_speed,
-    float wind_strength,
-    bool is_tall_plant_top_vertex
+vec3 getWindDisplacement(
+    vec3 worldPos,
+    float windSpeed,
+    float windStrength,
+    bool isTallPlantTopVertex
 ) {
-    const float wind_angle = 30.0 * degree;
-    const vec2 wind_dir = vec2(cos(wind_angle), sin(wind_angle));
+    const float windAngle = 30.0 * degree;
+    const vec2 windDir = vec2(cos(windAngle), sin(windAngle));
 
 #if defined WORLD_OVERWORLD
     // Adjust wind strength based on weather windiness
-    float windiness = weather_wind();
-    wind_strength *= 0.5 + windiness;
+    float windiness = weatherWind();
+    windStrength *= 0.5 + windiness;
 #endif
 
-    float t = wind_speed * frameTimeCounter;
+    float t = windSpeed * frameTimeCounter;
 
-    float gust_amount
-        = texture(noisetex, 0.05 * (world_pos.xz + wind_dir * t)).y;
-    gust_amount *= gust_amount;
+    float gustAmount
+        = texture(noisetex, 0.05 * (worldPos.xz + windDir * t)).y;
+    gustAmount *= gustAmount;
 
-    vec3 gust = vec3(wind_dir * gust_amount, 0.1 * gust_amount).xzy;
+    vec3 gust = vec3(windDir * gustAmount, 0.1 * gustAmount).xzy;
 
-    world_pos = 32.0 * world_pos + 3.0 * t
-        + vec3(0.0, golden_angle, 2.0 * golden_angle);
-    vec3 wobble = sin(world_pos) + 0.5 * sin(2.0 * world_pos)
-        + 0.25 * sin(4.0 * world_pos);
+    worldPos = 32.0 * worldPos + 3.0 * t
+        + vec3(0.0, goldenAngle, 2.0 * goldenAngle);
+    vec3 wobble = sin(worldPos) + 0.5 * sin(2.0 * worldPos)
+        + 0.25 * sin(4.0 * worldPos);
 
-    if (is_tall_plant_top_vertex) {
+    if (isTallPlantTopVertex) {
         gust *= 2.0;
         wobble *= 0.5;
     }
 
-    return wind_strength * (gust + 0.1 * wobble);
+    return windStrength * (gust + 0.1 * wobble);
 }
 #endif
 
-vec3 animate_vertex(
-    vec3 world_pos,
-    bool is_top_vertex,
+vec3 animateVertex(
+    vec3 worldPos,
+    bool isTopVertex,
     float skylight,
-    uint material_mask
+    uint materialMask
 ) {
-    float wind_speed = 0.3;
-    float wind_strength = sqr(skylight) * (0.25 + 0.66 * rainStrength);
+    float windSpeed = 0.3;
+    float windStrength = sqr(skylight) * (0.25 + 0.66 * rainStrength);
 
     // Displace plants close to the player
-    vec3 to_player = eyePosition - world_pos;
-    vec3 player_displacement
+    vec3 toPlayer = eyePosition - worldPos;
+    vec3 playerDisplacement
         = vec3(
-              -6.0 * to_player.xz
-                  * exp2(-length(to_player * vec3(6.0, 2.0, 6.0))),
+              -6.0 * toPlayer.xz
+                  * exp2(-length(toPlayer * vec3(6.0, 2.0, 6.0))),
               0.0
         )
               .xzy;
 
-    switch (material_mask) {
+    switch (materialMask) {
 #ifdef waterDisplacement
         case MATERIAL_WATER:
-            world_pos.y += get_water_displacement(world_pos, skylight);
-            return world_pos;
+            worldPos.y += getWaterDisplacement(worldPos, skylight);
+            return worldPos;
 #endif
 
 #ifdef wavingPlants
         case MATERIAL_SMALL_PLANTS:
         case MATERIAL_OPEN_EYEBLOSSOM:
-            return world_pos
-                + (get_wind_displacement(
-                       world_pos,
-                       wind_speed,
-                       wind_strength,
+            return worldPos
+                + (getWindDisplacement(
+                       worldPos,
+                       windSpeed,
+                       windStrength,
                        false
                    )
-                   + player_displacement)
-                * float(is_top_vertex);
+                   + playerDisplacement)
+                * float(isTopVertex);
 
         case MATERIAL_TALL_PLANTS_LOWER:
-            return world_pos
-                + (get_wind_displacement(
-                       world_pos,
-                       wind_speed,
-                       wind_strength,
+            return worldPos
+                + (getWindDisplacement(
+                       worldPos,
+                       windSpeed,
+                       windStrength,
                        false
                    )
-                   + player_displacement)
-                * float(is_top_vertex);
+                   + playerDisplacement)
+                * float(isTopVertex);
 
         case MATERIAL_TALL_PLANTS_UPPER:
-            return world_pos
-                + (get_wind_displacement(
-                       world_pos,
-                       wind_speed,
-                       wind_strength,
-                       is_top_vertex
+            return worldPos
+                + (getWindDisplacement(
+                       worldPos,
+                       windSpeed,
+                       windStrength,
+                       isTopVertex
                    )
-                   + player_displacement);
+                   + playerDisplacement);
 #endif
 
 #ifdef wavingLeaves
         case MATERIAL_LEAVES:
-            return world_pos
-                + get_wind_displacement(
-                       world_pos,
-                       wind_speed,
-                       wind_strength * 0.5,
+            return worldPos
+                + getWindDisplacement(
+                       worldPos,
+                       windSpeed,
+                       windStrength * 0.5,
                        false
                 );
 #endif
 
         default:
-            return world_pos;
+            return worldPos;
     }
 }
 

@@ -22,7 +22,7 @@
 #include "/lib/util/fastMath.glsl"
 #include "/lib/util/random.glsl"
 
-uniform float day_factor;
+uniform float dayFactor;
 
 struct Weather {
     float temperature; // [0, 1]
@@ -31,18 +31,18 @@ struct Weather {
     float turbulence; // [0, 1]
 };
 
-float weather_temperature() {
-    const float temperature_variation_speed = 0.37 * golden_ratio * rcp(600.0)
+float weatherTemperature() {
+    const float temperatureVariationSpeed = 0.37 * goldenRatio * rcp(600.0)
         * weatherTemperatureVariationSpeed;
-    const float random_temperature_min = 0.0;
-    const float random_temperature_max = 1.0;
-    const float biome_temperature_influence = 0.1;
+    const float randomTemperatureMin = 0.0;
+    const float randomTemperatureMax = 1.0;
+    const float biomeTemperatureInfluence = 0.1;
 
 #ifdef randomWeatherVariation
     float temperature = mix(
-        random_temperature_min,
-        random_temperature_max,
-        noise_1d(world_age * temperature_variation_speed + 2.5)
+        randomTemperatureMin,
+        randomTemperatureMax,
+        noise1d(worldAge * temperatureVariationSpeed + 2.5)
     );
 #else
     float temperature = 0.5;
@@ -50,13 +50,13 @@ float weather_temperature() {
 
     // Time-of-day-based variation
 
-    temperature -= 0.2 * time_sunrise + 0.2 * time_midnight;
+    temperature -= 0.2 * timeSunrise + 0.2 * timeMidnight;
 
     // Biome-based variation
 
 #ifdef biomeWeatherVariation
     temperature
-        *= 1.0 + (biome_temperature - 0.6) * biome_temperature_influence;
+        *= 1.0 + (biomeTemperature - 0.6) * biomeTemperatureInfluence;
 #endif
 
     // User adjustment
@@ -66,18 +66,18 @@ float weather_temperature() {
     return clamp01(temperature);
 }
 
-float weather_humidity() {
-    const float humidity_variation_speed
-        = 0.37 * golden_ratio * rcp(600.0) * weatherHumidityVariationSpeed;
-    const float random_humidity_min = 0.2;
-    const float random_humidity_max = 0.8;
-    const float biome_humidity_influence = 0.1;
+float weatherHumidity() {
+    const float humidityVariationSpeed
+        = 0.37 * goldenRatio * rcp(600.0) * weatherHumidityVariationSpeed;
+    const float randomHumidityMin = 0.2;
+    const float randomHumidityMax = 0.8;
+    const float biomeHumidityInfluence = 0.1;
 
 #ifdef randomWeatherVariation
     float humidity = mix(
-        random_humidity_min,
-        random_humidity_max,
-        noise_1d(world_age * humidity_variation_speed + 46.618)
+        randomHumidityMin,
+        randomHumidityMax,
+        noise1d(worldAge * humidityVariationSpeed + 46.618)
     );
 #else
     float humidity = 0.5;
@@ -86,7 +86,7 @@ float weather_humidity() {
     // Biome-based variation
 
 #ifdef biomeWeatherVariation
-    humidity *= 1.0 + (biome_humidity + 0.2) * biome_humidity_influence;
+    humidity *= 1.0 + (biomeHumidity + 0.2) * biomeHumidityInfluence;
 #endif
 
     // Weather-based variation
@@ -100,17 +100,17 @@ float weather_humidity() {
     return clamp01(humidity);
 }
 
-float weather_wind() {
-    const float wind_variation_speed
-        = 0.5 * golden_ratio * rcp(600.0) * weatherWindVariationSpeed;
-    const float random_wind_min = 0.0;
-    const float random_wind_max = 1.0;
+float weatherWind() {
+    const float windVariationSpeed
+        = 0.5 * goldenRatio * rcp(600.0) * weatherWindVariationSpeed;
+    const float randomWindMin = 0.0;
+    const float randomWindMax = 1.0;
 
 #ifdef randomWeatherVariation
     float wind = mix(
-        random_wind_min,
-        random_wind_max,
-        noise_1d(world_age * wind_variation_speed + 83.236)
+        randomWindMin,
+        randomWindMax,
+        noise1d(worldAge * windVariationSpeed + 83.236)
     );
 #else
     float wind = 0.5;
@@ -127,22 +127,22 @@ float weather_wind() {
     return clamp01(wind);
 }
 
-float weather_turbulence(Weather weather) {
+float weatherTurbulence(Weather weather) {
 
 
     // dimension driven by wind variation with temperature-contrast and
 
 
-    const float turbulence_variation_speed
-        = 0.61 * golden_ratio * rcp(600.0) * weatherTurbulenceVariationSpeed;
-    const float random_turbulence_min = 0.15;
-    const float random_turbulence_max = 0.85;
+    const float turbulenceVariationSpeed
+        = 0.61 * goldenRatio * rcp(600.0) * weatherTurbulenceVariationSpeed;
+    const float randomTurbulenceMin = 0.15;
+    const float randomTurbulenceMax = 0.85;
 
 #ifdef randomWeatherVariation
     float turbulence = mix(
-        random_turbulence_min,
-        random_turbulence_max,
-        noise_1d(world_age * turbulence_variation_speed + 131.071)
+        randomTurbulenceMin,
+        randomTurbulenceMax,
+        noise1d(worldAge * turbulenceVariationSpeed + 131.071)
     );
 #else
     float turbulence = 0.5;
@@ -163,13 +163,13 @@ float weather_turbulence(Weather weather) {
     return clamp01(turbulence);
 }
 
-Weather get_weather() {
+Weather getWeather() {
     Weather weather;
 
-    weather.temperature = weather_temperature();
-    weather.humidity = weather_humidity();
-    weather.wind = weather_wind();
-    weather.turbulence = weather_turbulence(weather);
+    weather.temperature = weatherTemperature();
+    weather.humidity = weatherHumidity();
+    weather.wind = weatherWind();
+    weather.turbulence = weatherTurbulence(weather);
 
     return weather;
 }

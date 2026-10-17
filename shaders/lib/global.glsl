@@ -19,7 +19,7 @@
 */
 
 #ifdef HAS_F16
-#define f16 float16_t
+#define f16 float16T
 #else
 #define f16 float
 #define f16vec2 vec2
@@ -87,19 +87,19 @@ const float eps = 1e-6;
 const float e = exp(1.0);
 const float pi = acos(-1.0);
 const float tau = 2.0 * pi;
-const float half_pi = 0.5 * pi;
-const float rcp_pi = 1.0 / pi;
+const float halfPi = 0.5 * pi;
+const float rcpPi = 1.0 / pi;
 const float degree
     = tau / 360.0; // Size of one degree in radians, useful because radians() is
                    // not a constant expression on all platforms
-const float golden_ratio = 0.5 + 0.5 * sqrt(5.0);
-const float golden_angle = tau / golden_ratio / golden_ratio;
-const float hand_depth = 0.56;
+const float goldenRatio = 0.5 + 0.5 * sqrt(5.0);
+const float goldenAngle = tau / goldenRatio / goldenRatio;
+const float handDepth = 0.56;
 
 #if defined taa && defined taau
-const float taau_render_scale = taauRenderScale;
+const float taauViewportScale = taauRenderScale;
 #else
-const float taau_render_scale = 1.0;
+const float taauViewportScale = 1.0;
 #endif
 
 // Helper functions
@@ -119,45 +119,45 @@ vec4 sqr(vec4 v) { return v * v; }
 
 float cube(float x) { return x * x * x; }
 
-float max_of(vec2 v) { return max(v.x, v.y); }
+float maxOf(vec2 v) { return max(v.x, v.y); }
 
-float max_of(vec3 v) { return max(v.x, max(v.y, v.z)); }
+float maxOf(vec3 v) { return max(v.x, max(v.y, v.z)); }
 
-float max_of(vec4 v) { return max(v.x, max(v.y, max(v.z, v.w))); }
+float maxOf(vec4 v) { return max(v.x, max(v.y, max(v.z, v.w))); }
 
-float min_of(vec2 v) { return min(v.x, v.y); }
+float minOf(vec2 v) { return min(v.x, v.y); }
 
-float min_of(vec3 v) { return min(v.x, min(v.y, v.z)); }
+float minOf(vec3 v) { return min(v.x, min(v.y, v.z)); }
 
-float min_of(vec4 v) { return min(v.x, min(v.y, min(v.z, v.w))); }
+float minOf(vec4 v) { return min(v.x, min(v.y, min(v.z, v.w))); }
 
-vec3 min_of(vec3 a, vec3 b, vec3 c, vec3 d, vec3 f) {
+vec3 minOf(vec3 a, vec3 b, vec3 c, vec3 d, vec3 f) {
     return min(a, min(b, min(c, min(d, f))));
 }
 
-vec3 max_of(vec3 a, vec3 b, vec3 c, vec3 d, vec3 f) {
+vec3 maxOf(vec3 a, vec3 b, vec3 c, vec3 d, vec3 f) {
     return max(a, max(b, max(c, max(d, f))));
 }
 
-float length_squared(vec2 v) { return dot(v, v); }
+float lengthSquared(vec2 v) { return dot(v, v); }
 
-float length_squared(vec3 v) { return dot(v, v); }
+float lengthSquared(vec3 v) { return dot(v, v); }
 
-vec2 normalize_safe(vec2 v) { return v == vec2(0.0) ? v : normalize(v); }
+vec2 normalizeSafe(vec2 v) { return v == vec2(0.0) ? v : normalize(v); }
 
-vec3 normalize_safe(vec3 v) { return v == vec3(0.0) ? v : normalize(v); }
+vec3 normalizeSafe(vec3 v) { return v == vec3(0.0) ? v : normalize(v); }
 
 // Remapping functions
 
-float linear_step(float edge0, float edge1, float x) {
+float linearStep(float edge0, float edge1, float x) {
     return clamp01((x - edge0) / (edge1 - edge0));
 }
 
-float linear_step_unclamped(float edge0, float edge1, float x) {
+float linearStepUnclamped(float edge0, float edge1, float x) {
     return (x - edge0) / (edge1 - edge0);
 }
 
-vec2 linear_step(vec2 edge0, vec2 edge1, vec2 x) {
+vec2 linearStep(vec2 edge0, vec2 edge1, vec2 x) {
     return clamp01((x - edge0) / (edge1 - edge0));
 }
 
@@ -178,12 +178,12 @@ vec3 lift(vec3 x, float amount) {
 
 // Smoothing function used by smoothstep
 // Zero derivative at zero and one
-float cubic_smooth(float x) { return sqr(x) * (3.0 - 2.0 * x); }
+float cubicSmooth(float x) { return sqr(x) * (3.0 - 2.0 * x); }
 
-vec2 cubic_smooth(vec2 x) { return sqr(x) * (3.0 - 2.0 * x); }
+vec2 cubicSmooth(vec2 x) { return sqr(x) * (3.0 - 2.0 * x); }
 
 
-float get_uv_from_unit_range(float values, const int res) {
+float getUvFromUnitRange(float values, const int res) {
     return values * (1.0 - 1.0 / float(res)) + (0.5 / float(res));
 }
 
@@ -192,7 +192,7 @@ float get_uv_from_unit_range(float values, const int res) {
 
 float pulse(float x, float center, float width) {
     x = abs(x - center) / width;
-    return x > 1.0 ? 0.0 : 1.0 - cubic_smooth(x);
+    return x > 1.0 ? 0.0 : 1.0 - cubicSmooth(x);
 }
 
 float pulse(float x, float center, float width, const float period) {
@@ -203,7 +203,7 @@ float pulse(float x, float center, float width, const float period) {
 }
 
 
-float cubic_length(vec2 v) {
+float cubicLength(vec2 v) {
     return pow(cube(abs(v.x)) + cube(abs(v.y)), rcp(3.0));
 }
 
@@ -221,29 +221,29 @@ vec4 project(mat4 m, vec3 pos) {
     return vec4(m[0].x, m[1].y, m[2].zw) * pos.xyzz + m[3];
 }
 
-vec3 project_and_divide(mat4 m, vec3 pos) {
+vec3 projectAndDivide(mat4 m, vec3 pos) {
     vec4 homogenous = project(m, pos);
     return homogenous.xyz / homogenous.w;
 }
 
-vec3 project_ortho(mat4 m, vec3 pos) {
+vec3 projectOrtho(mat4 m, vec3 pos) {
     return diagonal(m).xyz * pos + m[3].xyz;
 }
 
 // Hand
 
-void fix_hand_depth(inout float depth, out bool is_hand) {
-    is_hand = depth < hand_depth; // NB: Not the same as mc_hand_depth
-    if (is_hand) {
+void fixHandDepth(inout float depth, out bool isHand) {
+    isHand = depth < handDepth; // NB: Not the same as mcHandDepth
+    if (isHand) {
         depth = depth * 2.0 - 1.0;
         depth *= rcp(MC_HAND_DEPTH);
         depth = depth * 0.5 + 0.5;
     }
 }
 
-void fix_hand_depth(inout float depth) {
+void fixHandDepth(inout float depth) {
     bool unused;
-    fix_hand_depth(depth, unused);
+    fixHandDepth(depth, unused);
 }
 
 #endif // INCLUDE_GLOBAL

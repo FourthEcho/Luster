@@ -22,45 +22,45 @@
 
 // Reference setup: every triangle factor is normalized to these, so the
 // shipped defaults reproduce the pre-physical look exactly.
-const float camera_reference_fstops = 3.2;
-const float camera_reference_shutter = 60.0; // 1/60 s
-const float camera_reference_iso = 100.0;
+const float cameraReferenceFstops = 3.2;
+const float cameraReferenceShutter = 60.0; // 1/60 s
+const float cameraReferenceIso = 100.0;
 
 // Focal length in millimetres from the vertical FOV and the sensor height
 // (sensor width shared across axes, height derived from aspect ratio).
-float camera_sensor_height_mm(float aspect_ratio) {
-    return float(camSensorWidth) / max(aspect_ratio, 1e-4);
+float cameraSensorHeightMm(float frameAspect) {
+    return float(camSensorWidth) / max(frameAspect, 1e-4);
 }
 
-float camera_focal_length_mm(float projection_11, float aspect_ratio) {
-    float sensor_h = camera_sensor_height_mm(aspect_ratio);
-    return 0.5 * sensor_h * projection_11;
+float cameraFocalLengthMm(float projection11, float frameAspect) {
+    float sensorH = cameraSensorHeightMm(frameAspect);
+    return 0.5 * sensorH * projection11;
 }
 
 // Thin-lens circle of confusion as a fraction of screen height:
 // CoC = (f^2 / N) * |1/S - 1/D|, distances in metres.
-float camera_coc_height_fraction(
-    float focal_mm,
-    float sensor_h,
-    float focus_m,
-    float dist_m
+float cameraCocHeightFraction(
+    float focalMm,
+    float sensorH,
+    float focusM,
+    float distM
 ) {
-    float coc_mm = focal_mm * focal_mm / max(camFstops, 1e-4)
-        * abs(1.0 / (focus_m * 1000.0) - 1.0 / (dist_m * 1000.0));
-    return coc_mm / max(sensor_h, 1e-4);
+    float cocMm = focalMm * focalMm / max(camFstops, 1e-4)
+        * abs(1.0 / (focusM * 1000.0) - 1.0 / (distM * 1000.0));
+    return cocMm / max(sensorH, 1e-4);
 }
 
 // Shutter trail factor relative to the 60Hz reference capture.
-float camera_shutter_trail_factor() {
-    return camera_reference_shutter / float(camShutterSpeed);
+float cameraShutterTrailFactor() {
+    return cameraReferenceShutter / float(camShutterSpeed);
 }
 
 // Closed-triangle exposure factor: t * ISO / N^2, normalized to the
 // reference setup, times the EV compensation dial.
-float camera_exposure_triangle_factor() {
-    float t = camera_shutter_trail_factor();
-    float iso = float(camIso) / camera_reference_iso;
-    float n = camera_reference_fstops / max(camFstops, 1e-4);
+float cameraExposureTriangleFactor() {
+    float t = cameraShutterTrailFactor();
+    float iso = float(camIso) / cameraReferenceIso;
+    float n = cameraReferenceFstops / max(camFstops, 1e-4);
     return t * iso * n * n * exp2(camExposureCompensation);
 }
 
@@ -71,8 +71,8 @@ out vec2 uv;
 flat out float exposure;
 
 #if debugView == debugViewHistogram
-flat out vec4[histogramBins / 4] histogram_pdf;
-flat out float histogram_selected_bin;
+flat out vec4[histogramBins / 4] histogramPdf;
+flat out float histogramSelectedBin;
 #endif
 
 uniform sampler2D colortex0; // Scene color
@@ -81,82 +81,82 @@ uniform sampler2D colortex5; // Scene history
 uniform float frameTime;
 uniform float screenBrightness;
 
-uniform vec2 view_res;
-uniform vec2 view_pixel_size;
-uniform vec2 taa_offset;
+uniform vec2 viewRes;
+uniform vec2 viewPixelSize;
+uniform vec2 taaOffset;
 
 #include "/lib/util/color.glsl"
 
-#define get_exposure_from_ev_100(ev100) exp2(-(ev100))
-#define get_exposure_from_luminance(l) calibration / (l)
-#define get_luminance_from_exposure(e) calibration / (e)
+#define getExposureFromEv100(ev100) exp2(-(ev100))
+#define getExposureFromLuminance(l) calibration / (l)
+#define getLuminanceFromExposure(e) calibration / (e)
 
 const float K = 12.5; // Light-meter calibration constant
 const float sensitivity = 100.0; // ISO
 const float calibration = K / sensitivity / 1.2;
 
-const float min_luminance
-    = get_luminance_from_exposure(get_exposure_from_ev_100(autoExposureMin));
-const float max_luminance
-    = get_luminance_from_exposure(get_exposure_from_ev_100(autoExposureMax));
-const float min_log_luminance = log2(min_luminance);
-const float max_log_luminance = log2(max_luminance);
+const float minLuminance
+    = getLuminanceFromExposure(getExposureFromEv100(autoExposureMin));
+const float maxLuminance
+    = getLuminanceFromExposure(getExposureFromEv100(autoExposureMax));
+const float minLogLuminance = log2(minLuminance);
+const float maxLogLuminance = log2(maxLuminance);
 
 #ifdef manualExposureUseScreenBrightness
-float manual_exposure_value
-    = mix(min_luminance, max_luminance, screenBrightness);
+float manualExposureTarget
+    = mix(minLuminance, maxLuminance, screenBrightness);
 #else
-const float manual_exposure_value = manualExposureValue;
+const float manualExposureTarget = manualExposureValue;
 #endif
 
-float get_bin_from_luminance(float luminance) {
-    const float bin_count = histogramBins;
-    const float rcp_log_luminance_range
-        = 1.0 / (max_log_luminance - min_log_luminance);
-    const float scaled_min_log_luminance
-        = min_log_luminance * rcp_log_luminance_range;
+float getBinFromLuminance(float luminance) {
+    const float binCount = histogramBins;
+    const float rcpLogLuminanceRange
+        = 1.0 / (maxLogLuminance - minLogLuminance);
+    const float scaledMinLogLuminance
+        = minLogLuminance * rcpLogLuminanceRange;
 
-    if (luminance <= min_luminance) {
+    if (luminance <= minLuminance) {
         return 0.0; // Avoid taking log of 0
     }
 
-    float log_luminance = clamp01(
-        log2(luminance) * rcp_log_luminance_range - scaled_min_log_luminance
+    float logLuminance = clamp01(
+        log2(luminance) * rcpLogLuminanceRange - scaledMinLogLuminance
     );
 
-    return min(bin_count * log_luminance, bin_count - 1.0);
+    return min(binCount * logLuminance, binCount - 1.0);
 }
 
-float get_luminance_from_bin(int bin) {
-    const float log_luminance_range = max_log_luminance - min_log_luminance;
+float getLuminanceFromBin(int bin) {
+    const float logLuminanceRange = maxLogLuminance - minLogLuminance;
 
-    float log_luminance = bin * rcp(float(histogramBins));
+    float logLuminance = bin * rcp(float(histogramBins));
 
-    return exp2(log_luminance * log_luminance_range + min_log_luminance);
+    return exp2(logLuminance * logLuminanceRange + minLogLuminance);
 }
 
-void build_histogram(out float[histogramBins] pdf) {
+void buildHistogram(out float[histogramBins] pdf) {
     // Initialize PDF to 0
     for (int i = 0; i < histogramBins; ++i) {
         pdf[i] = 0.0;
     }
 
     const ivec2 tiles = ivec2(32, 18);
-    const vec2 tile_size = rcp(vec2(tiles));
+    const vec2 tileSize = rcp(vec2(tiles));
 
-    float lod = ceil(log2(max_of(view_res * tile_size)));
+    float lod = ceil(log2(maxOf(viewRes * tileSize)));
 
     // Sample into histogram
-    float total_weight = 0.0;
+    float totalWeight = 0.0;
     for (int y = 0; y < tiles.y; ++y) {
         for (int x = 0; x < tiles.x; ++x) {
-            vec2 coord = vec2(x, y) * tile_size + (0.5 * tile_size);
+            vec2 coord = vec2(x, y) * tileSize + (0.5 * tileSize);
 
             vec3 rgb
-                = textureLod(colortex0, coord * taau_render_scale, lod).rgb;
-            float luminance = dot(rgb, luminance_weights_ap1);
+                = textureLod(colortex0, coord * taauViewportScale, lod).rgb;
+            float luminance = dot(rgb, luminanceWeightsAp1);
 
-            float bin = get_bin_from_luminance(luminance);
+            float bin = getBinFromLuminance(luminance);
 
             uint bin0 = uint(bin);
             uint bin1 = min(bin0 + 1u, uint(histogramBins) - 1u);
@@ -165,30 +165,30 @@ void build_histogram(out float[histogramBins] pdf) {
             float weight0 = 1.0 - weight1;
 
 
-            vec2 weight_uv = (vec2(x, y) + 0.5) / vec2(tiles);
-            float center_weight = (1.0 - sqr(weight_uv.x * 2.0 - 1.0))
-                * (1.0 - sqr(weight_uv.y * 2.0 - 1.0));
-            center_weight *= center_weight;
+            vec2 weightUv = (vec2(x, y) + 0.5) / vec2(tiles);
+            float centerWeight = (1.0 - sqr(weightUv.x * 2.0 - 1.0))
+                * (1.0 - sqr(weightUv.y * 2.0 - 1.0));
+            centerWeight *= centerWeight;
 
-            pdf[bin0] += weight0 * center_weight;
-            pdf[bin1] += weight1 * center_weight;
-            total_weight += center_weight;
+            pdf[bin0] += weight0 * centerWeight;
+            pdf[bin1] += weight1 * centerWeight;
+            totalWeight += centerWeight;
         }
     }
 
     // Normalize PDF by the accumulated weight so CDF percentiles stay exact
     for (int i = 0; i < histogramBins; ++i) {
-        pdf[i] /= max(total_weight, eps);
+        pdf[i] /= max(totalWeight, eps);
     }
 }
 
-float get_percentile_luminance(float[histogramBins] pdf, float target) {
+float getPercentileLuminance(float[histogramBins] pdf, float target) {
     float cdf = 0.0;
 
     for (int i = 0; i < histogramBins; ++i) {
         cdf += pdf[i];
         if (cdf > target) {
-            return get_luminance_from_bin(i);
+            return getLuminanceFromBin(i);
         }
     }
 
@@ -196,16 +196,16 @@ float get_percentile_luminance(float[histogramBins] pdf, float target) {
 }
 
 
-float get_metered_luminance(float[histogramBins] pdf) {
-    float luminance_mid = get_percentile_luminance(pdf, histogramTarget);
-    float luminance_dark = get_percentile_luminance(pdf, 0.2);
-    float luminance_bright = get_percentile_luminance(pdf, 0.8);
+float getMeteredLuminance(float[histogramBins] pdf) {
+    float luminanceMid = getPercentileLuminance(pdf, histogramTarget);
+    float luminanceDark = getPercentileLuminance(pdf, 0.2);
+    float luminanceBright = getPercentileLuminance(pdf, 0.8);
 
-    float weight_sum = 1.0 + histogramShadowWeight + histogramHighlightWeight;
+    float weightSum = 1.0 + histogramShadowWeight + histogramHighlightWeight;
 
-    return (luminance_mid + histogramShadowWeight * luminance_dark
-            + histogramHighlightWeight * luminance_bright)
-        / weight_sum;
+    return (luminanceMid + histogramShadowWeight * luminanceDark
+            + histogramHighlightWeight * luminanceBright)
+        / weightSum;
 }
 
 void main() {
@@ -214,71 +214,71 @@ void main() {
     // Auto exposure
 
 #ifndef autoExposure
-    exposure = get_exposure_from_ev_100(manual_exposure_value);
+    exposure = getExposureFromEv100(manualExposureTarget);
 #else
 
 
-    float previous_exposure = texelFetch(colortex5, ivec2(0), 0).a
-        / max(camera_exposure_triangle_factor(), 1e-6);
+    float previousExposure = texelFetch(colortex5, ivec2(0), 0).a
+        / max(cameraExposureTriangleFactor(), 1e-6);
 
     float[histogramBins] pdf;
-    build_histogram(pdf);
+    buildHistogram(pdf);
 
-    float luminance = get_metered_luminance(pdf);
+    float luminance = getMeteredLuminance(pdf);
 
     // Sigmoid highlight rolloff into the rails: linear cal/lum through
     // the mid-tones with a soft knee at both ends instead of a hard
     // clamp snap. Bounds come from our EV Min/Max histogram rails, so
     // the sliders stay the single source of truth for calibration.
-    float min_allowed_exposure = calibration / max_luminance;
-    float max_allowed_exposure = calibration / min_luminance;
-    float sigmoid_a = max_luminance;
-    float sigmoid_b = max(max_luminance - min_luminance, 1e-6);
-    float target_exposure = calibration
-        / (sigmoid_a - sigmoid_b * exp(-luminance / sigmoid_b));
+    float minAllowedExposure = calibration / maxLuminance;
+    float maxAllowedExposure = calibration / minLuminance;
+    float sigmoidA = maxLuminance;
+    float sigmoidB = max(maxLuminance - minLuminance, 1e-6);
+    float targetExposure = calibration
+        / (sigmoidA - sigmoidB * exp(-luminance / sigmoidB));
 
 
-    bool previous_bad = isnan(previous_exposure) || isinf(previous_exposure)
-        || previous_exposure <= 0.0;
-    bool target_bad = isnan(target_exposure) || isinf(target_exposure)
-        || target_exposure <= 0.0;
-    if (target_bad) {
-        target_exposure = previous_bad
-            ? get_exposure_from_ev_100(manual_exposure_value)
-            : previous_exposure;
+    bool previousBad = isnan(previousExposure) || isinf(previousExposure)
+        || previousExposure <= 0.0;
+    bool targetBad = isnan(targetExposure) || isinf(targetExposure)
+        || targetExposure <= 0.0;
+    if (targetBad) {
+        targetExposure = previousBad
+            ? getExposureFromEv100(manualExposureTarget)
+            : previousExposure;
     }
-    if (previous_bad) {
-        previous_exposure = target_exposure;
+    if (previousBad) {
+        previousExposure = targetExposure;
     }
 
     // Hard rails from the EV Min/Max sliders: neither a spike frame nor
     // a stale history texel can push exposure outside calibration.
     // Ordered defensively since the sliders can be set inverted.
-    float rail_lo = min(min_allowed_exposure, max_allowed_exposure);
-    float rail_hi = max(min_allowed_exposure, max_allowed_exposure);
-    target_exposure = clamp(target_exposure, rail_lo, rail_hi);
-    previous_exposure = clamp(previous_exposure, rail_lo, rail_hi);
+    float railLo = min(minAllowedExposure, maxAllowedExposure);
+    float railHi = max(minAllowedExposure, maxAllowedExposure);
+    targetExposure = clamp(targetExposure, railLo, railHi);
+    previousExposure = clamp(previousExposure, railLo, railHi);
 
-    float adjustment_rate = target_exposure < previous_exposure
+    float adjustmentRate = targetExposure < previousExposure
         ? autoExposureRateDimToBright
         : autoExposureRateBrightToDim;
-    float blend_weight = exp(-adjustment_rate * frameTime);
+    float blendWeight = exp(-adjustmentRate * frameTime);
 
-    exposure = mix(target_exposure, previous_exposure, blend_weight);
+    exposure = mix(targetExposure, previousExposure, blendWeight);
 #endif
 
 
     // so scale the final exposure by the camera sensitivity. Applies to
 
 
-    exposure *= camera_exposure_triangle_factor();
+    exposure *= cameraExposureTriangleFactor();
 
 #if defined(autoExposure) \
     && debugView == debugViewHistogram
     for (int i = 0; i < histogramBins; ++i) {
-        histogram_pdf[i >> 2][i & 3] = pdf[i];
+        histogramPdf[i >> 2][i & 3] = pdf[i];
     }
-    histogram_selected_bin = get_bin_from_luminance(luminance);
+    histogramSelectedBin = getBinFromLuminance(luminance);
 #endif
 
     gl_Position = vec4(gl_Vertex.xy * 2.0 - 1.0, 0.0, 1.0);

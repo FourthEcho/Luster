@@ -16,7 +16,7 @@
 ====================================================================================================
 */
 
-#include "/lib/fog/overworld/parameters.glsl"
+#include "/lib/atmos/fog/overworld/parameters.glsl"
 #include "/lib/global.glsl"
 
 #ifdef shadow
@@ -31,9 +31,9 @@
 #undef shadowSsrt
 #endif
 
-uniform float desert_sandstorm;
+uniform float desertSandstormWeather;
 
-// simple_fog needs fogColor, Voxy patch doesn't expose it by default
+// simpleFog needs fogColor, Voxy patch doesn't expose it by default
 uniform vec3 fogColor;
 uniform sampler2D depthtex1;
 uniform sampler2D colortex4;
@@ -51,21 +51,21 @@ uniform mat4 shadowModelViewInverse;
 
 uniform vec3 cameraPosition;
 uniform vec3 previousCameraPosition;
-uniform vec3 sun_dir;
-uniform vec3 light_dir;
+uniform vec3 sunDir;
+uniform vec3 lightDir;
 
-uniform vec2 view_res;
-uniform vec2 view_pixel_size;
-uniform vec2 taa_offset;
+uniform vec2 viewRes;
+uniform vec2 viewPixelSize;
+uniform vec2 taaOffset;
 
 uniform float near;
 uniform float far;
 uniform float eyeAltitude;
-uniform float eye_skylight;
+uniform float eyeSkylight;
 uniform float rainStrength;
 uniform float blindness;
 uniform float darknessFactor;
-uniform float time_noon;
+uniform float timeNoon;
 uniform float nightVision;
 uniform float sunAngle;
 
@@ -78,22 +78,22 @@ uniform int frameCounter;
 uniform sampler2D noisetex;
 uniform float frameTimeCounter;
 
-// Declared for the cave-fog path, which scales density by biome_cave in
+// Declared for the cave-fog path, which scales density by biomeCave in
 // every TU that includes it.
-uniform float biome_cave;
+uniform float biomeCave;
 
-vec3 ambient_color;
-vec3 light_color;
+vec3 ambientColor;
+vec3 lightColor;
 
 #ifdef WORLD_OVERWORLD
 // Unused
-OverworldFogParameters fog_params;
+OverworldFogParameters fogParams;
 #endif
 
 #define TEMPORAL_REPROJECTION
 
-#include "/lib/fog/simpleFog.glsl"
-#include "/lib/brdf/diffuseLight.glsl"
+#include "/lib/atmos/fog/simpleFog.glsl"
+#include "/lib/brdf/common.glsl"
 #include "/lib/light/pcss.glsl"
 #include "/lib/brdf/specular.glsl"
 #include "/lib/misc/lodModSupport.glsl"
@@ -111,134 +111,134 @@ OverworldFogParameters fog_params;
 #if !defined INCLUDE_LIGHTING_CLOUD_SHADOWS
 #define INCLUDE_LIGHTING_CLOUD_SHADOWS
 
-#include "/lib/sky/clouds/constants.glsl"
+#include "/lib/atmos/sky/clouds/core/constants.glsl"
 #include "/lib/util/bicubic.glsl"
 
-const ivec2 cloud_shadow_res = ivec2(512);
+const ivec2 cloudShadowRes = ivec2(512);
 
-const float cloud_shadow_extent = 256.0 / (cloudsScale / 10.0);
+const float cloudShadowExtent = 256.0 / (cloudsScale / 10.0);
 
-vec2 shadow_view_to_cloud_shadow_space(vec3 shadow_view_pos) {
-    vec2 cloud_shadow_pos = shadow_view_pos.xy / cloud_shadow_extent;
-    cloud_shadow_pos /= 1.0 + length(cloud_shadow_pos);
-    cloud_shadow_pos = cloud_shadow_pos * 0.5 + 0.5;
+vec2 shadowViewToCloudShadowSpace(vec3 shadowViewPos) {
+    vec2 cloudShadowPos = shadowViewPos.xy / cloudShadowExtent;
+    cloudShadowPos /= 1.0 + length(cloudShadowPos);
+    cloudShadowPos = cloudShadowPos * 0.5 + 0.5;
 
-    return cloud_shadow_pos;
+    return cloudShadowPos;
 }
 
-vec2 project_cloud_shadow_map(vec3 scene_pos) {
-    return shadow_view_to_cloud_shadow_space(
-        transform(shadowModelView, scene_pos)
+vec2 projectCloudShadowMap(vec3 scenePos) {
+    return shadowViewToCloudShadowSpace(
+        transform(shadowModelView, scenePos)
     );
 }
 
-vec3 unproject_cloud_shadow_map(vec2 cloud_shadow_pos) {
-    cloud_shadow_pos = cloud_shadow_pos * 2.0 - 1.0;
-    cloud_shadow_pos /= 1.0 - length(cloud_shadow_pos);
+vec3 unprojectCloudShadowMap(vec2 cloudShadowPos) {
+    cloudShadowPos = cloudShadowPos * 2.0 - 1.0;
+    cloudShadowPos /= 1.0 - length(cloudShadowPos);
 
-    vec3 shadow_view_pos = vec3(cloud_shadow_pos * cloud_shadow_extent, 1.0);
+    vec3 shadowViewPos = vec3(cloudShadowPos * cloudShadowExtent, 1.0);
 
-    return transform(shadowModelViewInverse, shadow_view_pos);
+    return transform(shadowModelViewInverse, shadowViewPos);
 }
 
-float get_cloud_shadows(sampler2D cloud_shadow_map, vec3 scene_pos) {
+float getCloudShadows(sampler2D cloudShadowMap, vec3 scenePos) {
 #ifndef cloudShadows
     return 1.0;
 #else
-    vec2 cloud_shadow_pos = project_cloud_shadow_map(scene_pos)
-        * vec2(cloud_shadow_res) / vec2(textureSize(cloud_shadow_map, 0));
+    vec2 cloudShadowPos = projectCloudShadowMap(scenePos)
+        * vec2(cloudShadowRes) / vec2(textureSize(cloudShadowMap, 0));
 
-    if (clamp01(cloud_shadow_pos) != cloud_shadow_pos) {
+    if (clamp01(cloudShadowPos) != cloudShadowPos) {
         return 1.0;
     }
 
     // fade out cloud shadows when:
     //  - the fragment is above the cloud layer
     //  - the sun is near the horizon
-    float r = planet_radius
-        + (scene_pos.y + eyeAltitude - 63.0) * cloudsScale;
-    float altitude_fraction
-        = linear_step(clouds_cumulus_radius, clouds_cumulus_top_radius, r);
-    float cloud_shadow_fade = smoothstep(0.05, 0.15, light_dir.y)
-        * clamp01(1.0 - altitude_fraction);
+    float r = planetRadius
+        + (scenePos.y + eyeAltitude - 63.0) * cloudsScale;
+    float altitudeFraction
+        = linearStep(cloudsCumulusRadius, cloudsCumulusTopRadius, r);
+    float cloudShadowFade = smoothstep(0.05, 0.15, lightDir.y)
+        * clamp01(1.0 - altitudeFraction);
 
-    float cloud_shadow = bicubic_filter(cloud_shadow_map, cloud_shadow_pos).x;
-    cloud_shadow = cloud_shadow * cloud_shadow_fade + (1.0 - cloud_shadow_fade);
+    float cloudShadow = bicubicFilter(cloudShadowMap, cloudShadowPos).x;
+    cloudShadow = cloudShadow * cloudShadowFade + (1.0 - cloudShadowFade);
 
-    return cloud_shadow * cloudShadowsIntensity
+    return cloudShadow * cloudShadowsIntensity
         + (1.0 - cloudShadowsIntensity);
 #endif
 }
 
 #if defined PROGRAM_PREPARE && defined cloudShadows
-#include "/lib/sky/clouds/altocumulus.glsl"
-#include "/lib/sky/clouds/cirrus.glsl"
-#include "/lib/sky/clouds/cumulus.glsl"
-#include "/lib/sky/clouds/cumulusCongestus.glsl"
+#include "/lib/atmos/sky/clouds/altocumulus.glsl"
+#include "/lib/atmos/sky/clouds/cirrus.glsl"
+#include "/lib/atmos/sky/clouds/cumulus.glsl"
+#include "/lib/atmos/sky/clouds/cumulusCongestus.glsl"
 
-vec2 render_cloud_shadow_map(vec2 uv) {
+vec2 renderCloudShadowMap(vec2 uv) {
     // Transform position from scene-space to clouds-space
-    vec3 ray_origin = unproject_cloud_shadow_map(uv);
-    ray_origin = vec3(ray_origin.xz, ray_origin.y + eyeAltitude - 63.0).xzy
+    vec3 rayOrigin = unprojectCloudShadowMap(uv);
+    rayOrigin = vec3(rayOrigin.xz, rayOrigin.y + eyeAltitude - 63.0).xzy
             * cloudsScale
-        + vec3(0.0, planet_radius, 0.0);
+        + vec3(0.0, planetRadius, 0.0);
 
     vec3 pos;
-    float t, density, extinction_coeff;
+    float t, density, extinctionCoeff;
     float shadowVis = 1.0;
-    float shadow_cumulus_only = 1.0;
-    float distance_fade;
-    float distance_fade_strength = 0.00000001 * pulse(light_dir.y, -0.01, 0.2);
+    float shadowCumulusOnly = 1.0;
+    float distanceFade;
+    float distanceFadeStrength = 0.00000001 * pulse(lightDir.y, -0.01, 0.2);
 
 #ifdef cloudsCumulus
-    extinction_coeff = 0.25 * clouds_params.l0_extinction_coeff;
-    t = intersect_sphere(
-            ray_origin,
-            light_dir,
-            clouds_cumulus_radius + 0.25 * clouds_cumulus_thickness
+    extinctionCoeff = 0.25 * cloudsParams.l0ExtinctionCoeff;
+    t = intersectSphere(
+            rayOrigin,
+            lightDir,
+            cloudsCumulusRadius + 0.25 * cumulusLayerThickness
     )
             .y;
-    pos = ray_origin + light_dir * t;
-    distance_fade = exp2(-distance_fade_strength * length(pos.xy));
-    density = clouds_cumulus_density(pos);
+    pos = rayOrigin + lightDir * t;
+    distanceFade = exp2(-distanceFadeStrength * length(pos.xy));
+    density = cumulusDensityProfile(pos);
     shadowVis *= exp(
-        -1.00 * distance_fade * extinction_coeff * clouds_cumulus_thickness
-        * rcp(abs(light_dir.y) + eps) * density
+        -1.00 * distanceFade * extinctionCoeff * cumulusLayerThickness
+        * rcp(abs(lightDir.y) + eps) * density
     );
-    shadow_cumulus_only = shadowVis;
+    shadowCumulusOnly = shadowVis;
 #endif
 
 #ifdef cloudsAltocumulus
-    extinction_coeff = mix(0.05, 0.1, day_factor) * cloudsAltocumulusDensity
+    extinctionCoeff = mix(0.05, 0.1, dayFactor) * cloudsAltocumulusDensity
         * (1.0 - 0.33 * rainStrength);
-    t = intersect_sphere(
-            ray_origin,
-            light_dir,
-            clouds_altocumulus_radius + 0.5 * clouds_altocumulus_thickness
+    t = intersectSphere(
+            rayOrigin,
+            lightDir,
+            cloudsAltocumulusRadius + 0.5 * altocumulusLayerThickness
     )
             .y;
-    pos = ray_origin + light_dir * t;
-    distance_fade = exp2(-distance_fade_strength * length(pos.xy));
-    density = clouds_altocumulus_density(pos);
+    pos = rayOrigin + lightDir * t;
+    distanceFade = exp2(-distanceFadeStrength * length(pos.xy));
+    density = altocumulusDensityProfile(pos);
     shadowVis *= exp(
-        -1.00 * distance_fade * extinction_coeff * clouds_altocumulus_thickness
-        * rcp(abs(light_dir.y) + eps) * density
+        -1.00 * distanceFade * extinctionCoeff * altocumulusLayerThickness
+        * rcp(abs(lightDir.y) + eps) * density
     );
 #endif
 
 #ifdef cloudsCirrus
-    t = intersect_sphere(ray_origin, light_dir, clouds_cirrus_radius).y;
-    pos = ray_origin + light_dir * t;
-    distance_fade = exp2(-distance_fade_strength * length(pos.xy));
-    density = clouds_cirrus_density(pos.xz, 0.5);
-    shadowVis *= exp(-1.00 * distance_fade * clouds_cirrus_extinction_coeff
-                  * clouds_cirrus_thickness * rcp(abs(light_dir.y) + eps)
+    t = intersectSphere(rayOrigin, lightDir, cloudsCirrusRadius).y;
+    pos = rayOrigin + lightDir * t;
+    distanceFade = exp2(-distanceFadeStrength * length(pos.xy));
+    density = cirrusDensityProfile(pos.xz, 0.5);
+    shadowVis *= exp(-1.00 * distanceFade * cloudsCirrusExtinctionCoeff
+                  * cirrusLayerThickness * rcp(abs(lightDir.y) + eps)
                   * density)
             * 0.5
         + 0.5;
 #endif
 
-    return vec2(shadowVis, shadow_cumulus_only);
+    return vec2(shadowVis, shadowCumulusOnly);
 }
 #endif
 #endif // INCLUDE_LIGHTING_CLOUD_SHADOWS
@@ -251,58 +251,58 @@ vec2 render_cloud_shadow_map(vec2 uv) {
 
 // Based on Ninjamike's implementation in shaderLABS #snippets
 
-vec2 get_directional_lightmaps(vec3 position_scene, vec3 normal) {
-    vec2 lightmap_mul = vec2(1.0);
+vec2 getDirectionalLightmaps(vec3 positionScene, vec3 normal) {
+    vec2 lightmapMul = vec2(1.0);
 
-    vec2 lightmap_gradient;
-    vec3 lightmap_dir;
-    mat2x3 pos_gradient = mat2x3(dFdx(position_scene), dFdy(position_scene));
+    vec2 lightmapGradient;
+    vec3 lightmapDir;
+    mat2x3 posGradient = mat2x3(dFdx(positionScene), dFdy(positionScene));
 
     // Blocklight
 
-    lightmap_gradient = vec2(dFdx(light_levels.x), dFdy(light_levels.x));
-    lightmap_dir = pos_gradient * lightmap_gradient;
+    lightmapGradient = vec2(dFdx(lightLevels.x), dFdy(lightLevels.x));
+    lightmapDir = posGradient * lightmapGradient;
 
-    if (length_squared(lightmap_gradient) > 1e-12) {
-        lightmap_mul.x = (clamp01(dot(normalize(lightmap_dir), normal) + 0.8)
+    if (lengthSquared(lightmapGradient) > 1e-12) {
+        lightmapMul.x = (clamp01(dot(normalize(lightmapDir), normal) + 0.8)
                               * directionalLightmapsIntensity
                           + (1.0 - directionalLightmapsIntensity))
             // Clamp the renormalization: near-zero lightmaps would
             // otherwise boost noise up to ~1000x (fireflies in caves)
-            * inversesqrt(sqrt(max(light_levels.x, 0.0625)) + eps);
+            * inversesqrt(sqrt(max(lightLevels.x, 0.0625)) + eps);
 
         // Fade the effect out where the lightmap is nearly zero: the
         // gradient is quantized/noisy there and would speckle dark areas.
-        lightmap_mul.x = mix(
+        lightmapMul.x = mix(
             1.0,
-            lightmap_mul.x,
-            sqr(linear_step(0.03, 0.30, light_levels.x))
+            lightmapMul.x,
+            sqr(linearStep(0.03, 0.30, lightLevels.x))
         );
     }
 
     // Skylight
 
-    lightmap_gradient = vec2(dFdx(light_levels.y), dFdy(light_levels.y));
-    lightmap_dir = pos_gradient * lightmap_gradient;
+    lightmapGradient = vec2(dFdx(lightLevels.y), dFdy(lightLevels.y));
+    lightmapDir = posGradient * lightmapGradient;
 
-    if (length_squared(lightmap_gradient) > 1e-12) {
-        lightmap_mul.y = (clamp01(dot(normalize(lightmap_dir), normal) + 0.8)
+    if (lengthSquared(lightmapGradient) > 1e-12) {
+        lightmapMul.y = (clamp01(dot(normalize(lightmapDir), normal) + 0.8)
                               * directionalLightmapsIntensity
                           + (1.0 - directionalLightmapsIntensity))
             // Clamp the renormalization: near-zero lightmaps would
             // otherwise boost noise up to ~1000x (fireflies in caves)
-            * inversesqrt(sqrt(max(light_levels.y, 0.0625)) + eps);
+            * inversesqrt(sqrt(max(lightLevels.y, 0.0625)) + eps);
 
         // Fade the effect out where the lightmap is nearly zero: the
         // gradient is quantized/noisy there and would speckle dark areas.
-        lightmap_mul.y = mix(
+        lightmapMul.y = mix(
             1.0,
-            lightmap_mul.y,
-            sqr(linear_step(0.03, 0.30, light_levels.y))
+            lightmapMul.y,
+            sqr(linearStep(0.03, 0.30, lightLevels.y))
         );
     }
 
-    return lightmap_mul;
+    return lightmapMul;
 }
 
 #endif // INCLUDE_LIGHTING_DIRECTIONAL_LIGHTMAPS
@@ -315,7 +315,7 @@ vec2 get_directional_lightmaps(vec3 position_scene, vec3 normal) {
 
 #define HANDHELD_LIGHTING_COLORS
 #if handheldLightingMode == handheldLightingColored
-const vec3 handheld_emitter_light_color[48] = vec3[48](
+const vec3 handheldEmitterLightColor[48] = vec3[48](
     vec3(1.00, 1.00, 1.00) * 12.0, // Strong white light
     vec3(1.00, 1.00, 1.00) * 6.0, // Medium white light
     vec3(1.00, 1.00, 1.00) * 1.0, // Weak white light
@@ -377,41 +377,41 @@ uniform int heldItemId2;
 uniform int heldBlockLightValue;
 uniform int heldBlockLightValue2;
 
-vec3 get_handheld_light_color(int held_item_id, int held_item_light_value) {
+vec3 getHandheldLightColor(int handItemId, int heldItemLightValue) {
 #if handheldLightingMode == handheldLightingColored
-    const int first_emitter_id = 10032;
-    const int emitter_count = 48;
-    int emitter_index = held_item_id - first_emitter_id;
+    const int firstEmitterId = 10032;
+    const int emitterCount = 48;
+    int emitterIndex = handItemId - firstEmitterId;
 
-    if (emitter_index >= 0 && emitter_index < emitter_count) {
-        return handheld_emitter_light_color[emitter_index];
+    if (emitterIndex >= 0 && emitterIndex < emitterCount) {
+        return handheldEmitterLightColor[emitterIndex];
     }
 #endif
 
-    return (blocklight_color * blocklight_scale * rcp(15.0))
-        * held_item_light_value;
+    return (blocklightColor * blocklightScale * rcp(15.0))
+        * heldItemLightValue;
 }
 
-float get_handheld_light_falloff(vec3 scene_pos, float ao) {
-    float falloff = lift(rcp(dot(scene_pos, scene_pos) + 1.0), 3.0);
+float getHandheldLightFalloff(vec3 scenePos, float ao) {
+    float falloff = lift(rcp(dot(scenePos, scenePos) + 1.0), 3.0);
     return falloff * mix(ao, 1.0, falloff * falloff)
         * 1.00;
 }
 
-vec3 get_handheld_lighting(vec3 scene_pos, float ao) {
+vec3 getHandheldLighting(vec3 scenePos, float ao) {
 #ifdef IS_IRIS
     // Center light on player rather than camera
-    scene_pos += relativeEyePosition;
+    scenePos += relativeEyePosition;
 #endif
 
-    vec3 light_color = max(
-        get_handheld_light_color(heldItemId, heldBlockLightValue),
-        get_handheld_light_color(heldItemId2, heldBlockLightValue2)
+    vec3 lightColor = max(
+        getHandheldLightColor(heldItemId, heldBlockLightValue),
+        getHandheldLightColor(heldItemId2, heldBlockLightValue2)
     );
 
-    float falloff = get_handheld_light_falloff(scene_pos, ao);
+    float falloff = getHandheldLightFalloff(scenePos, ao);
 
-    return light_color * falloff;
+    return lightColor * falloff;
 }
 
 #endif // INCLUDE_LIGHTING_HANDHELD_LIGHTING
@@ -420,10 +420,10 @@ vec3 get_handheld_lighting(vec3 scene_pos, float ao) {
 #undef LUSTER_INCLUDE_CLOUD_SHADOWS
 #endif
 
-layout(location = 0) out vec4 fragment_color;
+layout(location = 0) out vec4 fragmentColor;
 layout(
     location = 1
-) out vec4 gbuffer_data; // albedo, block ID, flat normal, light levels
+) out vec4 gbufferData; // albedo, block ID, flat normal, light levels
 
 /*
 struct VoxyFragmentParameters {
@@ -438,93 +438,93 @@ struct VoxyFragmentParameters {
 };
 */
 
-Material get_water_material(
-    vec4 sampled_color,
+Material getWaterMaterial(
+    vec4 sampledColor,
     vec4 tint,
-    vec3 dir_world,
+    vec3 dirWorld,
     vec3 normal,
-    vec2 light_levels,
-    float layer_dist,
+    vec2 lightLevels,
+    float layerDist,
     out float alpha
 ) {
-    Material material = water_material;
+    Material material = waterMaterial;
     alpha = 0.01;
 
     // Water texture
 
 #if waterTexture == waterTextureHighlight \
     || waterTexture == waterTextureHighlightUnderground
-    float texture_highlight = dampen(
-        0.5 * sqr(linear_step(0.63, 1.0, sampled_color.r))
-        + 0.03 * sampled_color.r
+    float textureHighlight = dampen(
+        0.5 * sqr(linearStep(0.63, 1.0, sampledColor.r))
+        + 0.03 * sampledColor.r
     );
 #if waterTexture == waterTextureHighlightUnderground
-    texture_highlight *= 1.0 - cube(linear_step(0.0, 0.5, light_levels.y));
+    textureHighlight *= 1.0 - cube(linearStep(0.0, 0.5, lightLevels.y));
 #endif
 
-    sampled_color *= tint;
+    sampledColor *= tint;
     material.albedo
-        = clamp01(0.5 * exp(-2.0 * water_absorption_coeff) * texture_highlight);
-    material.roughness += 0.3 * texture_highlight;
-    alpha += texture_highlight;
+        = clamp01(0.5 * exp(-2.0 * waterAbsorptionCoeff) * textureHighlight);
+    material.roughness += 0.3 * textureHighlight;
+    alpha += textureHighlight;
 #elif waterTexture == waterTextureVanilla
-    sampled_color *= tint;
-    material.albedo = srgb_eotf_inv(sampled_color.rgb * sampled_color.a)
-        * rec709_to_working_color;
-    alpha = sampled_color.a;
+    sampledColor *= tint;
+    material.albedo = srgbEotfInv(sampledColor.rgb * sampledColor.a)
+        * rec709ToWorkingColor;
+    alpha = sampledColor.a;
 #endif
 
     // Water edge highlight
 
 #ifdef waterEdgeHighlight
-    float dist = layer_dist * max(abs(dir_world.y), eps);
+    float dist = layerDist * max(abs(dirWorld.y), eps);
 
 #if waterTexture == waterTextureHighlight \
     || waterTexture == waterTextureHighlightUnderground
-    float edge_highlight
-        = cube(max0(1.0 - 2.0 * dist)) * (1.0 + 8.0 * texture_highlight);
+    float edgeHighlightAmount
+        = cube(max0(1.0 - 2.0 * dist)) * (1.0 + 8.0 * textureHighlight);
 #else
-    float edge_highlight = cube(max0(1.0 - 2.0 * dist));
+    float edgeHighlightAmount = cube(max0(1.0 - 2.0 * dist));
 #endif
-    edge_highlight *= waterEdgeHighlightIntensity * max0(normal.y)
-        * (1.0 - 0.5 * sqr(light_levels.y));
+    edgeHighlightAmount *= waterEdgeHighlightIntensity * max0(normal.y)
+        * (1.0 - 0.5 * sqr(lightLevels.y));
     ;
 
-    material.albedo += 0.1 * edge_highlight
+    material.albedo += 0.1 * edgeHighlightAmount
         / mix(1.0,
-              max(dot(ambient_color, luminance_weights), 0.5),
-              light_levels.y);
+              max(dot(ambientColor, luminanceWeights), 0.5),
+              lightLevels.y);
     material.albedo = clamp01(material.albedo);
-    alpha += edge_highlight;
+    alpha += edgeHighlightAmount;
 #endif
 
     return material;
 }
 
 void voxy_emitFragment(VoxyFragmentParameters parameters) {
-    vec2 coord = gl_FragCoord.xy * view_pixel_size * rcp(taau_render_scale);
+    vec2 coord = gl_FragCoord.xy * viewPixelSize * rcp(taauViewportScale);
 
 
-    float vanilla_opaque_depth
+    float vanillaOpaqueDepth
         = texelFetch(depthtex1, ivec2(gl_FragCoord.xy), 0).x;
-    if (vanilla_opaque_depth < gl_FragCoord.z
-        && vanilla_opaque_depth < 1.0) {
+    if (vanillaOpaqueDepth < gl_FragCoord.z
+        && vanillaOpaqueDepth < 1.0) {
         discard;
     }
 
     // Get the depth of the solid layer behind this fragment (used for edge
     // highlight effect)
 
-    float lod_depth_behind
+    float lodDepthBehind
         = texelFetch(vxDepthTexOpaque, ivec2(gl_FragCoord.xy), 0).x;
 
 
-    light_color = texelFetch(colortex4, ivec2(191, 0), 0).rgb;
-    ambient_color = texelFetch(colortex4, ivec2(191, 1), 0).rgb;
+    lightColor = texelFetch(colortex4, ivec2(191, 0), 0).rgb;
+    ambientColor = texelFetch(colortex4, ivec2(191, 1), 0).rgb;
 
     // Get base properties
 
-    vec4 base_color = parameters.sampledColour * parameters.tinting;
+    vec4 baseColor = parameters.sampledColour * parameters.tinting;
 
     // from Cortex
     vec3 normal = vec3(
@@ -535,111 +535,111 @@ void voxy_emitFragment(VoxyFragmentParameters parameters) {
         * (float(int(parameters.face) & 1) * 2.0 - 1.0);
 
 
-    ambient_color *= clamp01(parameters.lightMap.y);
+    ambientColor *= clamp01(parameters.lightMap.y);
 
-    uint material_mask = max(parameters.customId - 10000u, 0u);
+    uint materialMask = max(parameters.customId - 10000u, 0u);
 
     // Get position
 
-    vec3 pos_screen = vec3(coord, gl_FragCoord.z);
-    vec3 pos_view = screen_to_view_space(vxProjInv, pos_screen, true);
-    vec3 pos_scene = view_to_scene_space(pos_view);
+    vec3 posScreen = vec3(coord, gl_FragCoord.z);
+    vec3 posView = screenToViewSpace(vxProjInv, posScreen, true);
+    vec3 posScene = viewToSceneSpace(posView);
 
-    vec3 dir_world = normalize(pos_scene - gbufferModelViewInverse[3].xyz);
+    vec3 dirWorld = normalize(posScene - gbufferModelViewInverse[3].xyz);
 
     // Get distance to the solid layer behind this fragment
 
-    vec3 back_pos_view
-        = screen_to_view_space(vxProjInv, vec3(coord, lod_depth_behind), true);
-    float layer_dist = distance(pos_view, back_pos_view);
+    vec3 backPosView
+        = screenToViewSpace(vxProjInv, vec3(coord, lodDepthBehind), true);
+    float layerDist = distance(posView, backPosView);
 
     // Get material
 
     Material material;
     float alpha = 0.0;
 
-    if (material_mask == MATERIAL_WATER) {
-        material = get_water_material(
+    if (materialMask == MATERIAL_WATER) {
+        material = getWaterMaterial(
             parameters.sampledColour,
             parameters.tinting,
-            dir_world,
+            dirWorld,
             normal,
             parameters.lightMap,
-            layer_dist,
+            layerDist,
             alpha
         );
     } else {
         vec2 unused = parameters.lightMap;
-        material = material_from(
-            base_color.rgb,
-            material_mask,
-            pos_scene + cameraPosition,
+        material = materialFrom(
+            baseColor.rgb,
+            materialMask,
+            posScene + cameraPosition,
             normal,
             unused
         );
-        alpha = base_color.a;
+        alpha = baseColor.a;
     }
 
     // Encode water data
 
-    if (material_mask == MATERIAL_WATER) {
-        gbuffer_data.x = pack_unorm_2x8(parameters.tinting.rg);
-        gbuffer_data.y = pack_unorm_2x8(parameters.tinting.b, alpha);
-        gbuffer_data.z = pack_unorm_2x8(encode_unit_vector(normal));
-        gbuffer_data.w = pack_unorm_2x8(parameters.lightMap);
+    if (materialMask == MATERIAL_WATER) {
+        gbufferData.x = packUnorm2x8(parameters.tinting.rg);
+        gbufferData.y = packUnorm2x8(parameters.tinting.b, alpha);
+        gbufferData.z = packUnorm2x8(encodeUnitVector(normal));
+        gbufferData.w = packUnorm2x8(parameters.lightMap);
     } else {
-        gbuffer_data = vec4(0.0);
+        gbufferData = vec4(0.0);
     }
 
     // Early exit if albedo is zero
 
-    if (max_of(material.albedo * alpha) < eps) {
-        fragment_color = vec4(0.0);
+    if (maxOf(material.albedo * alpha) < eps) {
+        fragmentColor = vec4(0.0);
         return;
     }
 
     // Forward shading
 
-    float NoL = dot(normal, light_dir);
-    float NoV = clamp01(dot(normal, -dir_world));
-    float LoV = dot(light_dir, -dir_world);
-    float halfway_norm = inversesqrt(2.0 * LoV + 2.0);
-    float NoH = (NoL + NoV) * halfway_norm;
-    float LoH = LoV * halfway_norm + halfway_norm;
+    float NoL = dot(normal, lightDir);
+    float NoV = clamp01(dot(normal, -dirWorld));
+    float LoV = dot(lightDir, -dirWorld);
+    float halfwayNorm = inversesqrt(2.0 * LoV + 2.0);
+    float NoH = (NoL + NoV) * halfwayNorm;
+    float LoH = LoV * halfwayNorm + halfwayNorm;
 
     vec3 shadows = vec3(pow8(parameters.lightMap.y)); // Fake shadow
-#define sss_depth 0.0
-#define shadow_distance_fade 0.0
+#define sssDepth 0.0
+#define shadowDistanceFade 0.0
 
 #ifdef cloudShadows
-    float cloud_shadows = get_cloud_shadows(colortex8, pos_scene);
-    shadows *= cloud_shadows;
+    float cloudShadowMask = getCloudShadows(colortex8, posScene);
+    shadows *= cloudShadowMask;
 #endif
 
-    fragment_color.rgb = get_diffuse_lighting(
+    fragmentColor.rgb = getDiffuseLighting(
         material,
-        pos_scene,
+        posScene,
         normal,
         normal,
         shadows,
         parameters.lightMap,
         1.0, // AO
         0.0, // Ambient sss
-        sss_depth,
+        sssDepth,
 #ifdef cloudShadows
-        cloud_shadows,
+        cloudShadowMask,
 #endif
-        shadow_distance_fade,
+        shadowDistanceFade,
         NoL,
         NoV,
         NoH,
         LoV,
-        ambient_color
+        ambientColor
     );
-    fragment_color.a = alpha;
+    fragmentColor.a = alpha;
 
     // Apply fog
 
-    vec4 fog = common_fog(length(pos_scene), false, pos_scene);
-    fragment_color.rgb = fragment_color.rgb * fog.a + fog.rgb;
+    vec4 fog = commonFog(length(posScene), false, posScene);
+    fragmentColor.rgb = fragmentColor.rgb * fog.a + fog.rgb;
 }

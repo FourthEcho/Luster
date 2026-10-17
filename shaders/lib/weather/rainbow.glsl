@@ -21,8 +21,8 @@
 
 #include "/lib/weather/core.glsl"
 
-float get_rainbow_amount(Weather weather) {
-    return max(wetness, 0.5 * linear_step(0.6, 1.0, weather.humidity))
+float getRainbowAmount(Weather weather) {
+    return max(wetness, 0.5 * linearStep(0.6, 1.0, weather.humidity))
         * float(1.0 - rainStrength);
 }
 

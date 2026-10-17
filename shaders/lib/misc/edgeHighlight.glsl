@@ -24,112 +24,112 @@
 
 // MC Dungeons-inspired edge highlight effect
 
-bool has_edge_highlight(vec3 normal) {
+bool hasEdgeHighlight(vec3 normal) {
     // Returns true for faces pointing along an axis
     return abs(dot(abs(normal), vec3(1.0)) - 1.0) < 0.1;
 }
 
-float edge_highlight_check(
+float edgeHighlightCheck(
     vec3 offset,
-    vec3 center_pos,
-    vec3 center_normal,
-    float center_depth,
+    vec3 centerPos,
+    vec3 centerNormal,
+    float centerDepth,
     float rcp_NoV,
-    vec2 depth_gradient
+    vec2 depthGradient
 ) {
     // Calculate sample position in screen space
-    vec3 sample_pos = scene_to_view_space(center_pos + offset);
-    sample_pos
-        = view_to_screen_space(combined_projection_matrix, sample_pos, true);
+    vec3 samplePos = sceneToViewSpace(centerPos + offset);
+    samplePos
+        = viewToScreenSpace(combinedProjectionMatrix, samplePos, true);
 
     // Sample depth and gbuffer data
-    ivec2 texel = ivec2(sample_pos.xy * view_res * taau_render_scale);
-    float sample_depth = texelFetch(combined_depth_tex, texel, 0).x;
-    float sample_data = texelFetch(colortex1, texel, 0).z;
+    ivec2 texel = ivec2(samplePos.xy * viewRes * taauViewportScale);
+    float sampleDepth = texelFetch(combinedDepthTex, texel, 0).x;
+    float sampleData = texelFetch(colortex1, texel, 0).z;
 
     // Test for depth discontinuity
-    sample_depth = linearize_depth_fast(sample_depth);
-    float expected_depth
-        = center_depth + dot(depth_gradient, sample_pos.xy - uv);
-    float depth_edge = float(
-        abs(sample_depth - expected_depth) > 0.25 * rcp_NoV
-        && expected_depth < sample_depth
+    sampleDepth = linearizeDepthFast(sampleDepth);
+    float expectedDepth
+        = centerDepth + dot(depthGradient, samplePos.xy - uv);
+    float depthEdge = float(
+        abs(sampleDepth - expectedDepth) > 0.25 * rcp_NoV
+        && expectedDepth < sampleDepth
     );
 
     // Test for normal discontinuity
-    vec3 sample_normal = decode_unit_vector(unpack_unorm_2x8(sample_data));
-    float normal_edge = float(
-        abs(dot(center_normal, sample_normal)) < 0.99
-        && dot(sample_normal, normalize(offset)) > 0.01
+    vec3 sampleNormal = decodeUnitVector(unpackUnorm2x8(sampleData));
+    float normalEdge = float(
+        abs(dot(centerNormal, sampleNormal)) < 0.99
+        && dot(sampleNormal, normalize(offset)) > 0.01
     );
 
-    return (depth_edge + normal_edge) * float(clamp01(sample_pos) == sample_pos)
+    return (depthEdge + normalEdge) * float(clamp01(samplePos) == samplePos)
         * float(
-               has_edge_highlight(sample_normal) || center_depth < sample_depth
+               hasEdgeHighlight(sampleNormal) || centerDepth < sampleDepth
         );
 }
 
-float get_edge_highlight(
-    vec3 scene_pos,
-    vec3 world_normal,
+float getEdgeHighlight(
+    vec3 scenePos,
+    vec3 worldNormal,
     float depth,
-    uint material_mask
+    uint materialMask
 ) {
     // Size of one block pixel in world-space
-    const float pixel_size = rcp(edgeHighlightScale);
+    const float pixelSize = rcp(edgeHighlightScale);
 
     // Calculate tangent and bitangent
-    mat3 tbn = get_tbn_matrix(world_normal) * pixel_size;
+    mat3 tbn = getTbnMatrix(worldNormal) * pixelSize;
 
 
-    float depth_linear = linearize_depth_fast(depth);
-    vec2 depth_gradient = vec2(dFdx(depth_linear), dFdy(depth_linear));
+    float depthLinear = linearizeDepthFast(depth);
+    vec2 depthGradient = vec2(dFdx(depthLinear), dFdy(depthLinear));
 
-    float rcp_NoV = abs(rcp(dot(normalize(scene_pos), world_normal)));
+    float rcp_NoV = abs(rcp(dot(normalize(scenePos), worldNormal)));
 
     // Check for an edge in 5 directions around the sample point
-    float highlight = edge_highlight_check(
+    float highlight = edgeHighlightCheck(
         tbn[0],
-        scene_pos,
-        world_normal,
-        depth_linear,
+        scenePos,
+        worldNormal,
+        depthLinear,
         rcp_NoV,
-        depth_gradient
+        depthGradient
     );
-    highlight += edge_highlight_check(
+    highlight += edgeHighlightCheck(
         -tbn[0],
-        scene_pos,
-        world_normal,
-        depth_linear,
+        scenePos,
+        worldNormal,
+        depthLinear,
         rcp_NoV,
-        depth_gradient
+        depthGradient
     );
-    highlight += edge_highlight_check(
+    highlight += edgeHighlightCheck(
         tbn[1],
-        scene_pos,
-        world_normal,
-        depth_linear,
+        scenePos,
+        worldNormal,
+        depthLinear,
         rcp_NoV,
-        depth_gradient
+        depthGradient
     );
-    highlight += edge_highlight_check(
+    highlight += edgeHighlightCheck(
         -tbn[1],
-        scene_pos,
-        world_normal,
-        depth_linear,
+        scenePos,
+        worldNormal,
+        depthLinear,
         rcp_NoV,
-        depth_gradient
+        depthGradient
     );
-    highlight += edge_highlight_check(
+    highlight += edgeHighlightCheck(
         tbn[2],
-        scene_pos,
-        world_normal,
-        depth_linear,
+        scenePos,
+        worldNormal,
+        depthLinear,
         rcp_NoV,
-        depth_gradient
+        depthGradient
     );
 
-    return clamp01(float(has_edge_highlight(world_normal)) * highlight);
+    return clamp01(float(hasEdgeHighlight(worldNormal)) * highlight);
 }
 
 #endif // INCLUDE_MISC_EDGE_HIGHLIGHT

@@ -20,40 +20,40 @@
 
 
 #if defined PROGRAM_GBUFFERS_WATER || refraction == refractionAll
-layout(location = 0) out vec4 refraction_data;
-layout(location = 1) out vec4 fragment_color;
+layout(location = 0) out vec4 refractionData;
+layout(location = 1) out vec4 fragmentColor;
 
 /* RENDERTARGETS: 3,13 */
 #else
-layout(location = 0) out vec4 fragment_color;
+layout(location = 0) out vec4 fragmentColor;
 
 /* RENDERTARGETS: 13 */
 #endif
 
 in vec2 uv;
-in vec3 position_view;
-in vec3 position_scene;
+in vec3 positionView;
+in vec3 positionScene;
 in vec4 tint;
 
 #if defined COLORWHEEL
-vec2 light_levels;
+vec2 lightLevels;
 #else
-in vec2 light_levels;
+in vec2 lightLevels;
 #endif
 
-flat in uint material_mask;
+flat in uint materialMask;
 flat in mat3 tbn;
 
 #if defined PROGRAM_GBUFFERS_WATER
-in vec2 atlas_tile_coord;
-in vec3 position_tangent;
-flat in vec2 atlas_tile_offset;
-flat in vec2 atlas_tile_scale;
+in vec2 atlasTileCoord;
+in vec3 positionTangent;
+flat in vec2 atlasTileOffset;
+flat in vec2 atlasTileScale;
 #endif
 
 #if defined WORLD_OVERWORLD
-#include "/lib/fog/overworld/parameters.glsl"
-flat in OverworldFogParameters fog_params;
+#include "/lib/atmos/fog/overworld/parameters.glsl"
+flat in OverworldFogParameters fogParams;
 #endif
 
 // ------------
@@ -110,7 +110,7 @@ uniform float far;
 uniform float frameTimeCounter;
 uniform float sunAngle;
 uniform float rainStrength;
-uniform float desert_sandstorm;
+uniform float desertSandstormWeather;
 uniform float wetness;
 
 uniform int worldTime;
@@ -123,24 +123,24 @@ uniform float nightVision;
 uniform float darknessFactor;
 uniform float eyeAltitude;
 
-uniform vec3 light_dir;
-uniform vec3 sun_dir;
-uniform vec3 moon_dir;
+uniform vec3 lightDir;
+uniform vec3 sunDir;
+uniform vec3 moonDir;
 
-uniform vec2 view_res;
-uniform vec2 view_pixel_size;
-uniform vec2 taa_offset;
+uniform vec2 viewRes;
+uniform vec2 viewPixelSize;
+uniform vec2 taaOffset;
 
-uniform float eye_skylight;
+uniform float eyeSkylight;
 
-uniform float biome_cave;
-uniform float biome_may_rain;
-uniform float biome_may_snow;
+uniform float biomeCave;
+uniform float biomeMayRain;
+uniform float biomeMaySnow;
 
-uniform float time_sunrise;
-uniform float time_noon;
-uniform float time_sunset;
-uniform float time_midnight;
+uniform float timeSunrise;
+uniform float timeNoon;
+uniform float timeSunset;
+uniform float timeMidnight;
 
 #if defined PROGRAM_GBUFFERS_ENTITIES_TRANSLUCENT \
     || defined PROGRAM_GBUFFERS_LIGHTNING
@@ -148,7 +148,7 @@ uniform int entityId;
 uniform vec4 entityColor;
 #endif
 
-vec3 light_color, ambient_color;
+vec3 lightColor, ambientColor;
 
 // ------------
 //   Includes
@@ -172,134 +172,134 @@ vec3 light_color, ambient_color;
 #if !defined INCLUDE_LIGHTING_CLOUD_SHADOWS
 #define INCLUDE_LIGHTING_CLOUD_SHADOWS
 
-#include "/lib/sky/clouds/constants.glsl"
+#include "/lib/atmos/sky/clouds/core/constants.glsl"
 #include "/lib/util/bicubic.glsl"
 
-const ivec2 cloud_shadow_res = ivec2(512);
+const ivec2 cloudShadowRes = ivec2(512);
 
-const float cloud_shadow_extent = 256.0 / (cloudsScale / 10.0);
+const float cloudShadowExtent = 256.0 / (cloudsScale / 10.0);
 
-vec2 shadow_view_to_cloud_shadow_space(vec3 shadow_view_pos) {
-    vec2 cloud_shadow_pos = shadow_view_pos.xy / cloud_shadow_extent;
-    cloud_shadow_pos /= 1.0 + length(cloud_shadow_pos);
-    cloud_shadow_pos = cloud_shadow_pos * 0.5 + 0.5;
+vec2 shadowViewToCloudShadowSpace(vec3 shadowViewPos) {
+    vec2 cloudShadowPos = shadowViewPos.xy / cloudShadowExtent;
+    cloudShadowPos /= 1.0 + length(cloudShadowPos);
+    cloudShadowPos = cloudShadowPos * 0.5 + 0.5;
 
-    return cloud_shadow_pos;
+    return cloudShadowPos;
 }
 
-vec2 project_cloud_shadow_map(vec3 scene_pos) {
-    return shadow_view_to_cloud_shadow_space(
-        transform(shadowModelView, scene_pos)
+vec2 projectCloudShadowMap(vec3 scenePos) {
+    return shadowViewToCloudShadowSpace(
+        transform(shadowModelView, scenePos)
     );
 }
 
-vec3 unproject_cloud_shadow_map(vec2 cloud_shadow_pos) {
-    cloud_shadow_pos = cloud_shadow_pos * 2.0 - 1.0;
-    cloud_shadow_pos /= 1.0 - length(cloud_shadow_pos);
+vec3 unprojectCloudShadowMap(vec2 cloudShadowPos) {
+    cloudShadowPos = cloudShadowPos * 2.0 - 1.0;
+    cloudShadowPos /= 1.0 - length(cloudShadowPos);
 
-    vec3 shadow_view_pos = vec3(cloud_shadow_pos * cloud_shadow_extent, 1.0);
+    vec3 shadowViewPos = vec3(cloudShadowPos * cloudShadowExtent, 1.0);
 
-    return transform(shadowModelViewInverse, shadow_view_pos);
+    return transform(shadowModelViewInverse, shadowViewPos);
 }
 
-float get_cloud_shadows(sampler2D cloud_shadow_map, vec3 scene_pos) {
+float getCloudShadows(sampler2D cloudShadowMap, vec3 scenePos) {
 #ifndef cloudShadows
     return 1.0;
 #else
-    vec2 cloud_shadow_pos = project_cloud_shadow_map(scene_pos)
-        * vec2(cloud_shadow_res) / vec2(textureSize(cloud_shadow_map, 0));
+    vec2 cloudShadowPos = projectCloudShadowMap(scenePos)
+        * vec2(cloudShadowRes) / vec2(textureSize(cloudShadowMap, 0));
 
-    if (clamp01(cloud_shadow_pos) != cloud_shadow_pos) {
+    if (clamp01(cloudShadowPos) != cloudShadowPos) {
         return 1.0;
     }
 
     // fade out cloud shadows when:
     //  - the fragment is above the cloud layer
     //  - the sun is near the horizon
-    float r = planet_radius
-        + (scene_pos.y + eyeAltitude - 63.0) * cloudsScale;
-    float altitude_fraction
-        = linear_step(clouds_cumulus_radius, clouds_cumulus_top_radius, r);
-    float cloud_shadow_fade = smoothstep(0.05, 0.15, light_dir.y)
-        * clamp01(1.0 - altitude_fraction);
+    float r = planetRadius
+        + (scenePos.y + eyeAltitude - 63.0) * cloudsScale;
+    float altitudeFraction
+        = linearStep(cloudsCumulusRadius, cloudsCumulusTopRadius, r);
+    float cloudShadowFade = smoothstep(0.05, 0.15, lightDir.y)
+        * clamp01(1.0 - altitudeFraction);
 
-    float cloud_shadow = bicubic_filter(cloud_shadow_map, cloud_shadow_pos).x;
-    cloud_shadow = cloud_shadow * cloud_shadow_fade + (1.0 - cloud_shadow_fade);
+    float cloudShadow = bicubicFilter(cloudShadowMap, cloudShadowPos).x;
+    cloudShadow = cloudShadow * cloudShadowFade + (1.0 - cloudShadowFade);
 
-    return cloud_shadow * cloudShadowsIntensity
+    return cloudShadow * cloudShadowsIntensity
         + (1.0 - cloudShadowsIntensity);
 #endif
 }
 
 #if defined PROGRAM_PREPARE && defined cloudShadows
-#include "/lib/sky/clouds/altocumulus.glsl"
-#include "/lib/sky/clouds/cirrus.glsl"
-#include "/lib/sky/clouds/cumulus.glsl"
-#include "/lib/sky/clouds/cumulusCongestus.glsl"
+#include "/lib/atmos/sky/clouds/altocumulus.glsl"
+#include "/lib/atmos/sky/clouds/cirrus.glsl"
+#include "/lib/atmos/sky/clouds/cumulus.glsl"
+#include "/lib/atmos/sky/clouds/cumulusCongestus.glsl"
 
-vec2 render_cloud_shadow_map(vec2 uv) {
+vec2 renderCloudShadowMap(vec2 uv) {
     // Transform position from scene-space to clouds-space
-    vec3 ray_origin = unproject_cloud_shadow_map(uv);
-    ray_origin = vec3(ray_origin.xz, ray_origin.y + eyeAltitude - 63.0).xzy
+    vec3 rayOrigin = unprojectCloudShadowMap(uv);
+    rayOrigin = vec3(rayOrigin.xz, rayOrigin.y + eyeAltitude - 63.0).xzy
             * cloudsScale
-        + vec3(0.0, planet_radius, 0.0);
+        + vec3(0.0, planetRadius, 0.0);
 
     vec3 pos;
-    float t, density, extinction_coeff;
+    float t, density, extinctionCoeff;
     float shadowVis = 1.0;
-    float shadow_cumulus_only = 1.0;
-    float distance_fade;
-    float distance_fade_strength = 0.00000001 * pulse(light_dir.y, -0.01, 0.2);
+    float shadowCumulusOnly = 1.0;
+    float distanceFade;
+    float distanceFadeStrength = 0.00000001 * pulse(lightDir.y, -0.01, 0.2);
 
 #ifdef cloudsCumulus
-    extinction_coeff = 0.25 * clouds_params.l0_extinction_coeff;
-    t = intersect_sphere(
-            ray_origin,
-            light_dir,
-            clouds_cumulus_radius + 0.25 * clouds_cumulus_thickness
+    extinctionCoeff = 0.25 * cloudsParams.l0ExtinctionCoeff;
+    t = intersectSphere(
+            rayOrigin,
+            lightDir,
+            cloudsCumulusRadius + 0.25 * cumulusLayerThickness
     )
             .y;
-    pos = ray_origin + light_dir * t;
-    distance_fade = exp2(-distance_fade_strength * length(pos.xy));
-    density = clouds_cumulus_density(pos);
+    pos = rayOrigin + lightDir * t;
+    distanceFade = exp2(-distanceFadeStrength * length(pos.xy));
+    density = cumulusDensityProfile(pos);
     shadowVis *= exp(
-        -1.00 * distance_fade * extinction_coeff * clouds_cumulus_thickness
-        * rcp(abs(light_dir.y) + eps) * density
+        -1.00 * distanceFade * extinctionCoeff * cumulusLayerThickness
+        * rcp(abs(lightDir.y) + eps) * density
     );
-    shadow_cumulus_only = shadowVis;
+    shadowCumulusOnly = shadowVis;
 #endif
 
 #ifdef cloudsAltocumulus
-    extinction_coeff = mix(0.05, 0.1, day_factor) * cloudsAltocumulusDensity
+    extinctionCoeff = mix(0.05, 0.1, dayFactor) * cloudsAltocumulusDensity
         * (1.0 - 0.33 * rainStrength);
-    t = intersect_sphere(
-            ray_origin,
-            light_dir,
-            clouds_altocumulus_radius + 0.5 * clouds_altocumulus_thickness
+    t = intersectSphere(
+            rayOrigin,
+            lightDir,
+            cloudsAltocumulusRadius + 0.5 * altocumulusLayerThickness
     )
             .y;
-    pos = ray_origin + light_dir * t;
-    distance_fade = exp2(-distance_fade_strength * length(pos.xy));
-    density = clouds_altocumulus_density(pos);
+    pos = rayOrigin + lightDir * t;
+    distanceFade = exp2(-distanceFadeStrength * length(pos.xy));
+    density = altocumulusDensityProfile(pos);
     shadowVis *= exp(
-        -1.00 * distance_fade * extinction_coeff * clouds_altocumulus_thickness
-        * rcp(abs(light_dir.y) + eps) * density
+        -1.00 * distanceFade * extinctionCoeff * altocumulusLayerThickness
+        * rcp(abs(lightDir.y) + eps) * density
     );
 #endif
 
 #ifdef cloudsCirrus
-    t = intersect_sphere(ray_origin, light_dir, clouds_cirrus_radius).y;
-    pos = ray_origin + light_dir * t;
-    distance_fade = exp2(-distance_fade_strength * length(pos.xy));
-    density = clouds_cirrus_density(pos.xz, 0.5);
-    shadowVis *= exp(-1.00 * distance_fade * clouds_cirrus_extinction_coeff
-                  * clouds_cirrus_thickness * rcp(abs(light_dir.y) + eps)
+    t = intersectSphere(rayOrigin, lightDir, cloudsCirrusRadius).y;
+    pos = rayOrigin + lightDir * t;
+    distanceFade = exp2(-distanceFadeStrength * length(pos.xy));
+    density = cirrusDensityProfile(pos.xz, 0.5);
+    shadowVis *= exp(-1.00 * distanceFade * cloudsCirrusExtinctionCoeff
+                  * cirrusLayerThickness * rcp(abs(lightDir.y) + eps)
                   * density)
             * 0.5
         + 0.5;
 #endif
 
-    return vec2(shadowVis, shadow_cumulus_only);
+    return vec2(shadowVis, shadowCumulusOnly);
 }
 #endif
 #endif // INCLUDE_LIGHTING_CLOUD_SHADOWS
@@ -312,58 +312,58 @@ vec2 render_cloud_shadow_map(vec2 uv) {
 
 // Based on Ninjamike's implementation in shaderLABS #snippets
 
-vec2 get_directional_lightmaps(vec3 position_scene, vec3 normal) {
-    vec2 lightmap_mul = vec2(1.0);
+vec2 getDirectionalLightmaps(vec3 positionScene, vec3 normal) {
+    vec2 lightmapMul = vec2(1.0);
 
-    vec2 lightmap_gradient;
-    vec3 lightmap_dir;
-    mat2x3 pos_gradient = mat2x3(dFdx(position_scene), dFdy(position_scene));
+    vec2 lightmapGradient;
+    vec3 lightmapDir;
+    mat2x3 posGradient = mat2x3(dFdx(positionScene), dFdy(positionScene));
 
     // Blocklight
 
-    lightmap_gradient = vec2(dFdx(light_levels.x), dFdy(light_levels.x));
-    lightmap_dir = pos_gradient * lightmap_gradient;
+    lightmapGradient = vec2(dFdx(lightLevels.x), dFdy(lightLevels.x));
+    lightmapDir = posGradient * lightmapGradient;
 
-    if (length_squared(lightmap_gradient) > 1e-12) {
-        lightmap_mul.x = (clamp01(dot(normalize(lightmap_dir), normal) + 0.8)
+    if (lengthSquared(lightmapGradient) > 1e-12) {
+        lightmapMul.x = (clamp01(dot(normalize(lightmapDir), normal) + 0.8)
                               * directionalLightmapsIntensity
                           + (1.0 - directionalLightmapsIntensity))
             // Clamp the renormalization: near-zero lightmaps would
             // otherwise boost noise up to ~1000x (fireflies in caves)
-            * inversesqrt(sqrt(max(light_levels.x, 0.0625)) + eps);
+            * inversesqrt(sqrt(max(lightLevels.x, 0.0625)) + eps);
 
         // Fade the effect out where the lightmap is nearly zero: the
         // gradient is quantized/noisy there and would speckle dark areas.
-        lightmap_mul.x = mix(
+        lightmapMul.x = mix(
             1.0,
-            lightmap_mul.x,
-            sqr(linear_step(0.03, 0.30, light_levels.x))
+            lightmapMul.x,
+            sqr(linearStep(0.03, 0.30, lightLevels.x))
         );
     }
 
     // Skylight
 
-    lightmap_gradient = vec2(dFdx(light_levels.y), dFdy(light_levels.y));
-    lightmap_dir = pos_gradient * lightmap_gradient;
+    lightmapGradient = vec2(dFdx(lightLevels.y), dFdy(lightLevels.y));
+    lightmapDir = posGradient * lightmapGradient;
 
-    if (length_squared(lightmap_gradient) > 1e-12) {
-        lightmap_mul.y = (clamp01(dot(normalize(lightmap_dir), normal) + 0.8)
+    if (lengthSquared(lightmapGradient) > 1e-12) {
+        lightmapMul.y = (clamp01(dot(normalize(lightmapDir), normal) + 0.8)
                               * directionalLightmapsIntensity
                           + (1.0 - directionalLightmapsIntensity))
             // Clamp the renormalization: near-zero lightmaps would
             // otherwise boost noise up to ~1000x (fireflies in caves)
-            * inversesqrt(sqrt(max(light_levels.y, 0.0625)) + eps);
+            * inversesqrt(sqrt(max(lightLevels.y, 0.0625)) + eps);
 
         // Fade the effect out where the lightmap is nearly zero: the
         // gradient is quantized/noisy there and would speckle dark areas.
-        lightmap_mul.y = mix(
+        lightmapMul.y = mix(
             1.0,
-            lightmap_mul.y,
-            sqr(linear_step(0.03, 0.30, light_levels.y))
+            lightmapMul.y,
+            sqr(linearStep(0.03, 0.30, lightLevels.y))
         );
     }
 
-    return lightmap_mul;
+    return lightmapMul;
 }
 
 #endif // INCLUDE_LIGHTING_DIRECTIONAL_LIGHTMAPS
@@ -376,7 +376,7 @@ vec2 get_directional_lightmaps(vec3 position_scene, vec3 normal) {
 
 #define HANDHELD_LIGHTING_COLORS
 #if handheldLightingMode == handheldLightingColored
-const vec3 handheld_emitter_light_color[48] = vec3[48](
+const vec3 handheldEmitterLightColor[48] = vec3[48](
     vec3(1.00, 1.00, 1.00) * 12.0, // Strong white light
     vec3(1.00, 1.00, 1.00) * 6.0, // Medium white light
     vec3(1.00, 1.00, 1.00) * 1.0, // Weak white light
@@ -438,41 +438,41 @@ uniform int heldItemId2;
 uniform int heldBlockLightValue;
 uniform int heldBlockLightValue2;
 
-vec3 get_handheld_light_color(int held_item_id, int held_item_light_value) {
+vec3 getHandheldLightColor(int handItemId, int heldItemLightValue) {
 #if handheldLightingMode == handheldLightingColored
-    const int first_emitter_id = 10032;
-    const int emitter_count = 48;
-    int emitter_index = held_item_id - first_emitter_id;
+    const int firstEmitterId = 10032;
+    const int emitterCount = 48;
+    int emitterIndex = handItemId - firstEmitterId;
 
-    if (emitter_index >= 0 && emitter_index < emitter_count) {
-        return handheld_emitter_light_color[emitter_index];
+    if (emitterIndex >= 0 && emitterIndex < emitterCount) {
+        return handheldEmitterLightColor[emitterIndex];
     }
 #endif
 
-    return (blocklight_color * blocklight_scale * rcp(15.0))
-        * held_item_light_value;
+    return (blocklightColor * blocklightScale * rcp(15.0))
+        * heldItemLightValue;
 }
 
-float get_handheld_light_falloff(vec3 scene_pos, float ao) {
-    float falloff = lift(rcp(dot(scene_pos, scene_pos) + 1.0), 3.0);
+float getHandheldLightFalloff(vec3 scenePos, float ao) {
+    float falloff = lift(rcp(dot(scenePos, scenePos) + 1.0), 3.0);
     return falloff * mix(ao, 1.0, falloff * falloff)
         * 1.00;
 }
 
-vec3 get_handheld_lighting(vec3 scene_pos, float ao) {
+vec3 getHandheldLighting(vec3 scenePos, float ao) {
 #ifdef IS_IRIS
     // Center light on player rather than camera
-    scene_pos += relativeEyePosition;
+    scenePos += relativeEyePosition;
 #endif
 
-    vec3 light_color = max(
-        get_handheld_light_color(heldItemId, heldBlockLightValue),
-        get_handheld_light_color(heldItemId2, heldBlockLightValue2)
+    vec3 lightColor = max(
+        getHandheldLightColor(heldItemId, heldBlockLightValue),
+        getHandheldLightColor(heldItemId2, heldBlockLightValue2)
     );
 
-    float falloff = get_handheld_light_falloff(scene_pos, ao);
+    float falloff = getHandheldLightFalloff(scenePos, ao);
 
-    return light_color * falloff;
+    return lightColor * falloff;
 }
 
 #endif // INCLUDE_LIGHTING_HANDHELD_LIGHTING
@@ -481,8 +481,8 @@ vec3 get_handheld_lighting(vec3 scene_pos, float ao) {
 #undef LUSTER_INCLUDE_DIRECTIONAL_LIGHTMAPS
 #endif
 
-#include "/lib/fog/simpleFog.glsl"
-#include "/lib/brdf/diffuseLight.glsl"
+#include "/lib/atmos/fog/simpleFog.glsl"
+#include "/lib/brdf/common.glsl"
 #include "/lib/light/pcss.glsl"
 #include "/lib/brdf/specular.glsl"
 #include "/lib/misc/lodModSupport.glsl"
@@ -491,44 +491,44 @@ vec3 get_handheld_lighting(vec3 scene_pos, float ao) {
 
 // Purkinje effect: mesopic shift toward rod (scotopic) peak sensitivity.
 // https://en.wikipedia.org/wiki/Purkinje_effect
-vec3 purkinje_shift(vec3 rgb, vec2 light_levels) {
+vec3 purkinjeShiftTransform(vec3 rgb, vec2 lightLevels) {
 #if !(defined purkinjeShift && defined WORLD_OVERWORLD)
     return rgb;
 #else
-    float purkinje_intensity = 0.05 * purkinjeShiftIntensity;
-    purkinje_intensity = purkinje_intensity
-        - purkinje_intensity * smoothstep(-0.12, -0.06, sun_dir.y)
-            * light_levels.y; // No purkinje shift in daylight
-    purkinje_intensity *= clamp01(
-        1.0 - light_levels.x
+    float purkinjeIntensity = 0.05 * purkinjeShiftIntensity;
+    purkinjeIntensity = purkinjeIntensity
+        - purkinjeIntensity * smoothstep(-0.12, -0.06, sunDir.y)
+            * lightLevels.y; // No purkinje shift in daylight
+    purkinjeIntensity *= clamp01(
+        1.0 - lightLevels.x
     ); // Reduce purkinje intensity in blocklight
-    purkinje_intensity *= clamp01(
-        0.3 + 0.7 * cube(max(light_levels.y, eye_skylight))
+    purkinjeIntensity *= clamp01(
+        0.3 + 0.7 * cube(max(lightLevels.y, eyeSkylight))
     ); // Reduce purkinje intensity underground
 
-    if (purkinje_intensity < eps) {
+    if (purkinjeIntensity < eps) {
         return rgb;
     }
 
-    const vec3 purkinje_tint = vec3(
+    const vec3 purkinjeTint = vec3(
         purkinjeShiftR,
         purkinjeShiftG,
         purkinjeShiftB
-    ) * rec709_to_working_color;
-    const vec3 rod_response
-        = vec3(7.15e-5, 4.81e-1, 3.28e-1) * rec709_to_working_color;
+    ) * rec709ToWorkingColor;
+    const vec3 rodResponse
+        = vec3(7.15e-5, 4.81e-1, 3.28e-1) * rec709ToWorkingColor;
 
-    vec3 xyz = rgb * working_to_xyz_color;
+    vec3 xyz = rgb * workingToXyzColor;
 
-    vec3 scotopic_luminance
+    vec3 scotopicLuminance
         = xyz * (1.33 * (1.0 + (xyz.y + xyz.z) / xyz.x) - 1.68);
 
-    float purkinje = dot(rod_response, scotopic_luminance * xyz_to_working_color);
+    float purkinje = dot(rodResponse, scotopicLuminance * xyzToWorkingColor);
 
     rgb = mix(
         rgb,
-        purkinje * purkinje_tint,
-        exp2(-rcp(purkinje_intensity) * purkinje)
+        purkinje * purkinjeTint,
+        exp2(-rcp(purkinjeIntensity) * purkinje)
     );
 
     return max0(rgb);
@@ -549,134 +549,134 @@ vec3 purkinje_shift(vec3 rgb, vec2 light_levels) {
 #if !defined INCLUDE_LIGHTING_CLOUD_SHADOWS
 #define INCLUDE_LIGHTING_CLOUD_SHADOWS
 
-#include "/lib/sky/clouds/constants.glsl"
+#include "/lib/atmos/sky/clouds/core/constants.glsl"
 #include "/lib/util/bicubic.glsl"
 
-const ivec2 cloud_shadow_res = ivec2(512);
+const ivec2 cloudShadowRes = ivec2(512);
 
-const float cloud_shadow_extent = 256.0 / (cloudsScale / 10.0);
+const float cloudShadowExtent = 256.0 / (cloudsScale / 10.0);
 
-vec2 shadow_view_to_cloud_shadow_space(vec3 shadow_view_pos) {
-    vec2 cloud_shadow_pos = shadow_view_pos.xy / cloud_shadow_extent;
-    cloud_shadow_pos /= 1.0 + length(cloud_shadow_pos);
-    cloud_shadow_pos = cloud_shadow_pos * 0.5 + 0.5;
+vec2 shadowViewToCloudShadowSpace(vec3 shadowViewPos) {
+    vec2 cloudShadowPos = shadowViewPos.xy / cloudShadowExtent;
+    cloudShadowPos /= 1.0 + length(cloudShadowPos);
+    cloudShadowPos = cloudShadowPos * 0.5 + 0.5;
 
-    return cloud_shadow_pos;
+    return cloudShadowPos;
 }
 
-vec2 project_cloud_shadow_map(vec3 scene_pos) {
-    return shadow_view_to_cloud_shadow_space(
-        transform(shadowModelView, scene_pos)
+vec2 projectCloudShadowMap(vec3 scenePos) {
+    return shadowViewToCloudShadowSpace(
+        transform(shadowModelView, scenePos)
     );
 }
 
-vec3 unproject_cloud_shadow_map(vec2 cloud_shadow_pos) {
-    cloud_shadow_pos = cloud_shadow_pos * 2.0 - 1.0;
-    cloud_shadow_pos /= 1.0 - length(cloud_shadow_pos);
+vec3 unprojectCloudShadowMap(vec2 cloudShadowPos) {
+    cloudShadowPos = cloudShadowPos * 2.0 - 1.0;
+    cloudShadowPos /= 1.0 - length(cloudShadowPos);
 
-    vec3 shadow_view_pos = vec3(cloud_shadow_pos * cloud_shadow_extent, 1.0);
+    vec3 shadowViewPos = vec3(cloudShadowPos * cloudShadowExtent, 1.0);
 
-    return transform(shadowModelViewInverse, shadow_view_pos);
+    return transform(shadowModelViewInverse, shadowViewPos);
 }
 
-float get_cloud_shadows(sampler2D cloud_shadow_map, vec3 scene_pos) {
+float getCloudShadows(sampler2D cloudShadowMap, vec3 scenePos) {
 #ifndef cloudShadows
     return 1.0;
 #else
-    vec2 cloud_shadow_pos = project_cloud_shadow_map(scene_pos)
-        * vec2(cloud_shadow_res) / vec2(textureSize(cloud_shadow_map, 0));
+    vec2 cloudShadowPos = projectCloudShadowMap(scenePos)
+        * vec2(cloudShadowRes) / vec2(textureSize(cloudShadowMap, 0));
 
-    if (clamp01(cloud_shadow_pos) != cloud_shadow_pos) {
+    if (clamp01(cloudShadowPos) != cloudShadowPos) {
         return 1.0;
     }
 
     // fade out cloud shadows when:
     //  - the fragment is above the cloud layer
     //  - the sun is near the horizon
-    float r = planet_radius
-        + (scene_pos.y + eyeAltitude - 63.0) * cloudsScale;
-    float altitude_fraction
-        = linear_step(clouds_cumulus_radius, clouds_cumulus_top_radius, r);
-    float cloud_shadow_fade = smoothstep(0.05, 0.15, light_dir.y)
-        * clamp01(1.0 - altitude_fraction);
+    float r = planetRadius
+        + (scenePos.y + eyeAltitude - 63.0) * cloudsScale;
+    float altitudeFraction
+        = linearStep(cloudsCumulusRadius, cloudsCumulusTopRadius, r);
+    float cloudShadowFade = smoothstep(0.05, 0.15, lightDir.y)
+        * clamp01(1.0 - altitudeFraction);
 
-    float cloud_shadow = bicubic_filter(cloud_shadow_map, cloud_shadow_pos).x;
-    cloud_shadow = cloud_shadow * cloud_shadow_fade + (1.0 - cloud_shadow_fade);
+    float cloudShadow = bicubicFilter(cloudShadowMap, cloudShadowPos).x;
+    cloudShadow = cloudShadow * cloudShadowFade + (1.0 - cloudShadowFade);
 
-    return cloud_shadow * cloudShadowsIntensity
+    return cloudShadow * cloudShadowsIntensity
         + (1.0 - cloudShadowsIntensity);
 #endif
 }
 
 #if defined PROGRAM_PREPARE && defined cloudShadows
-#include "/lib/sky/clouds/altocumulus.glsl"
-#include "/lib/sky/clouds/cirrus.glsl"
-#include "/lib/sky/clouds/cumulus.glsl"
-#include "/lib/sky/clouds/cumulusCongestus.glsl"
+#include "/lib/atmos/sky/clouds/altocumulus.glsl"
+#include "/lib/atmos/sky/clouds/cirrus.glsl"
+#include "/lib/atmos/sky/clouds/cumulus.glsl"
+#include "/lib/atmos/sky/clouds/cumulusCongestus.glsl"
 
-vec2 render_cloud_shadow_map(vec2 uv) {
+vec2 renderCloudShadowMap(vec2 uv) {
     // Transform position from scene-space to clouds-space
-    vec3 ray_origin = unproject_cloud_shadow_map(uv);
-    ray_origin = vec3(ray_origin.xz, ray_origin.y + eyeAltitude - 63.0).xzy
+    vec3 rayOrigin = unprojectCloudShadowMap(uv);
+    rayOrigin = vec3(rayOrigin.xz, rayOrigin.y + eyeAltitude - 63.0).xzy
             * cloudsScale
-        + vec3(0.0, planet_radius, 0.0);
+        + vec3(0.0, planetRadius, 0.0);
 
     vec3 pos;
-    float t, density, extinction_coeff;
+    float t, density, extinctionCoeff;
     float shadowVis = 1.0;
-    float shadow_cumulus_only = 1.0;
-    float distance_fade;
-    float distance_fade_strength = 0.00000001 * pulse(light_dir.y, -0.01, 0.2);
+    float shadowCumulusOnly = 1.0;
+    float distanceFade;
+    float distanceFadeStrength = 0.00000001 * pulse(lightDir.y, -0.01, 0.2);
 
 #ifdef cloudsCumulus
-    extinction_coeff = 0.25 * clouds_params.l0_extinction_coeff;
-    t = intersect_sphere(
-            ray_origin,
-            light_dir,
-            clouds_cumulus_radius + 0.25 * clouds_cumulus_thickness
+    extinctionCoeff = 0.25 * cloudsParams.l0ExtinctionCoeff;
+    t = intersectSphere(
+            rayOrigin,
+            lightDir,
+            cloudsCumulusRadius + 0.25 * cumulusLayerThickness
     )
             .y;
-    pos = ray_origin + light_dir * t;
-    distance_fade = exp2(-distance_fade_strength * length(pos.xy));
-    density = clouds_cumulus_density(pos);
+    pos = rayOrigin + lightDir * t;
+    distanceFade = exp2(-distanceFadeStrength * length(pos.xy));
+    density = cumulusDensityProfile(pos);
     shadowVis *= exp(
-        -1.00 * distance_fade * extinction_coeff * clouds_cumulus_thickness
-        * rcp(abs(light_dir.y) + eps) * density
+        -1.00 * distanceFade * extinctionCoeff * cumulusLayerThickness
+        * rcp(abs(lightDir.y) + eps) * density
     );
-    shadow_cumulus_only = shadowVis;
+    shadowCumulusOnly = shadowVis;
 #endif
 
 #ifdef cloudsAltocumulus
-    extinction_coeff = mix(0.05, 0.1, day_factor) * cloudsAltocumulusDensity
+    extinctionCoeff = mix(0.05, 0.1, dayFactor) * cloudsAltocumulusDensity
         * (1.0 - 0.33 * rainStrength);
-    t = intersect_sphere(
-            ray_origin,
-            light_dir,
-            clouds_altocumulus_radius + 0.5 * clouds_altocumulus_thickness
+    t = intersectSphere(
+            rayOrigin,
+            lightDir,
+            cloudsAltocumulusRadius + 0.5 * altocumulusLayerThickness
     )
             .y;
-    pos = ray_origin + light_dir * t;
-    distance_fade = exp2(-distance_fade_strength * length(pos.xy));
-    density = clouds_altocumulus_density(pos);
+    pos = rayOrigin + lightDir * t;
+    distanceFade = exp2(-distanceFadeStrength * length(pos.xy));
+    density = altocumulusDensityProfile(pos);
     shadowVis *= exp(
-        -1.00 * distance_fade * extinction_coeff * clouds_altocumulus_thickness
-        * rcp(abs(light_dir.y) + eps) * density
+        -1.00 * distanceFade * extinctionCoeff * altocumulusLayerThickness
+        * rcp(abs(lightDir.y) + eps) * density
     );
 #endif
 
 #ifdef cloudsCirrus
-    t = intersect_sphere(ray_origin, light_dir, clouds_cirrus_radius).y;
-    pos = ray_origin + light_dir * t;
-    distance_fade = exp2(-distance_fade_strength * length(pos.xy));
-    density = clouds_cirrus_density(pos.xz, 0.5);
-    shadowVis *= exp(-1.00 * distance_fade * clouds_cirrus_extinction_coeff
-                  * clouds_cirrus_thickness * rcp(abs(light_dir.y) + eps)
+    t = intersectSphere(rayOrigin, lightDir, cloudsCirrusRadius).y;
+    pos = rayOrigin + lightDir * t;
+    distanceFade = exp2(-distanceFadeStrength * length(pos.xy));
+    density = cirrusDensityProfile(pos.xz, 0.5);
+    shadowVis *= exp(-1.00 * distanceFade * cloudsCirrusExtinctionCoeff
+                  * cirrusLayerThickness * rcp(abs(lightDir.y) + eps)
                   * density)
             * 0.5
         + 0.5;
 #endif
 
-    return vec2(shadowVis, shadow_cumulus_only);
+    return vec2(shadowVis, shadowCumulusOnly);
 }
 #endif
 #endif // INCLUDE_LIGHTING_CLOUD_SHADOWS
@@ -689,58 +689,58 @@ vec2 render_cloud_shadow_map(vec2 uv) {
 
 // Based on Ninjamike's implementation in shaderLABS #snippets
 
-vec2 get_directional_lightmaps(vec3 position_scene, vec3 normal) {
-    vec2 lightmap_mul = vec2(1.0);
+vec2 getDirectionalLightmaps(vec3 positionScene, vec3 normal) {
+    vec2 lightmapMul = vec2(1.0);
 
-    vec2 lightmap_gradient;
-    vec3 lightmap_dir;
-    mat2x3 pos_gradient = mat2x3(dFdx(position_scene), dFdy(position_scene));
+    vec2 lightmapGradient;
+    vec3 lightmapDir;
+    mat2x3 posGradient = mat2x3(dFdx(positionScene), dFdy(positionScene));
 
     // Blocklight
 
-    lightmap_gradient = vec2(dFdx(light_levels.x), dFdy(light_levels.x));
-    lightmap_dir = pos_gradient * lightmap_gradient;
+    lightmapGradient = vec2(dFdx(lightLevels.x), dFdy(lightLevels.x));
+    lightmapDir = posGradient * lightmapGradient;
 
-    if (length_squared(lightmap_gradient) > 1e-12) {
-        lightmap_mul.x = (clamp01(dot(normalize(lightmap_dir), normal) + 0.8)
+    if (lengthSquared(lightmapGradient) > 1e-12) {
+        lightmapMul.x = (clamp01(dot(normalize(lightmapDir), normal) + 0.8)
                               * directionalLightmapsIntensity
                           + (1.0 - directionalLightmapsIntensity))
             // Clamp the renormalization: near-zero lightmaps would
             // otherwise boost noise up to ~1000x (fireflies in caves)
-            * inversesqrt(sqrt(max(light_levels.x, 0.0625)) + eps);
+            * inversesqrt(sqrt(max(lightLevels.x, 0.0625)) + eps);
 
         // Fade the effect out where the lightmap is nearly zero: the
         // gradient is quantized/noisy there and would speckle dark areas.
-        lightmap_mul.x = mix(
+        lightmapMul.x = mix(
             1.0,
-            lightmap_mul.x,
-            sqr(linear_step(0.03, 0.30, light_levels.x))
+            lightmapMul.x,
+            sqr(linearStep(0.03, 0.30, lightLevels.x))
         );
     }
 
     // Skylight
 
-    lightmap_gradient = vec2(dFdx(light_levels.y), dFdy(light_levels.y));
-    lightmap_dir = pos_gradient * lightmap_gradient;
+    lightmapGradient = vec2(dFdx(lightLevels.y), dFdy(lightLevels.y));
+    lightmapDir = posGradient * lightmapGradient;
 
-    if (length_squared(lightmap_gradient) > 1e-12) {
-        lightmap_mul.y = (clamp01(dot(normalize(lightmap_dir), normal) + 0.8)
+    if (lengthSquared(lightmapGradient) > 1e-12) {
+        lightmapMul.y = (clamp01(dot(normalize(lightmapDir), normal) + 0.8)
                               * directionalLightmapsIntensity
                           + (1.0 - directionalLightmapsIntensity))
             // Clamp the renormalization: near-zero lightmaps would
             // otherwise boost noise up to ~1000x (fireflies in caves)
-            * inversesqrt(sqrt(max(light_levels.y, 0.0625)) + eps);
+            * inversesqrt(sqrt(max(lightLevels.y, 0.0625)) + eps);
 
         // Fade the effect out where the lightmap is nearly zero: the
         // gradient is quantized/noisy there and would speckle dark areas.
-        lightmap_mul.y = mix(
+        lightmapMul.y = mix(
             1.0,
-            lightmap_mul.y,
-            sqr(linear_step(0.03, 0.30, light_levels.y))
+            lightmapMul.y,
+            sqr(linearStep(0.03, 0.30, lightLevels.y))
         );
     }
 
-    return lightmap_mul;
+    return lightmapMul;
 }
 
 #endif // INCLUDE_LIGHTING_DIRECTIONAL_LIGHTMAPS
@@ -753,7 +753,7 @@ vec2 get_directional_lightmaps(vec3 position_scene, vec3 normal) {
 
 #define HANDHELD_LIGHTING_COLORS
 #if handheldLightingMode == handheldLightingColored
-const vec3 handheld_emitter_light_color[48] = vec3[48](
+const vec3 handheldEmitterLightColor[48] = vec3[48](
     vec3(1.00, 1.00, 1.00) * 12.0, // Strong white light
     vec3(1.00, 1.00, 1.00) * 6.0, // Medium white light
     vec3(1.00, 1.00, 1.00) * 1.0, // Weak white light
@@ -815,41 +815,41 @@ uniform int heldItemId2;
 uniform int heldBlockLightValue;
 uniform int heldBlockLightValue2;
 
-vec3 get_handheld_light_color(int held_item_id, int held_item_light_value) {
+vec3 getHandheldLightColor(int handItemId, int heldItemLightValue) {
 #if handheldLightingMode == handheldLightingColored
-    const int first_emitter_id = 10032;
-    const int emitter_count = 48;
-    int emitter_index = held_item_id - first_emitter_id;
+    const int firstEmitterId = 10032;
+    const int emitterCount = 48;
+    int emitterIndex = handItemId - firstEmitterId;
 
-    if (emitter_index >= 0 && emitter_index < emitter_count) {
-        return handheld_emitter_light_color[emitter_index];
+    if (emitterIndex >= 0 && emitterIndex < emitterCount) {
+        return handheldEmitterLightColor[emitterIndex];
     }
 #endif
 
-    return (blocklight_color * blocklight_scale * rcp(15.0))
-        * held_item_light_value;
+    return (blocklightColor * blocklightScale * rcp(15.0))
+        * heldItemLightValue;
 }
 
-float get_handheld_light_falloff(vec3 scene_pos, float ao) {
-    float falloff = lift(rcp(dot(scene_pos, scene_pos) + 1.0), 3.0);
+float getHandheldLightFalloff(vec3 scenePos, float ao) {
+    float falloff = lift(rcp(dot(scenePos, scenePos) + 1.0), 3.0);
     return falloff * mix(ao, 1.0, falloff * falloff)
         * 1.00;
 }
 
-vec3 get_handheld_lighting(vec3 scene_pos, float ao) {
+vec3 getHandheldLighting(vec3 scenePos, float ao) {
 #ifdef IS_IRIS
     // Center light on player rather than camera
-    scene_pos += relativeEyePosition;
+    scenePos += relativeEyePosition;
 #endif
 
-    vec3 light_color = max(
-        get_handheld_light_color(heldItemId, heldBlockLightValue),
-        get_handheld_light_color(heldItemId2, heldBlockLightValue2)
+    vec3 lightColor = max(
+        getHandheldLightColor(heldItemId, heldBlockLightValue),
+        getHandheldLightColor(heldItemId2, heldBlockLightValue2)
     );
 
-    float falloff = get_handheld_light_falloff(scene_pos, ao);
+    float falloff = getHandheldLightFalloff(scenePos, ao);
 
-    return light_color * falloff;
+    return lightColor * falloff;
 }
 
 #endif // INCLUDE_LIGHTING_HANDHELD_LIGHTING
@@ -858,11 +858,11 @@ vec3 get_handheld_lighting(vec3 scene_pos, float ao) {
 #undef LUSTER_INCLUDE_CLOUD_SHADOWS
 #endif
 
-const float lod_bias = log2(taau_render_scale);
+const float lodBias = log2(taauViewportScale);
 
 
-#define read_tex_anisotropic_or_plain(samp, texcoord) \
-    texture(samp, texcoord, lod_bias)
+#define readTexAnisotropicOrPlain(samp, texcoord) \
+    texture(samp, texcoord, lodBias)
 
 #if defined PROGRAM_GBUFFERS_WATER
 #define LUSTER_INCLUDE_WATER_SURFACE_MATERIAL
@@ -870,7 +870,7 @@ const float lod_bias = log2(taau_render_scale);
 #include "/lib/material/water.glsl"
 #undef LUSTER_INCLUDE_WATER_SURFACE_MATERIAL
 
-// Fancy nether portal effect (needs position_tangent/atlas varyings in the
+// Fancy nether portal effect (needs positionTangent/atlas varyings in the
 // water-program variant).
 #if !defined INCLUDE_MISC_FANCY_NETHER_PORTAL
 #define INCLUDE_MISC_FANCY_NETHER_PORTAL
@@ -882,59 +882,59 @@ const float lod_bias = log2(taau_render_scale);
 #include "/lib/util/dithering.glsl"
 
 #if defined PROGRAM_GBUFFERS_WATER
-vec2 get_uv_from_local_coord(vec2 local_coord) {
-    return atlas_tile_offset + atlas_tile_scale * fract(local_coord);
+vec2 getUvFromLocalCoord(vec2 localCoord) {
+    return atlasTileOffset + atlasTileScale * fract(localCoord);
 }
 
-vec4 draw_nether_portal(vec3 direction_world, float layer_dist) {
-    const int step_count = 20;
-    const float parallax_depth = 0.2;
-        const float density_threshold = 0.6;
-    const float depth_step = rcp(float(step_count));
+vec4 drawNetherPortal(vec3 directionWorld, float layerDist) {
+    const int stepCount = 20;
+    const float parallaxDepth = 0.2;
+        const float densityThreshold = 0.6;
+    const float depthStep = rcp(float(stepCount));
 
-    float dither = interleaved_gradient_noise(gl_FragCoord.xy, frameCounter);
+    float dither = interleavedGradientNoise(gl_FragCoord.xy, frameCounter);
 
-    vec3 direction_tangent = -normalize(position_tangent);
-    mat2 uv_gradient = mat2(dFdx(uv), dFdy(uv));
+    vec3 directionTangent = -normalize(positionTangent);
+    mat2 uvGradient = mat2(dFdx(uv), dFdy(uv));
 
-    vec3 ray_step
+    vec3 rayStep
         = vec3(
-              direction_tangent.xy * rcp(-direction_tangent.z) * parallax_depth,
+              directionTangent.xy * rcp(-directionTangent.z) * parallaxDepth,
               1.0
           )
-        * depth_step;
-    vec3 pos = vec3(atlas_tile_coord + ray_step.xy * dither, 0.0);
+        * depthStep;
+    vec3 pos = vec3(atlasTileCoord + rayStep.xy * dither, 0.0);
 
     vec4 result = vec4(0.0);
 
-    for (uint i = 0; i < step_count; ++i) {
+    for (uint i = 0; i < stepCount; ++i) {
         vec4 col = textureGrad(
             gtexture,
-            get_uv_from_local_coord(pos.xy),
-            uv_gradient[0],
-            uv_gradient[1]
+            getUvFromLocalCoord(pos.xy),
+            uvGradient[0],
+            uvGradient[1]
         );
 
-        float density = dot(col.rgb, luminance_weights_rec709);
-        density = linear_step(0.0, density_threshold, density);
+        float density = dot(col.rgb, luminanceWeightsRec709);
+        density = linearStep(0.0, densityThreshold, density);
         density = max(density, 0.23);
-        density *= 1.0 - depth_step * (i + dither);
+        density *= 1.0 - depthStep * (i + dither);
 
         result += col * density;
 
-        pos += ray_step;
+        pos += rayStep;
     }
 
     // Edge highlight
-    float dist = layer_dist * max_of(abs(direction_world));
-    float edge_highlight = cube(max0(1.0 - 2.0 * dist));
-    result *= 1.0 + 2.0 * edge_highlight;
+    float dist = layerDist * maxOf(abs(directionWorld));
+    float edgeHighlightAmount = cube(max0(1.0 - 2.0 * dist));
+    result *= 1.0 + 2.0 * edgeHighlightAmount;
 
-    return clamp01(result * 4.00 * depth_step);
+    return clamp01(result * 4.00 * depthStep);
 }
 
 #else
-vec4 draw_nether_portal(vec3 direction_world, float layer_dist) {
+vec4 drawNetherPortal(vec3 directionWorld, float layerDist) {
     return vec4(0.0);
 }
 #endif
@@ -942,7 +942,7 @@ vec4 draw_nether_portal(vec3 direction_world, float layer_dist) {
 #endif // INCLUDE_MISC_FANCY_NETHER_PORTAL
 
 void main() {
-    vec2 coord = gl_FragCoord.xy * view_pixel_size * rcp(taau_render_scale);
+    vec2 coord = gl_FragCoord.xy * viewPixelSize * rcp(taauViewportScale);
 
     // Clip to taau viewport
 
@@ -954,121 +954,121 @@ void main() {
 
     // Get light colors
 
-    light_color = texelFetch(colortex4, ivec2(191, 0), 0).rgb;
+    lightColor = texelFetch(colortex4, ivec2(191, 0), 0).rgb;
 
     // Space conversions
 
     float depth0 = gl_FragCoord.z;
     float depth1 = texelFetch(depthtex1, ivec2(gl_FragCoord.xy), 0).x;
 
-    vec3 world_pos = position_scene + cameraPosition;
-    vec3 direction_world
-        = normalize(position_scene - gbufferModelViewInverse[3].xyz);
+    vec3 worldPos = positionScene + cameraPosition;
+    vec3 directionWorld
+        = normalize(positionScene - gbufferModelViewInverse[3].xyz);
 
-    vec3 view_back_pos = screen_to_view_space(vec3(coord, depth1), true);
+    vec3 viewBackPos = screenToViewSpace(vec3(coord, depth1), true);
 
 #ifdef LOD_MOD_ACTIVE
-    float depth1_lod
-        = texelFetch(lod_depth_tex_solid, ivec2(gl_FragCoord.xy), 0).x;
+    float depth1Lod
+        = texelFetch(lodDepthTexSolid, ivec2(gl_FragCoord.xy), 0).x;
 
-    if (is_lod_terrain(depth1, depth1_lod)) {
-        view_back_pos
-            = screen_to_view_space(vec3(coord, depth1_lod), true, true);
+    if (isLodTerrain(depth1, depth1Lod)) {
+        viewBackPos
+            = screenToViewSpace(vec3(coord, depth1Lod), true, true);
     }
 #endif
 
-    vec3 scene_back_pos = view_to_scene_space(view_back_pos);
+    vec3 sceneBackPos = viewToSceneSpace(viewBackPos);
 
-    float layer_dist = distance(
-        position_scene,
-        scene_back_pos
+    float layerDist = distance(
+        positionScene,
+        sceneBackPos
     ); // distance to solid layer along view ray
 
     // Get material and normal
 
     Material material;
     vec3 normal = tbn[2];
-    vec3 normal_tangent = vec3(0.0, 0.0, 1.0);
+    vec3 normalTangent = vec3(0.0, 0.0, 1.0);
 
 
-    ambient_color = texelFetch(colortex4, ivec2(191, 1), 0).rgb
-        * clamp01(light_levels.y);
+    ambientColor = texelFetch(colortex4, ivec2(191, 1), 0).rgb
+        * clamp01(lightLevels.y);
 
-    bool is_water = material_mask == MATERIAL_WATER;
-    bool is_nether_portal = material_mask == MATERIAL_NETHER_PORTAL;
+    bool isWater = materialMask == MATERIAL_WATER;
+    bool isNetherPortal = materialMask == MATERIAL_NETHER_PORTAL;
 
-    vec2 adjusted_light_levels = light_levels;
+    vec2 adjustedLightLevels = lightLevels;
 
 #ifdef NO_NORMAL
 
 
-    normal = normalize(cross(dFdx(position_scene), dFdy(position_scene)));
+    normal = normalize(cross(dFdx(positionScene), dFdy(positionScene)));
 #endif
 
     //------------------------------------------------------------------------//
-    if (is_water) {
+    if (isWater) {
 #ifdef PROGRAM_GBUFFERS_WATER
-        material = get_water_material(
-            direction_world,
+        material = getWaterMaterial(
+            directionWorld,
             normal,
-            layer_dist,
-            fragment_color.a
+            layerDist,
+            fragmentColor.a
         );
 
 #ifdef waterWaves
         if (true) {
-            vec3 flat_normal = tbn[2];
+            vec3 flatNormal = tbn[2];
 
 #ifdef LOD_MOD_ACTIVE
-            mat3 tbn_fixed = tbn;
+            mat3 tbnFixed = tbn;
             if (normal.y > 0.99) {
                 // Top surface: Use hardcoded TBN matrix pointing upwards that
                 // is the same for LoD water and regular water
-                tbn_fixed = mat3(
+                tbnFixed = mat3(
                     vec3(1.0, 0.0, 0.0),
                     vec3(0.0, 0.0, 1.0),
                     vec3(0.0, 1.0, 0.0)
                 );
             }
 #else
-#define tbn_fixed tbn
+#define tbnFixed tbn
 #endif
 
-            vec3 world_pos = position_scene + cameraPosition;
+            vec3 worldPos = positionScene + cameraPosition;
 
-            vec2 coord = -(world_pos * tbn_fixed).xy;
+            vec2 coord = -(worldPos * tbnFixed).xy;
 
-            bool vertical_side = abs(flat_normal.y) < eps;
-            bool flowing_water = abs(flat_normal.y) < 0.99 || vertical_side;
+            bool verticalSide = abs(flatNormal.y) < eps;
+            bool flowingWater = abs(flatNormal.y) < 0.99 || verticalSide;
 
-            vec2 flow_dir = vec2(0.0);
-            if (vertical_side) {
+            vec2 flowDir = vec2(0.0);
+            if (verticalSide) {
                 // Calculate downward direction in tangent space.
-                flow_dir = (vec3(0.0, 1.0, 0.0) * tbn_fixed).xy;
+                flowDir = (vec3(0.0, 1.0, 0.0) * tbnFixed).xy;
             } else {
-                flow_dir
-                    = flowing_water ? normalize(flat_normal.xz) : vec2(0.0);
+                flowDir
+                    = flowingWater ? normalize(flatNormal.xz) : vec2(0.0);
             }
 
 #ifdef waterParallax
-            vec3 direction_tangent = direction_world * tbn_fixed;
-            coord = get_water_parallax_coord(
-                direction_tangent,
+            vec3 directionTangent = directionWorld * tbnFixed;
+            coord = getWaterParallaxCoord(
+                directionTangent,
                 coord,
-                flow_dir,
-                flowing_water
+                flowDir,
+                flowingWater
             );
 #endif
 
-            normal_tangent = get_water_normal(
-                world_pos,
-                flat_normal,
+            normalTangent = getWaterNormal(
+                worldPos,
+                flatNormal,
                 coord,
-                flow_dir,
-                light_levels.y,
-                flowing_water
+                flowDir,
+                lightLevels.y,
+                flowingWater
             );
-            normal = tbn_fixed * normal_tangent;
+            normal = tbnFixed * normalTangent;
         }
 #endif
 #endif
@@ -1077,61 +1077,67 @@ void main() {
         // Sample textures
 
 #if defined COLORWHEEL
-        fragment_color = read_tex_anisotropic_or_plain(gtexture, uv);
+        fragmentColor = readTexAnisotropicOrPlain(gtexture, uv);
 
         float ao;
         vec4 overlayColor;
 
-        clrwl_computeFragment(fragment_color, fragment_color, light_levels, ao, overlayColor);
-        light_levels = clamp((light_levels - 1.0 / 32.0) * 32.0 / 30.0, 0.0, 1.0);
+        clrwl_computeFragment(fragmentColor, fragmentColor, lightLevels, ao, overlayColor);
+        lightLevels = clamp((lightLevels - 1.0 / 32.0) * 32.0 / 30.0, 0.0, 1.0);
 
-        adjusted_light_levels = light_levels;
+        adjustedLightLevels = lightLevels;
 #else
-        fragment_color = read_tex_anisotropic_or_plain(gtexture, uv) * tint;
+        fragmentColor = readTexAnisotropicOrPlain(gtexture, uv) * tint;
 #endif
 
 #ifdef normalMapping
-        vec3 normal_map = read_tex_anisotropic_or_plain(normals, uv).xyz;
+        vec3 normalMap = readTexAnisotropicOrPlain(normals, uv).xyz;
 #endif
 #ifdef specularMapping
-        vec4 specular_map = read_tex_anisotropic_or_plain(specular, uv);
+        vec4 specularMap = readTexAnisotropicOrPlain(specular, uv);
 #endif
 
 #ifdef fancyNetherPortal
-        if (is_nether_portal) {
-            fragment_color = draw_nether_portal(direction_world, layer_dist);
+        if (isNetherPortal) {
+            fragmentColor = drawNetherPortal(directionWorld, layerDist);
         }
 #endif
 
 #if defined COLORWHEEL
-        fragment_color.rgb =
-            mix(fragment_color.rgb, overlayColor.rgb, overlayColor.a);
+        fragmentColor.rgb =
+            mix(fragmentColor.rgb, overlayColor.rgb, overlayColor.a);
 #elif defined PROGRAM_GBUFFERS_ENTITIES_TRANSLUCENT
         // Lightning (old versions)
-        if (material_mask == MATERIAL_LIGHTNING_BOLT) {
-            fragment_color = vec4(1.0);
+        if (materialMask == MATERIAL_LIGHTNING_BOLT) {
+            fragmentColor = vec4(1.0);
         }
 
         // Hit mob tint
-        fragment_color.rgb
-            = mix(fragment_color.rgb, entityColor.rgb, entityColor.a);
+        fragmentColor.rgb
+            = mix(fragmentColor.rgb, entityColor.rgb, entityColor.a);
 #endif
 
-        if (fragment_color.a < 0.1) {
+        if (fragmentColor.a < 0.1) {
             discard;
             return;
         }
 
-        material = material_from(
-            fragment_color.rgb,
-            material_mask,
-            world_pos,
+#if defined IRIS_INLINE_GLINT
+        if (mc_hasGlint()) {
+            fragmentColor.rgb += sqr(mc_sampleGlint());
+        }
+#endif
+
+        material = materialFrom(
+            fragmentColor.rgb,
+            materialMask,
+            worldPos,
             tbn[2],
-            adjusted_light_levels
+            adjustedLightLevels
         );
 
 #if defined PROGRAM_GBUFFERS_LIGHTNING
-        if (material_mask == MATERIAL_DRAGON_BEAM) {
+        if (materialMask == MATERIAL_DRAGON_BEAM) {
             material.albedo *= tint.a;
         } else {
             material.albedo = vec3(1.0);
@@ -1142,122 +1148,122 @@ void main() {
         //--//
 
 #if defined normalMapping && !defined NO_NORMAL
-        float material_ao;
-        decode_normal_map(normal_map, normal_tangent, material_ao);
+        float materialAo;
+        decodeNormalMap(normalMap, normalTangent, materialAo);
 
-        normal = tbn * normal_tangent;
+        normal = tbn * normalTangent;
 
-        adjusted_light_levels *= mix(0.7, 1.0, material_ao);
+        adjustedLightLevels *= mix(0.7, 1.0, materialAo);
 
 #ifdef directionalLightmaps
-        adjusted_light_levels
-            *= get_directional_lightmaps(position_scene, normal);
+        adjustedLightLevels
+            *= getDirectionalLightmaps(positionScene, normal);
 #endif
 #endif
 
 #ifdef specularMapping
-        decode_specular_map(specular_map, material);
+        decodeSpecularMap(specularMap, material);
 #endif
     }
 
-    // Use the precomputed sky ambient term: the baked ambient_color
+    // Use the precomputed sky ambient term: the baked ambientColor
     // that the sky shader publishes to colortex4.
-    ambient_color = texelFetch(colortex4, ivec2(191, 1), 0).rgb
-        * clamp01(adjusted_light_levels.y);
+    ambientColor = texelFetch(colortex4, ivec2(191, 1), 0).rgb
+        * clamp01(adjustedLightLevels.y);
 
     // Shadows
 
 #ifndef NO_NORMAL
-    float NoL = dot(normal, light_dir);
+    float NoL = dot(normal, lightDir);
 #else
     float NoL = 1.0;
 #endif
-    float NoV = clamp01(dot(normal, -direction_world));
-    float LoV = dot(light_dir, -direction_world);
-    float halfway_norm = inversesqrt(2.0 * LoV + 2.0);
-    float NoH = (NoL + NoV) * halfway_norm;
-    float LoH = LoV * halfway_norm + halfway_norm;
+    float NoV = clamp01(dot(normal, -directionWorld));
+    float LoV = dot(lightDir, -directionWorld);
+    float halfwayNorm = inversesqrt(2.0 * LoV + 2.0);
+    float NoH = (NoL + NoV) * halfwayNorm;
+    float LoH = LoV * halfwayNorm + halfwayNorm;
 
 #if defined WORLD_OVERWORLD && defined cloudShadows
-    float cloud_shadows = get_cloud_shadows(colortex8, position_scene);
+    float cloudShadowMask = getCloudShadows(colortex8, positionScene);
 #else
-#define cloud_shadows 1.0
+#define cloudShadowMask 1.0
 #endif
 
 #if defined shadow && (defined WORLD_OVERWORLD || defined WORLD_END)
-    float sss_depth = 0.0;
-    float shadow_distance_fade = 0.0;
-    vec3 shadows = get_filtered_shadows(
-        position_scene,
+    float sssDepth = 0.0;
+    float shadowDistanceFade = 0.0;
+    vec3 shadows = getFilteredShadows(
+        positionScene,
         tbn[2],
-        adjusted_light_levels.y,
-        cloud_shadows,
-        material.sss_amount,
-        shadow_distance_fade,
-        sss_depth
+        adjustedLightLevels.y,
+        cloudShadowMask,
+        material.sssAmount,
+        shadowDistanceFade,
+        sssDepth
     );
 #else
-#define sss_depth 0.0
-#define shadow_distance_fade 0.0
-    vec3 shadows = vec3(pow8(adjusted_light_levels.y));
+#define sssDepth 0.0
+#define shadowDistanceFade 0.0
+    vec3 shadows = vec3(pow8(adjustedLightLevels.y));
 #endif
 
     // Diffuse lighting
 
-    fragment_color.rgb
-        = get_diffuse_lighting(
+    fragmentColor.rgb
+        = getDiffuseLighting(
               material,
-              position_scene,
+              positionScene,
               normal,
               tbn[2],
               shadows,
-              adjusted_light_levels,
+              adjustedLightLevels,
               1.0,
               0.0,
-              sss_depth,
+              sssDepth,
 #ifdef cloudShadows
-              cloud_shadows,
+              cloudShadowMask,
 #endif
-              shadow_distance_fade,
+              shadowDistanceFade,
               NoL,
               NoV,
               NoH,
               LoV,
-              ambient_color
+              ambientColor
           )
-        * fragment_color.a;
+        * fragmentColor.a;
 
     // Specular highlight
 
 #if (defined WORLD_OVERWORLD || defined WORLD_END) && !defined NO_NORMAL
-    fragment_color.rgb
-        += get_specular_highlight(material, NoL, NoV, NoH, LoV, LoH)
-        * light_color * shadows * cloud_shadows;
+    fragmentColor.rgb
+        += getSpecularHighlight(material, NoL, NoV, NoH, LoV, LoH)
+        * lightColor * shadows * cloudShadowMask;
 #endif
 
     // Specular reflections
 
 #if defined environmentReflections || defined skyReflections
-    if (material.ssr_multiplier > eps) {
-        vec3 position_screen = vec3(
-            gl_FragCoord.xy * rcp(taau_render_scale) * view_pixel_size,
+    if (material.ssrMultiplier > eps) {
+        vec3 positionScreen = vec3(
+            gl_FragCoord.xy * rcp(taauViewportScale) * viewPixelSize,
             gl_FragCoord.z
         );
 
-        mat3 new_tbn = get_tbn_matrix(normal);
+        mat3 newTbn = getTbnMatrix(normal);
 
-        fragment_color.rgb += get_specular_reflections(
+        fragmentColor.rgb += getSpecularReflections(
             material,
-            new_tbn,
-            position_screen,
-            position_view,
-            world_pos,
+            newTbn,
+            positionScreen,
+            positionView,
+            worldPos,
             normal,
             tbn[2],
-            direction_world,
-            direction_world * new_tbn,
-            light_levels.y,
-            is_water
+            directionWorld,
+            directionWorld * newTbn,
+            lightLevels.y,
+            isWater
         );
     }
 #endif
@@ -1265,25 +1271,25 @@ void main() {
     // Blending
 
 #if defined PROGRAM_GBUFFERS_WATER
-    if (is_water) {
-        fragment_color = water_absorption_approx(
-            fragment_color,
-            sss_depth,
-            layer_dist,
+    if (isWater) {
+        fragmentColor = waterAbsorptionApprox(
+            fragmentColor,
+            sssDepth,
+            layerDist,
             LoV,
-            dot(tbn[2], direction_world),
-            cloud_shadows
+            dot(tbn[2], directionWorld),
+            cloudShadowMask
         );
 
 #ifdef snellsWindow
         if (isEyeInWater == 1) {
 
 
-            float snell_factor = fresnel_dielectric_n(NoV, air_n / water_n).x;
-            fragment_color.a = mix(
-                fragment_color.a,
+            float snellFactor = fresnelDielectricN(NoV, airN / waterN).x;
+            fragmentColor.a = mix(
+                fragmentColor.a,
                 1.0,
-                snell_factor * snellsWindowIntensity
+                snellFactor * snellsWindowIntensity
             );
         }
 #endif
@@ -1292,17 +1298,17 @@ void main() {
 
     // Fog
 
-    vec4 fog = common_fog(length(position_scene), false, position_scene);
-    fragment_color.rgb = fragment_color.rgb * fog.a + fog.rgb;
+    vec4 fog = commonFog(length(positionScene), false, positionScene);
+    fragmentColor.rgb = fragmentColor.rgb * fog.a + fog.rgb;
 
     // Purkinje shift
 
-    fragment_color.rgb
-        = purkinje_shift(fragment_color.rgb, adjusted_light_levels);
+    fragmentColor.rgb
+        = purkinjeShiftTransform(fragmentColor.rgb, adjustedLightLevels);
 
 
 #if defined PROGRAM_GBUFFERS_WATER || refraction == refractionAll
-    refraction_data.xy = split_2x8(normal_tangent.x * 0.5 + 0.5);
-    refraction_data.zw = split_2x8(normal_tangent.y * 0.5 + 0.5);
+    refractionData.xy = split2x8(normalTangent.x * 0.5 + 0.5);
+    refractionData.zw = split2x8(normalTangent.y * 0.5 + 0.5);
 #endif
 }

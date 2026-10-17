@@ -52,23 +52,41 @@ uint lowbias32(uint x) {
 }
 
 
-float rand_next_float(inout uint state) {
+float randNextFloat(inout uint state) {
     state = lowbias32(state);
     return float(state) / float(0xffffffffu);
 }
 
-vec4 rand_next_vec4(inout uint state) {
+vec4 randNextVec4(inout uint state) {
     return vec4(
-        rand_next_float(state),
-        rand_next_float(state),
-        rand_next_float(state),
-        rand_next_float(state)
+        randNextFloat(state),
+        randNextFloat(state),
+        randNextFloat(state),
+        randNextFloat(state)
     );
 }
 
 //----------------------------------------------------------------------------//
 
-// https://www.shadertoy.com/view/4dj_s_r_w
+// Float hash functions from https://www.shadertoy.com/view/4djSRW
+// License:
+/*
+Copyright (c)2014 David Hoskins.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.*/
 // Uncomment when needed
 
 //*
@@ -162,9 +180,9 @@ vec4 hash4(vec4 p4) {
 //----------------------------------------------------------------------------//
 
 // One dimensional value noise
-float noise_1d(float x) {
+float noise1d(float x) {
     float i, f = modf(x, i);
-    f = cubic_smooth(f);
+    f = cubicSmooth(f);
     return mix(hash1(i), hash1(i + 1.0), f);
 }
 

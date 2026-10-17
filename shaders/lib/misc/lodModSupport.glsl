@@ -45,41 +45,41 @@ uniform float dhNearPlane;
 uniform float dhFarPlane;
 uniform int dhRenderDistance;
 
-uniform float combined_near;
-uniform float combined_far;
+uniform float combinedNear;
+uniform float combinedFar;
 
-uniform vec4 combined_projection_matrix_0;
-uniform vec4 combined_projection_matrix_1;
-uniform vec4 combined_projection_matrix_2;
-uniform vec4 combined_projection_matrix_3;
+uniform vec4 combinedProjectionMatrix0;
+uniform vec4 combinedProjectionMatrix1;
+uniform vec4 combinedProjectionMatrix2;
+uniform vec4 combinedProjectionMatrix3;
 
-uniform vec4 combined_projection_matrix_inverse_0;
-uniform vec4 combined_projection_matrix_inverse_1;
-uniform vec4 combined_projection_matrix_inverse_2;
-uniform vec4 combined_projection_matrix_inverse_3;
+uniform vec4 combinedProjectionMatrixInverse0;
+uniform vec4 combinedProjectionMatrixInverse1;
+uniform vec4 combinedProjectionMatrixInverse2;
+uniform vec4 combinedProjectionMatrixInverse3;
 
-#define combined_depth_tex colortex15
-#define lod_depth_tex dhDepthTex
-#define lod_depth_tex_solid dhDepthTex1
-#define lod_depth_tex_shading lod_depth_tex
-#define lod_depth_tex_scale taau_render_scale
-#define lod_projection_matrix dhProjection
-#define lod_projection_matrix_inverse dhProjectionInverse
-#define lod_previous_projection_matrix dhPreviousProjection
-#define lod_render_distance dhRenderDistance
-#define combined_projection_matrix \
+#define combinedDepthTex colortex15
+#define lodDepthTex dhDepthTex
+#define lodDepthTexSolid dhDepthTex1
+#define lodDepthTexShading lodDepthTex
+#define lodDepthTexScale taauViewportScale
+#define lodProjectionMatrix dhProjection
+#define lodProjectionMatrixInverse dhProjectionInverse
+#define lodPreviousProjectionMatrix dhPreviousProjection
+#define lodRenderDistance dhRenderDistance
+#define combinedProjectionMatrix \
     mat4( \
-        combined_projection_matrix_0, \
-        combined_projection_matrix_1, \
-        combined_projection_matrix_2, \
-        combined_projection_matrix_3 \
+        combinedProjectionMatrix0, \
+        combinedProjectionMatrix1, \
+        combinedProjectionMatrix2, \
+        combinedProjectionMatrix3 \
     )
-#define combined_projection_matrix_inverse \
+#define combinedProjectionMatrixInverse \
     mat4( \
-        combined_projection_matrix_inverse_0, \
-        combined_projection_matrix_inverse_1, \
-        combined_projection_matrix_inverse_2, \
-        combined_projection_matrix_inverse_3 \
+        combinedProjectionMatrixInverse0, \
+        combinedProjectionMatrixInverse1, \
+        combinedProjectionMatrixInverse2, \
+        combinedProjectionMatrixInverse3 \
     )
 #elif defined VOXY
 // --------
@@ -98,64 +98,64 @@ uniform mat4 vxProjInv;
 uniform mat4 vxProjPrev;
 uniform int vxRenderDistance;
 
-float combined_near = near;
-float combined_far = float(16 * vxRenderDistance);
+float combinedNear = near;
+float combinedFar = float(16 * vxRenderDistance);
 
-mat4 combined_projection_matrix = mat4(
+mat4 combinedProjectionMatrix = mat4(
     vec4(gbufferProjection[0][0], 0.0, 0.0, 0.0),
     vec4(0.0, gbufferProjection[1][1], 0.0, 0.0),
     vec4(
         gbufferProjection[2][0],
         gbufferProjection[2][1],
-        (combined_far + combined_near) / (combined_near - combined_far),
+        (combinedFar + combinedNear) / (combinedNear - combinedFar),
         -1.0
     ),
     vec4(
         0.0,
         0.0,
-        (2.0 * combined_far * combined_near) / (combined_near - combined_far),
+        (2.0 * combinedFar * combinedNear) / (combinedNear - combinedFar),
         0.0
     )
 );
 
-mat4 combined_projection_matrix_inverse = mat4(
+mat4 combinedProjectionMatrixInverse = mat4(
     vec4(gbufferProjectionInverse[0][0], 0.0, 0.0, 0.0),
     vec4(0.0, gbufferProjectionInverse[1][1], 0.0, 0.0),
     vec4(
         0.0,
         0.0,
         0.0,
-        -(combined_far - combined_near) / (2.0 * combined_far * combined_near)
+        -(combinedFar - combinedNear) / (2.0 * combinedFar * combinedNear)
     ),
     vec4(
         gbufferProjectionInverse[3][0],
         gbufferProjectionInverse[3][1],
         -1.0,
-        (combined_far + combined_near) / (2.0 * combined_far * combined_near)
+        (combinedFar + combinedNear) / (2.0 * combinedFar * combinedNear)
     )
 );
 
-#define combined_depth_tex colortex15
-#define lod_depth_tex vxDepthTexTrans
-#define lod_depth_tex_solid vxDepthTexOpaque
-#define lod_depth_tex_shading lod_depth_tex_solid
-#define lod_depth_tex_scale 1.0
-#define lod_projection_matrix vxProj
-#define lod_projection_matrix_inverse vxProjInv
-#define lod_previous_projection_matrix vxProjPrev
-#define lod_render_distance (vxRenderDistance * 16)
+#define combinedDepthTex colortex15
+#define lodDepthTex vxDepthTexTrans
+#define lodDepthTexSolid vxDepthTexOpaque
+#define lodDepthTexShading lodDepthTexSolid
+#define lodDepthTexScale 1.0
+#define lodProjectionMatrix vxProj
+#define lodProjectionMatrixInverse vxProjInv
+#define lodPreviousProjectionMatrix vxProjPrev
+#define lodRenderDistance (vxRenderDistance * 16)
 #else
-#define combined_near near
-#define combined_far far
-#define combined_projection_matrix gbufferProjection
-#define combined_projection_matrix_inverse gbufferProjectionInverse
-#define combined_depth_tex depthtex1
+#define combinedNear near
+#define combinedFar far
+#define combinedProjectionMatrix gbufferProjection
+#define combinedProjectionMatrixInverse gbufferProjectionInverse
+#define combinedDepthTex depthtex1
 
-#define sample_depth_texture texture
+#define sampleDepthTexture texture
 #endif
 
-bool is_lod_terrain(float depth, float depth_lod) {
-    return depth >= 1.0 && depth_lod < 1.0;
+bool isLodTerrain(float depth, float depthLod) {
+    return depth >= 1.0 && depthLod < 1.0;
 }
 
 #endif // INCLUDE_MISC_LOD_MOD_SUPPORT

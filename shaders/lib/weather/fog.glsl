@@ -19,10 +19,10 @@
 #if !defined INCLUDE_WEATHER_FOG
 #define INCLUDE_WEATHER_FOG
 
-#include "/lib/fog/overworld/parameters.glsl"
-#include "/lib/fog/overworld/constants.glsl"
-#include "/lib/fog/overworld/ozone.glsl"
-#include "/lib/fog/overworld/sandstorm.glsl"
+#include "/lib/atmos/fog/overworld/parameters.glsl"
+#include "/lib/atmos/fog/overworld/constants.glsl"
+#include "/lib/atmos/fog/overworld/aerosols/ozone.glsl"
+#include "/lib/atmos/fog/overworld/aerosols/sandstorm.glsl"
 #include "/lib/util/color.glsl"
 #include "/lib/weather/core.glsl"
 
@@ -34,94 +34,94 @@
 #define mistModeAdvanced 2
 #endif
 
-uniform float biome_pale_garden;
+uniform float biomePaleGarden;
 
-OverworldFogParameters get_fog_parameters(Weather weather) {
+OverworldFogParameters getFogParameters(Weather weather) {
     OverworldFogParameters params;
 
     // Rayleigh coefficient
 
-    const vec3 rayleigh_normal
-        = from_display(
+    const vec3 rayleighNormal
+        = fromDisplay(
               vec3(airFogRayleighR, airFogRayleighG, airFogRayleighB)
           )
         * airFogRayleighDensity;
-    const vec3 rayleigh_rain
-        = from_display(vec3(
+    const vec3 rayleighRain
+        = fromDisplay(vec3(
               airFogRayleighRRain,
               airFogRayleighGRain,
               airFogRayleighBRain
           ))
         * airFogRayleighDensityRain;
-    const vec3 rayleigh_arid
-        = from_display(vec3(
+    const vec3 rayleighArid
+        = fromDisplay(vec3(
               airFogRayleighRArid,
               airFogRayleighGArid,
               airFogRayleighBArid
           ))
         * airFogRayleighDensityArid;
-    const vec3 rayleigh_snowy
-        = from_display(vec3(
+    const vec3 rayleighSnowy
+        = fromDisplay(vec3(
               airFogRayleighRSnowy,
               airFogRayleighGSnowy,
               airFogRayleighBSnowy
           ))
         * airFogRayleighDensitySnowy;
-    const vec3 rayleigh_taiga
-        = from_display(vec3(
+    const vec3 rayleighTaiga
+        = fromDisplay(vec3(
               airFogRayleighRTaiga,
               airFogRayleighGTaiga,
               airFogRayleighBTaiga
           ))
         * airFogRayleighDensityTaiga;
-    const vec3 rayleigh_jungle
-        = from_display(vec3(
+    const vec3 rayleighJungle
+        = fromDisplay(vec3(
               airFogRayleighRJungle,
               airFogRayleighGJungle,
               airFogRayleighBJungle
           ))
         * airFogRayleighDensityJungle;
-    const vec3 rayleigh_swamp
-        = from_display(vec3(
+    const vec3 rayleighSwamp
+        = fromDisplay(vec3(
               airFogRayleighRSwamp,
               airFogRayleighGSwamp,
               airFogRayleighBSwamp
           ))
         * airFogRayleighDensitySwamp;
-    const vec3 rayleigh_pale_garden
-        = from_display(vec3(
+    const vec3 rayleighPaleGarden
+        = fromDisplay(vec3(
               airFogRayleighRPaleGarden,
               airFogRayleighGPaleGarden,
               airFogRayleighBPaleGarden
           ))
         * airFogRayleighDensityPaleGarden;
 
-    params.rayleigh_scattering_coeff = rayleigh_normal * biome_temperate
-        + rayleigh_arid * biome_arid + rayleigh_snowy * biome_snowy
-        + rayleigh_taiga * biome_taiga + rayleigh_jungle * biome_jungle
-        + rayleigh_swamp * biome_swamp
-        + rayleigh_pale_garden * biome_pale_garden;
+    params.rayleighScatteringCoeff = rayleighNormal * biomeTemperate
+        + rayleighArid * biomeArid + rayleighSnowy * biomeSnowy
+        + rayleighTaiga * biomeTaiga + rayleighJungle * biomeJungle
+        + rayleighSwamp * biomeSwamp
+        + rayleighPaleGarden * biomePaleGarden;
 
     // rain
-    params.rayleigh_scattering_coeff = mix(
-        params.rayleigh_scattering_coeff
+    params.rayleighScatteringCoeff = mix(
+        params.rayleighScatteringCoeff
             * (1.0 + weather.humidity * weather.temperature),
-        rayleigh_rain,
-        rainStrength * biome_may_rain
+        rayleighRain,
+        rainStrength * biomeMayRain
     );
 
     // Mie coefficient
 
     // Increased mie density and scattering strength during late sunset / blue
     // hour
-    float blue_hour
-        = linear_step(0.05, 1.0, exp(-190.0 * sqr(sun_dir.y + 0.07283)));
+    float blueHour
+        = linearStep(0.05, 1.0, exp(-190.0 * sqr(sunDir.y + 0.07283)));
 
-    float mie = airFogMieDensityMorning * time_sunrise
-        + airFogMieDensityNoon * time_noon
-        + airFogMieDensityEvening * time_sunset
-        + airFogMieDensityMidnight * time_midnight
-        + airFogMieDensityBlueHour * blue_hour;
+    float mie = airFogMieDensityMorning * timeSunrise
+        + airFogMieDensityNoon * timeNoon
+        + airFogMieDensityEvening * timeSunset
+        + airFogMieDensityMidnight * timeMidnight
+        + airFogMieDensityBlueHour * blueHour;
 
     // Weather influence
     mie = mix(
@@ -129,16 +129,16 @@ OverworldFogParameters get_fog_parameters(Weather weather) {
             + 8.0 * airFogMieDensityNoon
                 * sqr(clamp01(weather.humidity * rcp(0.8))),
         airFogMieDensityRain,
-        rainStrength * biome_may_rain
+        rainStrength * biomeMayRain
     );
-    mie = mix(mie, airFogMieDensitySnow, rainStrength * biome_may_snow);
+    mie = mix(mie, airFogMieDensitySnow, rainStrength * biomeMaySnow);
 
-    float mie_albedo = mix(0.9, 0.5, rainStrength * biome_may_rain);
+    float mieAlbedo = mix(0.9, 0.5, rainStrength * biomeMayRain);
     // User Mie tint: same multiplier the sky's Mie coefficient uses, so haze
     // in the sky and air fog stay the same colour.
-    const vec3 mie_tint = vec3(mieColorR, mieColorG, mieColorB);
-    params.mie_scattering_coeff = vec3(mie_albedo * mie) * mie_tint;
-    params.mie_extinction_coeff = vec3(mie) * mie_tint;
+    const vec3 mieTint = vec3(mieColorR, mieColorG, mieColorB);
+    params.mieScatteringCoeff = vec3(mieAlbedo * mie) * mieTint;
+    params.mieExtinctionCoeff = vec3(mie) * mieTint;
 
     // ---- Mist scattering coefficient ----
     // Tinted by the current Rayleigh colour so mist picks up the correct
@@ -146,62 +146,62 @@ OverworldFogParameters get_fog_parameters(Weather weather) {
 
 #if mistMode != mistModeOff
     {
-        vec3 horizon_tint = normalize(params.rayleigh_scattering_coeff + 1e-6);
+        vec3 horizonTint = normalize(params.rayleighScatteringCoeff + 1e-6);
 
 #if defined ozoneLayer && defined ozoneMist
 
 
 #if mistMode == mistModeAdvanced
-        float mist_ozone_mu = sun_dir.y;
+        float mistOzoneMu = sunDir.y;
 #else
-        float mist_ozone_mu = 0.1;
+        float mistOzoneMu = 0.1;
 #endif
-        vec3 ozone_filtered = horizon_tint
-            * ozone_layer_transmittance(mist_ozone_mu, ozone_planet_radius);
-        float twilight = linear_step(0.7, 1.0, 1.0 - abs(sun_dir.y));
-        horizon_tint = mix(
-            horizon_tint,
-            normalize(ozone_filtered + 1e-6),
+        vec3 ozoneFiltered = horizonTint
+            * ozoneLayerTransmittance(mistOzoneMu, ozonePlanetRadius);
+        float twilight = linearStep(0.7, 1.0, 1.0 - abs(sunDir.y));
+        horizonTint = mix(
+            horizonTint,
+            normalize(ozoneFiltered + 1e-6),
             twilight
         );
 #endif
 #if defined desertSandstorm && defined sandstormMist
 
 
-        horizon_tint = normalize(mix(
-            horizon_tint,
-            sandstorm_tint(),
-            sandstorm_strength()
+        horizonTint = normalize(mix(
+            horizonTint,
+            sandstormTint(),
+            sandstormStrength()
         ) + 1e-6);
 #endif
 
-        params.mist_scattering_coeff = mist_base_scatter_coeff
-            * mistDensity * horizon_tint
+        params.mistScatteringCoeff = mistBaseScatterCoeff
+            * mistDensity * horizonTint
             * vec3(mistColorR, mistColorG, mistColorB);
         // Thicken mist during and after rain
-        params.mist_scattering_coeff *= 1.0 + 0.5 * rainStrength * biome_may_rain;
+        params.mistScatteringCoeff *= 1.0 + 0.5 * rainStrength * biomeMayRain;
     }
 #else
-    params.mist_scattering_coeff = vec3(0.0);
+    params.mistScatteringCoeff = vec3(0.0);
 #endif
 
 #ifdef desertSandstorm
 
 
-    const float desert_sandstorm_density = 0.2 * desertSandstormIntensity;
-    const float desert_sandstorm_scattering = desert_sandstorm_density * 0.5;
-    const vec3 desert_sandstorm_extinction
-        = desert_sandstorm_density * vec3(0.2, 0.27, 0.45);
+    const float desertSandstormDensity = 0.2 * desertSandstormIntensity;
+    const float desertSandstormScattering = desertSandstormDensity * 0.5;
+    const vec3 desertSandstormExtinction
+        = desertSandstormDensity * vec3(0.2, 0.27, 0.45);
 
-    params.mie_scattering_coeff
-        += desert_sandstorm * desert_sandstorm_scattering;
-    params.mie_extinction_coeff
-        += desert_sandstorm * desert_sandstorm_extinction;
+    params.mieScatteringCoeff
+        += desertSandstormWeather * desertSandstormScattering;
+    params.mieExtinctionCoeff
+        += desertSandstormWeather * desertSandstormExtinction;
 #endif
 
 
-    params.rayleigh_scattering_coeff
-        = gamut_expand(params.rayleigh_scattering_coeff);
+    params.rayleighScatteringCoeff
+        = gamutExpand(params.rayleighScatteringCoeff);
 
     return params;
 }
