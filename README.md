@@ -47,7 +47,7 @@ Atmosphere · lighting · clouds · water · image quality — built with Iris a
 * TAA, FXAA, and CAS
 * Temporal upscaling with TAAU
 * Purkinje shift
-* ACES and AGX tonemapping
+* ACES tonemapping
 * Full color grading controls
 * Bloom
 * Depth of field
