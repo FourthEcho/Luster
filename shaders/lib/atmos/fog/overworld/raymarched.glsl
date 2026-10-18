@@ -520,6 +520,12 @@ mat2x3 raymarchAirFog(
             shadowScreenPos.xy * shadowMapResolution * MC_SHADOW_QUALITY
         );
 
+// Boolean options register in Iris only when checked via #ifdef/#ifndef,
+// but the mixed-type switch below needs a combined plain "#if defined" to
+// select vec3 vs float shadow visibility. This empty check keeps the
+// toggle discoverable on the settings screen.
+#ifdef airFogColoredLightShafts
+#endif
 #if defined airFogColoredLightShafts && defined shadowColor
         float depth0 = texelFetch(shadowtex0, shadowTexel, 0).x;
         float depth1 = texelFetch(shadowtex1, shadowTexel, 0).x;

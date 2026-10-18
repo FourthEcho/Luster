@@ -787,6 +787,12 @@ void main() {
 #if defined normalMapping && !defined PROGRAM_GBUFFERS_VOXELS
     vec3 normal;
     float materialAo;
+// #ifdef references so Iris registers both toggles on the settings screen
+// (the selection below uses a combined plain "#if defined").
+#ifdef pomSlopeNormalsOnly
+#endif
+#ifdef pomSlopeNormalOnly
+#endif
 #if defined pomSlopeNormalsOnly || defined pomSlopeNormalOnly
     normal = vec3(0.0, 0.0, 1.0);
     materialAo = 1.0;

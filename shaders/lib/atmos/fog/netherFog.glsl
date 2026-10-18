@@ -295,6 +295,10 @@ mat2x3 raymarchNetherFog(
             scatteringAmount *= 0.5;
         }
 
+// #ifdef reference so Iris registers the toggle on the settings screen
+// (the emission block below selects it through a combined plain "#if").
+#ifdef netherFogGlow
+#endif
 #if defined netherFogGlow || defined endGlow
         // Emission
 #ifdef netherSmoke
