@@ -33,11 +33,11 @@ flat out mat2x3 auroraColors;
 
 flat out float rainbowAmount;
 
-#include "/lib/atmos/sky/clouds/core/parameters.glsl"
-flat out CloudsParameters cloudsParams;
+#include "/lib/atmos/sky/clouds/core/params.glsl"
+flat out CloudsParams cloudsParams;
 
-#include "/lib/atmos/fog/overworld/parameters.glsl"
-flat out OverworldFogParameters fogParams;
+#include "/lib/atmos/fog/overworld/params.glsl"
+flat out OverworldFogParams fogParams;
 #endif
 
 // ------------
@@ -186,14 +186,14 @@ void main() {
 
     Weather weather = getWeather();
     rainbowAmount = getRainbowAmount(weather);
-    cloudsParams = getCloudsParameters(weather);
-    fogParams = getFogParameters(weather);
+    cloudsParams = getCloudsParams(weather);
+    fogParams = getFogParams(weather);
 
 
-    vec3 auroraLighting
+    vec3 auroraLight
         = mix(auroraColors[0], auroraColors[1], 0.25) * auroraAmount;
-    skyColor += auroraCloudLighting * auroraLighting;
-    ambientColor += auroraGroundLighting * auroraLighting;
+    skyColor += auroraCloudLight * auroraLight;
+    ambientColor += auroraGroundLight * auroraLight;
 #endif
 
     gl_Position = vec4(gl_Vertex.xy * 2.0 - 1.0, 0.0, 1.0);

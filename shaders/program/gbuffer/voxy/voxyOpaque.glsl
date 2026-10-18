@@ -21,20 +21,20 @@
 
 layout(location = 0) out vec4 gbufferData0;
 
-void voxy_emitFragment(VoxyFragmentParameters parameters) {
+void voxy_emitFragment(VoxyFragmentParams params) {
     // Get base properties
 
-    vec3 baseColor = parameters.sampledColour.rgb * parameters.tinting.rgb;
+    vec3 baseColor = params.sampledColour.rgb * params.tinting.rgb;
 
     // from Cortex
     vec3 normal = vec3(
-                      uint((parameters.face >> 1) == 2),
-                      uint((parameters.face >> 1) == 0),
-                      uint((parameters.face >> 1) == 1)
+                      uint((params.face >> 1) == 2),
+                      uint((params.face >> 1) == 0),
+                      uint((params.face >> 1) == 1)
                   )
-        * (float(int(parameters.face) & 1) * 2.0 - 1.0);
+        * (float(int(params.face) & 1) * 2.0 - 1.0);
 
-    uint materialMask = max(parameters.customId - 10000u, 0u);
+    uint materialMask = max(params.customId - 10000u, 0u);
 
     // Encode gbuffer data
 
@@ -44,5 +44,5 @@ void voxy_emitFragment(VoxyFragmentParameters parameters) {
         clamp01(float(materialMask) * rcp(255.0))
     );
     gbufferData0.z = packUnorm2x8(encodeUnitVector(normal));
-    gbufferData0.w = packUnorm2x8(parameters.lightMap);
+    gbufferData0.w = packUnorm2x8(params.lightMap);
 }

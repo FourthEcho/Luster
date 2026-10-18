@@ -16,15 +16,15 @@
 ====================================================================================================
 */
 
-#include "/lib/atmos/fog/overworld/parameters.glsl"
+#include "/lib/atmos/fog/overworld/params.glsl"
 #include "/lib/global.glsl"
 
 #ifdef shadow
 #undef shadow
 #endif
 
-#ifdef handheldLighting
-#undef handheldLighting
+#ifdef handheldLight
+#undef handheldLight
 #endif
 
 #ifdef shadowSsrt
@@ -87,7 +87,7 @@ vec3 lightColor;
 
 #ifdef WORLD_OVERWORLD
 // Unused
-OverworldFogParameters fogParams;
+OverworldFogParams fogParams;
 #endif
 
 #define TEMPORAL_REPROJECTION
@@ -108,8 +108,8 @@ OverworldFogParameters fogParams;
 #define LUSTER_INCLUDE_CLOUD_SHADOWS
 #if defined(LUSTER_INCLUDE_CLOUD_SHADOWS)
 // Cloud-shadow projection and sampling.
-#if !defined INCLUDE_LIGHTING_CLOUD_SHADOWS
-#define INCLUDE_LIGHTING_CLOUD_SHADOWS
+#if !defined INCLUDE_LIGHT_CLOUD_SHADOWS
+#define INCLUDE_LIGHT_CLOUD_SHADOWS
 
 #include "/lib/atmos/sky/clouds/core/constants.glsl"
 #include "/lib/util/bicubic.glsl"
@@ -246,8 +246,8 @@ vec2 renderCloudShadowMap(vec2 uv) {
 
 #if defined(LUSTER_INCLUDE_DIRECTIONAL_LIGHTMAPS)
 // Directional lightmap modulation.
-#if !defined INCLUDE_LIGHTING_DIRECTIONAL_LIGHTMAPS
-#define INCLUDE_LIGHTING_DIRECTIONAL_LIGHTMAPS
+#if !defined INCLUDE_LIGHT_DIRECTIONAL_LIGHTMAPS
+#define INCLUDE_LIGHT_DIRECTIONAL_LIGHTMAPS
 
 // Based on Ninjamike's implementation in shaderLABS #snippets
 
@@ -308,13 +308,13 @@ vec2 getDirectionalLightmaps(vec3 positionScene, vec3 normal) {
 #endif // INCLUDE_LIGHTING_DIRECTIONAL_LIGHTMAPS
 #endif
 
-#if defined(LUSTER_INCLUDE_HANDHELD_LIGHTING)
+#if defined(LUSTER_INCLUDE_HANDHELD_LIGHT)
 // Handheld light source data and evaluation.
-#if !defined INCLUDE_LIGHTING_HANDHELD_LIGHTING
-#define INCLUDE_LIGHTING_HANDHELD_LIGHTING
+#if !defined INCLUDE_LIGHT_HANDHELD_LIGHT
+#define INCLUDE_LIGHT_HANDHELD_LIGHT
 
-#define HANDHELD_LIGHTING_COLORS
-#if handheldLightingMode == handheldLightingColored
+#define HANDHELD_LIGHT_COLORS
+#if handheldLightMode == handheldLightColored
 const vec3 handheldEmitterLightColor[48] = vec3[48](
     vec3(1.00, 1.00, 1.00) * 12.0, // Strong white light
     vec3(1.00, 1.00, 1.00) * 6.0, // Medium white light
@@ -378,7 +378,7 @@ uniform int heldBlockLightValue;
 uniform int heldBlockLightValue2;
 
 vec3 getHandheldLightColor(int handItemId, int heldItemLightValue) {
-#if handheldLightingMode == handheldLightingColored
+#if handheldLightMode == handheldLightColored
     const int firstEmitterId = 10032;
     const int emitterCount = 48;
     int emitterIndex = handItemId - firstEmitterId;
@@ -398,7 +398,7 @@ float getHandheldLightFalloff(vec3 scenePos, float ao) {
         * 1.00;
 }
 
-vec3 getHandheldLighting(vec3 scenePos, float ao) {
+vec3 getHandheldLight(vec3 scenePos, float ao) {
 #ifdef IS_IRIS
     // Center light on player rather than camera
     scenePos += relativeEyePosition;
@@ -501,7 +501,7 @@ Material getWaterMaterial(
     return material;
 }
 
-void voxy_emitFragment(VoxyFragmentParameters parameters) {
+void voxy_emitFragment(VoxyFragmentParams params) {
     vec2 coord = gl_FragCoord.xy * viewPixelSize * rcp(taauViewportScale);
 
 
@@ -524,20 +524,20 @@ void voxy_emitFragment(VoxyFragmentParameters parameters) {
 
     // Get base properties
 
-    vec4 baseColor = parameters.sampledColour * parameters.tinting;
+    vec4 baseColor = params.sampledColour * params.tinting;
 
     // from Cortex
     vec3 normal = vec3(
-                      uint((parameters.face >> 1) == 2),
-                      uint((parameters.face >> 1) == 0),
-                      uint((parameters.face >> 1) == 1)
+                      uint((params.face >> 1) == 2),
+                      uint((params.face >> 1) == 0),
+                      uint((params.face >> 1) == 1)
                   )
-        * (float(int(parameters.face) & 1) * 2.0 - 1.0);
+        * (float(int(params.face) & 1) * 2.0 - 1.0);
 
 
-    ambientColor *= clamp01(parameters.lightMap.y);
+    ambientColor *= clamp01(params.lightMap.y);
 
-    uint materialMask = max(parameters.customId - 10000u, 0u);
+    uint materialMask = max(params.customId - 10000u, 0u);
 
     // Get position
 
@@ -560,16 +560,16 @@ void voxy_emitFragment(VoxyFragmentParameters parameters) {
 
     if (materialMask == MATERIAL_WATER) {
         material = getWaterMaterial(
-            parameters.sampledColour,
-            parameters.tinting,
+            params.sampledColour,
+            params.tinting,
             dirWorld,
             normal,
-            parameters.lightMap,
+            params.lightMap,
             layerDist,
             alpha
         );
     } else {
-        vec2 unused = parameters.lightMap;
+        vec2 unused = params.lightMap;
         material = materialFrom(
             baseColor.rgb,
             materialMask,
@@ -583,10 +583,10 @@ void voxy_emitFragment(VoxyFragmentParameters parameters) {
     // Encode water data
 
     if (materialMask == MATERIAL_WATER) {
-        gbufferData.x = packUnorm2x8(parameters.tinting.rg);
-        gbufferData.y = packUnorm2x8(parameters.tinting.b, alpha);
+        gbufferData.x = packUnorm2x8(params.tinting.rg);
+        gbufferData.y = packUnorm2x8(params.tinting.b, alpha);
         gbufferData.z = packUnorm2x8(encodeUnitVector(normal));
-        gbufferData.w = packUnorm2x8(parameters.lightMap);
+        gbufferData.w = packUnorm2x8(params.lightMap);
     } else {
         gbufferData = vec4(0.0);
     }
@@ -607,7 +607,7 @@ void voxy_emitFragment(VoxyFragmentParameters parameters) {
     float NoH = (NoL + NoV) * halfwayNorm;
     float LoH = LoV * halfwayNorm + halfwayNorm;
 
-    vec3 shadows = vec3(pow8(parameters.lightMap.y)); // Fake shadow
+    vec3 shadows = vec3(pow8(params.lightMap.y)); // Fake shadow
 #define sssDepth 0.0
 #define shadowDistanceFade 0.0
 
@@ -616,13 +616,13 @@ void voxy_emitFragment(VoxyFragmentParameters parameters) {
     shadows *= cloudShadowMask;
 #endif
 
-    fragmentColor.rgb = getDiffuseLighting(
+    fragmentColor.rgb = getDiffuseLight(
         material,
         posScene,
         normal,
         normal,
         shadows,
-        parameters.lightMap,
+        params.lightMap,
         1.0, // AO
         0.0, // Ambient sss
         sssDepth,

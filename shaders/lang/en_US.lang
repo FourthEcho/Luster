@@ -7,7 +7,7 @@ screen.atmoSpace=Space
 screen.atmoSky=Sky
 screen.atmoAir=Air
 screen.atmoGround=Fog
-screen.lighting=Lighting
+screen.light=Lighting
 screen.skyCelestialBodies=Sun & Moon
 screen.rainbows=Rainbows
 screen.planet=Planet
@@ -24,8 +24,8 @@ screen.lensFlare=Lens Flare
 screen.misc=Misc
 screen.miscDebug=Debug
 screen.tonemapComparison=Tonemap Comparison
-screen.directLighting=Direct Light
-screen.ambientLighting=Ambient Light
+screen.directLight=Direct Light
+screen.ambientLight=Ambient Light
 screen.framingTool=Framing Tool
 
 screen.weather=Weather 
@@ -106,7 +106,6 @@ screen.netherColor=Static Color
 screen.distanceView=Distance View
 
 option.info=Luster Shaders
-option.info.comment=Hope you like it
 value.info.0=§eBy Fourth Echo
 value.info.1=§aBy Fourth Echo
 value.info.2=§bBy Fourth Echo
@@ -196,7 +195,7 @@ option.blockEntityShadows=Block Entity Shadows
 option.blockEntityShadows.comment=When enabled, chests, signs, banners and other block entities cast shadows. Lower cost than full entity shadows.
 option.pixelatedShadows=Pixelated Shadows
 option.pixelatedShadows.comment=Shadows snap to the block texel grid, creating a retro pixelated look. For stylistic screenshots.
-option.pixelatedShadowsResolution=Pixel Size
+option.pixelatedShadowsRes=Pixel Size
 option.pixelatedShadowsResolution.comment=Adjusts the texel grid size for pixelated shadows. Lower = chunkier, more blocky pixels.
 option.sssSteps=SSS Steps 
 option.sssSteps.comment=Increase to reduce noise on foliage and other materials with SSS, at the cost of performance.
@@ -287,8 +286,8 @@ option.blocklightB=§9▍ §fBlue — Block Light
 option.blocklightB.comment=Adjusts the blue tint of block lights. Higher = cooler, whiter light.
 option.blocklightI=Block Light Intensity
 option.blocklightI.comment=Adjusts the overall brightness of block light sources. Higher = stronger torch and lamp illumination.
-option.caveLightingI=Cave Ambient
-option.caveLightingI.comment=Adjusts the base brightness of underground ambient light when no direct light is present. Higher = caves appear less pitch-black.
+option.caveLightI=Cave Ambient
+option.caveLightI.comment=Adjusts the base brightness of underground ambient light when no direct light is present. Higher = caves appear less pitch-black.
 
 
 
@@ -363,8 +362,8 @@ option.cloudsCumulusPrimaryStepsH=Primary Steps - Horizon
 option.cloudsCumulusPrimaryStepsH.comment=Ray-march steps toward the horizon for cumulus. Higher = more accurate horizon clouds at higher GPU cost.
 option.cloudsCumulusPrimaryStepsZ=Primary Steps - Zenith
 option.cloudsCumulusPrimaryStepsZ.comment=Ray-march steps toward the zenith for cumulus. Higher = more accurate overhead clouds at higher cost.
-option.cloudsCumulusLightingSteps=Lighting Steps
-option.cloudsCumulusLightingSteps.comment=Shadow/light sampling steps inside cumulus clouds. Higher = softer, more accurate scattering.
+option.cloudsCumulusLightSteps=Lighting Steps
+option.cloudsCumulusLightSteps.comment=Shadow/light sampling steps inside cumulus clouds. Higher = softer, more accurate scattering.
 option.cloudsCumulusAmbientSteps=Ambient Steps
 option.cloudsCumulusAmbientSteps.comment=Ambient occlusion sampling steps for cumulus. Higher = better self-shadowing.
 option.cloudsCumulusAltitude=Altitude
@@ -395,8 +394,8 @@ option.cloudsAltocumulusPrimaryStepsH=Primary Steps - Horizon
 option.cloudsAltocumulusPrimaryStepsH.comment=Ray-march steps toward the horizon for altocumulus. Higher = more accurate horizon clouds at higher cost.
 option.cloudsAltocumulusPrimaryStepsZ=Primary Steps - Zenith
 option.cloudsAltocumulusPrimaryStepsZ.comment=Ray-march steps toward the zenith for altocumulus. Higher = more accurate overhead clouds at higher cost.
-option.cloudsAltocumulusLightingSteps=Lighting Steps
-option.cloudsAltocumulusLightingSteps.comment=Light sampling steps inside altocumulus. Higher = more accurate scattering.
+option.cloudsAltocumulusLightSteps=Lighting Steps
+option.cloudsAltocumulusLightSteps.comment=Light sampling steps inside altocumulus. Higher = more accurate scattering.
 option.cloudsAltocumulusAmbientSteps=Ambient Steps
 option.cloudsAltocumulusAmbientSteps.comment=Ambient sampling steps for altocumulus. Higher = better self-shadowing.
 option.cloudsAltocumulusAltitude=Altitude
@@ -423,8 +422,8 @@ option.cloudsCumulusCongestus=Cumulus Congestus Clouds
 option.cloudsCumulusCongestus.comment=Massive, distant volumetric storm clouds. Creates dramatic sky visuals with heavy performance impact due to high geometric complexity.
 option.cloudsCumulusCongestusPrimarySteps=Primary Steps
 option.cloudsCumulusCongestusPrimarySteps.comment=Controls primary steps.
-option.cloudsCumulusCongestusLightingSteps=Lighting Steps
-option.cloudsCumulusCongestusLightingSteps.comment=Controls lighting steps.
+option.cloudsCumulusCongestusLightSteps=Lighting Steps
+option.cloudsCumulusCongestusLightSteps.comment=Controls lighting steps.
 option.cloudsCumulusCongestusAmbientSteps=Ambient Steps
 option.cloudsCumulusCongestusAmbientSteps.comment=Controls ambient steps.
 option.cloudsCumulusCongestusAltitude=Altitude
@@ -460,8 +459,8 @@ option.blockyCloudsSharpness=Sharpness
 option.blockyCloudsSharpness.comment=Cloud edge sharpness
 option.blockyCloudsPrimarySteps=Primary Steps
 option.blockyCloudsPrimarySteps.comment=Controls primary steps.
-option.blockyCloudsLightingSteps=Lighting Steps
-option.blockyCloudsLightingSteps.comment=Controls lighting steps.
+option.blockyCloudsLightSteps=Lighting Steps
+option.blockyCloudsLightSteps.comment=Controls lighting steps.
 option.blockyCloudsDensity=Density
 option.blockyCloudsDensity.comment=Adjusts the density of the clouds. Higher values increase noise
 option.blockyCloudsBrightness=Brightness
@@ -493,8 +492,8 @@ value.cloudsTemporalUpscaling.4=16×
 
 option.cloudsCirrus=Cirrus/Cirrocumulus Clouds
 option.cloudsCirrus.comment=Planar cirrus and cirrocumulus clouds
-option.cloudsCirrusLightingSteps=Lighting Steps
-option.cloudsCirrusLightingSteps.comment=Light sampling steps for cirrus/cirrocumulus layers. Higher = more accurate high-cloud shading.
+option.cloudsCirrusLightSteps=Lighting Steps
+option.cloudsCirrusLightSteps.comment=Light sampling steps for cirrus/cirrocumulus layers. Higher = more accurate high-cloud shading.
 option.cloudsCirrusAltitude=Altitude
 option.cloudsCirrusAltitude.comment=Controls altitude.
 suffix.cloudsCirrusAltitude=m
@@ -538,9 +537,9 @@ option.auroraBrightness=Aurora Brightness
 option.auroraBrightness.comment=Controls aurora brightness intensity. Higher values produce more vibrant and intense aurora displays.
 option.auroraFrequency=Aurora Frequency
 option.auroraFrequency.comment=Controls aurora frequency. Determines how often the aurora appears during a game session.
-option.auroraCloudLighting=Cloud Light Contribution
+option.auroraCloudLight=Cloud Light Contribution
 option.auroraCloudLighting.comment=Controls whether aurora light contributes to cloud illumination. When enabled, clouds are illuminated by the aurora colors.
-option.auroraGroundLighting=Ground Light Contribution
+option.auroraGroundLight=Ground Light Contribution
 option.auroraGroundLighting.comment=Aurora light on terrain and water. Higher values strengthen the aurora-colored ground glow.
 
 value.auroraNormal.auroraNever=Never
@@ -800,7 +799,7 @@ option.ssrIntersectionStepsRough=Intersection Steps - Rough
 option.ssrIntersectionStepsRough.comment=Adjusts the accuracy of rough reflections. Higher values improve quality but reduce performance. Controls intersection tests for non-mirror-like surfaces.
 option.ssrRefinementSteps=Refinement Steps
 option.ssrRefinementSteps.comment=Adjusts the refinement quality for all reflections. Higher values improve accuracy but increase performance cost. Final polishing step for reflections.
-option.ssrRoughnessThreshold=Roughness Threshold
+option.ssrRoughnessThresh=Roughness Threshold
 option.ssrRoughnessThreshold.comment=Adjusts the roughness threshold for reflections. Lower values reflect on rougher surfaces, higher values only reflect on smooth/mirror-like surfaces.
 
 # Water settings
@@ -905,7 +904,7 @@ option.lensFlareHalo=Flare Halo
 option.lensFlareHalo.comment=Halo ring around the sun on top of the ghost chain.
 option.lensFlareIntensity=Flare Intensity
 option.lensFlareIntensity.comment=Overall strength of ghosts, halo and streak.
-option.lensFlareThreshold=Flare Threshold
+option.lensFlareThresh=Flare Threshold
 option.lensFlareThreshold.comment=Scene luminance above which highlights seed flare. Lower values let lamps and glints flare; higher isolates the sun.
 option.lensFlareGhosts=Ghost Count
 option.lensFlareGhosts.comment=Number of ghosts strung along the sun axis. More ghosts cost performance.
@@ -1183,7 +1182,7 @@ option.dhOverdrawFadeLength.comment=Controls the fade length for Distant Horizon
 option.noiseOnDhTerrain=Noise on DH Terrain
 option.noiseOnDhTerrain.comment=Controls whether noise is applied to Distant Horizons terrain. Adds subtle detail variation to avoid repetitive-looking generated terrain.
 
-screen.indirectLighting=Indirect Light
+screen.indirectLight=Indirect Light
 screen.aa=Anti-Aliasing
 screen.motionBlur=Motion Blur
 screen.dof=Depth of field

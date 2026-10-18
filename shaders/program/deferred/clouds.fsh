@@ -36,8 +36,8 @@ flat in vec3 skyColor;
 flat in float auroraAmount;
 flat in mat2x3 auroraColors;
 
-#include "/lib/atmos/sky/clouds/core/parameters.glsl"
-flat in CloudsParameters cloudsParams;
+#include "/lib/atmos/sky/clouds/core/params.glsl"
+flat in CloudsParams cloudsParams;
 #endif
 
 // ------------
@@ -125,10 +125,10 @@ uniform float biomeHumidity;
 #if defined WORLD_OVERWORLD
 #include "/lib/atmos/atmosphere.glsl"
 #include "/lib/atmos/sky/aurora.glsl"
-#include "/lib/atmos/sky/clouds/pipeline.glsl"
+#include "/lib/atmos/sky/clouds/core/pipeline.glsl"
 
 #if defined crepuscularRays && !defined blockyClouds
-#include "/lib/atmos/crepuscularRays.glsl"
+#include "/lib/atmos/sky/clouds/core/crepuscularRays.glsl"
 #endif
 #endif
 

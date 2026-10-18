@@ -16,8 +16,8 @@
 ====================================================================================================
 */
 
-#if !defined INCLUDE_LIGHTING_BSDF_SPECULAR_LIGHTING
-#define INCLUDE_LIGHTING_BSDF_SPECULAR_LIGHTING
+#if !defined INCLUDE_LIGHT_BSDF_SPECULAR_LIGHT
+#define INCLUDE_LIGHT_BSDF_SPECULAR_LIGHT
 
 #include "/lib/brdf/fresnel.glsl"
 #define LUSTER_INCLUDE_MOON_PHASE_COLOR

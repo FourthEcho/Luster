@@ -496,7 +496,7 @@ void debugWeather(inout vec3 color) {
     const int numberCol = 30;
 
     Weather weather = getWeather();
-    CloudsParameters cloudsParams = getCloudsParameters(weather);
+    CloudsParams cloudsParams = getCloudsParams(weather);
 
     beginText(ivec2(gl_FragCoord.xy) / debugTextScale, debugTextPosition);
     text.bgCol = vec4(0.0);

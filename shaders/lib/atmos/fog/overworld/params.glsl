@@ -16,10 +16,10 @@
 ====================================================================================================
 */
 
-#if !defined INCLUDE_FOG_OVERWORLD_PARAMETERS
-#define INCLUDE_FOG_OVERWORLD_PARAMETERS
+#if !defined INCLUDE_FOG_OVERWORLD_PARAMS
+#define INCLUDE_FOG_OVERWORLD_PARAMS
 
-struct OverworldFogParameters {
+struct OverworldFogParams {
     vec3 rayleighScatteringCoeff;
     vec3 mieScatteringCoeff;
     vec3 mieExtinctionCoeff;

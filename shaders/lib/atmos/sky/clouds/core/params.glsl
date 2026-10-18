@@ -16,10 +16,10 @@
 ====================================================================================================
 */
 
-#if !defined INCLUDE_SKY_CLOUDS_PARAMETERS
-#define INCLUDE_SKY_CLOUDS_PARAMETERS
+#if !defined INCLUDE_SKY_CLOUDS_PARAMS
+#define INCLUDE_SKY_CLOUDS_PARAMS
 
-struct CloudsParameters {
+struct CloudsParams {
     // Cumulus congestus
     float cumulusCongestusBlend; // replaces layer 0
     // Volumetric layer 0

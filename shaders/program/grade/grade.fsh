@@ -591,7 +591,7 @@ vec3 lensFlareSource(vec2 screenUv) {
 #else
     vec3 c = texture(colortex5, clamp(screenUv, vec2(0.0), vec2(1.0))).rgb;
 #endif
-    return max0(c - lensFlareThreshold);
+    return max0(c - lensFlareThresh);
 }
 
 // Project the sun into screen UV; facing fades to 0 as the sun drops

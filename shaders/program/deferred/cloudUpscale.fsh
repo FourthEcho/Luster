@@ -392,6 +392,6 @@ void main() {
     cloudsHistory = max0(mix(current, history, historyWeight));
     cloudsData.x
         = mix(apparentDistance, apparentDistanceHistory, historyWeight);
-    cloudsData.y = min(++pixelAge, cloudsAccumulationLimit);
+    cloudsData.y = min(++pixelAge, cloudsAccumLimit);
     cloudsData.z = mix(ambientScattering, historyData.z, historyWeight);
 }

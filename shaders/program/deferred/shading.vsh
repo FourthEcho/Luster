@@ -30,8 +30,8 @@ flat out vec3 hSky[6];
 flat out vec3 sunColor;
 flat out vec3 moonColor;
 
-#include "/lib/atmos/fog/overworld/parameters.glsl"
-flat out OverworldFogParameters fogParams;
+#include "/lib/atmos/fog/overworld/params.glsl"
+flat out OverworldFogParams fogParams;
 
 
 flat out float rainbowAmount;
@@ -106,8 +106,8 @@ uniform float timeMidnight;
 #include "/lib/util/bicubic.glsl"
 #include "/lib/util/random.glsl"
 #include "/lib/util/sampling.glsl"
-#if !defined INCLUDE_LIGHTING_AMBIENT_H_BASIS_SKYLIGHT
-#define INCLUDE_LIGHTING_AMBIENT_H_BASIS_SKYLIGHT
+#if !defined INCLUDE_LIGHT_AMBIENT_H_BASIS_SKYLIGHT
+#define INCLUDE_LIGHT_AMBIENT_H_BASIS_SKYLIGHT
 
 // H-basis directional sky ambient.
 
@@ -185,7 +185,7 @@ void main() {
         1.00
     );
 #endif
-    fogParams = getFogParameters(weather);
+    fogParams = getFogParams(weather);
 
 
     rainbowAmount = getRainbowAmount(weather);

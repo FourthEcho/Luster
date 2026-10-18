@@ -20,8 +20,8 @@
 
 out vec2 uv;
 
-#include "/lib/atmos/sky/clouds/core/parameters.glsl"
-flat out CloudsParameters cloudsParams;
+#include "/lib/atmos/sky/clouds/core/params.glsl"
+flat out CloudsParams cloudsParams;
 
 
 // ------------
@@ -73,7 +73,7 @@ void main() {
     uv = gl_MultiTexCoord0.xy;
 
     Weather weather = getWeather();
-    cloudsParams = getCloudsParameters(weather);
+    cloudsParams = getCloudsParams(weather);
 
 
     gl_Position = vec4(gl_Vertex.xy * 2.0 - 1.0, 0.0, 1.0);

@@ -75,7 +75,7 @@ uniform vec2 taaOffset;
 uniform vec3 lightDir;
 
 #include "/lib/material/water.glsl"
-#include "/lib/atmos/fog/waterAbsorption.glsl"
+#include "/lib/atmos/fog/water/waterAbsorption.glsl"
 #include "/lib/util/color.glsl"
 #include "/lib/util/encoding.glsl"
 

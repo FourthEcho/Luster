@@ -30,13 +30,13 @@
 
 // Stars based on https://www.shadertoy.com/view/Md2SR3
 
-vec3 unstableStarField(vec2 coord, float starThreshold) {
+vec3 unstableStarField(vec2 coord, float starThresh) {
     const float minTemp = 4500.0;
     const float maxTemp = 8500.0;
 
     vec4 noise = hash4(coord);
 
-    float star = linearStep(starThreshold, 1.0, noise.x);
+    float star = linearStep(starThresh, 1.0, noise.x);
     star = pow16(star) * starsIntensity;
 
     float temp = mix(minTemp, maxTemp, noise.y);
@@ -54,30 +54,30 @@ vec3 unstableStarField(vec2 coord, float starThreshold) {
 
 // Stabilizes the star field by sampling at the four neighboring integer
 // coordinates and interpolating
-vec3 stableStarField(vec2 coord, float starThreshold) {
+vec3 stableStarField(vec2 coord, float starThresh) {
     coord = abs(coord) + 33.3 * step(0.0, coord);
     vec2 i, f = modf(coord, i);
 
     f.x = cubicSmooth(f.x);
     f.y = cubicSmooth(f.y);
 
-    return unstableStarField(i + vec2(0.0, 0.0), starThreshold) * (1.0 - f.x)
+    return unstableStarField(i + vec2(0.0, 0.0), starThresh) * (1.0 - f.x)
         * (1.0 - f.y)
-        + unstableStarField(i + vec2(1.0, 0.0), starThreshold) * f.x
+        + unstableStarField(i + vec2(1.0, 0.0), starThresh) * f.x
         * (1.0 - f.y)
-        + unstableStarField(i + vec2(0.0, 1.0), starThreshold) * f.y
+        + unstableStarField(i + vec2(0.0, 1.0), starThresh) * f.y
         * (1.0 - f.x)
-        + unstableStarField(i + vec2(1.0, 1.0), starThreshold) * f.x * f.y;
+        + unstableStarField(i + vec2(1.0, 1.0), starThresh) * f.x * f.y;
 }
 
 vec3 drawStars(vec3 rayDir, float galaxyLuminance) {
     // Adjust star threshold so that brightest stars appear first
 #if defined WORLD_OVERWORLD
-    float starThreshold = 1.0
+    float starThresh = 1.0
         - 0.05 * starsCoverage * smoothstep(-0.2, 0.05, -sunDir.y)
         - 0.5 * cube(galaxyLuminance);
 #else
-    float starThreshold = 1.0 - 0.008 * starsCoverage;
+    float starThresh = 1.0 - 0.008 * starsCoverage;
 #endif
 
     // Project ray direction onto the plane
@@ -85,7 +85,7 @@ vec3 drawStars(vec3 rayDir, float galaxyLuminance) {
         + 41.21 * sign(rayDir.z);
     coord *= 600.0;
 
-    return stableStarField(coord, starThreshold);
+    return stableStarField(coord, starThresh);
 }
 
 #endif // INCLUDE_SKY_STARS
@@ -124,10 +124,10 @@ const float lightningFlashIntensity = 4.0;
 #include "/lib/util/geometry.glsl"
 
 #if defined PROGRAM_DEFERRED0
-#include "/lib/atmos/sky/clouds/pipeline.glsl"
+#include "/lib/atmos/sky/clouds/core/pipeline.glsl"
 
 #if defined crepuscularRays && !defined blockyClouds
-#include "/lib/atmos/crepuscularRays.glsl"
+#include "/lib/atmos/sky/clouds/core/crepuscularRays.glsl"
 #endif
 #endif
 

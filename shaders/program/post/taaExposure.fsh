@@ -265,10 +265,10 @@ void drawHistogram(ivec2 texel) {
 
     if (all(lessThan(texel, ivec2(width, height)))) {
         int index = int(histogramBins * coord.x);
-        float threshold = coord.y;
+        float thresh = coord.y;
 
         result.rgb
-            = histogramPdf[index >> 2][index & 3] > threshold ? black : white;
+            = histogramPdf[index >> 2][index & 3] > thresh ? black : white;
 
         float median = max0(1.0 - abs(index - histogramSelectedBin));
         result.rgb = mix(result.rgb, red, median) / exposure;

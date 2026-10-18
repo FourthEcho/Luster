@@ -1,7 +1,7 @@
 # Screens
 
 screen.world=世界
-screen.lighting=光影
+screen.light=光影
 screen.cloudsVolumetric=Volumetric Clouds
 screen.cloudsPlanar=Planar Clouds
 screen.fogGeneral=通用
@@ -162,7 +162,7 @@ option.blockEntityShadows=Block Entity Shadows
 option.blockEntityShadows.comment=When enabled, chests, signs, banners and other block entities cast shadows. Lower cost than full entity shadows.
 option.pixelatedShadows=Pixelated Shadows
 option.pixelatedShadows.comment=Shadows snap to the block texel grid, creating a retro pixelated look. For stylistic screenshots.
-option.pixelatedShadowsResolution=Pixel Size
+option.pixelatedShadowsRes=Pixel Size
 option.pixelatedShadowsResolution.comment=Adjusts the texel grid size for pixelated shadows. Lower = chunkier, more blocky pixels.
 option.sssSteps=次表面散射取樣步數
 option.sssSteps.comment=增加可減少雜訊，但會影響效能
@@ -319,8 +319,8 @@ option.cloudsCumulusPrimaryStepsH=地平線光線步數
 option.cloudsCumulusPrimaryStepsH.comment=Controls primary steps - horizon.
 option.cloudsCumulusPrimaryStepsZ=天頂光線步數
 option.cloudsCumulusPrimaryStepsZ.comment=Controls primary steps - zenith.
-option.cloudsCumulusLightingSteps=照明取樣步數
-option.cloudsCumulusLightingSteps.comment=Controls lighting steps.
+option.cloudsCumulusLightSteps=照明取樣步數
+option.cloudsCumulusLightSteps.comment=Controls lighting steps.
 option.cloudsCumulusAmbientSteps=環境取樣步數
 option.cloudsCumulusAmbientSteps.comment=Controls ambient steps.
 option.cloudsCumulusAltitude=海拔高度
@@ -351,8 +351,8 @@ option.cloudsAltocumulusPrimaryStepsH=地平線取樣步數
 option.cloudsAltocumulusPrimaryStepsH.comment=Controls primary steps - horizon.
 option.cloudsAltocumulusPrimaryStepsZ=天頂取樣步數
 option.cloudsAltocumulusPrimaryStepsZ.comment=Controls primary steps - zenith.
-option.cloudsAltocumulusLightingSteps=照明取樣步數
-option.cloudsAltocumulusLightingSteps.comment=Controls lighting steps.
+option.cloudsAltocumulusLightSteps=照明取樣步數
+option.cloudsAltocumulusLightSteps.comment=Controls lighting steps.
 option.cloudsAltocumulusAmbientSteps=環境取樣步數
 option.cloudsAltocumulusAmbientSteps.comment=Controls ambient steps.
 option.cloudsAltocumulusAltitude=海拔高度
@@ -379,8 +379,8 @@ option.cloudsCumulusCongestus=暴積雲
 option.cloudsCumulusCongestus.comment=巨量且遙遠的體素雲朵
 option.cloudsCumulusCongestusPrimarySteps=Primary Steps
 option.cloudsCumulusCongestusPrimarySteps.comment=Controls primary steps.
-option.cloudsCumulusCongestusLightingSteps=照明取樣步數
-option.cloudsCumulusCongestusLightingSteps.comment=Controls lighting steps.
+option.cloudsCumulusCongestusLightSteps=照明取樣步數
+option.cloudsCumulusCongestusLightSteps.comment=Controls lighting steps.
 option.cloudsCumulusCongestusAmbientSteps=環境光取樣步數
 option.cloudsCumulusCongestusAmbientSteps.comment=Controls ambient steps.
 option.cloudsCumulusCongestusAltitude=海拔高度
@@ -429,8 +429,8 @@ value.cloudsTemporalUpscaling.4=16×
 
 option.cloudsCirrus=卷雲與高積雲
 option.cloudsCirrus.comment=平面狀卷雲與高積雲
-option.cloudsCirrusLightingSteps=照明取樣步數
-option.cloudsCirrusLightingSteps.comment=Controls lighting steps.
+option.cloudsCirrusLightSteps=照明取樣步數
+option.cloudsCirrusLightSteps.comment=Controls lighting steps.
 option.cloudsCirrusAltitude=海拔高度
 option.cloudsCirrusAltitude.comment=Controls altitude.
 suffix.cloudsCirrusAltitude=公尺
@@ -474,9 +474,9 @@ option.auroraBrightness=極光亮度
 option.auroraBrightness.comment=Toggles aurora brightness.
 option.auroraFrequency=極光頻率
 option.auroraFrequency.comment=Toggles aurora frequency.
-option.auroraCloudLighting=雲層光貢獻
+option.auroraCloudLight=雲層光貢獻
 option.auroraCloudLighting.comment=Toggles cloud light contribution.
-option.auroraGroundLighting=地面光照貢獻
+option.auroraGroundLight=地面光照貢獻
 option.auroraGroundLighting.comment=控制極光向地面光照的貢獻量。數值越高，地形、水面等受天空照明的表面會被極光顏色照亮得越明顯。
 
 value.auroraNormal.auroraNever=從不
@@ -706,7 +706,7 @@ option.ssrIntersectionStepsRough=粗糙相交步數
 option.ssrIntersectionStepsRough.comment=調整粗糙反射的精度，會影響效能
 option.ssrRefinementSteps=精煉步數
 option.ssrRefinementSteps.comment=調整所有反射的精度，會影響效能
-option.ssrRoughnessThreshold=粗糙度閾值
+option.ssrRoughnessThresh=粗糙度閾值
 option.ssrRoughnessThreshold.comment=調整物體表面必須多光滑才會出現反射
 
 # Water settings
@@ -955,8 +955,8 @@ option.noiseOnDhTerrain.comment=Controls noise on dh terrain.
 
 
 # English fallback labels for UI completeness
-screen.directLighting=Direct Light
-screen.ambientLighting=Ambient Light
+screen.directLight=Direct Light
+screen.ambientLight=Ambient Light
 screen.framingTool=Framing Tool
 screen.moonPhaseInfluence=Moon Phase Influence
 option.shadowSsrt=Distant Shadows
@@ -977,8 +977,8 @@ suffix.blockyCloudsAltitude=m
 suffix.blockyCloudsAltitude2=m
 option.blockyCloudsPrimarySteps=Primary Steps
 option.blockyCloudsPrimarySteps.comment=Controls primary steps.
-option.blockyCloudsLightingSteps=Lighting Steps
-option.blockyCloudsLightingSteps.comment=Controls lighting steps.
+option.blockyCloudsLightSteps=Lighting Steps
+option.blockyCloudsLightSteps.comment=Controls lighting steps.
 option.blockyCloudsDensity=Density
 option.blockyCloudsDensity.comment=Adjusts the density of the clouds. Higher values increase noise
 option.blockyCloudsBrightness=Brightness
@@ -1140,8 +1140,8 @@ option.weatherTurbulenceBias=Turbulence Bias
 option.weatherTurbulenceBias.comment=Shifts baseline turbulence. Higher values tear clouds into broken, wispy detail.
 option.weatherTurbulenceVariationSpeed=Turbulence Variation Speed
 option.weatherTurbulenceVariationSpeed.comment=How fast turbulence drifts. Higher values make cloud detail churn faster.
-option.caveLightingI=Cave Ambient
-option.caveLightingI.comment=Adjusts the base brightness of underground ambient light when no direct light is present. Higher = caves appear less pitch-black.
+option.caveLightI=Cave Ambient
+option.caveLightI.comment=Adjusts the base brightness of underground ambient light when no direct light is present. Higher = caves appear less pitch-black.
 option.planetBounce=Planet Bounce Light
 option.planetBounce.comment=Ground-bounced sun and moonlight re-scattered through the air. Warms the horizon and downward views almost for free.
 option.mistColorR=§c▍ §fRed — Mist
@@ -1198,7 +1198,7 @@ option.lensFlareHalo=Flare Halo
 option.lensFlareHalo.comment=Halo ring around the sun on top of the ghost chain.
 option.lensFlareIntensity=Flare Intensity
 option.lensFlareIntensity.comment=Overall strength of ghosts, halo and streak.
-option.lensFlareThreshold=Flare Threshold
+option.lensFlareThresh=Flare Threshold
 option.lensFlareThreshold.comment=Scene luminance above which highlights seed flare. Lower values let lamps and glints flare; higher isolates the sun.
 option.lensFlareGhosts=Ghost Count
 option.lensFlareGhosts.comment=Number of ghosts strung along the sun axis. More ghosts cost performance.
@@ -1312,7 +1312,7 @@ value.displayGamut.displayGamutDciP3=DCI-P3
 value.displayGamut.displayGamutDisplayP3=Display P3
 value.displayGamut.displayGamutRec2020=Rec.2020
 value.displayGamut.displayGamutAdobeRgb=Adobe RGB
-screen.indirectLighting=Indirect Light
+screen.indirectLight=Indirect Light
 screen.ssptFilter=SVGF Filter
 option.ssptEnabled=SSPT
 option.ssptEnabled.comment=Screen-space path traced emission and colored lighting. Big performance impact.

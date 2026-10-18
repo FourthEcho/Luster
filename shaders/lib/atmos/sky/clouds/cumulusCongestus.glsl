@@ -224,7 +224,7 @@ CloudsResult drawCumulusCongestusClouds(
     // ---------------------
 
     const uint primarySteps = cloudsCumulusCongestusPrimarySteps;
-    const uint lightingSteps = cloudsCumulusCongestusLightingSteps;
+    const uint lightSteps = cloudsCumulusCongestusLightSteps;
     const uint ambientSteps = cloudsCumulusCongestusAmbientSteps;
 
     const float minTransmittance = 0.075;
@@ -325,7 +325,7 @@ CloudsResult drawCumulusCongestusClouds(
             rayPos,
             lightDir,
             hash.x,
-            lightingSteps
+            lightSteps
         );
         float skyOpticalDepth = cloudsCumulusCongestusOpticalDepth(
             rayPos,

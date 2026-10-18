@@ -1,7 +1,7 @@
 # Screens
 
 screen.world=Мир
-screen.lighting=Освещение
+screen.light=Освещение
 screen.cloudsVolumetric=Volumetric Clouds
 screen.cloudsPlanar=Planar Clouds
 screen.fogGeneral=Общее
@@ -164,7 +164,7 @@ option.blockEntityShadows=Block Entity Shadows
 option.blockEntityShadows.comment=When enabled, chests, signs, banners and other block entities cast shadows. Lower cost than full entity shadows.
 option.pixelatedShadows=Pixelated Shadows
 option.pixelatedShadows.comment=Shadows snap to the block texel grid, creating a retro pixelated look. For stylistic screenshots.
-option.pixelatedShadowsResolution=Pixel Size
+option.pixelatedShadowsRes=Pixel Size
 option.pixelatedShadowsResolution.comment=Adjusts the texel grid size for pixelated shadows. Lower = chunkier, more blocky pixels.
 option.sssSteps=Шагов SSS 
 option.sssSteps.comment=Увеличьте, чтобы уменьшить количество шума на листве и других материалов с подповерхностным рассеиванием (SSS), ценой производительности.
@@ -317,8 +317,8 @@ option.cloudsCumulusPrimaryStepsH=Основные шаги - Горизонт
 option.cloudsCumulusPrimaryStepsH.comment=Controls primary steps - horizon.
 option.cloudsCumulusPrimaryStepsZ=Основные шаги - Зенит
 option.cloudsCumulusPrimaryStepsZ.comment=Controls primary steps - zenith.
-option.cloudsCumulusLightingSteps=Шагов освещения
-option.cloudsCumulusLightingSteps.comment=Controls lighting steps.
+option.cloudsCumulusLightSteps=Шагов освещения
+option.cloudsCumulusLightSteps.comment=Controls lighting steps.
 option.cloudsCumulusAmbientSteps=Шагов окружающего освещения
 option.cloudsCumulusAmbientSteps.comment=Controls ambient steps.
 option.cloudsCumulusAltitude=Высота
@@ -349,8 +349,8 @@ option.cloudsAltocumulusPrimaryStepsH=Основные шаги - Горизон
 option.cloudsAltocumulusPrimaryStepsH.comment=Controls primary steps - horizon.
 option.cloudsAltocumulusPrimaryStepsZ=Основные шаги - Зенит
 option.cloudsAltocumulusPrimaryStepsZ.comment=Controls primary steps - zenith.
-option.cloudsAltocumulusLightingSteps=Шагов освещения
-option.cloudsAltocumulusLightingSteps.comment=Controls lighting steps.
+option.cloudsAltocumulusLightSteps=Шагов освещения
+option.cloudsAltocumulusLightSteps.comment=Controls lighting steps.
 option.cloudsAltocumulusAmbientSteps=Шагов окружающего освещения
 option.cloudsAltocumulusAmbientSteps.comment=Controls ambient steps.
 option.cloudsAltocumulusAltitude=Высота
@@ -377,8 +377,8 @@ option.cloudsCumulusCongestus=Мощнокучевые облака
 option.cloudsCumulusCongestus.comment=Массивные, далекие объемные облака
 option.cloudsCumulusCongestusPrimarySteps=Primary Steps
 option.cloudsCumulusCongestusPrimarySteps.comment=Controls primary steps.
-option.cloudsCumulusCongestusLightingSteps=Шагов освещения
-option.cloudsCumulusCongestusLightingSteps.comment=Controls lighting steps.
+option.cloudsCumulusCongestusLightSteps=Шагов освещения
+option.cloudsCumulusCongestusLightSteps.comment=Controls lighting steps.
 option.cloudsCumulusCongestusAmbientSteps=Шагов окружающего освещения
 option.cloudsCumulusCongestusAmbientSteps.comment=Controls ambient steps.
 option.cloudsCumulusCongestusAltitude=Высота
@@ -414,8 +414,8 @@ option.blockyCloudsSharpness=Резкость
 option.blockyCloudsSharpness.comment=Резкость краев облаков
 option.blockyCloudsPrimarySteps=Основных шагов
 option.blockyCloudsPrimarySteps.comment=Controls primary steps.
-option.blockyCloudsLightingSteps=Шагов освещения
-option.blockyCloudsLightingSteps.comment=Controls lighting steps.
+option.blockyCloudsLightSteps=Шагов освещения
+option.blockyCloudsLightSteps.comment=Controls lighting steps.
 option.blockyCloudsDensity=Плотность
 option.blockyCloudsDensity.comment=Регулирует плотность облаков. Более высокие значения увеличивают шум
 option.blockyCloudsBrightness=Яркость
@@ -447,8 +447,8 @@ value.cloudsTemporalUpscaling.4=16×
 
 option.cloudsCirrus=Перистые облака
 option.cloudsCirrus.comment=Плоские перистые облака
-option.cloudsCirrusLightingSteps=Шагов освещения
-option.cloudsCirrusLightingSteps.comment=Controls lighting steps.
+option.cloudsCirrusLightSteps=Шагов освещения
+option.cloudsCirrusLightSteps.comment=Controls lighting steps.
 option.cloudsCirrusAltitude=Высота
 option.cloudsCirrusAltitude.comment=Controls altitude.
 suffix.cloudsCirrusAltitude=m
@@ -492,9 +492,9 @@ option.auroraBrightness=Яркость сияния
 option.auroraBrightness.comment=Toggles aurora brightness.
 option.auroraFrequency=Частота сияний
 option.auroraFrequency.comment=Toggles aurora frequency.
-option.auroraCloudLighting=Вклад облачного света
+option.auroraCloudLight=Вклад облачного света
 option.auroraCloudLighting.comment=Toggles cloud light contribution.
-option.auroraGroundLighting=Вклад света на землю
+option.auroraGroundLight=Вклад света на землю
 option.auroraGroundLighting.comment=Определяет, сколько света от северного сияния попадает на освещение земли. Более высокие значения заставляют рельеф, воду и другие освещаемые небом поверхности светиться цветами сияния.
 
 value.auroraNormal.auroraNever=Никогда
@@ -724,7 +724,7 @@ option.ssrIntersectionStepsRough=Шаги пересечения - Грубый
 option.ssrIntersectionStepsRough.comment=Регулирует точность грубых отражений в ущерб производительности
 option.ssrRefinementSteps=Шагов доработки
 option.ssrRefinementSteps.comment=Регулирует точность всех отражений в ущерб производительности
-option.ssrRoughnessThreshold=Порог шероховатости
+option.ssrRoughnessThresh=Порог шероховатости
 option.ssrRoughnessThreshold.comment=Определяет, насколько гладкой должна быть поверхность для появления отражений
 
 # Water settings
@@ -973,8 +973,8 @@ option.noiseOnDhTerrain.comment=Controls noise on dh terrain.
 
 
 # English fallback labels for UI completeness
-screen.directLighting=Direct Light
-screen.ambientLighting=Ambient Light
+screen.directLight=Direct Light
+screen.ambientLight=Ambient Light
 screen.framingTool=Framing Tool
 screen.moonPhaseInfluence=Moon Phase Influence
 option.vanillaAoLift=Vanilla AO Lift
@@ -1130,8 +1130,8 @@ option.weatherTurbulenceBias=Turbulence Bias
 option.weatherTurbulenceBias.comment=Shifts baseline turbulence. Higher values tear clouds into broken, wispy detail.
 option.weatherTurbulenceVariationSpeed=Turbulence Variation Speed
 option.weatherTurbulenceVariationSpeed.comment=How fast turbulence drifts. Higher values make cloud detail churn faster.
-option.caveLightingI=Cave Ambient
-option.caveLightingI.comment=Adjusts the base brightness of underground ambient light when no direct light is present. Higher = caves appear less pitch-black.
+option.caveLightI=Cave Ambient
+option.caveLightI.comment=Adjusts the base brightness of underground ambient light when no direct light is present. Higher = caves appear less pitch-black.
 option.planetBounce=Planet Bounce Light
 option.planetBounce.comment=Ground-bounced sun and moonlight re-scattered through the air. Warms the horizon and downward views almost for free.
 option.mistColorR=§c▍ §fRed — Mist
@@ -1188,7 +1188,7 @@ option.lensFlareHalo=Flare Halo
 option.lensFlareHalo.comment=Halo ring around the sun on top of the ghost chain.
 option.lensFlareIntensity=Flare Intensity
 option.lensFlareIntensity.comment=Overall strength of ghosts, halo and streak.
-option.lensFlareThreshold=Flare Threshold
+option.lensFlareThresh=Flare Threshold
 option.lensFlareThreshold.comment=Scene luminance above which highlights seed flare. Lower values let lamps and glints flare; higher isolates the sun.
 option.lensFlareGhosts=Ghost Count
 option.lensFlareGhosts.comment=Number of ghosts strung along the sun axis. More ghosts cost performance.
@@ -1302,7 +1302,7 @@ value.displayGamut.displayGamutDciP3=DCI-P3
 value.displayGamut.displayGamutDisplayP3=Display P3
 value.displayGamut.displayGamutRec2020=Rec.2020
 value.displayGamut.displayGamutAdobeRgb=Adobe RGB
-screen.indirectLighting=Indirect Light
+screen.indirectLight=Indirect Light
 screen.ssptFilter=SVGF Filter
 option.ssptEnabled=SSPT
 option.ssptEnabled.comment=Screen-space path traced emission and colored lighting. Big performance impact.

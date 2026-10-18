@@ -37,11 +37,11 @@ flat in mat2x3 auroraColors;
 
 flat in float rainbowAmount;
 
-#include "/lib/atmos/sky/clouds/core/parameters.glsl"
-flat in CloudsParameters cloudsParams;
+#include "/lib/atmos/sky/clouds/core/params.glsl"
+flat in CloudsParams cloudsParams;
 
-#include "/lib/atmos/fog/overworld/parameters.glsl"
-flat in OverworldFogParameters fogParams;
+#include "/lib/atmos/fog/overworld/params.glsl"
+flat in OverworldFogParams fogParams;
 #endif
 
 // ------------

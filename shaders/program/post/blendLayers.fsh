@@ -81,8 +81,8 @@ flat in vec3 ambientColor;
 flat in vec3 lightColor;
 
 #ifdef WORLD_OVERWORLD
-#include "/lib/atmos/fog/overworld/parameters.glsl"
-flat in OverworldFogParameters fogParams;
+#include "/lib/atmos/fog/overworld/params.glsl"
+flat in OverworldFogParams fogParams;
 #endif
 
 // ------------
@@ -100,10 +100,6 @@ uniform sampler2D colortex7; // volumetric fog transmittance
 uniform sampler2D colortex11; // clouds history
 uniform sampler2D colortex12; // clouds data
 uniform sampler2D colortex13; // rendered translucent layer
-
-#ifdef ssptEnabled
-uniform sampler2D colortex17; // filtered SSPT emission + bounce (fog tint)
-#endif
 
 #ifdef DISTANT_HORIZONS
 // colortex1 gbuffer fetch for the DH water path below.
@@ -181,8 +177,8 @@ uniform float timeMidnight;
 #define LUSTER_INCLUDE_CLOUD_SHADOWS
 #if defined(LUSTER_INCLUDE_CLOUD_SHADOWS)
 // Cloud-shadow projection and sampling.
-#if !defined INCLUDE_LIGHTING_CLOUD_SHADOWS
-#define INCLUDE_LIGHTING_CLOUD_SHADOWS
+#if !defined INCLUDE_LIGHT_CLOUD_SHADOWS
+#define INCLUDE_LIGHT_CLOUD_SHADOWS
 
 #include "/lib/atmos/sky/clouds/core/constants.glsl"
 #include "/lib/util/bicubic.glsl"
@@ -319,8 +315,8 @@ vec2 renderCloudShadowMap(vec2 uv) {
 
 #if defined(LUSTER_INCLUDE_DIRECTIONAL_LIGHTMAPS)
 // Directional lightmap modulation.
-#if !defined INCLUDE_LIGHTING_DIRECTIONAL_LIGHTMAPS
-#define INCLUDE_LIGHTING_DIRECTIONAL_LIGHTMAPS
+#if !defined INCLUDE_LIGHT_DIRECTIONAL_LIGHTMAPS
+#define INCLUDE_LIGHT_DIRECTIONAL_LIGHTMAPS
 
 // Based on Ninjamike's implementation in shaderLABS #snippets
 
@@ -381,13 +377,13 @@ vec2 getDirectionalLightmaps(vec3 positionScene, vec3 normal) {
 #endif // INCLUDE_LIGHTING_DIRECTIONAL_LIGHTMAPS
 #endif
 
-#if defined(LUSTER_INCLUDE_HANDHELD_LIGHTING)
+#if defined(LUSTER_INCLUDE_HANDHELD_LIGHT)
 // Handheld light source data and evaluation.
-#if !defined INCLUDE_LIGHTING_HANDHELD_LIGHTING
-#define INCLUDE_LIGHTING_HANDHELD_LIGHTING
+#if !defined INCLUDE_LIGHT_HANDHELD_LIGHT
+#define INCLUDE_LIGHT_HANDHELD_LIGHT
 
-#define HANDHELD_LIGHTING_COLORS
-#if handheldLightingMode == handheldLightingColored
+#define HANDHELD_LIGHT_COLORS
+#if handheldLightMode == handheldLightColored
 const vec3 handheldEmitterLightColor[48] = vec3[48](
     vec3(1.00, 1.00, 1.00) * 12.0, // Strong white light
     vec3(1.00, 1.00, 1.00) * 6.0, // Medium white light
@@ -451,7 +447,7 @@ uniform int heldBlockLightValue;
 uniform int heldBlockLightValue2;
 
 vec3 getHandheldLightColor(int handItemId, int heldItemLightValue) {
-#if handheldLightingMode == handheldLightingColored
+#if handheldLightMode == handheldLightColored
     const int firstEmitterId = 10032;
     const int emitterCount = 48;
     int emitterIndex = handItemId - firstEmitterId;
@@ -471,7 +467,7 @@ float getHandheldLightFalloff(vec3 scenePos, float ao) {
         * 1.00;
 }
 
-vec3 getHandheldLighting(vec3 scenePos, float ao) {
+vec3 getHandheldLight(vec3 scenePos, float ao) {
 #ifdef IS_IRIS
     // Center light on player rather than camera
     scenePos += relativeEyePosition;
@@ -585,8 +581,8 @@ vec3 applyRefraction(
 #define LUSTER_INCLUDE_CLOUD_SHADOWS
 #if defined(LUSTER_INCLUDE_CLOUD_SHADOWS)
 // Cloud-shadow projection and sampling.
-#if !defined INCLUDE_LIGHTING_CLOUD_SHADOWS
-#define INCLUDE_LIGHTING_CLOUD_SHADOWS
+#if !defined INCLUDE_LIGHT_CLOUD_SHADOWS
+#define INCLUDE_LIGHT_CLOUD_SHADOWS
 
 #include "/lib/atmos/sky/clouds/core/constants.glsl"
 #include "/lib/util/bicubic.glsl"
@@ -723,8 +719,8 @@ vec2 renderCloudShadowMap(vec2 uv) {
 
 #if defined(LUSTER_INCLUDE_DIRECTIONAL_LIGHTMAPS)
 // Directional lightmap modulation.
-#if !defined INCLUDE_LIGHTING_DIRECTIONAL_LIGHTMAPS
-#define INCLUDE_LIGHTING_DIRECTIONAL_LIGHTMAPS
+#if !defined INCLUDE_LIGHT_DIRECTIONAL_LIGHTMAPS
+#define INCLUDE_LIGHT_DIRECTIONAL_LIGHTMAPS
 
 // Based on Ninjamike's implementation in shaderLABS #snippets
 
@@ -785,13 +781,13 @@ vec2 getDirectionalLightmaps(vec3 positionScene, vec3 normal) {
 #endif // INCLUDE_LIGHTING_DIRECTIONAL_LIGHTMAPS
 #endif
 
-#if defined(LUSTER_INCLUDE_HANDHELD_LIGHTING)
+#if defined(LUSTER_INCLUDE_HANDHELD_LIGHT)
 // Handheld light source data and evaluation.
-#if !defined INCLUDE_LIGHTING_HANDHELD_LIGHTING
-#define INCLUDE_LIGHTING_HANDHELD_LIGHTING
+#if !defined INCLUDE_LIGHT_HANDHELD_LIGHT
+#define INCLUDE_LIGHT_HANDHELD_LIGHT
 
-#define HANDHELD_LIGHTING_COLORS
-#if handheldLightingMode == handheldLightingColored
+#define HANDHELD_LIGHT_COLORS
+#if handheldLightMode == handheldLightColored
 const vec3 handheldEmitterLightColor[48] = vec3[48](
     vec3(1.00, 1.00, 1.00) * 12.0, // Strong white light
     vec3(1.00, 1.00, 1.00) * 6.0, // Medium white light
@@ -855,7 +851,7 @@ uniform int heldBlockLightValue;
 uniform int heldBlockLightValue2;
 
 vec3 getHandheldLightColor(int handItemId, int heldItemLightValue) {
-#if handheldLightingMode == handheldLightingColored
+#if handheldLightMode == handheldLightColored
     const int firstEmitterId = 10032;
     const int emitterCount = 48;
     int emitterIndex = handItemId - firstEmitterId;
@@ -875,7 +871,7 @@ float getHandheldLightFalloff(vec3 scenePos, float ao) {
         * 1.00;
 }
 
-vec3 getHandheldLighting(vec3 scenePos, float ao) {
+vec3 getHandheldLight(vec3 scenePos, float ao) {
 #ifdef IS_IRIS
     // Center light on player rather than camera
     scenePos += relativeEyePosition;
@@ -1082,19 +1078,6 @@ vec4 drawDistantWater(
 #endif
 #include "/lib/atmos/projection.glsl"
 
-#ifdef ssptEnabled
-// SSPT-colored fog: the filtered SSPT buffer (emission + bounced light,
-// already denoised) is the local light field, so fog near emissives or
-// bounce-heavy corners picks up their color. Scaled by the scattered
-// fraction (1 - transmittance), which is ~0 for sky/clear rays, so those
-// are untouched. No-op when SSPT is off (whole block compiled out).
-vec3 ssptFogTint(vec2 uv, vec3 transmittance) {
-    vec3 sspt = max0(texture(colortex17, uv).rgb);
-    float scatter = 1.0 - clamp01(dot(transmittance, luminanceWeights));
-    return sspt * (scatter * 0.5);
-}
-#endif
-
 vec3 blendLayersWithFog(
     vec3 backgroundColor,
     vec4 translucentColor,
@@ -1141,9 +1124,6 @@ vec3 blendLayersWithFog(
         analyticFog[0] *= getCloudShadows(colortex8, midScene);
 
         backgroundColor = backgroundColor * analyticFog[1] + analyticFog[0];
-#ifdef ssptEnabled
-        backgroundColor += ssptFogTint(uv, analyticFog[1]);
-#endif
     }
 #endif
 
@@ -1392,9 +1372,6 @@ void main() {
     // Volumetric fog
 
     fragmentColor = fragmentColor * fogTransmittance + fogScattering;
-#ifdef ssptEnabled
-    fragmentColor += ssptFogTint(uv, fogTransmittance);
-#endif
 
 #ifdef bloomyFog
     bloomyFogBlend
@@ -1422,9 +1399,6 @@ void main() {
 
         fragmentColor *= analyticFog[1];
         fragmentColor += analyticFog[0];
-#ifdef ssptEnabled
-        fragmentColor += ssptFogTint(uv, analyticFog[1]);
-#endif
 
 #ifdef bloomyFog
         bloomyFogBlend = sqrt(clamp01(dot(analyticFog[1], vec3(0.33))));
@@ -1452,9 +1426,6 @@ void main() {
 
         fragmentColor *= analyticFog[1];
         fragmentColor += analyticFog[0];
-#ifdef ssptEnabled
-        fragmentColor += ssptFogTint(uv, analyticFog[1]);
-#endif
 
 #ifdef bloomyFog
         // NOTE: fogTransmittance only exists under vl above; use the

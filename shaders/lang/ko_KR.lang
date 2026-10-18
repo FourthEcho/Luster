@@ -1,7 +1,7 @@
 # Screens
 
 screen.world=월드
-screen.lighting=조명
+screen.light=조명
 screen.cloudsVolumetric=Volumetric Clouds
 screen.cloudsPlanar=Planar Clouds
 screen.fogGeneral=일반
@@ -165,7 +165,7 @@ option.blockEntityShadows=Block Entity Shadows
 option.blockEntityShadows.comment=When enabled, chests, signs, banners and other block entities cast shadows. Lower cost than full entity shadows.
 option.pixelatedShadows=Pixelated Shadows
 option.pixelatedShadows.comment=Shadows snap to the block texel grid, creating a retro pixelated look. For stylistic screenshots.
-option.pixelatedShadowsResolution=Pixel Size
+option.pixelatedShadowsRes=Pixel Size
 option.pixelatedShadowsResolution.comment=Adjusts the texel grid size for pixelated shadows. Lower = chunkier, more blocky pixels.
 option.sssSteps=SSS 단계
 option.sssSteps.comment=값을 높이면 SSS가 적용된 식물이나 기타 재질의 노이즈가 줄어들지만 성능 비용이 발생합니다.
@@ -322,8 +322,8 @@ option.cloudsCumulusPrimaryStepsH=기본 단계 - 수평선
 option.cloudsCumulusPrimaryStepsH.comment=Controls primary steps - horizon.
 option.cloudsCumulusPrimaryStepsZ=기본 단계 - 천정
 option.cloudsCumulusPrimaryStepsZ.comment=Controls primary steps - zenith.
-option.cloudsCumulusLightingSteps=조명 단계
-option.cloudsCumulusLightingSteps.comment=Controls lighting steps.
+option.cloudsCumulusLightSteps=조명 단계
+option.cloudsCumulusLightSteps.comment=Controls lighting steps.
 option.cloudsCumulusAmbientSteps=주변광 단계
 option.cloudsCumulusAmbientSteps.comment=Controls ambient steps.
 option.cloudsCumulusAltitude=고도
@@ -354,8 +354,8 @@ option.cloudsAltocumulusPrimaryStepsH=기본 단계 - 수평선
 option.cloudsAltocumulusPrimaryStepsH.comment=Controls primary steps - horizon.
 option.cloudsAltocumulusPrimaryStepsZ=기본 단계 - 천정
 option.cloudsAltocumulusPrimaryStepsZ.comment=Controls primary steps - zenith.
-option.cloudsAltocumulusLightingSteps=조명 단계
-option.cloudsAltocumulusLightingSteps.comment=Controls lighting steps.
+option.cloudsAltocumulusLightSteps=조명 단계
+option.cloudsAltocumulusLightSteps.comment=Controls lighting steps.
 option.cloudsAltocumulusAmbientSteps=주변광 단계
 option.cloudsAltocumulusAmbientSteps.comment=Controls ambient steps.
 option.cloudsAltocumulusAltitude=고도
@@ -382,8 +382,8 @@ option.cloudsCumulusCongestus=웅대적운
 option.cloudsCumulusCongestus.comment=거대하고 멀리 있는 볼류메트릭 구름
 option.cloudsCumulusCongestusPrimarySteps=Primary Steps
 option.cloudsCumulusCongestusPrimarySteps.comment=Controls primary steps.
-option.cloudsCumulusCongestusLightingSteps=조명 단계
-option.cloudsCumulusCongestusLightingSteps.comment=Controls lighting steps.
+option.cloudsCumulusCongestusLightSteps=조명 단계
+option.cloudsCumulusCongestusLightSteps.comment=Controls lighting steps.
 option.cloudsCumulusCongestusAmbientSteps=주변광 단계
 option.cloudsCumulusCongestusAmbientSteps.comment=Controls ambient steps.
 option.cloudsCumulusCongestusAltitude=고도
@@ -419,8 +419,8 @@ option.blockyCloudsSharpness=선명도
 option.blockyCloudsSharpness.comment=구름 가장자리의 선명도
 option.blockyCloudsPrimarySteps=기본 단계
 option.blockyCloudsPrimarySteps.comment=Controls primary steps.
-option.blockyCloudsLightingSteps=조명 단계
-option.blockyCloudsLightingSteps.comment=Controls lighting steps.
+option.blockyCloudsLightSteps=조명 단계
+option.blockyCloudsLightSteps.comment=Controls lighting steps.
 option.blockyCloudsDensity=밀도
 option.blockyCloudsDensity.comment=구름의 밀도를 조절합니다. 값이 높을수록 노이즈가 증가합니다
 option.blockyCloudsBrightness=밝기
@@ -452,8 +452,8 @@ value.cloudsTemporalUpscaling.4=16×
 
 option.cloudsCirrus=권운/권적운
 option.cloudsCirrus.comment=평면형 권운 및 권적운
-option.cloudsCirrusLightingSteps=조명 단계
-option.cloudsCirrusLightingSteps.comment=Controls lighting steps.
+option.cloudsCirrusLightSteps=조명 단계
+option.cloudsCirrusLightSteps.comment=Controls lighting steps.
 option.cloudsCirrusAltitude=고도
 option.cloudsCirrusAltitude.comment=Controls altitude.
 suffix.cloudsCirrusAltitude=m
@@ -497,9 +497,9 @@ option.auroraBrightness=오로라 밝기
 option.auroraBrightness.comment=Toggles aurora brightness.
 option.auroraFrequency=오로라 빈도
 option.auroraFrequency.comment=Toggles aurora frequency.
-option.auroraCloudLighting=구름 조명 기여도
+option.auroraCloudLight=구름 조명 기여도
 option.auroraCloudLighting.comment=Toggles cloud light contribution.
-option.auroraGroundLighting=지면 조명 기여도
+option.auroraGroundLight=지면 조명 기여도
 option.auroraGroundLighting.comment=오로라 빛이 지면 조명에 기여하는 정도를 조절합니다. 값이 높을수록 지형, 물 등 하늘빛을 받는 표면이 오로라 색으로 더 밝게 빛납니다.
 
 value.auroraNormal.auroraNever=나타나지 않음
@@ -729,7 +729,7 @@ option.ssrIntersectionStepsRough=교차 단계 - 거침
 option.ssrIntersectionStepsRough.comment=성능을 대가로 거친 반사의 정확도를 조절합니다
 option.ssrRefinementSteps=정제 단계
 option.ssrRefinementSteps.comment=성능을 대가로 모든 반사의 정확도를 조절합니다
-option.ssrRoughnessThreshold=거칠기 임계값
+option.ssrRoughnessThresh=거칠기 임계값
 option.ssrRoughnessThreshold.comment=반사가 나타나기 위해 표면이 얼마나 매끄러워야 하는지 조절합니다
 
 # Water settings
@@ -976,8 +976,8 @@ option.boxLineWidth.comment=Controls line width.
 
 
 # English fallback labels for UI completeness
-screen.directLighting=Direct Light
-screen.ambientLighting=Ambient Light
+screen.directLight=Direct Light
+screen.ambientLight=Ambient Light
 screen.framingTool=Framing Tool
 screen.moonPhaseInfluence=Moon Phase Influence
 option.vanillaAoLift=Vanilla AO Lift
@@ -1129,8 +1129,8 @@ option.weatherTurbulenceBias=Turbulence Bias
 option.weatherTurbulenceBias.comment=Shifts baseline turbulence. Higher values tear clouds into broken, wispy detail.
 option.weatherTurbulenceVariationSpeed=Turbulence Variation Speed
 option.weatherTurbulenceVariationSpeed.comment=How fast turbulence drifts. Higher values make cloud detail churn faster.
-option.caveLightingI=Cave Ambient
-option.caveLightingI.comment=Adjusts the base brightness of underground ambient light when no direct light is present. Higher = caves appear less pitch-black.
+option.caveLightI=Cave Ambient
+option.caveLightI.comment=Adjusts the base brightness of underground ambient light when no direct light is present. Higher = caves appear less pitch-black.
 option.planetBounce=Planet Bounce Light
 option.planetBounce.comment=Ground-bounced sun and moonlight re-scattered through the air. Warms the horizon and downward views almost for free.
 option.mistColorR=§c▍ §fRed — Mist
@@ -1187,7 +1187,7 @@ option.lensFlareHalo=Flare Halo
 option.lensFlareHalo.comment=Halo ring around the sun on top of the ghost chain.
 option.lensFlareIntensity=Flare Intensity
 option.lensFlareIntensity.comment=Overall strength of ghosts, halo and streak.
-option.lensFlareThreshold=Flare Threshold
+option.lensFlareThresh=Flare Threshold
 option.lensFlareThreshold.comment=Scene luminance above which highlights seed flare. Lower values let lamps and glints flare; higher isolates the sun.
 option.lensFlareGhosts=Ghost Count
 option.lensFlareGhosts.comment=Number of ghosts strung along the sun axis. More ghosts cost performance.
@@ -1301,7 +1301,7 @@ value.displayGamut.displayGamutDciP3=DCI-P3
 value.displayGamut.displayGamutDisplayP3=Display P3
 value.displayGamut.displayGamutRec2020=Rec.2020
 value.displayGamut.displayGamutAdobeRgb=Adobe RGB
-screen.indirectLighting=Indirect Light
+screen.indirectLight=Indirect Light
 screen.ssptFilter=SVGF Filter
 option.ssptEnabled=SSPT
 option.ssptEnabled.comment=Screen-space path traced emission and colored lighting. Big performance impact.

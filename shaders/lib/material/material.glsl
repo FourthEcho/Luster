@@ -166,7 +166,7 @@ void decodeSpecularMap(vec4 specularMap, inout Material material) {
     material.ssrMultiplier = step(
         0.01,
         (material.f0.x
-         - material.f0.x * material.roughness * ssrRoughnessThreshold)
+         - material.f0.x * material.roughness * ssrRoughnessThresh)
     ); // based on Kneemund's method
 }
 #elif textureFormat == textureFormatOld
@@ -182,7 +182,7 @@ void decodeSpecularMap(vec4 specularMap, inout Material material) {
     material.ssrMultiplier = step(
         0.01,
         (material.f0.x
-         - material.f0.x * material.roughness * ssrRoughnessThreshold)
+         - material.f0.x * material.roughness * ssrRoughnessThresh)
     ); // based on Kneemund's method
 }
 #endif

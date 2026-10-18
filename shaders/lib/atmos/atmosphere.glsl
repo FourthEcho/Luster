@@ -24,8 +24,7 @@
 #include "/lib/util/fastMath.glsl"
 #include "/lib/util/geometry.glsl"
 #include "/lib/util/phaseFunctions.glsl"
-#include "/lib/atmos/fog/overworld/aerosols/ozone.glsl"
-#include "/lib/atmos/fog/overworld/aerosols/sandstorm.glsl"
+#include "/lib/atmos/fog/overworld/aerosols.glsl"
 
 // These have to be macros so that they can be used by constant expressions
 #define coneAngleToSolidAngle(theta) (tau * (1.0 - cos(theta)))
@@ -65,7 +64,7 @@ const float atmosphereOuterRadiusSq
 // Atmosphere coefficients
 
 const float airMieAlbedo = 0.9;
-const float airMieEnergyParameter
+const float airMieEnergyParam
     = 3000.0; // Energy parameter for the Klein-Nishina phase function
 const float airMieG
     = mieAnisotropy; // Anisotropy parameter for Henyey-Greenstein phase function
@@ -73,24 +72,24 @@ const float airMieG
 const vec2 airScaleHeights = vec2(8.4e3, 1.25e3); // m
 
 // Coefficients for Rec. 709 primaries transformed to Rec. 2020
-const vec3 airRayleighCoefficient
+const vec3 airRayleighCoef
     = vec3(8.059375432e-06, 1.671209429e-05, 4.080133294e-05)
     * rec709ToWorkingColor;
-const vec3 airMieCoefficient
+const vec3 airMieCoef
     = vec3(1.666442358e-06, 1.812685127e-06, 1.958927896e-06)
     * vec3(mieColorR, mieColorG, mieColorB) // user tint (Rec. 709)
     * rec709ToWorkingColor;
-const vec3 airOzoneCoefficient
+const vec3 airOzoneCoef
     = vec3(8.304280072e-07, 1.314911970e-06, 5.440679729e-08)
     * vec3(ozoneColorR, ozoneColorG, ozoneColorB) // user tint (Rec. 709)
     * rec709ToWorkingColor;
 
-const mat2x3 airScatteringCoefficients
-    = mat2x3(airRayleighCoefficient, airMieAlbedo* airMieCoefficient);
-const mat3x3 airExtinctionCoefficients = mat3x3(
-    airRayleighCoefficient,
-    airMieCoefficient,
-    airOzoneCoefficient
+const mat2x3 airScatteringCoefs
+    = mat2x3(airRayleighCoef, airMieAlbedo* airMieCoef);
+const mat3x3 airExtinctionCoefs = mat3x3(
+    airRayleighCoef,
+    airMieCoef,
+    airOzoneCoef
 );
 
 uniform float atmosphereSaturationBoostAmount;
@@ -102,7 +101,7 @@ float atmosphereMiePhase(float nu, bool useKleinNishinaPhase) {
     return useKleinNishinaPhase
         ? kleinNishinaPhaseArea(
               nu,
-              airMieEnergyParameter,
+              airMieEnergyParam,
               moonAngularSizeRad
           )
         : henyeyGreensteinPhase(nu, airMieG);
@@ -741,7 +740,7 @@ vec3 atmosphereTransmittance(float mu, float r) {
 
     vec3 airmass3 = vec3(airmass.x, airmass.y, ozoneAirmass);
     vec3 transmittance
-        = clamp01(exp(-airExtinctionCoefficients * airmass3));
+        = clamp01(exp(-airExtinctionCoefs * airmass3));
 
 #if defined desertSandstorm && defined sandstormLayer
 

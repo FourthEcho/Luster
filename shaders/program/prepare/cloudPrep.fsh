@@ -28,8 +28,8 @@ layout(location = 0) out vec3 fragmentColor;
 in vec2 uv;
 
 
-#include "/lib/atmos/sky/clouds/core/parameters.glsl"
-flat in CloudsParameters cloudsParams;
+#include "/lib/atmos/sky/clouds/core/params.glsl"
+flat in CloudsParams cloudsParams;
 
 // ------------
 //   Uniforms
@@ -92,8 +92,8 @@ const vec3 skyColor = vec3(0.0);
 #define LUSTER_INCLUDE_CLOUD_SHADOWS
 #if defined(LUSTER_INCLUDE_CLOUD_SHADOWS)
 // Cloud-shadow projection and sampling.
-#if !defined INCLUDE_LIGHTING_CLOUD_SHADOWS
-#define INCLUDE_LIGHTING_CLOUD_SHADOWS
+#if !defined INCLUDE_LIGHT_CLOUD_SHADOWS
+#define INCLUDE_LIGHT_CLOUD_SHADOWS
 
 #include "/lib/atmos/sky/clouds/core/constants.glsl"
 #include "/lib/util/bicubic.glsl"
@@ -230,8 +230,8 @@ vec2 renderCloudShadowMap(vec2 uv) {
 
 #if defined(LUSTER_INCLUDE_DIRECTIONAL_LIGHTMAPS)
 // Directional lightmap modulation.
-#if !defined INCLUDE_LIGHTING_DIRECTIONAL_LIGHTMAPS
-#define INCLUDE_LIGHTING_DIRECTIONAL_LIGHTMAPS
+#if !defined INCLUDE_LIGHT_DIRECTIONAL_LIGHTMAPS
+#define INCLUDE_LIGHT_DIRECTIONAL_LIGHTMAPS
 
 // Based on Ninjamike's implementation in shaderLABS #snippets
 
@@ -292,13 +292,13 @@ vec2 getDirectionalLightmaps(vec3 positionScene, vec3 normal) {
 #endif // INCLUDE_LIGHTING_DIRECTIONAL_LIGHTMAPS
 #endif
 
-#if defined(LUSTER_INCLUDE_HANDHELD_LIGHTING)
+#if defined(LUSTER_INCLUDE_HANDHELD_LIGHT)
 // Handheld light source data and evaluation.
-#if !defined INCLUDE_LIGHTING_HANDHELD_LIGHTING
-#define INCLUDE_LIGHTING_HANDHELD_LIGHTING
+#if !defined INCLUDE_LIGHT_HANDHELD_LIGHT
+#define INCLUDE_LIGHT_HANDHELD_LIGHT
 
-#define HANDHELD_LIGHTING_COLORS
-#if handheldLightingMode == handheldLightingColored
+#define HANDHELD_LIGHT_COLORS
+#if handheldLightMode == handheldLightColored
 const vec3 handheldEmitterLightColor[48] = vec3[48](
     vec3(1.00, 1.00, 1.00) * 12.0, // Strong white light
     vec3(1.00, 1.00, 1.00) * 6.0, // Medium white light
@@ -362,7 +362,7 @@ uniform int heldBlockLightValue;
 uniform int heldBlockLightValue2;
 
 vec3 getHandheldLightColor(int handItemId, int heldItemLightValue) {
-#if handheldLightingMode == handheldLightingColored
+#if handheldLightMode == handheldLightColored
     const int firstEmitterId = 10032;
     const int emitterCount = 48;
     int emitterIndex = handItemId - firstEmitterId;
@@ -382,7 +382,7 @@ float getHandheldLightFalloff(vec3 scenePos, float ao) {
         * 1.00;
 }
 
-vec3 getHandheldLighting(vec3 scenePos, float ao) {
+vec3 getHandheldLight(vec3 scenePos, float ao) {
 #ifdef IS_IRIS
     // Center light on player rather than camera
     scenePos += relativeEyePosition;

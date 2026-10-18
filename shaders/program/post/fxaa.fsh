@@ -33,8 +33,8 @@ const int maxIterations = 12;
 const float[12] quality
     = float[12](1.0, 1.0, 1.0, 1.0, 1.0, 1.5, 2.0, 2.0, 2.0, 2.0, 4.0, 8.0);
 
-const float edgeThresholdMin = 0.0312;
-const float edgeThresholdMax = 0.125;
+const float edgeThreshMin = 0.0312;
+const float edgeThreshMax = 0.125;
 
 // subpixelQuality of 0.75 is multiplied by the slider value:
 
@@ -91,7 +91,7 @@ void main() {
 
     // If the luma variation is lower that a threshold (or if we are in a really
     // dark area), we are not on an edge, don't perform any AA.
-    if (lumaRange < max(edgeThresholdMin, lumaMax * edgeThresholdMax)) {
+    if (lumaRange < max(edgeThreshMin, lumaMax * edgeThreshMax)) {
         sceneColor = e;
         return;
     }

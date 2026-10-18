@@ -87,6 +87,7 @@ uniform float desertSandstormWeather;
 uniform vec3 lightDir;
 uniform float eyeAltitude;
 uniform int moonPhase;
+uniform int isEyeInWater;
 
 // ------------
 //   Includes
@@ -97,18 +98,18 @@ uniform int moonPhase;
 #define TRACE_PROJ_INV combinedProjectionMatrixInverse
 
 #include "/lib/misc/lodModSupport.glsl"
-#if !defined INCLUDE_LIGHTING_INDIRECT_LIGHTING_SSPT
-#define INCLUDE_LIGHTING_INDIRECT_LIGHTING_SSPT
+#if !defined INCLUDE_LIGHT_INDIRECT_LIGHT_SSPT
+#define INCLUDE_LIGHT_INDIRECT_LIGHT_SSPT
 
 
 #define LUSTER_INCLUDE_BLOCKLIGHT_COLOR
 #include "/lib/light/colors.glsl"
 #undef LUSTER_INCLUDE_BLOCKLIGHT_COLOR
-#define LUSTER_INCLUDE_HANDHELD_LIGHTING
+#define LUSTER_INCLUDE_HANDHELD_LIGHT
 #if defined(LUSTER_INCLUDE_CLOUD_SHADOWS)
 // Cloud-shadow projection and sampling.
-#if !defined INCLUDE_LIGHTING_CLOUD_SHADOWS
-#define INCLUDE_LIGHTING_CLOUD_SHADOWS
+#if !defined INCLUDE_LIGHT_CLOUD_SHADOWS
+#define INCLUDE_LIGHT_CLOUD_SHADOWS
 
 #include "/lib/atmos/sky/clouds/core/constants.glsl"
 #include "/lib/util/bicubic.glsl"
@@ -245,8 +246,8 @@ vec2 renderCloudShadowMap(vec2 uv) {
 
 #if defined(LUSTER_INCLUDE_DIRECTIONAL_LIGHTMAPS)
 // Directional lightmap modulation.
-#if !defined INCLUDE_LIGHTING_DIRECTIONAL_LIGHTMAPS
-#define INCLUDE_LIGHTING_DIRECTIONAL_LIGHTMAPS
+#if !defined INCLUDE_LIGHT_DIRECTIONAL_LIGHTMAPS
+#define INCLUDE_LIGHT_DIRECTIONAL_LIGHTMAPS
 
 // Based on Ninjamike's implementation in shaderLABS #snippets
 
@@ -307,13 +308,13 @@ vec2 getDirectionalLightmaps(vec3 positionScene, vec3 normal) {
 #endif // INCLUDE_LIGHTING_DIRECTIONAL_LIGHTMAPS
 #endif
 
-#if defined(LUSTER_INCLUDE_HANDHELD_LIGHTING)
+#if defined(LUSTER_INCLUDE_HANDHELD_LIGHT)
 // Handheld light source data and evaluation.
-#if !defined INCLUDE_LIGHTING_HANDHELD_LIGHTING
-#define INCLUDE_LIGHTING_HANDHELD_LIGHTING
+#if !defined INCLUDE_LIGHT_HANDHELD_LIGHT
+#define INCLUDE_LIGHT_HANDHELD_LIGHT
 
-#define HANDHELD_LIGHTING_COLORS
-#if handheldLightingMode == handheldLightingColored
+#define HANDHELD_LIGHT_COLORS
+#if handheldLightMode == handheldLightColored
 const vec3 handheldEmitterLightColor[48] = vec3[48](
     vec3(1.00, 1.00, 1.00) * 12.0, // Strong white light
     vec3(1.00, 1.00, 1.00) * 6.0, // Medium white light
@@ -377,7 +378,7 @@ uniform int heldBlockLightValue;
 uniform int heldBlockLightValue2;
 
 vec3 getHandheldLightColor(int handItemId, int heldItemLightValue) {
-#if handheldLightingMode == handheldLightingColored
+#if handheldLightMode == handheldLightColored
     const int firstEmitterId = 10032;
     const int emitterCount = 48;
     int emitterIndex = handItemId - firstEmitterId;
@@ -397,7 +398,7 @@ float getHandheldLightFalloff(vec3 scenePos, float ao) {
         * 1.00;
 }
 
-vec3 getHandheldLighting(vec3 scenePos, float ao) {
+vec3 getHandheldLight(vec3 scenePos, float ao) {
 #ifdef IS_IRIS
     // Center light on player rather than camera
     scenePos += relativeEyePosition;
@@ -416,12 +417,12 @@ vec3 getHandheldLighting(vec3 scenePos, float ao) {
 #endif // INCLUDE_LIGHTING_HANDHELD_LIGHTING
 #endif
 
-#undef LUSTER_INCLUDE_HANDHELD_LIGHTING
+#undef LUSTER_INCLUDE_HANDHELD_LIGHT
 #define LUSTER_INCLUDE_CLOUD_SHADOWS
 #if defined(LUSTER_INCLUDE_CLOUD_SHADOWS)
 // Cloud-shadow projection and sampling.
-#if !defined INCLUDE_LIGHTING_CLOUD_SHADOWS
-#define INCLUDE_LIGHTING_CLOUD_SHADOWS
+#if !defined INCLUDE_LIGHT_CLOUD_SHADOWS
+#define INCLUDE_LIGHT_CLOUD_SHADOWS
 
 #include "/lib/atmos/sky/clouds/core/constants.glsl"
 #include "/lib/util/bicubic.glsl"
@@ -558,8 +559,8 @@ vec2 renderCloudShadowMap(vec2 uv) {
 
 #if defined(LUSTER_INCLUDE_DIRECTIONAL_LIGHTMAPS)
 // Directional lightmap modulation.
-#if !defined INCLUDE_LIGHTING_DIRECTIONAL_LIGHTMAPS
-#define INCLUDE_LIGHTING_DIRECTIONAL_LIGHTMAPS
+#if !defined INCLUDE_LIGHT_DIRECTIONAL_LIGHTMAPS
+#define INCLUDE_LIGHT_DIRECTIONAL_LIGHTMAPS
 
 // Based on Ninjamike's implementation in shaderLABS #snippets
 
@@ -620,13 +621,13 @@ vec2 getDirectionalLightmaps(vec3 positionScene, vec3 normal) {
 #endif // INCLUDE_LIGHTING_DIRECTIONAL_LIGHTMAPS
 #endif
 
-#if defined(LUSTER_INCLUDE_HANDHELD_LIGHTING)
+#if defined(LUSTER_INCLUDE_HANDHELD_LIGHT)
 // Handheld light source data and evaluation.
-#if !defined INCLUDE_LIGHTING_HANDHELD_LIGHTING
-#define INCLUDE_LIGHTING_HANDHELD_LIGHTING
+#if !defined INCLUDE_LIGHT_HANDHELD_LIGHT
+#define INCLUDE_LIGHT_HANDHELD_LIGHT
 
-#define HANDHELD_LIGHTING_COLORS
-#if handheldLightingMode == handheldLightingColored
+#define HANDHELD_LIGHT_COLORS
+#if handheldLightMode == handheldLightColored
 const vec3 handheldEmitterLightColor[48] = vec3[48](
     vec3(1.00, 1.00, 1.00) * 12.0, // Strong white light
     vec3(1.00, 1.00, 1.00) * 6.0, // Medium white light
@@ -690,7 +691,7 @@ uniform int heldBlockLightValue;
 uniform int heldBlockLightValue2;
 
 vec3 getHandheldLightColor(int handItemId, int heldItemLightValue) {
-#if handheldLightingMode == handheldLightingColored
+#if handheldLightMode == handheldLightColored
     const int firstEmitterId = 10032;
     const int emitterCount = 48;
     int emitterIndex = handItemId - firstEmitterId;
@@ -710,7 +711,7 @@ float getHandheldLightFalloff(vec3 scenePos, float ao) {
         * 1.00;
 }
 
-vec3 getHandheldLighting(vec3 scenePos, float ao) {
+vec3 getHandheldLight(vec3 scenePos, float ao) {
 #ifdef IS_IRIS
     // Center light on player rather than camera
     scenePos += relativeEyePosition;
@@ -992,12 +993,29 @@ vec3 hitEmission(vec4 hitData0, ivec2 hitTexel, vec3 hitViewPos) {
 #if defined shadow && !defined WORLD_NETHER
 #define DIRECT_SUN_BOUNCE 1
 #endif
-#ifdef handheldLighting
+#ifdef handheldLight
 #define DIRECT_HANDHELD_BOUNCE 1
 #endif
 
 
 #define DIRECT_SKY_BOUNCE 1
+
+// The screen-space tracer has no notion of volume: traced radiance is
+// computed at air strength even when both path vertices sit underwater.
+// Water absorption over the traced segment brings traced emission and
+// bounce light down to the medium's response, so side faces no longer
+// read as coated by an air-strength film of indirect light.
+vec3 tracedWaterAttenuation(vec3 viewPos, vec3 hitViewPos) {
+    if (isEyeInWater != 1) return vec3(1.0);
+    const vec3 absorptionCoeff
+        = vec3(
+              waterAbsorptionRUnderwater,
+              waterAbsorptionGUnderwater,
+              waterAbsorptionBUnderwater
+          )
+        * rec709ToWorkingColor;
+    return exp(-absorptionCoeff * distance(hitViewPos, viewPos));
+}
 
 #if defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE || defined DIRECT_SKY_BOUNCE
 
@@ -1086,7 +1104,7 @@ vec3 hitDirectLight(HitData hit, vec3 hitViewPos) {
 #ifdef DIRECT_HANDHELD_BOUNCE
 
 
-    indirectDirect += getHandheldLighting(hitScenePos, 1.0);
+    indirectDirect += getHandheldLight(hitScenePos, 1.0);
 #endif
 
 
@@ -1168,6 +1186,7 @@ vec3 traceIndirect(
             vec4 hitData0 = texelFetch(colortex1, hitTexel, 0);
 
             vec3 hitViewPos = screenToViewSpace(TRACE_PROJ_INV, hitPosition, true);
+            vec3 hitAttenuation = tracedWaterAttenuation(viewPos, hitViewPos);
 
             // Cubic emission distance falloff.
             float emissionFalloff = 1.0 - linearStep(
@@ -1178,12 +1197,13 @@ vec3 traceIndirect(
                 emissionFalloff = cube(emissionFalloff);
 
             emission += hitEmission(hitData0, hitTexel, hitViewPos)
-                      * emissionFalloff * brdf;
+                      * emissionFalloff * brdf * hitAttenuation;
 
 #if defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE || defined DIRECT_SKY_BOUNCE
             // Direct-light bounce: no distance falloff, BRDF-weighted.
             // (Counted per cosine candidate above, not per hit.)
-            bounce += hitDirectLight(unpackHit(hitData0), hitViewPos) * brdf;
+            bounce += hitDirectLight(unpackHit(hitData0), hitViewPos)
+                    * brdf * hitAttenuation;
 #endif
         }
     }
@@ -1248,6 +1268,7 @@ vec3 traceIndirect(
                 hitNormal = mat3(gbufferModelView) * hitNormalScene;
 
                 vec3 hitViewPos = screenToViewSpace(TRACE_PROJ_INV, hitPosition, true);
+                vec3 hitAttenuation = tracedWaterAttenuation(viewPos, hitViewPos);
 
                 float emissionFalloff = 1.0 - linearStep(
                     ssptEmissionDistance * rcpPi,
@@ -1257,12 +1278,12 @@ vec3 traceIndirect(
                     emissionFalloff = cube(emissionFalloff);
 
                 emission += hitEmission(hitData0, hitTexel, hitViewPos)
-                          * emissionFalloff * contribution;
+                          * emissionFalloff * contribution * hitAttenuation;
 
 #if defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE || defined DIRECT_SKY_BOUNCE
                 // Direct-light bounce on every path vertex.
                 bounce += hitDirectLight(unpackHit(hitData0), hitViewPos)
-                        * contribution;
+                        * contribution * hitAttenuation;
 #endif
 
                 contribution *= hitAlbedo; // colored bleed into deeper bounces

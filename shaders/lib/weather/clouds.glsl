@@ -20,7 +20,7 @@
 #define INCLUDE_WEATHER_CLOUDS
 
 #include "/lib/atmos/sky/clouds/core/constants.glsl"
-#include "/lib/atmos/sky/clouds/core/parameters.glsl"
+#include "/lib/atmos/sky/clouds/core/params.glsl"
 #include "/lib/weather/core.glsl"
 
 float cloudsCumulusCongestusBlend(Weather weather, vec2 l0Coverage) {
@@ -132,8 +132,8 @@ float cloudsNoctilucentAmount() {
     return dampen(intensity) * cloudsNoctilucentIntensity;
 }
 
-CloudsParameters getCloudsParameters(Weather weather) {
-    CloudsParameters params;
+CloudsParams getCloudsParams(Weather weather) {
+    CloudsParams params;
 
     // Shaping parameters
 

@@ -18,8 +18,8 @@
 
 #if defined(LUSTER_INCLUDE_MOON_PHASE_COLOR)
 // Moon-phase color influence.
-#if !defined INCLUDE_LIGHTING_COLORS_MOON_PHASE_INFLUENCE
-#define INCLUDE_LIGHTING_COLORS_MOON_PHASE_INFLUENCE
+#if !defined INCLUDE_LIGHT_COLORS_MOON_PHASE_INFLUENCE
+#define INCLUDE_LIGHT_COLORS_MOON_PHASE_INFLUENCE
 
 #include "/lib/util/color.glsl"
 
@@ -62,8 +62,8 @@ vec3 applyMoonPhaseInfluence(
 
 #if defined(LUSTER_INCLUDE_BLOCKLIGHT_COLOR)
 // Blocklight color and emissive scale.
-#if !defined INCLUDE_LIGHTING_COLORS_BLOCKLIGHT_COLOR
-#define INCLUDE_LIGHTING_COLORS_BLOCKLIGHT_COLOR
+#if !defined INCLUDE_LIGHT_COLORS_BLOCKLIGHT_COLOR
+#define INCLUDE_LIGHT_COLORS_BLOCKLIGHT_COLOR
 
 #include "/lib/util/color.glsl"
 
@@ -80,8 +80,8 @@ const float emissionScale = 40.0;
 
 #if defined(LUSTER_INCLUDE_LIGHT_COLOR)
 // Sun/moon color and exposure helpers.
-#if !defined INCLUDE_LIGHTING_COLORS_LIGHT_COLOR
-#define INCLUDE_LIGHTING_COLORS_LIGHT_COLOR
+#if !defined INCLUDE_LIGHT_COLORS_LIGHT_COLOR
+#define INCLUDE_LIGHT_COLORS_LIGHT_COLOR
 
 #include "/lib/atmos/atmosphere.glsl"
 #include "/lib/util/color.glsl"
@@ -164,8 +164,8 @@ vec3 getLightColor() {
 
 #if defined(LUSTER_INCLUDE_WEATHER_COLOR)
 // Precipitation and weather color helpers.
-#if !defined INCLUDE_LIGHTING_COLORS_WEATHER_COLOR
-#define INCLUDE_LIGHTING_COLORS_WEATHER_COLOR
+#if !defined INCLUDE_LIGHT_COLORS_WEATHER_COLOR
+#define INCLUDE_LIGHT_COLORS_WEATHER_COLOR
 
 #include "/lib/atmos/atmosphere.glsl"
 

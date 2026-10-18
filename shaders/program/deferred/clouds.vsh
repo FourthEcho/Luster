@@ -28,8 +28,8 @@ flat out vec3 skyColor;
 flat out float auroraAmount;
 flat out mat2x3 auroraColors;
 
-#include "/lib/atmos/sky/clouds/core/parameters.glsl"
-flat out CloudsParameters cloudsParams;
+#include "/lib/atmos/sky/clouds/core/params.glsl"
+flat out CloudsParams cloudsParams;
 #endif
 
 // ------------
@@ -123,9 +123,9 @@ void main() {
     auroraAmount = getAuroraAmount();
     auroraColors = getAuroraColors();
 
-    cloudsParams = getCloudsParameters(getWeather());
+    cloudsParams = getCloudsParams(getWeather());
 
-    skyColor += auroraAmount * auroraCloudLighting
+    skyColor += auroraAmount * auroraCloudLight
         * mix(auroraColors[0], auroraColors[1], 0.25);
 #endif
 

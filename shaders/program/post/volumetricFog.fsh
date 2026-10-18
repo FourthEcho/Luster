@@ -29,8 +29,8 @@ flat in vec3 ambientColor;
 flat in vec3 lightColor;
 
 #if defined WORLD_OVERWORLD
-#include "/lib/atmos/fog/overworld/parameters.glsl"
-flat in OverworldFogParameters fogParams;
+#include "/lib/atmos/fog/overworld/params.glsl"
+flat in OverworldFogParams fogParams;
 #endif
 
 // ------------
@@ -112,11 +112,11 @@ uniform float timeMidnight;
 #endif
 
 #if defined WORLD_END
-#include "/lib/atmos/fog/volumetric/end.glsl"
+#include "/lib/atmos/fog/endFog.glsl"
 #endif
 
-#include "/lib/atmos/fog/volumetric/water.glsl"
-#include "/lib/atmos/fog/volumetric/nether.glsl"
+#include "/lib/atmos/fog/water/waterFog.glsl"
+#include "/lib/atmos/fog/netherFog.glsl"
 #include "/lib/misc/lodModSupport.glsl"
 #include "/lib/util/dithering.glsl"
 #include "/lib/util/encoding.glsl"

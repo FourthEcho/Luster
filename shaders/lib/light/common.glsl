@@ -16,8 +16,8 @@
 ====================================================================================================
 */
 
-#if !defined INCLUDE_LIGHTING_DIRECT_LIGHTING_COMMON
-#define INCLUDE_LIGHTING_DIRECT_LIGHTING_COMMON
+#if !defined INCLUDE_LIGHT_DIRECT_LIGHT_COMMON
+#define INCLUDE_LIGHT_DIRECT_LIGHT_COMMON
 
 // Fade from close shadows (shadow maps) to distant shadows (lightmap or SSRT)
 float getShadowDistanceFade(vec3 scenePos, vec3 shadowScreenPos) {

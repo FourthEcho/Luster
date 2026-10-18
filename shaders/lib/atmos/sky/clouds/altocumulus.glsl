@@ -227,7 +227,7 @@ CloudsResult drawAltocumulusClouds(
     const uint primaryStepsHorizon = cloudsAltocumulusPrimaryStepsH;
     const uint primaryStepsZenith = cloudsAltocumulusPrimaryStepsZ;
 #endif
-    const uint lightingSteps = cloudsAltocumulusLightingSteps;
+    const uint lightSteps = cloudsAltocumulusLightSteps;
     const uint ambientSteps = cloudsAltocumulusAmbientSteps;
     const float maxRayLength = 2e4;
     const float minTransmittance = 0.075;
@@ -342,7 +342,7 @@ CloudsResult drawAltocumulusClouds(
             rayPos,
             lightDir,
             hash.x,
-            lightingSteps
+            lightSteps
         );
         float skyOpticalDepth = cloudsAltocumulusOpticalDepth(
             rayPos,

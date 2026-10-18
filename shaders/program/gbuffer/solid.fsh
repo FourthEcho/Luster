@@ -137,8 +137,8 @@ uniform vec4 entityColor;
 #define LUSTER_INCLUDE_DIRECTIONAL_LIGHTMAPS
 #if defined(LUSTER_INCLUDE_CLOUD_SHADOWS)
 // Cloud-shadow projection and sampling.
-#if !defined INCLUDE_LIGHTING_CLOUD_SHADOWS
-#define INCLUDE_LIGHTING_CLOUD_SHADOWS
+#if !defined INCLUDE_LIGHT_CLOUD_SHADOWS
+#define INCLUDE_LIGHT_CLOUD_SHADOWS
 
 #include "/lib/atmos/sky/clouds/core/constants.glsl"
 #include "/lib/util/bicubic.glsl"
@@ -275,8 +275,8 @@ vec2 renderCloudShadowMap(vec2 uv) {
 
 #if defined(LUSTER_INCLUDE_DIRECTIONAL_LIGHTMAPS)
 // Directional lightmap modulation.
-#if !defined INCLUDE_LIGHTING_DIRECTIONAL_LIGHTMAPS
-#define INCLUDE_LIGHTING_DIRECTIONAL_LIGHTMAPS
+#if !defined INCLUDE_LIGHT_DIRECTIONAL_LIGHTMAPS
+#define INCLUDE_LIGHT_DIRECTIONAL_LIGHTMAPS
 
 // Based on Ninjamike's implementation in shaderLABS #snippets
 
@@ -337,13 +337,13 @@ vec2 getDirectionalLightmaps(vec3 positionScene, vec3 normal) {
 #endif // INCLUDE_LIGHTING_DIRECTIONAL_LIGHTMAPS
 #endif
 
-#if defined(LUSTER_INCLUDE_HANDHELD_LIGHTING)
+#if defined(LUSTER_INCLUDE_HANDHELD_LIGHT)
 // Handheld light source data and evaluation.
-#if !defined INCLUDE_LIGHTING_HANDHELD_LIGHTING
-#define INCLUDE_LIGHTING_HANDHELD_LIGHTING
+#if !defined INCLUDE_LIGHT_HANDHELD_LIGHT
+#define INCLUDE_LIGHT_HANDHELD_LIGHT
 
-#define HANDHELD_LIGHTING_COLORS
-#if handheldLightingMode == handheldLightingColored
+#define HANDHELD_LIGHT_COLORS
+#if handheldLightMode == handheldLightColored
 const vec3 handheldEmitterLightColor[48] = vec3[48](
     vec3(1.00, 1.00, 1.00) * 12.0, // Strong white light
     vec3(1.00, 1.00, 1.00) * 6.0, // Medium white light
@@ -407,7 +407,7 @@ uniform int heldBlockLightValue;
 uniform int heldBlockLightValue2;
 
 vec3 getHandheldLightColor(int handItemId, int heldItemLightValue) {
-#if handheldLightingMode == handheldLightingColored
+#if handheldLightMode == handheldLightColored
     const int firstEmitterId = 10032;
     const int emitterCount = 48;
     int emitterIndex = handItemId - firstEmitterId;
@@ -427,7 +427,7 @@ float getHandheldLightFalloff(vec3 scenePos, float ao) {
         * 1.00;
 }
 
-vec3 getHandheldLighting(vec3 scenePos, float ao) {
+vec3 getHandheldLight(vec3 scenePos, float ao) {
 #ifdef IS_IRIS
     // Center light on player rather than camera
     scenePos += relativeEyePosition;
@@ -504,7 +504,7 @@ vec3 drawEndPortal() {
     const int layerCount = 8; // Number of layers
     const float depthScale = 0.33; // Apparent distance between layers
     const float depthFade = 0.5; // How quickly the layers fade to black
-    const float threshold = 0.99; // Threshold for the "stars". Lower values
+    const float thresh = 0.99; // Threshold for the "stars". Lower values
                                   // mean more stars appear
     const float twinkleSpeed = 0.4; // How fast the stars appear to twinkle
     const float twinkleAmount = 0.04; // How many twinkling stars appear
@@ -561,7 +561,7 @@ vec3 drawEndPortal() {
                 * cos(frameTimeCounter * twinkleSpeed + twinkleOffset);
 
         // Stomp all values below threshold to zero
-        float intensity = pow8(linearStep(threshold, 1.0, random.x));
+        float intensity = pow8(linearStep(thresh, 1.0, random.x));
 
         // Blend between the 3 colors
         vec3 color = mix(color0, color1, random.y);
@@ -577,7 +577,7 @@ vec3 drawEndPortal() {
         tangentPos
             += tangentDir * depthScale * gbufferProjection[1][1] * rcp(1.37);
 
-        if (random.x > threshold) {
+        if (random.x > thresh) {
             break;
         }
     }

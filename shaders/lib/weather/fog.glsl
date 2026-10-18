@@ -19,10 +19,9 @@
 #if !defined INCLUDE_WEATHER_FOG
 #define INCLUDE_WEATHER_FOG
 
-#include "/lib/atmos/fog/overworld/parameters.glsl"
+#include "/lib/atmos/fog/overworld/params.glsl"
 #include "/lib/atmos/fog/overworld/constants.glsl"
-#include "/lib/atmos/fog/overworld/aerosols/ozone.glsl"
-#include "/lib/atmos/fog/overworld/aerosols/sandstorm.glsl"
+#include "/lib/atmos/fog/overworld/aerosols.glsl"
 #include "/lib/util/color.glsl"
 #include "/lib/weather/core.glsl"
 
@@ -36,8 +35,8 @@
 
 uniform float biomePaleGarden;
 
-OverworldFogParameters getFogParameters(Weather weather) {
-    OverworldFogParameters params;
+OverworldFogParams getFogParams(Weather weather) {
+    OverworldFogParams params;
 
     // Rayleigh coefficient
 

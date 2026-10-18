@@ -90,8 +90,8 @@ vec3 slerp(vec3 v0, vec3 v1, float t) {
 #include "/lib/util/spaceConversion.glsl"
 
 #if shaderAo == shaderAoSsao
-#if !defined INCLUDE_LIGHTING_INDIRECT_LIGHTING_SSAO
-#define INCLUDE_LIGHTING_INDIRECT_LIGHTING_SSAO
+#if !defined INCLUDE_LIGHT_INDIRECT_LIGHT_SSAO
+#define INCLUDE_LIGHT_INDIRECT_LIGHT_SSAO
 
 #include "/lib/util/fastMath.glsl"
 #include "/lib/util/random.glsl"
@@ -180,8 +180,8 @@ float computeDssao(
 #endif
 
 #if shaderAo == shaderAoGtao
-#if !defined INCLUDE_LIGHTING_INDIRECT_LIGHTING_GTAO
-#define INCLUDE_LIGHTING_INDIRECT_LIGHTING_GTAO
+#if !defined INCLUDE_LIGHT_INDIRECT_LIGHT_GTAO
+#define INCLUDE_LIGHT_INDIRECT_LIGHT_GTAO
 
 #include "/lib/misc/lodModSupport.glsl"
 #include "/lib/util/fastMath.glsl"
@@ -474,7 +474,7 @@ void main() {
 
     // Temporal accumulation
 
-    const float maxAccumulatedFrames = 10.0;
+    const float maxAccumFrames = 10.0;
     const float depthRejectionStrength = 16.0;
     const float offcenterRejectionStrength = 0.25;
 
@@ -486,7 +486,7 @@ void main() {
     if (clamp01(previousScreenPos.xy) == previousScreenPos.xy) {
         // Unpack history data
         float historyDepth = 1.0 - historyData.x;
-        float pixelAge = min(historyData.y, maxAccumulatedFrames);
+        float pixelAge = min(historyData.y, maxAccumFrames);
 
         vec3 historyBentNormal;
         historyBentNormal.xy = history.zw * 2.0 - 1.0;

@@ -60,8 +60,8 @@ uniform vec2 viewRes;
 //   Includes
 // ------------
 
-#if !defined INCLUDE_LIGHTING_INDIRECT_LIGHTING_TEMPORAL
-#define INCLUDE_LIGHTING_INDIRECT_LIGHTING_TEMPORAL
+#if !defined INCLUDE_LIGHT_INDIRECT_LIGHT_TEMPORAL
+#define INCLUDE_LIGHT_INDIRECT_LIGHT_TEMPORAL
 
 // Shared bookkeeping for the SSPT temporal passes (d5 accumulate + SVGF
 // filter): target-sized buffer helpers and the packed-gbuffer fetch.

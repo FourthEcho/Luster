@@ -40,8 +40,8 @@ flat out vec2 atlasTileScale;
 #endif
 
 #if defined WORLD_OVERWORLD
-#include "/lib/atmos/fog/overworld/parameters.glsl"
-flat out OverworldFogParameters fogParams;
+#include "/lib/atmos/fog/overworld/params.glsl"
+flat out OverworldFogParams fogParams;
 #endif
 
 // --------------
@@ -204,7 +204,7 @@ void main() {
 #endif
 
 #if defined WORLD_OVERWORLD
-    fogParams = getFogParameters(getWeather());
+    fogParams = getFogParams(getWeather());
 #endif
 
     positionView = sceneToViewSpace(positionScene);

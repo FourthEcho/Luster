@@ -137,7 +137,7 @@ float cirrusDensityProfile(vec2 coord, float altitudeFraction) {
 }
 
 float cloudsCirrusOpticalDepth(vec3 rayOrigin, vec3 rayDir, float dither) {
-    const uint stepCount = cloudsCirrusLightingSteps;
+    const uint stepCount = cloudsCirrusLightSteps;
     const float maxRayLength = 1e3;
     const float stepGrowth = 1.5;
 

@@ -24,8 +24,8 @@ flat out vec3 ambientColor;
 flat out vec3 lightColor;
 
 #if defined WORLD_OVERWORLD
-#include "/lib/atmos/fog/overworld/parameters.glsl"
-flat out OverworldFogParameters fogParams;
+#include "/lib/atmos/fog/overworld/params.glsl"
+flat out OverworldFogParams fogParams;
 #endif
 
 // ------------
@@ -77,7 +77,7 @@ void main() {
     ambientColor = texelFetch(colortex4, ivec2(191, 1), 0).rgb;
 
 #if defined WORLD_OVERWORLD
-    fogParams = getFogParameters(getWeather());
+    fogParams = getFogParams(getWeather());
 #endif
 
     vec2 vertexPos = gl_Vertex.xy;

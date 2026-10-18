@@ -16,8 +16,8 @@
 ====================================================================================================
 */
 
-#if !defined INCLUDE_LIGHTING_DIRECT_LIGHTING_PCSS
-#define INCLUDE_LIGHTING_DIRECT_LIGHTING_PCSS
+#if !defined INCLUDE_LIGHT_DIRECT_LIGHT_PCSS
+#define INCLUDE_LIGHT_DIRECT_LIGHT_PCSS
 
 #if defined shadow && (defined WORLD_OVERWORLD || defined WORLD_END)
 
@@ -197,11 +197,11 @@ vec3 shadowPcfFilter(
     float rcpSteps = rcp(float(stepCount));
 
     // sharpening for small penumbra sizes
-    float sharpeningThreshold
+    float sharpeningThresh
         = 0.4 * max0((minFilterRadius - penumbraSize) / minFilterRadius);
     shadowVis = linearStep(
-        sharpeningThreshold,
-        1.0 - sharpeningThreshold,
+        sharpeningThresh,
+        1.0 - sharpeningThresh,
         shadowVis * rcpSteps
     );
 
@@ -231,7 +231,7 @@ vec3 getFilteredShadows(
 
 #ifdef pixelatedShadows
     // Snap position to the nearest block texel
-    const float pixelScale = float(pixelatedShadowsResolution);
+    const float pixelScale = float(pixelatedShadowsRes);
     scenePos = scenePos + cameraPosition;
     scenePos = floor(scenePos * pixelScale + 0.01) * rcp(pixelScale)
         + (0.5 / pixelScale);

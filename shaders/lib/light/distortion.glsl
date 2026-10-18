@@ -16,8 +16,8 @@
 ====================================================================================================
 */
 
-#if !defined INCLUDE_LIGHTING_DIRECT_LIGHTING_DISTORTION
-#define INCLUDE_LIGHTING_DIRECT_LIGHTING_DISTORTION
+#if !defined INCLUDE_LIGHT_DIRECT_LIGHT_DISTORTION
+#define INCLUDE_LIGHT_DIRECT_LIGHT_DISTORTION
 
 #include "/lib/util/fastMath.glsl"
 

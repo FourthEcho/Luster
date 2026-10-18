@@ -16,8 +16,8 @@
 ====================================================================================================
 */
 
-#if !defined INCLUDE_LIGHTING_BSDF_DIFFUSE_LIGHTING
-#define INCLUDE_LIGHTING_BSDF_DIFFUSE_LIGHTING
+#if !defined INCLUDE_LIGHT_BSDF_DIFFUSE_LIGHT
+#define INCLUDE_LIGHT_BSDF_DIFFUSE_LIGHT
 
 #include "/lib/brdf/hammon.glsl"
 #define LUSTER_INCLUDE_BLOCKLIGHT_COLOR
@@ -26,12 +26,12 @@
 #include "/lib/material/material.glsl"
 #include "/lib/util/fastMath.glsl"
 #include "/lib/util/phaseFunctions.glsl"
-#ifdef handheldLighting
-#define LUSTER_INCLUDE_HANDHELD_LIGHTING
+#ifdef handheldLight
+#define LUSTER_INCLUDE_HANDHELD_LIGHT
 #if defined(LUSTER_INCLUDE_CLOUD_SHADOWS)
 // Cloud-shadow projection and sampling.
-#if !defined INCLUDE_LIGHTING_CLOUD_SHADOWS
-#define INCLUDE_LIGHTING_CLOUD_SHADOWS
+#if !defined INCLUDE_LIGHT_CLOUD_SHADOWS
+#define INCLUDE_LIGHT_CLOUD_SHADOWS
 
 #include "/lib/atmos/sky/clouds/core/constants.glsl"
 #include "/lib/util/bicubic.glsl"
@@ -168,8 +168,8 @@ vec2 renderCloudShadowMap(vec2 uv) {
 
 #if defined(LUSTER_INCLUDE_DIRECTIONAL_LIGHTMAPS)
 // Directional lightmap modulation.
-#if !defined INCLUDE_LIGHTING_DIRECTIONAL_LIGHTMAPS
-#define INCLUDE_LIGHTING_DIRECTIONAL_LIGHTMAPS
+#if !defined INCLUDE_LIGHT_DIRECTIONAL_LIGHTMAPS
+#define INCLUDE_LIGHT_DIRECTIONAL_LIGHTMAPS
 
 // Based on Ninjamike's implementation in shaderLABS #snippets
 
@@ -230,13 +230,13 @@ vec2 getDirectionalLightmaps(vec3 positionScene, vec3 normal) {
 #endif // INCLUDE_LIGHTING_DIRECTIONAL_LIGHTMAPS
 #endif
 
-#if defined(LUSTER_INCLUDE_HANDHELD_LIGHTING)
+#if defined(LUSTER_INCLUDE_HANDHELD_LIGHT)
 // Handheld light source data and evaluation.
-#if !defined INCLUDE_LIGHTING_HANDHELD_LIGHTING
-#define INCLUDE_LIGHTING_HANDHELD_LIGHTING
+#if !defined INCLUDE_LIGHT_HANDHELD_LIGHT
+#define INCLUDE_LIGHT_HANDHELD_LIGHT
 
-#define HANDHELD_LIGHTING_COLORS
-#if handheldLightingMode == handheldLightingColored
+#define HANDHELD_LIGHT_COLORS
+#if handheldLightMode == handheldLightColored
 const vec3 handheldEmitterLightColor[48] = vec3[48](
     vec3(1.00, 1.00, 1.00) * 12.0, // Strong white light
     vec3(1.00, 1.00, 1.00) * 6.0, // Medium white light
@@ -300,7 +300,7 @@ uniform int heldBlockLightValue;
 uniform int heldBlockLightValue2;
 
 vec3 getHandheldLightColor(int handItemId, int heldItemLightValue) {
-#if handheldLightingMode == handheldLightingColored
+#if handheldLightMode == handheldLightColored
     const int firstEmitterId = 10032;
     const int emitterCount = 48;
     int emitterIndex = handItemId - firstEmitterId;
@@ -320,7 +320,7 @@ float getHandheldLightFalloff(vec3 scenePos, float ao) {
         * 1.00;
 }
 
-vec3 getHandheldLighting(vec3 scenePos, float ao) {
+vec3 getHandheldLight(vec3 scenePos, float ao) {
 #ifdef IS_IRIS
     // Center light on player rather than camera
     scenePos += relativeEyePosition;
@@ -339,7 +339,7 @@ vec3 getHandheldLighting(vec3 scenePos, float ao) {
 #endif // INCLUDE_LIGHTING_HANDHELD_LIGHTING
 #endif
 
-#undef LUSTER_INCLUDE_HANDHELD_LIGHTING
+#undef LUSTER_INCLUDE_HANDHELD_LIGHT
 #endif
 
 #if !defined WORLD_OVERWORLD
@@ -453,18 +453,18 @@ vec3 sssApprox(
 }
 #endif
 
-vec3 getBlockLighting(
+vec3 getBlockLight(
     vec3 scenePos,
     vec3 flatNormal,
     vec2 lightLevels,
     float ao,
-    float directionalLighting
+    float directionalLight
 ) {
-    vec3 lighting = vec3(0.0f);
+    vec3 light = vec3(0.0f);
 
     float blocklightFalloff
         = getBlocklightFalloff(lightLevels.x, lightLevels.y, ao);
-    vec3 mcBlocklight = (blocklightFalloff * directionalLighting)
+    vec3 mcBlocklight = (blocklightFalloff * directionalLight)
         * (blocklightScale * blocklightColor);
 
 #ifdef ssptEnabled
@@ -472,25 +472,25 @@ vec3 getBlockLighting(
 
 
 #else
-    lighting += mcBlocklight;
+    light += mcBlocklight;
 #endif
 
-#ifdef handheldLighting
-    lighting += getHandheldLighting(scenePos, ao);
+#ifdef handheldLight
+    light += getHandheldLight(scenePos, ao);
 #endif
 
-    return lighting;
+    return light;
 }
 
-vec3 getSkyLighting(
+vec3 getSkyLight(
     Material material,
     vec2 lightLevels,
     float ao,
     float ambientSss,
-    float directionalLighting,
+    float directionalLight,
     vec3 skyIrradiance
 ) {
-    vec3 lighting = vec3(0.0);
+    vec3 light = vec3(0.0);
 
 #if defined WORLD_NETHER
     // Nether keeps the caller-provided sky irradiance as its only ambient
@@ -501,10 +501,10 @@ vec3 getSkyLighting(
     skylight = mix(skylight, 0.5 * skylightUp * ao, material.sssAmount);
     skylight += ambientSss * skylightUp * material.sssAmount * 2.0;
 
-    skylight = 16.0 * directionalLighting
+    skylight = 16.0 * directionalLight
         * mix(skylight, vec3(dot(skylight, luminanceWeights)), 0.5);
 
-    lighting += skylight * getSkylightFalloff(lightLevels.y);
+    light += skylight * getSkylightFalloff(lightLevels.y);
 #else
 
 
@@ -517,13 +517,13 @@ vec3 getSkyLighting(
     skylight = mix(skylight, 0.5 * skylightUp * ao, material.sssAmount);
     skylight += ambientSss * skylightUp * material.sssAmount * 2.0;
 
-    lighting += skylight * getSkylightFalloff(lightLevels.y);
+    light += skylight * getSkylightFalloff(lightLevels.y);
 #endif
 
-    return lighting;
+    return light;
 }
 
-vec3 getDiffuseLighting(
+vec3 getDiffuseLight(
     Material material,
     vec3 scenePos,
     vec3 normal,
@@ -551,10 +551,10 @@ vec3 getDiffuseLighting(
     }
 #endif
 
-    vec3 lighting = vec3(0.0);
+    vec3 light = vec3(0.0);
 
 
-    float directionalLighting = 1.0;
+    float directionalLight = 1.0;
 
 
     // Direct ambient stays AO-occluded even with SSPT enabled. The SSPT
@@ -611,10 +611,10 @@ vec3 getDiffuseLighting(
 
 #ifdef shadowVps
     // Add sss and diffuse
-    lighting += diffuse * shadows + bounced + sssLight;
+    light += diffuse * shadows + bounced + sssLight;
 #else
     // Blend sss and diffuse
-    lighting += mix(diffuse, sssLight, material.sssAmount) * shadows + bounced;
+    light += mix(diffuse, sssLight, material.sssAmount) * shadows + bounced;
 #endif
 #else
 
@@ -636,50 +636,50 @@ vec3 getDiffuseLighting(
     diffuse = diffuse + max0(sssLight * lift(material.sssAmount, 5.0));
     diffuse *= ao * pow4(lightLevels.y) * (dampen(lightDir.y) * 0.5 + 0.5);
 
-    lighting += diffuse;
+    light += diffuse;
 #endif
 
-    lighting *= lightColor;
+    light *= lightColor;
 
 #ifdef cloudShadows
-    lighting *= cloudShadowMask;
+    light *= cloudShadowMask;
 #endif
 #endif
 
     // Skylight
 
-    lighting += getSkyLighting(
+    light += getSkyLight(
         material,
         lightLevels,
         indirectAo,
         ambientSss,
-        directionalLighting,
+        directionalLight,
         skyIrradiance
     );
 
     // Blocklight
 
-    lighting += getBlockLighting(
+    light += getBlockLight(
         scenePos,
         flatNormal,
         lightLevels,
         indirectAo,
-        directionalLighting
+        directionalLight
     );
 
 
-    lighting += material.emission * emissionScale;
+    light += material.emission * emissionScale;
 
 #if defined WORLD_OVERWORLD
 
 
-    lighting += 0.15 * caveLightingI * directionalLighting * indirectAo
+    light += 0.15 * caveLightI * directionalLight * indirectAo
         * (1.0 - lightLevels.y * lightLevels.y)
         * (1.0 - 0.7 * darknessFactor);
-    lighting += nightVision * nightVisionScale * directionalLighting * indirectAo;
+    light += nightVision * nightVisionScale * directionalLight * indirectAo;
 #endif
 
-    return max0(lighting) * material.albedo * rcpPi
+    return max0(light) * material.albedo * rcpPi
         * mix(1.0, metalDiffuseAmount, float(material.isMetal));
 }
 
