@@ -36,10 +36,9 @@ Where a file or other work contains both Luster-original material and third-part
 
 Luster Shaders also contains or references other third-party material. Separate licenses and notices are retained in their respective locations and remain independent of this license, including:
 
-* `shaders/include/post_processing/aces/license.md` — Academy Color Encoding System (ACES) license.
-* `shaders/include/post_processing/agx/license.md` — AGX and related third-party licensing information.
-* `shaders/include/post_processing/hejl_2015/LICENSE.md` — Hejl 2015 tone mapping license.
-* `shaders/include/post_processing/lottes/LICENSE.md` — Lottes tone mapping license.
+* `shaders/lib/academy/license.md` — Academy Color Encoding System (ACES) license.
+* `shaders/program/grade/grade.fsh` — Lottes and Hejl 2015 tone-mapping operators via the GLSL port from Damien Seguin's `shaders-tone-map` (MIT license, embedded inline).
+* `shaders/lib/util/bicubic.glsl` — efficient bicubic filtering by MJP (MIT license, embedded inline).
 
 Additional third-party contributions, techniques, references, translations, textures, images, and other material identified in the Luster documentation, source comments, acknowledgements, or other notices remain subject to their respective rights and licenses. This includes third-party contributions credited in the Luster README.
 
@@ -82,7 +81,9 @@ PHOTON SHADERS IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 
 The following licenses are intentionally maintained separately in their respective directories and are not replaced or superseded by the Luster Shaders License Agreement:
 
-* `shaders/include/post_processing/aces/license.md`
-* `shaders/include/post_processing/agx/license.md`
-* `shaders/include/post_processing/hejl_2015/LICENSE.md`
-* `shaders/include/post_processing/lottes/LICENSE.md`
+* `shaders/lib/academy/license.md` — Academy Color Encoding System (ACES) license.
+
+Other third-party material carries its license text embedded inline alongside the code it originates from in the corresponding shader file, which is not replaced or superseded by the Luster Shaders License Agreement either:
+
+* `shaders/program/grade/grade.fsh` — Lottes and Hejl 2015 tone-mapping operators via the GLSL port from Damien Seguin's `shaders-tone-map` (MIT license).
+* `shaders/lib/util/bicubic.glsl` — efficient bicubic filtering by MJP (MIT license).
