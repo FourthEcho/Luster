@@ -79,10 +79,9 @@ uniform bool worldAgeChanged;
 
 #define TEMPORAL_REPROJECTION
 
-#include "/lib/misc/lodModSupport.glsl"
+#include "/lib/lodMod.glsl"
 #include "/lib/util/bicubic.glsl"
 #include "/lib/util/checkerboard.glsl"
-#include "/lib/util/dithering.glsl"
 #include "/lib/util/encoding.glsl"
 #include "/lib/util/fastMath.glsl"
 #include "/lib/util/geometry.glsl"
@@ -95,20 +94,6 @@ vec4 minOf(vec4 a, vec4 b, vec4 c, vec4 d, vec4 e) {
 
 vec4 maxOf(vec4 a, vec4 b, vec4 c, vec4 d, vec4 e) {
     return max(a, max(b, max(c, max(d, e))));
-}
-
-vec4 smoothFilter(sampler2D sampler, vec2 coord) {
-    // from https://iquilezles.org/www/articles/texture/texture.htm
-    vec2 res = vec2(textureSize(sampler, 0));
-
-    coord = coord * res + 0.5;
-
-    vec2 i, f = modf(coord, i);
-    f = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
-    coord = i + f;
-
-    coord = (coord - 0.5) / res;
-    return texture(sampler, coord);
 }
 
 float textureMin4x4(sampler2D s, vec2 coord) {

@@ -19,7 +19,7 @@
 #if !defined INCLUDE_UTILITY_SPACE_CONVERSION
 #define INCLUDE_UTILITY_SPACE_CONVERSION
 
-#include "/lib/misc/lodModSupport.glsl"
+#include "/lib/lodMod.glsl"
 
 
 // https://wiki.shaderlabs.org/wiki/Shader_tricks#Linearizing_depth

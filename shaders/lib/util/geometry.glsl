@@ -24,13 +24,7 @@
 // Sphere/AABB intersection methods from https://www.scratchapixel.com
 
 // Returns +-1
-vec3 signNonZero(vec3 v) {
-    return vec3(
-        v.x >= 0.0 ? 1.0 : -1.0,
-        v.y >= 0.0 ? 1.0 : -1.0,
-        v.z >= 0.0 ? 1.0 : -1.0
-    );
-}
+
 
 // from https://ebruneton.github.io/precomputedAtmosphericScattering/
 vec2 intersectSphere(float mu, float r, float sphereRadius) {

@@ -504,11 +504,10 @@ uniform float lightningFlashIris;
 const float lightningFlashIntensity = 4.0;
 
 #endif // INCLUDE_MISC_LIGHTNING_FLASH
-#include "/lib/misc/lodModSupport.glsl"
+#include "/lib/lodMod.glsl"
 #include "/lib/util/color.glsl"
 #include "/lib/util/encoding.glsl"
 #include "/lib/util/fastMath.glsl"
-#include "/lib/util/sampling.glsl"
 #include "/lib/util/spaceConversion.glsl"
 
 // Inlined from /lib/misc/refraction.glsl (single consumer: applyRefraction
@@ -949,7 +948,7 @@ vec3 purkinjeShiftTransform(vec3 rgb, vec2 lightLevels) {
 }
 
 #endif // INCLUDE_POST_PURKINJE_SHIFT
-#include "/lib/material/water.glsl"
+#include "/lib/surface/water.glsl"
 
 vec4 drawDistantWater(
     vec3 positionScreen,
@@ -1077,6 +1076,7 @@ vec4 drawDistantWater(
 #endif // INCLUDE_MISC_DISTANT_WATER
 #endif
 #include "/lib/atmos/projection.glsl"
+#include "/lib/util/random.glsl"
 
 vec3 blendLayersWithFog(
     vec3 backgroundColor,

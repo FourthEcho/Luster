@@ -65,10 +65,9 @@ uniform vec2 taaOffset;
 // ------------
 
 #define TEMPORAL_REPROJECTION
-#include "/lib/misc/lodModSupport.glsl"
+#include "/lib/lodMod.glsl"
 #include "/lib/util/bicubic.glsl"
 #include "/lib/util/color.glsl"
-#include "/lib/util/dithering.glsl"
 #include "/lib/util/encoding.glsl"
 #include "/lib/util/fastMath.glsl"
 #include "/lib/util/random.glsl"
@@ -94,7 +93,6 @@ vec3 slerp(vec3 v0, vec3 v1, float t) {
 #define INCLUDE_LIGHT_INDIRECT_LIGHT_SSAO
 
 #include "/lib/util/fastMath.glsl"
-#include "/lib/util/random.glsl"
 #include "/lib/util/spaceConversion.glsl"
 
 // DSSAO paired-depth sampling adapted from the BSL-derived method credited
@@ -183,7 +181,7 @@ float computeDssao(
 #if !defined INCLUDE_LIGHT_INDIRECT_LIGHT_GTAO
 #define INCLUDE_LIGHT_INDIRECT_LIGHT_GTAO
 
-#include "/lib/misc/lodModSupport.glsl"
+#include "/lib/lodMod.glsl"
 #include "/lib/util/fastMath.glsl"
 #include "/lib/util/spaceConversion.glsl"
 

@@ -16,8 +16,8 @@
 ====================================================================================================
 */
 
-#if !defined INCLUDE_MATERIAL_RAIN_RIPPLES
-#define INCLUDE_MATERIAL_RAIN_RIPPLES
+#if !defined INCLUDE_SURFACE_RAIN_RIPPLES
+#define INCLUDE_SURFACE_RAIN_RIPPLES
 
 #ifdef rainRipples
 // Use a rain_ prefix to avoid collisions with other hash helpers.
@@ -73,11 +73,11 @@ vec3 rainRippleNormal(vec2 coord, float time) {
 }
 #endif // rainRipples
 
-#endif // INCLUDE_MATERIAL_RAIN_RIPPLES
+#endif // INCLUDE_SURFACE_RAIN_RIPPLES
 
 #ifdef LUSTER_INCLUDE_RAIN_PUDDLES
-#if !defined INCLUDE_MATERIAL_RAIN_PUDDLES
-#define INCLUDE_MATERIAL_RAIN_PUDDLES
+#if !defined INCLUDE_SURFACE_RAIN_PUDDLES
+#define INCLUDE_SURFACE_RAIN_PUDDLES
 
 
 float getRippleHeight(vec2 coord) {
@@ -231,5 +231,5 @@ bool getRainPuddles(
     return true;
 }
 
-#endif // INCLUDE_MATERIAL_RAIN_PUDDLES
+#endif // INCLUDE_SURFACE_RAIN_PUDDLES
 #endif // LUSTER_INCLUDE_RAIN_PUDDLES

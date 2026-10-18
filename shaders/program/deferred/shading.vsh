@@ -105,7 +105,6 @@ uniform float timeMidnight;
 
 #include "/lib/util/bicubic.glsl"
 #include "/lib/util/random.glsl"
-#include "/lib/util/sampling.glsl"
 #if !defined INCLUDE_LIGHT_AMBIENT_H_BASIS_SKYLIGHT
 #define INCLUDE_LIGHT_AMBIENT_H_BASIS_SKYLIGHT
 

@@ -152,9 +152,9 @@ uniform vec4 entityColor;
 #include "/lib/brdf/common.glsl"
 #include "/lib/light/pcss.glsl"
 #include "/lib/brdf/specular.glsl"
-#include "/lib/misc/lodModSupport.glsl"
-#include "/lib/material/material.glsl"
-#include "/lib/material/water.glsl"
+#include "/lib/lodMod.glsl"
+#include "/lib/brdf/material.glsl"
+#include "/lib/surface/water.glsl"
 #include "/lib/util/color.glsl"
 #include "/lib/util/encoding.glsl"
 #include "/lib/util/fastMath.glsl"
@@ -231,6 +231,7 @@ float getCloudShadows(sampler2D cloudShadowMap, vec3 scenePos) {
 #include "/lib/atmos/sky/clouds/cirrus.glsl"
 #include "/lib/atmos/sky/clouds/cumulus.glsl"
 #include "/lib/atmos/sky/clouds/cumulusCongestus.glsl"
+#include "/lib/util/random.glsl"
 
 vec2 renderCloudShadowMap(vec2 uv) {
     // Transform position from scene-space to clouds-space

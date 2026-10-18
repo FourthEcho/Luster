@@ -20,7 +20,7 @@
 #define INCLUDE_FOG_AIR_FOG_ANALYTIC
 
 #include "/lib/atmos/fog/overworld/constants.glsl"
-#include "/lib/misc/lodModSupport.glsl"
+#include "/lib/lodMod.glsl"
 #include "/lib/atmos/atmosphere.glsl"
 #include "/lib/util/phaseFunctions.glsl"
 

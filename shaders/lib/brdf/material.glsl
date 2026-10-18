@@ -16,8 +16,8 @@
 ====================================================================================================
 */
 
-#if !defined INCLUDE_MATERIAL_CORE
-#define INCLUDE_MATERIAL_CORE
+#if !defined INCLUDE_BRDF_MATERIAL
+#define INCLUDE_BRDF_MATERIAL
 
 #include "/lib/academy/matrices.glsl"
 #include "/lib/util/color.glsl"
@@ -975,4 +975,4 @@ Material materialFrom(
     return material;
 }
 
-#endif // INCLUDE_MATERIAL_CORE
+#endif // INCLUDE_BRDF_MATERIAL

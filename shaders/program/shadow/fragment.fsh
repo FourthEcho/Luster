@@ -74,13 +74,13 @@ uniform float rainStrength;
 uniform vec2 taaOffset;
 uniform vec3 lightDir;
 
-#include "/lib/material/water.glsl"
+#include "/lib/surface/water.glsl"
 #include "/lib/atmos/fog/water/waterAbsorption.glsl"
 #include "/lib/util/color.glsl"
 #include "/lib/util/encoding.glsl"
 
 #if defined pom && defined pomDepthWrite && !defined COLORWHEEL && (defined PROGRAM_SHADOW_SOLID || defined PROGRAM_SHADOW_CUTOUT)
-#include "/lib/material/parallax.glsl"
+#include "/lib/surface/parallax.glsl"
 #endif
 
 const float airN = 1.000293; // for 0°C and 1 atm

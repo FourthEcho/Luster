@@ -97,7 +97,7 @@ uniform int isEyeInWater;
 #define TRACE_PROJ combinedProjectionMatrix
 #define TRACE_PROJ_INV combinedProjectionMatrixInverse
 
-#include "/lib/misc/lodModSupport.glsl"
+#include "/lib/lodMod.glsl"
 #if !defined INCLUDE_LIGHT_INDIRECT_LIGHT_SSPT
 #define INCLUDE_LIGHT_INDIRECT_LIGHT_SSPT
 
@@ -732,13 +732,13 @@ vec3 getHandheldLight(vec3 scenePos, float ao) {
 
 #undef LUSTER_INCLUDE_CLOUD_SHADOWS
 #include "/lib/light/distortion.glsl"
-#include "/lib/misc/lodModSupport.glsl"
+#include "/lib/lodMod.glsl"
 #include "/lib/util/color.glsl"
 #include "/lib/util/encoding.glsl"
 #include "/lib/util/fastMath.glsl"
 #include "/lib/util/random.glsl"
 #include "/lib/util/spaceConversion.glsl"
-#include "/lib/material/material.glsl"
+#include "/lib/brdf/material.glsl"
 #include "/lib/atmos/projection.glsl"
 
 

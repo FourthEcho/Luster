@@ -24,9 +24,7 @@
 #include "/lib/light/common.glsl"
 #include "/lib/light/distortion.glsl"
 #include "/lib/util/color.glsl"
-#include "/lib/util/dithering.glsl"
 #include "/lib/util/random.glsl"
-#include "/lib/util/sampling.glsl"
 
 const ivec2[9] blurKernelOffsets3x3 = ivec2[9](
     ivec2(-1, -1),

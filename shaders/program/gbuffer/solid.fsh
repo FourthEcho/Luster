@@ -130,7 +130,7 @@ uniform vec4 entityColor;
 #endif
 
 #if defined PROGRAM_GBUFFERS_TERRAIN && defined pom
-#include "/lib/material/parallax.glsl"
+#include "/lib/surface/parallax.glsl"
 #endif
 
 #ifdef directionalLightmaps
@@ -483,7 +483,6 @@ uint fixMaterialMask() {
     return materialMask;
 }
 #endif
-#include "/lib/util/dithering.glsl"
 #include "/lib/util/encoding.glsl"
 #include "/lib/util/fastMath.glsl"
 #include "/lib/util/random.glsl"

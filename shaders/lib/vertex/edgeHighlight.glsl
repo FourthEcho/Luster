@@ -16,8 +16,8 @@
 ====================================================================================================
 */
 
-#if !defined INCLUDE_MISC_EDGE_HIGHLIGHT
-#define INCLUDE_MISC_EDGE_HIGHLIGHT
+#if !defined INCLUDE_VERTEX_EDGE_HIGHLIGHT
+#define INCLUDE_VERTEX_EDGE_HIGHLIGHT
 
 #include "/lib/util/encoding.glsl"
 #include "/lib/util/spaceConversion.glsl"
@@ -132,4 +132,4 @@ float getEdgeHighlight(
     return clamp01(float(hasEdgeHighlight(worldNormal)) * highlight);
 }
 
-#endif // INCLUDE_MISC_EDGE_HIGHLIGHT
+#endif // INCLUDE_VERTEX_EDGE_HIGHLIGHT

@@ -26,7 +26,6 @@
 #include "/lib/util/geometry.glsl"
 #include "/lib/util/phaseFunctions.glsl"
 #include "/lib/util/random.glsl"
-#include "/lib/util/sampling.glsl"
 
 uniform float dayFactor;
 

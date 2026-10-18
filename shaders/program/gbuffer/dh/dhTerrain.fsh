@@ -42,8 +42,8 @@ flat in uint materialMask;
 uniform vec2 viewPixelSize;
 uniform int frameCounter;
 
-#include "/lib/util/dithering.glsl"
 #include "/lib/util/encoding.glsl"
+#include "/lib/util/random.glsl"
 
 // ------------
 //   Uniforms

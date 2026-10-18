@@ -23,7 +23,7 @@
 #define LUSTER_INCLUDE_BLOCKLIGHT_COLOR
 #include "/lib/light/colors.glsl"
 #undef LUSTER_INCLUDE_BLOCKLIGHT_COLOR
-#include "/lib/material/material.glsl"
+#include "/lib/brdf/material.glsl"
 #include "/lib/util/fastMath.glsl"
 #include "/lib/util/phaseFunctions.glsl"
 #ifdef handheldLight

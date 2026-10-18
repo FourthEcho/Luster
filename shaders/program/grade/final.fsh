@@ -38,7 +38,7 @@ uniform float frameTimeCounter;
 
 #include "/lib/util/bicubic.glsl"
 #include "/lib/util/color.glsl"
-#include "/lib/util/dithering.glsl"
+#include "/lib/util/random.glsl"
 /*
 --------------------------------------------------------------------------------
 
@@ -446,7 +446,7 @@ uniform vec2 taaOffset;
 uniform float near;
 uniform float far;
 
-#include "/lib/misc/lodModSupport.glsl"
+#include "/lib/lodMod.glsl"
 #include "/lib/util/spaceConversion.glsl"
 #endif
 

@@ -22,6 +22,7 @@
 #include "/lib/atmos/sky/clouds/core/constants.glsl"
 #include "/lib/atmos/sky/clouds/core/params.glsl"
 #include "/lib/weather/core.glsl"
+#include "/lib/util/random.glsl"
 
 float cloudsCumulusCongestusBlend(Weather weather, vec2 l0Coverage) {
     float temperatureWeight = linearStep(0.5, 1.0, weather.temperature);

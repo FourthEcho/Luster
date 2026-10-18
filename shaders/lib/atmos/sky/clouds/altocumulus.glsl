@@ -22,6 +22,7 @@
 // 2nd layer: volumetric altocumulus clouds
 
 #include "/lib/atmos/sky/clouds/core/common.glsl"
+#include "/lib/util/random.glsl"
 
 // altitudeFraction := 0 at the bottom of the cloud layer and 1 at the top
 float cloudsAltocumulusAltitudeShaping(

@@ -23,14 +23,12 @@
 #define LUSTER_INCLUDE_MOON_PHASE_COLOR
 #include "/lib/light/colors.glsl"
 #undef LUSTER_INCLUDE_MOON_PHASE_COLOR
-#include "/lib/misc/lodModSupport.glsl"
+#include "/lib/lodMod.glsl"
 #include "/lib/util/geometry.glsl"
 #include "/lib/atmos/projection.glsl"
-#include "/lib/material/material.glsl"
+#include "/lib/brdf/material.glsl"
 #include "/lib/util/bicubic.glsl"
-#include "/lib/util/dithering.glsl"
 #include "/lib/util/random.glsl"
-#include "/lib/util/sampling.glsl"
 #include "/lib/util/spaceConversion.glsl"
 
 #if defined WORLD_OVERWORLD

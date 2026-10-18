@@ -22,6 +22,7 @@
 // Alternative 1st layer: distant cumulus congestus clouds
 
 #include "/lib/atmos/sky/clouds/core/common.glsl"
+#include "/lib/util/random.glsl"
 
 const float cloudsCumulusCongestusRadius
     = planetRadius + cloudsCumulusCongestusAltitude;

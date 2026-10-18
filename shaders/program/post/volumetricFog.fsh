@@ -117,8 +117,7 @@ uniform float timeMidnight;
 
 #include "/lib/atmos/fog/water/waterFog.glsl"
 #include "/lib/atmos/fog/netherFog.glsl"
-#include "/lib/misc/lodModSupport.glsl"
-#include "/lib/util/dithering.glsl"
+#include "/lib/lodMod.glsl"
 #include "/lib/util/encoding.glsl"
 #include "/lib/util/random.glsl"
 #include "/lib/util/spaceConversion.glsl"

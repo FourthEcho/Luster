@@ -23,7 +23,7 @@
 #include "/lib/light/colors.glsl"
 #undef LUSTER_INCLUDE_BLOCKLIGHT_COLOR
 #include "/lib/atmos/fog/water/waterAbsorption.glsl"
-#include "/lib/misc/lodModSupport.glsl"
+#include "/lib/lodMod.glsl"
 #include "/lib/atmos/projection.glsl"
 #include "/lib/util/bicubic.glsl"
 #include "/lib/util/color.glsl"

@@ -16,8 +16,8 @@
 ====================================================================================================
 */
 
-#if !defined INCLUDE_MATERIAL_PARALLAX
-#define INCLUDE_MATERIAL_PARALLAX
+#if !defined INCLUDE_SURFACE_PARALLAX
+#define INCLUDE_SURFACE_PARALLAX
 
 vec2 getUvFromLocalCoord(vec2 localCoord) {
     return atlasTileOffset + atlasTileScale * fract(localCoord);
@@ -161,4 +161,4 @@ bool getParallaxShadow(
     return false;
 }
 
-#endif // INCLUDE_MATERIAL_PARALLAX
+#endif // INCLUDE_SURFACE_PARALLAX

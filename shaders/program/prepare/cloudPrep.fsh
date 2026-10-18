@@ -402,7 +402,7 @@ vec3 getHandheldLight(vec3 scenePos, float ao) {
 #endif
 
 #undef LUSTER_INCLUDE_CLOUD_SHADOWS
-#include "/lib/misc/lodModSupport.glsl"
+#include "/lib/lodMod.glsl"
 #include "/lib/atmos/sky/clouds/core/coverageMap.glsl"
 
 void main() {

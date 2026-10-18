@@ -16,11 +16,11 @@
 ====================================================================================================
 */
 
-#if !defined INCLUDE_MATERIAL_WATER
-#define INCLUDE_MATERIAL_WATER
+#if !defined INCLUDE_SURFACE_WATER
+#define INCLUDE_SURFACE_WATER
 
 #include "/lib/util/spaceConversion.glsl"
-#include "/lib/material/rain.glsl"
+#include "/lib/surface/rain.glsl"
 
 float gerstnerWave(
     vec2 coord,
@@ -247,7 +247,7 @@ vec2 getWaterParallaxCoord(
 
 
 #ifdef LUSTER_INCLUDE_WATER_SURFACE_MATERIAL
-#include "/lib/material/material.glsl"
+#include "/lib/brdf/material.glsl"
 #include "/lib/atmos/fog/simpleFog.glsl"
 #include "/lib/util/color.glsl"
 Material getWaterMaterial(
@@ -355,4 +355,4 @@ vec4 waterAbsorptionApprox(
 }
 #endif
 
-#endif // INCLUDE_MATERIAL_WATER
+#endif // INCLUDE_SURFACE_WATER

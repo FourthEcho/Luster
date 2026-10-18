@@ -405,7 +405,7 @@ float mistShadowOd(vec3 worldPos, float localDensity) {
 
 #endif // mistMode != mistModeOff
 #include "/lib/light/distortion.glsl"
-#include "/lib/misc/lodModSupport.glsl"
+#include "/lib/lodMod.glsl"
 #include "/lib/atmos/atmosphere.glsl"
 #include "/lib/util/encoding.glsl"
 #include "/lib/util/random.glsl"

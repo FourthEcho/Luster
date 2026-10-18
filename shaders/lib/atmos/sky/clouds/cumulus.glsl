@@ -23,6 +23,7 @@
 
 #include "/lib/atmos/sky/clouds/core/common.glsl"
 #include "/lib/atmos/sky/clouds/core/coverageMap.glsl"
+#include "/lib/util/random.glsl"
 
 // altitudeFraction := 0 at the bottom of the cloud layer and 1 at the top
 float cloudsCumulusAltitudeShaping(float density, float altitudeFraction) {

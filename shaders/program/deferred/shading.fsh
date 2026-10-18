@@ -243,7 +243,6 @@ vec3 evaluateHBasisIrradiance(vec3 h[6], vec3 normal) {
 
 #include "/lib/light/common.glsl"
 #include "/lib/util/random.glsl"
-#include "/lib/util/sampling.glsl"
 #include "/lib/util/spaceConversion.glsl"
 
 bool raymarchShadow(
@@ -434,7 +433,7 @@ float getScreenSpaceShadows(
 #endif // INCLUDE_LIGHTING_DIRECT_LIGHTING_SSRT
 
 #include "/lib/brdf/specular.glsl"
-#include "/lib/misc/lodModSupport.glsl"
+#include "/lib/lodMod.glsl"
 #if !defined INCLUDE_POST_PURKINJE_SHIFT
 #define INCLUDE_POST_PURKINJE_SHIFT
 
@@ -486,10 +485,10 @@ vec3 purkinjeShiftTransform(vec3 rgb, vec2 lightLevels) {
 
 #endif // INCLUDE_POST_PURKINJE_SHIFT
 #include "/lib/atmos/sky/sky.glsl"
-#include "/lib/misc/edgeHighlight.glsl"
-#include "/lib/material/material.glsl"
+#include "/lib/vertex/edgeHighlight.glsl"
+#include "/lib/brdf/material.glsl"
 #define LUSTER_INCLUDE_RAIN_PUDDLES
-#include "/lib/material/rain.glsl"
+#include "/lib/surface/rain.glsl"
 #undef LUSTER_INCLUDE_RAIN_PUDDLES
 #include "/lib/util/bicubic.glsl"
 #include "/lib/util/spaceConversion.glsl"
@@ -577,10 +576,8 @@ vec4 bilateralUpscaleResolve(
 
 #include "/lib/atmos/atmosphere.glsl"
 #include "/lib/util/color.glsl"
-#include "/lib/util/dithering.glsl"
 #include "/lib/util/fastMath.glsl"
 #include "/lib/util/phaseFunctions.glsl"
-#include "/lib/util/random.glsl"
 
 // Blocky volumetric clouds
 

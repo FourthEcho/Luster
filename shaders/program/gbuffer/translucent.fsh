@@ -485,7 +485,7 @@ vec3 getHandheldLight(vec3 scenePos, float ao) {
 #include "/lib/brdf/common.glsl"
 #include "/lib/light/pcss.glsl"
 #include "/lib/brdf/specular.glsl"
-#include "/lib/misc/lodModSupport.glsl"
+#include "/lib/lodMod.glsl"
 #if !defined INCLUDE_POST_PURKINJE_SHIFT
 #define INCLUDE_POST_PURKINJE_SHIFT
 
@@ -536,7 +536,7 @@ vec3 purkinjeShiftTransform(vec3 rgb, vec2 lightLevels) {
 }
 
 #endif // INCLUDE_POST_PURKINJE_SHIFT
-#include "/lib/material/material.glsl"
+#include "/lib/brdf/material.glsl"
 #include "/lib/util/color.glsl"
 #include "/lib/util/encoding.glsl"
 #include "/lib/util/fastMath.glsl"
@@ -867,7 +867,7 @@ const float lodBias = log2(taauViewportScale);
 #if defined PROGRAM_GBUFFERS_WATER
 #define LUSTER_INCLUDE_WATER_SURFACE_MATERIAL
 #endif
-#include "/lib/material/water.glsl"
+#include "/lib/surface/water.glsl"
 #undef LUSTER_INCLUDE_WATER_SURFACE_MATERIAL
 
 // Fancy nether portal effect (needs positionTangent/atlas varyings in the
@@ -879,7 +879,7 @@ const float lodBias = log2(taauViewportScale);
 // EminGT Thanks to Emin for letting me use his idea!
 
 #include "/lib/util/color.glsl"
-#include "/lib/util/dithering.glsl"
+#include "/lib/util/random.glsl"
 
 #if defined PROGRAM_GBUFFERS_WATER
 vec2 getUvFromLocalCoord(vec2 localCoord) {

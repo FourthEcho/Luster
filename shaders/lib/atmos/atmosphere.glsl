@@ -133,9 +133,6 @@ vec3 atmosphereMiePhaseMoon(float nu) {
 
 // Planet bounce light
 
-
-// Average reflectance of Minecraft-typical ground cover (grass/dirt),
-// tinted slightly green the way real vegetated terrain is
 const vec3 planetBounceAlbedo = vec3(0.30, 0.33, 0.22);
 
 vec3 atmospherePlanetBounce(
@@ -149,8 +146,6 @@ vec3 atmospherePlanetBounce(
 
     const vec3 groundNormal = vec3(0.0, 1.0, 0.0);
 
-    // Wet ground reflects less light back up, and what it does reflect
-    // is less saturated (thin water film flattens the diffuse albedo)
     vec3 albedo = mix(
         planetBounceAlbedo,
         planetBounceAlbedo * vec3(0.4),
