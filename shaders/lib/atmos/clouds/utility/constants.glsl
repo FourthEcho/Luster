@@ -16,10 +16,10 @@
 ====================================================================================================
 */
 
-#if !defined INCLUDE_SKY_CLOUDS_CONSTANTS
-#define INCLUDE_SKY_CLOUDS_CONSTANTS
+#if !defined INCLUDE_ATMOS_CLOUDS_CORE_CONSTANTS
+#define INCLUDE_ATMOS_CLOUDS_CORE_CONSTANTS
 
-#include "/lib/atmos/atmosphere.glsl"
+#include "/lib/atmos/air/atmosphere.glsl"
 
 const float cloudsCumulusRadius = planetRadius + cloudsCumulusAltitude;
 const float cumulusLayerThickness
@@ -46,4 +46,4 @@ const float cloudsNoctilucentAltitude = 80000.0;
 const float cloudsNoctilucentRadius
     = planetRadius + cloudsNoctilucentAltitude;
 
-#endif // INCLUDE_SKY_CLOUDS_CONSTANTS
+#endif // INCLUDE_ATMOS_CLOUDS_CORE_CONSTANTS

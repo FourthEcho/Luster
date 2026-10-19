@@ -37,10 +37,10 @@ flat in mat2x3 auroraColors;
 
 flat in float rainbowAmount;
 
-#include "/lib/atmos/sky/clouds/core/params.glsl"
+#include "/lib/atmos/clouds/utility/params.glsl"
 flat in CloudsParams cloudsParams;
 
-#include "/lib/atmos/fog/overworld/params.glsl"
+#include "/lib/atmos/air/overworld/params.glsl"
 flat in OverworldFogParams fogParams;
 #endif
 
@@ -127,12 +127,12 @@ uniform float biomeMaySnow;
 #endif
 
 #if defined WORLD_OVERWORLD
-#include "/lib/atmos/fog/overworld/analytic.glsl"
-#include "/lib/atmos/sky/aurora.glsl"
+#include "/lib/atmos/air/overworld/analytic.glsl"
+#include "/lib/atmos/aurora.glsl"
 #endif
 
 #include "/lib/atmos/projection.glsl"
-#include "/lib/atmos/sky/sky.glsl"
+#include "/lib/atmos/sky.glsl"
 
 void main() {
     ivec2 texel = ivec2(gl_FragCoord.xy);

@@ -81,7 +81,7 @@ flat in vec3 ambientColor;
 flat in vec3 lightColor;
 
 #ifdef WORLD_OVERWORLD
-#include "/lib/atmos/fog/overworld/params.glsl"
+#include "/lib/atmos/air/overworld/params.glsl"
 flat in OverworldFogParams fogParams;
 #endif
 
@@ -173,14 +173,14 @@ uniform float timeMidnight;
 #define SSRT_LOD
 #define TEMPORAL_REPROJECTION
 
-#include "/lib/atmos/fog/simpleFog.glsl"
+#include "/lib/atmos/air/simple.glsl"
 #define LUSTER_INCLUDE_CLOUD_SHADOWS
 #if defined(LUSTER_INCLUDE_CLOUD_SHADOWS)
 // Cloud-shadow projection and sampling.
 #if !defined INCLUDE_LIGHT_CLOUD_SHADOWS
 #define INCLUDE_LIGHT_CLOUD_SHADOWS
 
-#include "/lib/atmos/sky/clouds/core/constants.glsl"
+#include "/lib/atmos/clouds/utility/constants.glsl"
 #include "/lib/util/bicubic.glsl"
 
 const ivec2 cloudShadowRes = ivec2(512);
@@ -240,10 +240,10 @@ float getCloudShadows(sampler2D cloudShadowMap, vec3 scenePos) {
 }
 
 #if defined PROGRAM_PREPARE && defined cloudShadows
-#include "/lib/atmos/sky/clouds/altocumulus.glsl"
-#include "/lib/atmos/sky/clouds/cirrus.glsl"
-#include "/lib/atmos/sky/clouds/cumulus.glsl"
-#include "/lib/atmos/sky/clouds/cumulusCongestus.glsl"
+#include "/lib/atmos/clouds/altocumulus.glsl"
+#include "/lib/atmos/clouds/cirrus.glsl"
+#include "/lib/atmos/clouds/cumulus.glsl"
+#include "/lib/atmos/clouds/cumulusCongestus.glsl"
 
 vec2 renderCloudShadowMap(vec2 uv) {
     // Transform position from scene-space to clouds-space
@@ -504,7 +504,7 @@ uniform float lightningFlashIris;
 const float lightningFlashIntensity = 4.0;
 
 #endif // INCLUDE_MISC_LIGHTNING_FLASH
-#include "/lib/lodMod.glsl"
+#include "/lib/util/lodMod.glsl"
 #include "/lib/util/color.glsl"
 #include "/lib/util/encoding.glsl"
 #include "/lib/util/fastMath.glsl"
@@ -573,8 +573,8 @@ vec3 applyRefraction(
 }
 
 #ifdef WORLD_OVERWORLD
-#include "/lib/atmos/fog/overworld/analytic.glsl"
-#include "/lib/atmos/sky/clouds/core/sampling.glsl"
+#include "/lib/atmos/air/overworld/analytic.glsl"
+#include "/lib/atmos/clouds/utility/sampling.glsl"
 
 #ifdef LOD_MOD_ACTIVE
 #define LUSTER_INCLUDE_CLOUD_SHADOWS
@@ -583,7 +583,7 @@ vec3 applyRefraction(
 #if !defined INCLUDE_LIGHT_CLOUD_SHADOWS
 #define INCLUDE_LIGHT_CLOUD_SHADOWS
 
-#include "/lib/atmos/sky/clouds/core/constants.glsl"
+#include "/lib/atmos/clouds/utility/constants.glsl"
 #include "/lib/util/bicubic.glsl"
 
 const ivec2 cloudShadowRes = ivec2(512);
@@ -643,10 +643,10 @@ float getCloudShadows(sampler2D cloudShadowMap, vec3 scenePos) {
 }
 
 #if defined PROGRAM_PREPARE && defined cloudShadows
-#include "/lib/atmos/sky/clouds/altocumulus.glsl"
-#include "/lib/atmos/sky/clouds/cirrus.glsl"
-#include "/lib/atmos/sky/clouds/cumulus.glsl"
-#include "/lib/atmos/sky/clouds/cumulusCongestus.glsl"
+#include "/lib/atmos/clouds/altocumulus.glsl"
+#include "/lib/atmos/clouds/cirrus.glsl"
+#include "/lib/atmos/clouds/cumulus.glsl"
+#include "/lib/atmos/clouds/cumulusCongestus.glsl"
 
 vec2 renderCloudShadowMap(vec2 uv) {
     // Transform position from scene-space to clouds-space

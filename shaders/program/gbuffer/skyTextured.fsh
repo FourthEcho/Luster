@@ -47,7 +47,7 @@ uniform vec3 viewSunDir;
 uniform float desertSandstormWeather;
 uniform float rainStrength;
 
-#include "/lib/atmos/atmosphere.glsl"
+#include "/lib/atmos/air/atmosphere.glsl"
 #include "/lib/util/color.glsl"
 
 const float vanillaSunLuminance = 10.0;

@@ -16,14 +16,46 @@
 ====================================================================================================
 */
 
-#if !defined INCLUDE_FOG_SIMPLE_FOG
-#define INCLUDE_FOG_SIMPLE_FOG
+#if !defined INCLUDE_ATMOS_AIR_SIMPLE
+#define INCLUDE_ATMOS_AIR_SIMPLE
 
 #define LUSTER_INCLUDE_BLOCKLIGHT_COLOR
 #include "/lib/light/colors.glsl"
 #undef LUSTER_INCLUDE_BLOCKLIGHT_COLOR
-#include "/lib/atmos/fog/water/waterAbsorption.glsl"
-#include "/lib/lodMod.glsl"
+
+// waterAbsorption.glsl (inlined: consumers air/simple + shadow fragment)
+
+#if !defined INCLUDE_FOG_WATER_ABSORPTION
+#define INCLUDE_FOG_WATER_ABSORPTION
+
+#include "/lib/util/color.glsl"
+
+vec3 biomeWaterCoeff(vec3 biomeWaterTint) {
+    const float densityScale = 0.15;
+    const float biomeColorContribution = 0.33;
+
+    const vec3 baseAbsorptionCoeff
+        = vec3(waterAbsorptionR, waterAbsorptionG, waterAbsorptionB)
+        * rec709ToWorkingColor;
+    const vec3 forestAbsorptionCoeff
+        = -densityScale * log(vec3(0.1245, 0.1797, 0.7108));
+
+#ifdef biomeWaterColor
+    vec3 biomeAbsorptionCoeff = -densityScale * log(biomeWaterTint + eps)
+        - forestAbsorptionCoeff;
+
+    return max0(
+        baseAbsorptionCoeff
+        + biomeAbsorptionCoeff * biomeColorContribution
+    );
+#else
+    return baseAbsorptionCoeff;
+#endif
+}
+
+#endif // INCLUDE_FOG_WATER_ABSORPTION
+
+#include "/lib/util/lodMod.glsl"
 #include "/lib/atmos/projection.glsl"
 #include "/lib/util/bicubic.glsl"
 #include "/lib/util/color.glsl"
@@ -220,4 +252,4 @@ mat2x3 waterFogSimple(
     return mat2x3(scattering, transmittance);
 }
 
-#endif // INCLUDE_FOG_SIMPLE_FOG
+#endif // INCLUDE_ATMOS_AIR_SIMPLE

@@ -33,7 +33,7 @@
 #if !defined INCLUDE_LIGHT_CLOUD_SHADOWS
 #define INCLUDE_LIGHT_CLOUD_SHADOWS
 
-#include "/lib/atmos/sky/clouds/core/constants.glsl"
+#include "/lib/atmos/clouds/utility/constants.glsl"
 #include "/lib/util/bicubic.glsl"
 
 const ivec2 cloudShadowRes = ivec2(512);
@@ -93,10 +93,10 @@ float getCloudShadows(sampler2D cloudShadowMap, vec3 scenePos) {
 }
 
 #if defined PROGRAM_PREPARE && defined cloudShadows
-#include "/lib/atmos/sky/clouds/altocumulus.glsl"
-#include "/lib/atmos/sky/clouds/cirrus.glsl"
-#include "/lib/atmos/sky/clouds/cumulus.glsl"
-#include "/lib/atmos/sky/clouds/cumulusCongestus.glsl"
+#include "/lib/atmos/clouds/altocumulus.glsl"
+#include "/lib/atmos/clouds/cirrus.glsl"
+#include "/lib/atmos/clouds/cumulus.glsl"
+#include "/lib/atmos/clouds/cumulusCongestus.glsl"
 
 vec2 renderCloudShadowMap(vec2 uv) {
     // Transform position from scene-space to clouds-space

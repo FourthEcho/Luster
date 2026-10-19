@@ -33,10 +33,10 @@ flat out mat2x3 auroraColors;
 
 flat out float rainbowAmount;
 
-#include "/lib/atmos/sky/clouds/core/params.glsl"
+#include "/lib/atmos/clouds/utility/params.glsl"
 flat out CloudsParams cloudsParams;
 
-#include "/lib/atmos/fog/overworld/params.glsl"
+#include "/lib/atmos/air/overworld/params.glsl"
 flat out OverworldFogParams fogParams;
 #endif
 
@@ -106,7 +106,7 @@ uniform float desertSandstormWeather;
 #define LUSTER_INCLUDE_WEATHER_COLOR
 #include "/lib/light/colors.glsl"
 #undef LUSTER_INCLUDE_WEATHER_COLOR
-#include "/lib/atmos/sky/aurora.glsl"
+#include "/lib/atmos/aurora.glsl"
 #include "/lib/weather/clouds.glsl"
 #include "/lib/weather/fog.glsl"
 #include "/lib/weather/rainbow.glsl"

@@ -19,9 +19,9 @@
 #if !defined INCLUDE_WEATHER_FOG
 #define INCLUDE_WEATHER_FOG
 
-#include "/lib/atmos/fog/overworld/params.glsl"
-#include "/lib/atmos/fog/overworld/constants.glsl"
-#include "/lib/atmos/fog/overworld/aerosols.glsl"
+#include "/lib/atmos/air/overworld/params.glsl"
+#include "/lib/atmos/air/overworld/constants.glsl"
+#include "/lib/atmos/air/overworld/aerosols.glsl"
 #include "/lib/util/color.glsl"
 #include "/lib/weather/core.glsl"
 

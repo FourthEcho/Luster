@@ -16,15 +16,15 @@
 ====================================================================================================
 */
 
-#if !defined INCLUDE_SKY_ATMOSPHERE
-#define INCLUDE_SKY_ATMOSPHERE
+#if !defined INCLUDE_ATMOS_AIR_ATMOSPHERE
+#define INCLUDE_ATMOS_AIR_ATMOSPHERE
 
 #include "/lib/academy/matrices.glsl"
 #include "/lib/util/color.glsl"
 #include "/lib/util/fastMath.glsl"
 #include "/lib/util/geometry.glsl"
 #include "/lib/util/phaseFunctions.glsl"
-#include "/lib/atmos/fog/overworld/aerosols.glsl"
+#include "/lib/atmos/air/overworld/aerosols.glsl"
 
 // These have to be macros so that they can be used by constant expressions
 #define coneAngleToSolidAngle(theta) (tau * (1.0 - cos(theta)))
@@ -618,7 +618,7 @@ vec3 atmosphereScattering(
     );
 #endif
 
-#ifdef renderBelowPlanet
+#ifdef renderBelowHorizon
 
 
     float belowHorizon
@@ -646,7 +646,7 @@ vec3 atmosphereScattering(
 
         atmosphere = mix(
             atmosphere,
-            groundLight * renderBelowPlanetIntensity,
+            groundLight * renderBelowHorizonIntensity,
             belowHorizon
         );
     }
@@ -757,4 +757,4 @@ vec3 atmosphereTransmittance(vec3 rayOrigin, vec3 rayDir) {
     return atmosphereTransmittance(mu, r);
 }
 
-#endif // INCLUDE_SKY_ATMOSPHERE
+#endif // INCLUDE_ATMOS_AIR_ATMOSPHERE

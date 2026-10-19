@@ -16,8 +16,8 @@
 ====================================================================================================
 */
 
-#if !defined INCLUDE_SKY_PROJECTION
-#define INCLUDE_SKY_PROJECTION
+#if !defined INCLUDE_ATMOS_PROJECTION
+#define INCLUDE_ATMOS_PROJECTION
 
 #include "/lib/util/fastMath.glsl"
 
@@ -77,4 +77,4 @@ vec3 unprojectSky(vec2 coord) {
     );
 }
 
-#endif // INCLUDE_SKY_PROJECTION
+#endif // INCLUDE_ATMOS_PROJECTION

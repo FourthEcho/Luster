@@ -16,16 +16,16 @@
 ====================================================================================================
 */
 
-#if !defined INCLUDE_SKY_SKY
-#define INCLUDE_SKY_SKY
+#if !defined INCLUDE_ATMOS_SKY
+#define INCLUDE_ATMOS_SKY
 
 #include "/lib/util/color.glsl"
 #include "/lib/util/fastMath.glsl"
 #include "/lib/util/random.glsl"
 
 #if defined WORLD_OVERWORLD || defined WORLD_END
-#if !defined INCLUDE_SKY_STARS
-#define INCLUDE_SKY_STARS
+#if !defined INCLUDE_ATMOS_SKY_STARS
+#define INCLUDE_ATMOS_SKY_STARS
 
 // Stars based on https://www.shadertoy.com/view/Md2SR3
 
@@ -87,7 +87,7 @@ vec3 drawStars(vec3 rayDir, float galaxyLuminance) {
     return stableStarField(coord, starThresh);
 }
 
-#endif // INCLUDE_SKY_STARS
+#endif // INCLUDE_ATMOS_SKY_STARS
 
 #endif
 
@@ -117,35 +117,121 @@ uniform float lightningFlashIris;
 const float lightningFlashIntensity = 4.0;
 
 #endif // INCLUDE_MISC_LIGHTNING_FLASH
-#include "/lib/atmos/atmosphere.glsl"
+#include "/lib/atmos/air/atmosphere.glsl"
 #include "/lib/atmos/projection.glsl"
-#include "/lib/atmos/sky/rainbow.glsl"
+
+#if !defined INCLUDE_ATMOS_SKY_RAINBOW
+#define INCLUDE_ATMOS_SKY_RAINBOW
+
+#include "/lib/util/color.glsl"
+#include "/lib/util/fastMath.glsl"
+
+// Colours of the rainbow, specified in CIE LAB
+const vec3[] rainbowColorsLab = vec3[](
+    // Black (padding)
+    vec3(0.0, 0.0, 0.0),
+    // Red
+    vec3(1.9204079259259252, 8.615652850435307, 3.034993236839206),
+    // Orange
+    vec3(5.150595481481478, 2.0166722671075, 7.751801674224828),
+    // Yellow
+    vec3(8.374896406590196, -4.55693490912186, 12.458460748771072),
+    // Green
+    vec3(6.460375111111109, -13.197961166655613, 9.433616874771245),
+    // Blue
+    vec3(2.5902924592592598, 0.6233705627450292, -9.638464531481834),
+    // Indigo
+    vec3(0.6521799259259282, 4.582758912741708, -12.47089864973529),
+    // Violet
+    vec3(2.57258785185185, 13.19841176317703, -9.435757721780169),
+    // Black (padding)
+    vec3(0.0, 0.0, 0.0)
+);
+
+const float firstRainbowMiddleAngle = 42.0 * degree;
+const float firstRainbowThickness = 4.0 * degree;
+const float secondRainbowMiddleAngle = 47.0 * degree;
+const float secondRainbowThickness = 3.0 * degree;
+const float rainbowStartDistance = 500.0;
+const float rainbowEndDistance = 600.0;
+
+vec3 drawSingleRainbow(float viewAngle, float startAngle, float endAngle) {
+    float rainbowProgress
+        = linearStepUnclamped(startAngle, endAngle, viewAngle);
+
+    if (clamp01(rainbowProgress) != rainbowProgress) {
+        return vec3(0.0);
+    }
+
+    float i,
+        f = modf(
+            rainbowProgress * float(rainbowColorsLab.length() - 1) - 0.5,
+            i
+        );
+
+    vec3 rainbowColorLab
+        = mix(rainbowColorsLab[int(i)], rainbowColorsLab[int(i + 1)], f);
+    vec3 rainbowColor = max0(labToXyz(rainbowColorLab) * xyzToWorkingColor);
+    float rainbowIntensity
+        = rainbowProgress - rainbowProgress * dampen(rainbowProgress);
+
+    return rainbowColor * rainbowIntensity;
+}
+
+vec3 drawRainbows(
+    vec3 fragmentColor,
+    vec3 directionWorld,
+    float viewDistance
+) {
+#ifndef rainbows
+    return fragmentColor;
+#endif
+
+    if (rainbowAmount < eps) {
+        return fragmentColor;
+    }
+
+    float rainbowAngle
+        = fastAcos(clamp(-dot(directionWorld, lightDir), -1.0, 1.0));
+
+    vec3 firstRainbow = drawSingleRainbow(
+        rainbowAngle,
+        firstRainbowMiddleAngle + firstRainbowThickness * 0.5,
+        firstRainbowMiddleAngle - firstRainbowThickness * 0.5
+    );
+
+    vec3 secondRainbow = drawSingleRainbow(
+        rainbowAngle,
+        secondRainbowMiddleAngle - secondRainbowThickness * 0.5,
+        secondRainbowMiddleAngle + secondRainbowThickness * 0.5
+    );
+
+    vec3 transmittanceApprox
+        = mix(vec3(1.0, 0.75, 0.5), vec3(1.0), dampen(max0(directionWorld.y)));
+
+    vec3 rainbowColor = lightColor * (0.1 * rainbowsIntensity)
+        * (3.0 * firstRainbow + 0.5 * secondRainbow)
+        * sqr(transmittanceApprox);
+    float rainbowFade = rainbowAmount
+        * smoothstep(rainbowStartDistance,
+                     rainbowEndDistance,
+                     viewDistance)
+        * smoothstep(0.0, 0.05, directionWorld.y);
+    ;
+
+    return fragmentColor + rainbowColor * rainbowFade;
+}
+
+#endif // INCLUDE_ATMOS_SKY_RAINBOW
 #include "/lib/util/geometry.glsl"
 
 #if defined PROGRAM_DEFERRED0
-#include "/lib/atmos/sky/clouds/core/pipeline.glsl"
+#include "/lib/atmos/clouds/utility/pipeline.glsl"
 
 #if defined crepuscularRays && !defined blockyClouds
-/*
-====================================================================================================
 
-    Copyright (C) 2026 FourthEcho
-
-    All Rights Reserved unless otherwise explicitly stated.
-
-
-    By downloading this you have agreed to the license and terms of use.
-    These can be found inside the included license-file.
-
-    Violating these terms may be penalized with actions according to the Digital Millennium
-    Copyright Act (DMCA), the Information Society Directive and/or similar laws
-    depending on your country.
-
-====================================================================================================
-*/
-
-#if !defined INCLUDE_SKY_CREPUSCULAR_RAYS
-#define INCLUDE_SKY_CREPUSCULAR_RAYS
+#if !defined INCLUDE_ATMOS_SKY_CREPUSCULAR_RAYS
+#define INCLUDE_ATMOS_SKY_CREPUSCULAR_RAYS
 
 #define LUSTER_INCLUDE_CLOUD_SHADOWS
 #if defined(LUSTER_INCLUDE_CLOUD_SHADOWS)
@@ -153,7 +239,7 @@ const float lightningFlashIntensity = 4.0;
 #if !defined INCLUDE_LIGHT_CLOUD_SHADOWS
 #define INCLUDE_LIGHT_CLOUD_SHADOWS
 
-#include "/lib/atmos/sky/clouds/core/constants.glsl"
+#include "/lib/atmos/clouds/utility/constants.glsl"
 #include "/lib/util/bicubic.glsl"
 
 const ivec2 cloudShadowRes = ivec2(512);
@@ -213,10 +299,10 @@ float getCloudShadows(sampler2D cloudShadowMap, vec3 scenePos) {
 }
 
 #if defined PROGRAM_PREPARE && defined cloudShadows
-#include "/lib/atmos/sky/clouds/altocumulus.glsl"
-#include "/lib/atmos/sky/clouds/cirrus.glsl"
-#include "/lib/atmos/sky/clouds/cumulus.glsl"
-#include "/lib/atmos/sky/clouds/cumulusCongestus.glsl"
+#include "/lib/atmos/clouds/altocumulus.glsl"
+#include "/lib/atmos/clouds/cirrus.glsl"
+#include "/lib/atmos/clouds/cumulus.glsl"
+#include "/lib/atmos/clouds/cumulusCongestus.glsl"
 
 vec2 renderCloudShadowMap(vec2 uv) {
     // Transform position from scene-space to clouds-space
@@ -460,8 +546,8 @@ vec3 getHandheldLight(vec3 scenePos, float ao) {
 #endif
 
 #undef LUSTER_INCLUDE_CLOUD_SHADOWS
-#include "/lib/lodMod.glsl"
-#include "/lib/atmos/sky/clouds/core/common.glsl"
+#include "/lib/util/lodMod.glsl"
+#include "/lib/atmos/clouds/utility/common.glsl"
 
 vec4 drawCrepuscularRays(
     sampler2D cloudShadowMap,
@@ -469,15 +555,15 @@ vec4 drawCrepuscularRays(
     bool isTerrain,
     float dither
 ) {
-    const uint stepCountHorizon = 20;
-    const uint stepCountZenith = 16;
+    const uint stepCountHorizon = crepRaysStepsHorizon;
+    const uint stepCountZenith = crepRaysStepsZenith;
     const float maxRayLength = 4096.0 / (cloudsScale / 10.0);
     // Volume extends indefinitely into the planet (no ground cutoff —
     // the unclipped path was the only one in use anyway)
     const float volumeInnerRadius = 1.0;
     const float volumeOuterRadius
         = cloudsCumulusRadius + cumulusLayerThickness * 0.5;
-    vec3 extinctionCoeff = 2.0 * dampen(cloudsParams.crepuscularRaysAmount)
+    vec3 extinctionCoeff = crepRaysIntensity * dampen(cloudsParams.crepuscularRaysAmount)
         * (50.0 * airRayleighCoef + 400.0 * airMieCoef)
         * (cloudsScale / 10.0);
 
@@ -603,7 +689,7 @@ vec4 drawCrepuscularRays(
     return vec4(scattering, clamp01(dot(transmittance, vec3(1.0 / 3.0))));
 }
 
-#endif // INCLUDE_SKY_CREPUSCULAR_RAYS
+#endif // INCLUDE_ATMOS_SKY_CREPUSCULAR_RAYS
 #endif
 #endif
 
@@ -881,7 +967,7 @@ vec3 drawSky(vec3 rayDir) { return ambientColor; }
 //----------------------------------------------------------------------------//
 #elif defined WORLD_END
 
-#include "/lib/atmos/atmosphere.glsl"
+#include "/lib/atmos/air/atmosphere.glsl"
 
 const float sunSolidAngle = coneAngleToSolidAngle(sunAngularSizeRad);
 const vec3 endSunColor = vec3(1.0, 0.5, 0.25);
@@ -955,4 +1041,4 @@ vec3 drawSky(vec3 rayDir) {
 
 #endif
 
-#endif // INCLUDE_SKY_SKY
+#endif // INCLUDE_ATMOS_SKY

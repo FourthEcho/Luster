@@ -19,8 +19,8 @@
 #if !defined INCLUDE_WEATHER_CLOUDS
 #define INCLUDE_WEATHER_CLOUDS
 
-#include "/lib/atmos/sky/clouds/core/constants.glsl"
-#include "/lib/atmos/sky/clouds/core/params.glsl"
+#include "/lib/atmos/clouds/utility/constants.glsl"
+#include "/lib/atmos/clouds/utility/params.glsl"
 #include "/lib/weather/core.glsl"
 #include "/lib/util/random.glsl"
 

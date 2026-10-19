@@ -16,8 +16,8 @@
 ====================================================================================================
 */
 
-#if !defined INCLUDE_FOG_OVERWORLD_OZONE
-#define INCLUDE_FOG_OVERWORLD_OZONE
+#if !defined INCLUDE_ATMOS_AIR_OVERWORLD_OZONE
+#define INCLUDE_ATMOS_AIR_OVERWORLD_OZONE
 
 #ifdef ozoneSky
 #define OZONE_SKY_OPTION_ENABLED
@@ -96,28 +96,10 @@ vec3 ozoneMultipleScattering(float order) {
 #endif
 }
 
-#endif // INCLUDE_FOG_OVERWORLD_OZONE
+#endif // INCLUDE_ATMOS_AIR_OVERWORLD_OZONE
 
-/*
-====================================================================================================
-
-    Copyright (C) 2026 FourthEcho
-
-    All Rights Reserved unless otherwise explicitly stated.
-
-
-    By downloading this you have agreed to the license and terms of use.
-    These can be found inside the included license-file.
-
-    Violating these terms may be penalized with actions according to the Digital Millennium
-    Copyright Act (DMCA), the Information Society Directive and/or similar laws
-    depending on your country.
-
-====================================================================================================
-*/
-
-#if !defined INCLUDE_FOG_OVERWORLD_SANDSTORM
-#define INCLUDE_FOG_OVERWORLD_SANDSTORM
+#if !defined INCLUDE_ATMOS_AIR_OVERWORLD_SANDBORMDSTORM
+#define INCLUDE_ATMOS_AIR_OVERWORLD_SANDBORMDSTORM
 
 
 #ifdef sandstormLayer
@@ -144,8 +126,6 @@ const float sandstormScaleHeight = 1.5e3; // m
 const vec3 sandstormExtinctionCoeff
     = vec3(1.15, 0.75, 0.45) * 2.2e-5;
 
-// Effective storm strength: live 0..1 storm amount scaled by the user
-// intensity. Zero when the feature is compiled out.
 float sandstormStrength() {
 #ifdef desertSandstorm
     return clamp01(desertSandstormWeather * desertSandstormIntensity);
@@ -154,8 +134,6 @@ float sandstormStrength() {
 #endif
 }
 
-// Relative airmass of the low exponential dust layer (Chapman-style,
-// clamped so the exact horizon saturates instead of diverging).
 float sandstormAirmass(float mu) {
     float x = sandstormScaleHeight / 6371e3;
     float c = sqrt(1.5707963 / max(x, 1e-9));
@@ -170,8 +148,6 @@ float sandstormAirmass(float mu) {
     return clamp(m, 0.0, 24.0);
 }
 
-// Transmittance of the dust layer along a ray with zenith cosine mu,
-// scaled by the live storm strength. Identity when disabled.
 vec3 sandstormTransmittance(float mu) {
 #if defined desertSandstorm && defined sandstormLayer
     float s = sandstormStrength();
@@ -193,4 +169,4 @@ vec3 sandstormTransmittance(float mu) { return vec3(1.0); }
 vec3 sandstormTint() { return vec3(1.0); }
 #endif
 
-#endif // INCLUDE_FOG_OVERWORLD_SANDSTORM
+#endif // INCLUDE_ATMOS_AIR_OVERWORLD_SANDBORMDSTORM

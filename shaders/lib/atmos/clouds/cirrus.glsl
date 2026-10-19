@@ -16,12 +16,12 @@
 ====================================================================================================
 */
 
-#if !defined INCLUDE_SKY_CLOUDS_CIRRUS
-#define INCLUDE_SKY_CLOUDS_CIRRUS
+#if !defined INCLUDE_ATMOS_CLOUDS_CIRRUS
+#define INCLUDE_ATMOS_CLOUDS_CIRRUS
 
 // 3rd layer: planar cirrus/cirrocumulus clouds
 
-#include "/lib/atmos/sky/clouds/core/common.glsl"
+#include "/lib/atmos/clouds/utility/common.glsl"
 
 float cirrusDensityProfile(vec2 coord, float altitudeFraction) {
     const float windAngle = cloudsCirrusWindAngle * degree;

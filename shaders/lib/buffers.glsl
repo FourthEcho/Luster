@@ -46,15 +46,11 @@ const vec4 shadowcolor0ClearColor = vec4(0.0, 0.0, 0.0, 0.0);
 const vec4 shadowcolor1ClearColor = vec4(0.0, 0.0, 0.0, 0.0);
 
 #ifdef VOXY
-// Ty Cortex for the extra color textures!
 const int colortex16Format = RGBA16; // Voxy water gbuffer data
 const bool colortex16Clear = true;
 const vec4 colortex16ClearColor = vec4(0.0, 0.0, 0.0, 0.0);
 #endif
 
-// SSPT chain (screen-space path traced emission + colored lighting).
-// Reduced-resolution, fragment-only passes — Mac-safe: no compute, no SSBO,
-// no imageStore. Same sizing convention as the AO buffers (colortex6/14).
 const int colortex17Format = RGBA16F; // SSPT color: raw (d4) -> accumulated (d5) -> filtered (d6-10)
 const bool colortex17Clear = true;
 const int colortex18Format = RGBA16F; // SSPT history color (rgb) + accumulated frames (a)

@@ -16,8 +16,8 @@
 ====================================================================================================
 */
 
-#if !defined INCLUDE_SKY_CLOUDS_PARAMS
-#define INCLUDE_SKY_CLOUDS_PARAMS
+#if !defined INCLUDE_ATMOS_CLOUDS_CORE_PARAMS
+#define INCLUDE_ATMOS_CLOUDS_CORE_PARAMS
 
 struct CloudsParams {
     // Cumulus congestus
@@ -43,4 +43,4 @@ struct CloudsParams {
     float crepuscularRaysAmount;
 };
 
-#endif // INCLUDE_SKY_CLOUDS_PARAMETERS
+#endif // INCLUDE_ATMOS_CLOUDS_CORE_PARAMS

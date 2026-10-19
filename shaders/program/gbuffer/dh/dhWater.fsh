@@ -42,7 +42,7 @@ flat in vec2 atlasTileScale;
 #endif
 
 #if defined WORLD_OVERWORLD
-#include "/lib/atmos/fog/overworld/params.glsl"
+#include "/lib/atmos/air/overworld/params.glsl"
 flat in OverworldFogParams fogParams;
 #endif
 
@@ -148,11 +148,11 @@ uniform vec4 entityColor;
 #endif
 
 
-#include "/lib/atmos/fog/simpleFog.glsl"
+#include "/lib/atmos/air/simple.glsl"
 #include "/lib/brdf/common.glsl"
 #include "/lib/light/pcss.glsl"
 #include "/lib/brdf/specular.glsl"
-#include "/lib/lodMod.glsl"
+#include "/lib/util/lodMod.glsl"
 #include "/lib/brdf/material.glsl"
 #include "/lib/surface/water.glsl"
 #include "/lib/util/color.glsl"
@@ -167,7 +167,7 @@ uniform vec4 entityColor;
 #if !defined INCLUDE_LIGHT_CLOUD_SHADOWS
 #define INCLUDE_LIGHT_CLOUD_SHADOWS
 
-#include "/lib/atmos/sky/clouds/core/constants.glsl"
+#include "/lib/atmos/clouds/utility/constants.glsl"
 #include "/lib/util/bicubic.glsl"
 
 const ivec2 cloudShadowRes = ivec2(512);
@@ -227,10 +227,10 @@ float getCloudShadows(sampler2D cloudShadowMap, vec3 scenePos) {
 }
 
 #if defined PROGRAM_PREPARE && defined cloudShadows
-#include "/lib/atmos/sky/clouds/altocumulus.glsl"
-#include "/lib/atmos/sky/clouds/cirrus.glsl"
-#include "/lib/atmos/sky/clouds/cumulus.glsl"
-#include "/lib/atmos/sky/clouds/cumulusCongestus.glsl"
+#include "/lib/atmos/clouds/altocumulus.glsl"
+#include "/lib/atmos/clouds/cirrus.glsl"
+#include "/lib/atmos/clouds/cumulus.glsl"
+#include "/lib/atmos/clouds/cumulusCongestus.glsl"
 #include "/lib/util/random.glsl"
 
 vec2 renderCloudShadowMap(vec2 uv) {

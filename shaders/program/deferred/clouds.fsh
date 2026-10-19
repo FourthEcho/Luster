@@ -36,7 +36,7 @@ flat in vec3 skyColor;
 flat in float auroraAmount;
 flat in mat2x3 auroraColors;
 
-#include "/lib/atmos/sky/clouds/core/params.glsl"
+#include "/lib/atmos/clouds/utility/params.glsl"
 flat in CloudsParams cloudsParams;
 #endif
 
@@ -123,31 +123,14 @@ uniform float biomeHumidity;
 #endif
 
 #if defined WORLD_OVERWORLD
-#include "/lib/atmos/atmosphere.glsl"
-#include "/lib/atmos/sky/aurora.glsl"
-#include "/lib/atmos/sky/clouds/core/pipeline.glsl"
+#include "/lib/atmos/air/atmosphere.glsl"
+#include "/lib/atmos/aurora.glsl"
+#include "/lib/atmos/clouds/utility/pipeline.glsl"
 
 #if defined crepuscularRays && !defined blockyClouds
-/*
-====================================================================================================
 
-    Copyright (C) 2026 FourthEcho
-
-    All Rights Reserved unless otherwise explicitly stated.
-
-
-    By downloading this you have agreed to the license and terms of use.
-    These can be found inside the included license-file.
-
-    Violating these terms may be penalized with actions according to the Digital Millennium
-    Copyright Act (DMCA), the Information Society Directive and/or similar laws
-    depending on your country.
-
-====================================================================================================
-*/
-
-#if !defined INCLUDE_SKY_CREPUSCULAR_RAYS
-#define INCLUDE_SKY_CREPUSCULAR_RAYS
+#if !defined INCLUDE_ATMOS_SKY_CREPUSCULAR_RAYS
+#define INCLUDE_ATMOS_SKY_CREPUSCULAR_RAYS
 
 #define LUSTER_INCLUDE_CLOUD_SHADOWS
 #if defined(LUSTER_INCLUDE_CLOUD_SHADOWS)
@@ -155,7 +138,7 @@ uniform float biomeHumidity;
 #if !defined INCLUDE_LIGHT_CLOUD_SHADOWS
 #define INCLUDE_LIGHT_CLOUD_SHADOWS
 
-#include "/lib/atmos/sky/clouds/core/constants.glsl"
+#include "/lib/atmos/clouds/utility/constants.glsl"
 #include "/lib/util/bicubic.glsl"
 
 const ivec2 cloudShadowRes = ivec2(512);
@@ -215,10 +198,10 @@ float getCloudShadows(sampler2D cloudShadowMap, vec3 scenePos) {
 }
 
 #if defined PROGRAM_PREPARE && defined cloudShadows
-#include "/lib/atmos/sky/clouds/altocumulus.glsl"
-#include "/lib/atmos/sky/clouds/cirrus.glsl"
-#include "/lib/atmos/sky/clouds/cumulus.glsl"
-#include "/lib/atmos/sky/clouds/cumulusCongestus.glsl"
+#include "/lib/atmos/clouds/altocumulus.glsl"
+#include "/lib/atmos/clouds/cirrus.glsl"
+#include "/lib/atmos/clouds/cumulus.glsl"
+#include "/lib/atmos/clouds/cumulusCongestus.glsl"
 
 vec2 renderCloudShadowMap(vec2 uv) {
     // Transform position from scene-space to clouds-space
@@ -462,8 +445,8 @@ vec3 getHandheldLight(vec3 scenePos, float ao) {
 #endif
 
 #undef LUSTER_INCLUDE_CLOUD_SHADOWS
-#include "/lib/lodMod.glsl"
-#include "/lib/atmos/sky/clouds/core/common.glsl"
+#include "/lib/util/lodMod.glsl"
+#include "/lib/atmos/clouds/utility/common.glsl"
 
 vec4 drawCrepuscularRays(
     sampler2D cloudShadowMap,
@@ -471,15 +454,15 @@ vec4 drawCrepuscularRays(
     bool isTerrain,
     float dither
 ) {
-    const uint stepCountHorizon = 20;
-    const uint stepCountZenith = 16;
+    const uint stepCountHorizon = crepRaysStepsHorizon;
+    const uint stepCountZenith = crepRaysStepsZenith;
     const float maxRayLength = 4096.0 / (cloudsScale / 10.0);
     // Volume extends indefinitely into the planet (no ground cutoff —
     // the unclipped path was the only one in use anyway)
     const float volumeInnerRadius = 1.0;
     const float volumeOuterRadius
         = cloudsCumulusRadius + cumulusLayerThickness * 0.5;
-    vec3 extinctionCoeff = 2.0 * dampen(cloudsParams.crepuscularRaysAmount)
+    vec3 extinctionCoeff = crepRaysIntensity * dampen(cloudsParams.crepuscularRaysAmount)
         * (50.0 * airRayleighCoef + 400.0 * airMieCoef)
         * (cloudsScale / 10.0);
 
@@ -605,11 +588,11 @@ vec4 drawCrepuscularRays(
     return vec4(scattering, clamp01(dot(transmittance, vec3(1.0 / 3.0))));
 }
 
-#endif // INCLUDE_SKY_CREPUSCULAR_RAYS
+#endif // INCLUDE_ATMOS_SKY_CREPUSCULAR_RAYS
 #endif
 #endif
 
-#include "/lib/lodMod.glsl"
+#include "/lib/util/lodMod.glsl"
 #include "/lib/util/checkerboard.glsl"
 #include "/lib/util/random.glsl"
 #include "/lib/util/spaceConversion.glsl"

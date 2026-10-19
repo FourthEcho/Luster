@@ -16,12 +16,12 @@
 ====================================================================================================
 */
 
-#if !defined INCLUDE_FOG_AIR_FOG_ANALYTIC
-#define INCLUDE_FOG_AIR_FOG_ANALYTIC
+#if !defined INCLUDE_ATMOS_AIR_OVERWORLD_ANALYTIC
+#define INCLUDE_ATMOS_AIR_OVERWORLD_ANALYTIC
 
-#include "/lib/atmos/fog/overworld/constants.glsl"
-#include "/lib/lodMod.glsl"
-#include "/lib/atmos/atmosphere.glsl"
+#include "/lib/atmos/air/overworld/constants.glsl"
+#include "/lib/util/lodMod.glsl"
+#include "/lib/atmos/air/atmosphere.glsl"
 #include "/lib/util/phaseFunctions.glsl"
 
 vec2 airFogAnalyticAirmass(
@@ -160,4 +160,4 @@ mat2x3 airFogAnalytic(
     );
 }
 
-#endif // INCLUDE_FOG_AIR_FOG_ANALYTIC
+#endif // INCLUDE_ATMOS_AIR_OVERWORLD_ANALYTIC

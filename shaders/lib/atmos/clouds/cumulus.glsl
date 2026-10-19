@@ -16,13 +16,13 @@
 ====================================================================================================
 */
 
-#if !defined INCLUDE_SKY_CLOUDS_CUMULUS
-#define INCLUDE_SKY_CLOUDS_CUMULUS
+#if !defined INCLUDE_ATMOS_CLOUDS_CUMULUS
+#define INCLUDE_ATMOS_CLOUDS_CUMULUS
 
 // 1st layer: volumetric cumulus/stratocumulus/stratus clouds
 
-#include "/lib/atmos/sky/clouds/core/common.glsl"
-#include "/lib/atmos/sky/clouds/core/coverageMap.glsl"
+#include "/lib/atmos/clouds/utility/common.glsl"
+#include "/lib/atmos/clouds/utility/coverageMap.glsl"
 #include "/lib/util/random.glsl"
 
 // altitudeFraction := 0 at the bottom of the cloud layer and 1 at the top

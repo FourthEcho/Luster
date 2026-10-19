@@ -16,14 +16,15 @@
 ====================================================================================================
 */
 
-#if !defined INCLUDE_SKY_CLOUDS
-#define INCLUDE_SKY_CLOUDS
+#if !defined INCLUDE_ATMOS_CLOUDS_PIPELINE
+#define INCLUDE_ATMOS_CLOUDS_PIPELINE
 
-#include "/lib/atmos/sky/clouds/altocumulus.glsl"
-#include "/lib/atmos/sky/clouds/cirrus.glsl"
-#include "/lib/atmos/sky/clouds/cumulus.glsl"
-#include "/lib/atmos/sky/clouds/cumulusCongestus.glsl"
-#include "/lib/atmos/sky/clouds/noctilucent.glsl"
+#include "/lib/atmos/clouds/altocumulus.glsl"
+#include "/lib/atmos/clouds/cirrus.glsl"
+#include "/lib/atmos/clouds/cumulus.glsl"
+#include "/lib/atmos/clouds/cumulusCongestus.glsl"
+#include "/lib/atmos/clouds/noctilucent.glsl"
+
 
 
 bool cloudsEarlyExit(CloudsResult result, float r, float layerRadius) {
@@ -132,4 +133,4 @@ CloudsResult drawClouds(
     return result;
 }
 
-#endif // INCLUDE_SKY_CLOUDS
+#endif // INCLUDE_ATMOS_CLOUDS_PIPELINE

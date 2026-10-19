@@ -16,8 +16,8 @@
 ====================================================================================================
 */
 
-#if !defined INCLUDE_SKY_AURORA
-#define INCLUDE_SKY_AURORA
+#if !defined INCLUDE_ATMOS_AURORA
+#define INCLUDE_ATMOS_AURORA
 
 #include "/lib/util/color.glsl"
 #include "/lib/util/fastMath.glsl"
@@ -192,4 +192,4 @@ float getAuroraAmount() {
     return night * mix(auroraNormalFactor, auroraSnowFactor, biomeMaySnow);
 }
 
-#endif // INCLUDE_SKY_AURORA
+#endif // INCLUDE_ATMOS_AURORA

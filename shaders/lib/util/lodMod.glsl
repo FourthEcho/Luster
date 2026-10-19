@@ -16,8 +16,8 @@
 ====================================================================================================
 */
 
-#if !defined INCLUDE_LIB_LODMOD
-#define INCLUDE_LIB_LODMOD
+#if !defined INCLUDE_UTIL_LODMOD
+#define INCLUDE_UTIL_LODMOD
 
 /*
  * Utility include for LoD mod support (Distant Horizons and Voxy)
@@ -158,4 +158,4 @@ bool isLodTerrain(float depth, float depthLod) {
     return depth >= 1.0 && depthLod < 1.0;
 }
 
-#endif // INCLUDE_LIB_LODMOD
+#endif // INCLUDE_UTIL_LODMOD

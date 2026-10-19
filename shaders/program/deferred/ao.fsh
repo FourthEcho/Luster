@@ -65,7 +65,7 @@ uniform vec2 taaOffset;
 // ------------
 
 #define TEMPORAL_REPROJECTION
-#include "/lib/lodMod.glsl"
+#include "/lib/util/lodMod.glsl"
 #include "/lib/util/bicubic.glsl"
 #include "/lib/util/color.glsl"
 #include "/lib/util/encoding.glsl"
@@ -181,7 +181,7 @@ float computeDssao(
 #if !defined INCLUDE_LIGHT_INDIRECT_LIGHT_GTAO
 #define INCLUDE_LIGHT_INDIRECT_LIGHT_GTAO
 
-#include "/lib/lodMod.glsl"
+#include "/lib/util/lodMod.glsl"
 #include "/lib/util/fastMath.glsl"
 #include "/lib/util/spaceConversion.glsl"
 

@@ -28,7 +28,7 @@ flat out vec3 skyColor;
 flat out float auroraAmount;
 flat out mat2x3 auroraColors;
 
-#include "/lib/atmos/sky/clouds/core/params.glsl"
+#include "/lib/atmos/clouds/utility/params.glsl"
 flat out CloudsParams cloudsParams;
 #endif
 
@@ -93,8 +93,8 @@ uniform float desertSandstormWeather;
 #define LUSTER_INCLUDE_WEATHER_COLOR
 #include "/lib/light/colors.glsl"
 #undef LUSTER_INCLUDE_WEATHER_COLOR
-#include "/lib/atmos/atmosphere.glsl"
-#include "/lib/atmos/sky/aurora.glsl"
+#include "/lib/atmos/air/atmosphere.glsl"
+#include "/lib/atmos/aurora.glsl"
 #include "/lib/weather/clouds.glsl"
 #endif
 

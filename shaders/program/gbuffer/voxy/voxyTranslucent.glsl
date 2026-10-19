@@ -16,7 +16,7 @@
 ====================================================================================================
 */
 
-#include "/lib/atmos/fog/overworld/params.glsl"
+#include "/lib/atmos/air/overworld/params.glsl"
 #include "/lib/global.glsl"
 
 #ifdef shadow
@@ -33,7 +33,7 @@
 
 uniform float desertSandstormWeather;
 
-// simpleFog needs fogColor, Voxy patch doesn't expose it by default
+// simple.glsl needs fogColor, Voxy patch doesn't expose it by default
 uniform vec3 fogColor;
 uniform sampler2D depthtex1;
 uniform sampler2D colortex4;
@@ -92,11 +92,11 @@ OverworldFogParams fogParams;
 
 #define TEMPORAL_REPROJECTION
 
-#include "/lib/atmos/fog/simpleFog.glsl"
+#include "/lib/atmos/air/simple.glsl"
 #include "/lib/brdf/common.glsl"
 #include "/lib/light/pcss.glsl"
 #include "/lib/brdf/specular.glsl"
-#include "/lib/lodMod.glsl"
+#include "/lib/util/lodMod.glsl"
 #include "/lib/brdf/material.glsl"
 #include "/lib/surface/water.glsl"
 #include "/lib/util/color.glsl"
@@ -111,7 +111,7 @@ OverworldFogParams fogParams;
 #if !defined INCLUDE_LIGHT_CLOUD_SHADOWS
 #define INCLUDE_LIGHT_CLOUD_SHADOWS
 
-#include "/lib/atmos/sky/clouds/core/constants.glsl"
+#include "/lib/atmos/clouds/utility/constants.glsl"
 #include "/lib/util/bicubic.glsl"
 
 const ivec2 cloudShadowRes = ivec2(512);
@@ -171,10 +171,10 @@ float getCloudShadows(sampler2D cloudShadowMap, vec3 scenePos) {
 }
 
 #if defined PROGRAM_PREPARE && defined cloudShadows
-#include "/lib/atmos/sky/clouds/altocumulus.glsl"
-#include "/lib/atmos/sky/clouds/cirrus.glsl"
-#include "/lib/atmos/sky/clouds/cumulus.glsl"
-#include "/lib/atmos/sky/clouds/cumulusCongestus.glsl"
+#include "/lib/atmos/clouds/altocumulus.glsl"
+#include "/lib/atmos/clouds/cirrus.glsl"
+#include "/lib/atmos/clouds/cumulus.glsl"
+#include "/lib/atmos/clouds/cumulusCongestus.glsl"
 
 vec2 renderCloudShadowMap(vec2 uv) {
     // Transform position from scene-space to clouds-space

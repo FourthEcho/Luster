@@ -446,7 +446,7 @@ uniform vec2 taaOffset;
 uniform float near;
 uniform float far;
 
-#include "/lib/lodMod.glsl"
+#include "/lib/util/lodMod.glsl"
 #include "/lib/util/spaceConversion.glsl"
 #endif
 

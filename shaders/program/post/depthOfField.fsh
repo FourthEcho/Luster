@@ -89,7 +89,7 @@ uniform int frameCounter;
 uniform vec2 viewPixelSize;
 uniform vec2 taaOffset;
 
-#include "/lib/lodMod.glsl"
+#include "/lib/util/lodMod.glsl"
 // Radial chromatic dispersion
 
 vec3 applyChromaticDispersion(

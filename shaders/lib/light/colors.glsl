@@ -83,7 +83,7 @@ const float emissionScale = 40.0;
 #if !defined INCLUDE_LIGHT_COLORS_LIGHT_COLOR
 #define INCLUDE_LIGHT_COLORS_LIGHT_COLOR
 
-#include "/lib/atmos/atmosphere.glsl"
+#include "/lib/atmos/air/atmosphere.glsl"
 #include "/lib/util/color.glsl"
 uniform float moonPhaseBrightness;
 
@@ -167,7 +167,7 @@ vec3 getLightColor() {
 #if !defined INCLUDE_LIGHT_COLORS_WEATHER_COLOR
 #define INCLUDE_LIGHT_COLORS_WEATHER_COLOR
 
-#include "/lib/atmos/atmosphere.glsl"
+#include "/lib/atmos/air/atmosphere.glsl"
 
 uniform float biomeMaySandstorm;
 

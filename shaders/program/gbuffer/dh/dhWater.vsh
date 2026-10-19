@@ -28,7 +28,7 @@ flat out vec3 lightColor;
 flat out vec3 ambientColor;
 
 #if defined WORLD_OVERWORLD
-#include "/lib/atmos/fog/overworld/params.glsl"
+#include "/lib/atmos/air/overworld/params.glsl"
 flat out OverworldFogParams fogParams;
 #endif
 

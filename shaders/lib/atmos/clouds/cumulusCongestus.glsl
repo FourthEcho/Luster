@@ -16,12 +16,12 @@
 ====================================================================================================
 */
 
-#if !defined INCLUDE_SKY_CLOUDS_CUMULUS_CONGESTUS
-#define INCLUDE_SKY_CLOUDS_CUMULUS_CONGESTUS
+#if !defined INCLUDE_ATMOS_CLOUDS_CUMULUS_CONGESTUS
+#define INCLUDE_ATMOS_CLOUDS_CUMULUS_CONGESTUS
 
 // Alternative 1st layer: distant cumulus congestus clouds
 
-#include "/lib/atmos/sky/clouds/core/common.glsl"
+#include "/lib/atmos/clouds/utility/common.glsl"
 #include "/lib/util/random.glsl"
 
 const float cloudsCumulusCongestusRadius

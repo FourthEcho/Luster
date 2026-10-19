@@ -6,7 +6,7 @@ screen.atmosphere=Atmosphere
 screen.atmoSpace=Space
 screen.atmoSky=Sky
 screen.atmoAir=Air
-screen.atmoGround=Fog
+screen.atmoGround=Volumetrics
 screen.light=Lighting
 screen.skyCelestialBodies=Sun & Moon
 screen.rainbows=Rainbows
@@ -1316,10 +1316,10 @@ option.desertSandstormIntensity.comment=Controls desert sandstorm intensity.
 option.rainbowsIntensity=Rainbow Visibility
 option.rainbowsIntensity.comment=Adjusts the opacity and vividness of rainbows during/after rain. Higher = brighter, more saturated rainbow.
 option.planetBounceIntensity=Planet Bounce Intensity
-option.renderBelowPlanet=Render Below Planet
-option.renderBelowPlanet.comment=Renders the planet ground disc for below-horizon rays instead of stretching the horizon sky downward.
-option.renderBelowPlanetIntensity=Below Planet Brightness
-option.renderBelowPlanetIntensity.comment=Brightness of the planet ground rendered below the horizon.
+option.renderBelowHorizon=Render Below Horizon
+option.renderBelowHorizon.comment=Renders the planet ground disc for below-horizon rays instead of stretching the horizon sky downward.
+option.renderBelowHorizonIntensity=Below Horizon Brightness
+option.renderBelowHorizonIntensity.comment=Brightness of the planet ground rendered below the horizon.
 option.planetBounceIntensity.comment=Adjusts the strength of ground-bounced light re-entering the sky. Higher = brighter, warmer horizon glow; 0 disables the contribution entirely.
 
 # UI value aliases for shader option identifiers
@@ -1409,3 +1409,11 @@ option.shadowVpsQuality=VPS Quality
 option.shadowVpsQuality.comment=Controls the blocker-search sample count for Variable Penumbra Shadows. Higher values improve penumbra stability at additional GPU cost.
 option.bloomSpread=Bloom Spread
 option.bloomSpread.comment=Controls the size of the bloom blur. Higher values spread the glow over a larger area.
+
+screen.crepRays=Crepuscular Rays
+option.crepRaysIntensity=Crepuscular Rays Intensity
+option.crepRaysIntensity.comment=Strength of the crepuscular light shafts scattered into the air.
+option.crepRaysStepsHorizon=Crepuscular Rays Steps (Horizon)
+option.crepRaysStepsHorizon.comment=Step count for rays marching toward the horizon. Lower values are cheaper but noisier.
+option.crepRaysStepsZenith=Crepuscular Rays Steps (Zenith)
+option.crepRaysStepsZenith.comment=Step count for rays marching toward the zenith. Lower values are cheaper but noisier.

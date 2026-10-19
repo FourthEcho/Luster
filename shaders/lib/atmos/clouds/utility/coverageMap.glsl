@@ -16,8 +16,8 @@
 ====================================================================================================
 */
 
-#if !defined INCLUDE_SKY_CLOUDS_COVERAGE_MAP
-#define INCLUDE_SKY_CLOUDS_COVERAGE_MAP
+#if !defined INCLUDE_ATMOS_CLOUDS_CORE_COVERAGE_MAP_MAP
+#define INCLUDE_ATMOS_CLOUDS_CORE_COVERAGE_MAP_MAP
 
 // Distance covered by the cumulus coverage map on each axis (m^2)
 const float cloudsCumulusCoverageMapScale = 1.5e5;
@@ -96,4 +96,4 @@ float renderCloudsCumulusCoverageMap(vec2 uv) {
     return cloudsCumulusLocalCoverage(pos);
 }
 
-#endif // INCLUDE_SKY_CLOUDS_COVERAGE_MAP
+#endif // INCLUDE_ATMOS_CLOUDS_CORE_COVERAGE_MAP_MAP

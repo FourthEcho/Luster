@@ -75,7 +75,38 @@ uniform vec2 taaOffset;
 uniform vec3 lightDir;
 
 #include "/lib/surface/water.glsl"
-#include "/lib/atmos/fog/water/waterAbsorption.glsl"
+
+// waterAbsorption.glsl (inlined: consumers air/simple + shadow fragment)
+
+#if !defined INCLUDE_FOG_WATER_ABSORPTION
+#define INCLUDE_FOG_WATER_ABSORPTION
+
+#include "/lib/util/color.glsl"
+
+vec3 biomeWaterCoeff(vec3 biomeWaterTint) {
+    const float densityScale = 0.15;
+    const float biomeColorContribution = 0.33;
+
+    const vec3 baseAbsorptionCoeff
+        = vec3(waterAbsorptionR, waterAbsorptionG, waterAbsorptionB)
+        * rec709ToWorkingColor;
+    const vec3 forestAbsorptionCoeff
+        = -densityScale * log(vec3(0.1245, 0.1797, 0.7108));
+
+#ifdef biomeWaterColor
+    vec3 biomeAbsorptionCoeff = -densityScale * log(biomeWaterTint + eps)
+        - forestAbsorptionCoeff;
+
+    return max0(
+        baseAbsorptionCoeff
+        + biomeAbsorptionCoeff * biomeColorContribution
+    );
+#else
+    return baseAbsorptionCoeff;
+#endif
+}
+
+#endif // INCLUDE_FOG_WATER_ABSORPTION
 #include "/lib/util/color.glsl"
 #include "/lib/util/encoding.glsl"
 

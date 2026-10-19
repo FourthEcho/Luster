@@ -23,7 +23,7 @@
 #define LUSTER_INCLUDE_MOON_PHASE_COLOR
 #include "/lib/light/colors.glsl"
 #undef LUSTER_INCLUDE_MOON_PHASE_COLOR
-#include "/lib/lodMod.glsl"
+#include "/lib/util/lodMod.glsl"
 #include "/lib/util/geometry.glsl"
 #include "/lib/atmos/projection.glsl"
 #include "/lib/brdf/material.glsl"
@@ -32,7 +32,7 @@
 #include "/lib/util/spaceConversion.glsl"
 
 #if defined WORLD_OVERWORLD
-#include "/lib/atmos/fog/overworld/analytic.glsl"
+#include "/lib/atmos/air/overworld/analytic.glsl"
 #endif
 
 // Microfacet distribution & geometry (GGX/Smith). Kept with the specular
@@ -55,8 +55,6 @@ float v2SmithGgx(float NoL, float NoV, float alphaSq) {
     return 0.5 / (ggxL + ggxV);
 }
 
-// Merged from /lib/brdf/raytracer.glsl (single consumer: raymarchDepthBuffer
-// used by traceSpecularRay below).
 #if defined SSRT_LOD
 #define SSRT_DEPTH_SAMPLER lodDepthTexShading
 #define SSRT_PROJECTION_MATRIX lodProjectionMatrix

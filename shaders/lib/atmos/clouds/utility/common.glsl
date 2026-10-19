@@ -16,11 +16,11 @@
 ====================================================================================================
 */
 
-#if !defined INCLUDE_SKY_CLOUDS_COMMON
-#define INCLUDE_SKY_CLOUDS_COMMON
+#if !defined INCLUDE_ATMOS_CLOUDS_CORE_COMMON
+#define INCLUDE_ATMOS_CLOUDS_CORE_COMMON
 
-#include "/lib/atmos/atmosphere.glsl"
-#include "/lib/atmos/sky/clouds/core/constants.glsl"
+#include "/lib/atmos/air/atmosphere.glsl"
+#include "/lib/atmos/clouds/utility/constants.glsl"
 #include "/lib/util/color.glsl"
 #include "/lib/util/fastMath.glsl"
 #include "/lib/util/geometry.glsl"

@@ -16,10 +16,10 @@
 ====================================================================================================
 */
 
-#if !defined INCLUDE_SKY_CLOUDS_NOCTILUCENT
-#define INCLUDE_SKY_CLOUDS_NOCTILUCENT
+#if !defined INCLUDE_ATMOS_CLOUDS_NOCTILUCENT
+#define INCLUDE_ATMOS_CLOUDS_NOCTILUCENT
 
-#include "/lib/atmos/sky/clouds/core/common.glsl"
+#include "/lib/atmos/clouds/utility/common.glsl"
 
 // 5th layer: noctilucent clouds
 
@@ -122,4 +122,4 @@ vec4 drawNoctilucentClouds(
     return vec4(scattering, transmittance);
 }
 
-#endif // INCLUDE_SKY_CLOUDS_NOCTILUCENT
+#endif // INCLUDE_ATMOS_CLOUDS_NOCTILUCENT

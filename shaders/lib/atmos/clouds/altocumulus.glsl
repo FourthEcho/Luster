@@ -16,12 +16,12 @@
 ====================================================================================================
 */
 
-#if !defined INCLUDE_SKY_CLOUDS_ALTOCUMULUS
-#define INCLUDE_SKY_CLOUDS_ALTOCUMULUS
+#if !defined INCLUDE_ATMOS_CLOUDS_ALTOCUMULUS
+#define INCLUDE_ATMOS_CLOUDS_ALTOCUMULUS
 
 // 2nd layer: volumetric altocumulus clouds
 
-#include "/lib/atmos/sky/clouds/core/common.glsl"
+#include "/lib/atmos/clouds/utility/common.glsl"
 #include "/lib/util/random.glsl"
 
 // altitudeFraction := 0 at the bottom of the cloud layer and 1 at the top

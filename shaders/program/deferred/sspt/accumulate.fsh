@@ -97,7 +97,7 @@ vec4 fetchGbuffer(ivec2 texel) {
 }
 
 #endif // INCLUDE_LIGHTING_INDIRECT_LIGHTING_TEMPORAL
-#include "/lib/lodMod.glsl"
+#include "/lib/util/lodMod.glsl"
 #include "/lib/util/encoding.glsl"
 #include "/lib/util/fastMath.glsl"
 #include "/lib/util/spaceConversion.glsl"

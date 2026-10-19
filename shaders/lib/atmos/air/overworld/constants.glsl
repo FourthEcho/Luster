@@ -16,14 +16,23 @@
 ====================================================================================================
 */
 
-#if !defined INCLUDE_FOG_OVERWORLD_PARAMS
-#define INCLUDE_FOG_OVERWORLD_PARAMS
+#if !defined INCLUDE_ATMOS_AIR_OVERWORLD_CONSTANTS
+#define INCLUDE_ATMOS_AIR_OVERWORLD_CONSTANTS
 
-struct OverworldFogParams {
-    vec3 rayleighScatteringCoeff;
-    vec3 mieScatteringCoeff;
-    vec3 mieExtinctionCoeff;
-    vec3 mistScatteringCoeff; // tinted by live horizon sky colour
-};
+const uint airFogMinStepCount = 8;
+const uint airFogMaxStepCount = 25;
+const float airFogStepCountGrowth = 0.1;
+const float airFogVolumeTop = 320.0;
+const float airFogVolumeBottom = 63.0 - 24.0;
+const vec2 airFogFalloffStart
+    = vec2(airFogRayleighFalloffStart, airFogMieFalloffStart)
+    + 63.0;
+const vec2 airFogFalloffHalfLife
+    = vec2(airFogRayleighFalloffHalfLife, airFogMieFalloffHalfLife);
 
-#endif // INCLUDE_FOG_OVERWORLD_PARAMETERS
+// ---- Mist constants ----
+
+
+const float mistBaseScatterCoeff = 8e-3;
+
+#endif // INCLUDE_ATMOS_AIR_OVERWORLD_CONSTANTS

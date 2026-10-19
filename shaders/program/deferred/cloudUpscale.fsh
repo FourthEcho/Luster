@@ -79,7 +79,7 @@ uniform bool worldAgeChanged;
 
 #define TEMPORAL_REPROJECTION
 
-#include "/lib/lodMod.glsl"
+#include "/lib/util/lodMod.glsl"
 #include "/lib/util/bicubic.glsl"
 #include "/lib/util/checkerboard.glsl"
 #include "/lib/util/encoding.glsl"

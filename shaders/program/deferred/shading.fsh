@@ -5,7 +5,6 @@
 
     All Rights Reserved unless otherwise explicitly stated.
 
-
     By downloading this you have agreed to the license and terms of use.
     These can be found inside the included license-file.
 
@@ -47,9 +46,8 @@ flat in vec3 hSky[6];
 flat in vec3 sunColor;
 flat in vec3 moonColor;
 
-#include "/lib/atmos/fog/overworld/params.glsl"
+#include "/lib/atmos/air/overworld/params.glsl"
 flat in OverworldFogParams fogParams;
-
 
 flat in float rainbowAmount;
 #endif
@@ -180,7 +178,7 @@ const bool colortex11MipmapEnabled = true;
 #define ATMOSPHERE_SCATTERING_LUT depthtex0
 #define TEMPORAL_REPROJECTION
 
-#include "/lib/atmos/fog/simpleFog.glsl"
+#include "/lib/atmos/air/simple.glsl"
 #if !defined INCLUDE_LIGHT_AMBIENT_H_BASIS_SKYLIGHT
 #define INCLUDE_LIGHT_AMBIENT_H_BASIS_SKYLIGHT
 
@@ -268,7 +266,6 @@ bool raymarchShadow(
         )
         - rayOriginScreen
     );
-
 
     vec3 invDir = 1.0 / (rayDirScreen + vec3(1e-9));
     vec3 tToEdge = max(
@@ -370,7 +367,6 @@ float getScreenSpaceShadows(
 
 #ifdef LOD_MOD_ACTIVE
 
-
     bool raymarchCombinedDepth = lengthSquared(positionView)
         < sqr(far + 64.0); // heuristic of 4 chunks overlap
     bool hit;
@@ -433,7 +429,7 @@ float getScreenSpaceShadows(
 #endif // INCLUDE_LIGHTING_DIRECT_LIGHTING_SSRT
 
 #include "/lib/brdf/specular.glsl"
-#include "/lib/lodMod.glsl"
+#include "/lib/util/lodMod.glsl"
 #if !defined INCLUDE_POST_PURKINJE_SHIFT
 #define INCLUDE_POST_PURKINJE_SHIFT
 
@@ -484,15 +480,130 @@ vec3 purkinjeShiftTransform(vec3 rgb, vec2 lightLevels) {
 }
 
 #endif // INCLUDE_POST_PURKINJE_SHIFT
-#include "/lib/atmos/sky/sky.glsl"
-#include "/lib/vertex/edgeHighlight.glsl"
+#include "/lib/atmos/sky.glsl"
+
+#if !defined INCLUDE_SURFACE_EDGE_HIGHLIGHT
+#define INCLUDE_SURFACE_EDGE_HIGHLIGHT
+
+#include "/lib/util/encoding.glsl"
+#include "/lib/util/spaceConversion.glsl"
+
+// MC Dungeons-inspired edge highlight effect
+
+bool hasEdgeHighlight(vec3 normal) {
+    // Returns true for faces pointing along an axis
+    return abs(dot(abs(normal), vec3(1.0)) - 1.0) < 0.1;
+}
+
+float edgeHighlightCheck(
+    vec3 offset,
+    vec3 centerPos,
+    vec3 centerNormal,
+    float centerDepth,
+    float rcp_NoV,
+    vec2 depthGradient
+) {
+    // Calculate sample position in screen space
+    vec3 samplePos = sceneToViewSpace(centerPos + offset);
+    samplePos
+        = viewToScreenSpace(combinedProjectionMatrix, samplePos, true);
+
+    // Sample depth and gbuffer data
+    ivec2 texel = ivec2(samplePos.xy * viewRes * taauViewportScale);
+    float sampleDepth = texelFetch(combinedDepthTex, texel, 0).x;
+    float sampleData = texelFetch(colortex1, texel, 0).z;
+
+    // Test for depth discontinuity
+    sampleDepth = linearizeDepthFast(sampleDepth);
+    float expectedDepth
+        = centerDepth + dot(depthGradient, samplePos.xy - uv);
+    float depthEdge = float(
+        abs(sampleDepth - expectedDepth) > 0.25 * rcp_NoV
+        && expectedDepth < sampleDepth
+    );
+
+    // Test for normal discontinuity
+    vec3 sampleNormal = decodeUnitVector(unpackUnorm2x8(sampleData));
+    float normalEdge = float(
+        abs(dot(centerNormal, sampleNormal)) < 0.99
+        && dot(sampleNormal, normalize(offset)) > 0.01
+    );
+
+    return (depthEdge + normalEdge) * float(clamp01(samplePos) == samplePos)
+        * float(
+               hasEdgeHighlight(sampleNormal) || centerDepth < sampleDepth
+        );
+}
+
+float getEdgeHighlight(
+    vec3 scenePos,
+    vec3 worldNormal,
+    float depth,
+    uint materialMask
+) {
+    // Size of one block pixel in world-space
+    const float pixelSize = rcp(edgeHighlightScale);
+
+    // Calculate tangent and bitangent
+    mat3 tbn = getTbnMatrix(worldNormal) * pixelSize;
+
+    float depthLinear = linearizeDepthFast(depth);
+    vec2 depthGradient = vec2(dFdx(depthLinear), dFdy(depthLinear));
+
+    float rcp_NoV = abs(rcp(dot(normalize(scenePos), worldNormal)));
+
+    // Check for an edge in 5 directions around the sample point
+    float highlight = edgeHighlightCheck(
+        tbn[0],
+        scenePos,
+        worldNormal,
+        depthLinear,
+        rcp_NoV,
+        depthGradient
+    );
+    highlight += edgeHighlightCheck(
+        -tbn[0],
+        scenePos,
+        worldNormal,
+        depthLinear,
+        rcp_NoV,
+        depthGradient
+    );
+    highlight += edgeHighlightCheck(
+        tbn[1],
+        scenePos,
+        worldNormal,
+        depthLinear,
+        rcp_NoV,
+        depthGradient
+    );
+    highlight += edgeHighlightCheck(
+        -tbn[1],
+        scenePos,
+        worldNormal,
+        depthLinear,
+        rcp_NoV,
+        depthGradient
+    );
+    highlight += edgeHighlightCheck(
+        tbn[2],
+        scenePos,
+        worldNormal,
+        depthLinear,
+        rcp_NoV,
+        depthGradient
+    );
+
+    return clamp01(float(hasEdgeHighlight(worldNormal)) * highlight);
+}
+
+#endif // INCLUDE_SURFACE_EDGE_HIGHLIGHT
 #include "/lib/brdf/material.glsl"
 #define LUSTER_INCLUDE_RAIN_PUDDLES
 #include "/lib/surface/rain.glsl"
 #undef LUSTER_INCLUDE_RAIN_PUDDLES
 #include "/lib/util/bicubic.glsl"
 #include "/lib/util/spaceConversion.glsl"
-
 
 void bilateralUpscaleSample(
     sampler2D dataSampler,
@@ -521,7 +632,6 @@ void bilateralUpscaleSample(
     depth01 = texelFetch(depthSampler, p01, 0).x;
     depth11 = texelFetch(depthSampler, p11, 0).x;
 }
-
 
 vec4 bilateralUpscaleResolve(
     vec4 data00,
@@ -566,15 +676,13 @@ vec4 bilateralUpscaleResolve(
 #include "/lib/util/color.glsl"
 #include "/lib/util/encoding.glsl"
 
-
 #if defined WORLD_OVERWORLD
-#include "/lib/atmos/sky/clouds/core/sampling.glsl"
-#include "/lib/atmos/sky/rainbow.glsl"
+#include "/lib/atmos/clouds/utility/sampling.glsl"
 #if defined blockyClouds
-#if !defined INCLUDE_SKY_BLOCKY_CLOUDS
-#define INCLUDE_SKY_BLOCKY_CLOUDS
+#if !defined INCLUDE_ATMOS_SKY_BLOCKY_CLOUDS
+#define INCLUDE_ATMOS_SKY_BLOCKY_CLOUDS
 
-#include "/lib/atmos/atmosphere.glsl"
+#include "/lib/atmos/air/atmosphere.glsl"
 #include "/lib/util/color.glsl"
 #include "/lib/util/fastMath.glsl"
 #include "/lib/util/phaseFunctions.glsl"
@@ -912,7 +1020,7 @@ vec4 raymarchBlockyClouds(
     return vec4(scattering, transmittance);
 }
 
-#endif // INCLUDE_SKY_BLOCKY_CLOUDS
+#endif // INCLUDE_ATMOS_SKY_BLOCKY_CLOUDS
 
 #endif
 #endif
@@ -924,7 +1032,7 @@ vec4 raymarchBlockyClouds(
 #if !defined INCLUDE_LIGHT_CLOUD_SHADOWS
 #define INCLUDE_LIGHT_CLOUD_SHADOWS
 
-#include "/lib/atmos/sky/clouds/core/constants.glsl"
+#include "/lib/atmos/clouds/utility/constants.glsl"
 #include "/lib/util/bicubic.glsl"
 
 const ivec2 cloudShadowRes = ivec2(512);
@@ -984,10 +1092,10 @@ float getCloudShadows(sampler2D cloudShadowMap, vec3 scenePos) {
 }
 
 #if defined PROGRAM_PREPARE && defined cloudShadows
-#include "/lib/atmos/sky/clouds/altocumulus.glsl"
-#include "/lib/atmos/sky/clouds/cirrus.glsl"
-#include "/lib/atmos/sky/clouds/cumulus.glsl"
-#include "/lib/atmos/sky/clouds/cumulusCongestus.glsl"
+#include "/lib/atmos/clouds/altocumulus.glsl"
+#include "/lib/atmos/clouds/cirrus.glsl"
+#include "/lib/atmos/clouds/cumulus.glsl"
+#include "/lib/atmos/clouds/cumulusCongestus.glsl"
 
 vec2 renderCloudShadowMap(vec2 uv) {
     // Transform position from scene-space to clouds-space
@@ -1279,7 +1387,6 @@ void main() {
 
     // Shared stochastic offset used by cloud lighting. Animated IGN so
 
-
 #if LUSTER_D4_PASS == 2
     float dither = interleavedGradientNoise(vec2(texel), frameCounter);
 #endif
@@ -1462,7 +1569,6 @@ void main() {
         }
 #endif
 
-
 #if defined WORLD_OVERWORLD && defined porosity
         if (wetness > eps && material.porosityAmount > eps) {
             material.albedo = applyWetPorosityDarkening(
@@ -1595,7 +1701,6 @@ void main() {
         const float sssDepth = 0.0;
 #endif
 
-
 #ifdef hBasisSkylight
         vec3 skyIrradiance = hBasisIntensity
             * evaluateHBasisIrradiance(hSky, bentNormal);
@@ -1631,27 +1736,20 @@ void main() {
 #ifdef ssptEnabled
         {
 
-
             // d5SsptAccumulate and a-trous filtered by d6SsptFilter.
-
 
             vec3 ssptLight = max0(texture(colortex17, uv).rgb);
 
-
             // diffuse modulation by albedo and metal diffuse amount. SSPT
-
 
             ssptLight *= material.albedo;
             ssptLight *= mix(1.0, metalDiffuseAmount, float(material.isMetal));
 
-
             // clouds physically, and traced sky arrives pre-darkened by the
-
 
             fragmentColor += ssptLight;
         }
 #endif
-
 
         // Specular highlight
 
@@ -1661,7 +1759,6 @@ void main() {
             * lightColor * shadows * cloudShadowMask * ao;
 #endif
 #else
-
 
         fragmentColor = texelFetch(colortex0, texel, 0).rgb;
 

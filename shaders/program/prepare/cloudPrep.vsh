@@ -20,7 +20,7 @@
 
 out vec2 uv;
 
-#include "/lib/atmos/sky/clouds/core/params.glsl"
+#include "/lib/atmos/clouds/utility/params.glsl"
 flat out CloudsParams cloudsParams;
 
 

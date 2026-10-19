@@ -248,7 +248,7 @@ vec2 getWaterParallaxCoord(
 
 #ifdef LUSTER_INCLUDE_WATER_SURFACE_MATERIAL
 #include "/lib/brdf/material.glsl"
-#include "/lib/atmos/fog/simpleFog.glsl"
+#include "/lib/atmos/air/simple.glsl"
 #include "/lib/util/color.glsl"
 Material getWaterMaterial(
     vec3 directionWorld,

@@ -16,8 +16,8 @@
 ====================================================================================================
 */
 
-#if !defined INCLUDE_SKY_CLOUDS_SAMPLING
-#define INCLUDE_SKY_CLOUDS_SAMPLING
+#if !defined INCLUDE_ATMOS_CLOUDS_CORE_SAMPLING
+#define INCLUDE_ATMOS_CLOUDS_CORE_SAMPLING
 
 // Sample filtered clouds
 vec4 readCloudsAndAurora(vec2 uv, out float apparentDistance) {
@@ -46,4 +46,4 @@ vec4 readCloudsAndAurora(vec2 uv, out float apparentDistance) {
 #endif
 }
 
-#endif // INCLUDE_SKY_CLOUDS_SAMPLING
+#endif // INCLUDE_ATMOS_CLOUDS_CORE_SAMPLING

@@ -30,7 +30,7 @@ flat out vec3 hSky[6];
 flat out vec3 sunColor;
 flat out vec3 moonColor;
 
-#include "/lib/atmos/fog/overworld/params.glsl"
+#include "/lib/atmos/air/overworld/params.glsl"
 flat out OverworldFogParams fogParams;
 
 
@@ -97,7 +97,7 @@ uniform float timeMidnight;
 #define LUSTER_INCLUDE_LIGHT_COLOR
 #include "/lib/light/colors.glsl"
 #undef LUSTER_INCLUDE_LIGHT_COLOR
-#include "/lib/atmos/atmosphere.glsl"
+#include "/lib/atmos/air/atmosphere.glsl"
 #include "/lib/atmos/projection.glsl"
 #include "/lib/weather/fog.glsl"
 #include "/lib/weather/rainbow.glsl"
