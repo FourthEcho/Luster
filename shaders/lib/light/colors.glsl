@@ -131,7 +131,12 @@ float getMoonExposure() {
 
     float timeBoost = 1.0 + 0.33 * rcp(clamp01(1.25 * max(-sunDir.y, 0.1)));
 
+#ifdef moonPhaseAffectsBrightness
     return baseScale * moonPhaseBrightness * timeBoost;
+#else
+    // The moon phase only tints the night, it does not change its brightness.
+    return baseScale * timeBoost;
+#endif
 }
 
 vec3 getMoonTint() {

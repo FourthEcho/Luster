@@ -91,6 +91,15 @@ const vec3 primaryWavelengthsAdobeRgb = vec3(660.0, 550.0, 440.0);
 // Generic via XYZ so every branch stays exact; constant-folds at compile.
 #define workingToRec709Color (workingToXyzColor * xyzToRec709)
 
+// Rec. 2020 -> working color space.
+// The precomputed atmosphere scattering LUT (image/atmos/scattering.dat) was
+// baked with the Rec. 2020 scattering coefficients, so it holds Rec. 2020
+// encoded radiance. It has to be converted into the active working gamut
+// before it is used, otherwise the sky is interpreted in the wrong primaries.
+// Follows the pack's row-vector convention: use it as `v * rec2020ToWorkingColor`.
+// The matrix is the identity when the working space already is Rec. 2020.
+#define rec2020ToWorkingColor (rec2020ToXyz * xyzToWorkingColor)
+
 
 #if displayGamut == displayGamutDciP3
 #define fromDisplay(x) (pow(x, vec3(2.6)))

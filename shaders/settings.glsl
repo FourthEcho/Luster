@@ -33,6 +33,8 @@ const float wetnessHalflife         = 70.0;
   #define edgeHighlightScale 16.0 // [4.0 8.0 16.0 32.0 64.0 128.0 256.0]
   #define slantedRain
   #define moonPhaseAffectsBrightness
+  #define entityShadows
+#define blockEntityShadows
   #define desertSandstorm
 // The sandstorm sub-toggles only exist while the sandstorm itself is
 // enabled, so none of them can change anything on its own.
@@ -134,8 +136,6 @@ const float wetnessHalflife         = 70.0;
   #define shadowVpsQuality 8 // [4 6 8 10 12 16 20 24 32]
   #define shadowPenumbraScale 1.0
   #define shadowColorIntensity 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.20 1.50 2.00]
-  #define entityShadows
-#define blockEntityShadows
 //#define pixelatedShadows
   #define pixelatedShadowsRes 16 // [4 8 16 32 64 128 256]
   #define sssSteps 12 // [4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24]

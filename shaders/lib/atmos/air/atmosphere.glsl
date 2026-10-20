@@ -186,12 +186,24 @@ vec3 atmospherePlanetBounce(
 
 // Post-processing applied to the atmosphere color
 vec3 atmospherePostProcessing(vec3 atmosphere) {
+    // The boost and the rain desaturation each have their own toggle, so the
+    // intensity sliders only apply while the feature is enabled.
+    float saturationBoost = 0.0;
+    float rainDesaturation = 0.0;
+
+#ifdef atmosphereSaturationBoost
+    saturationBoost = atmosphereSaturationBoostIntensity * atmosphereSaturationBoostAmount;
+#endif
+
+#ifdef atmosphereRainDesaturation
+    rainDesaturation = atmosphereRainDesaturationIntensity;
+#endif
+
     // Atmosphere saturation boost and rain saturation influence
     atmosphere = mix(
         vec3(dot(atmosphere, luminanceWeights)),
         atmosphere,
-        (1 + atmosphereSaturationBoostIntensity * atmosphereSaturationBoostAmount)
-            * (1 - rainStrength * atmosphereRainDesaturationIntensity)
+        (1 + saturationBoost) * (1 - rainStrength * rainDesaturation)
     );
 
     return atmosphere;
@@ -369,12 +381,16 @@ vec3 atmosphereScattering(
     vec3 scattering;
 
     // Rayleigh + multiple scattering
+    // The LUT is baked in Rec. 2020, so it is converted into the working
+    // gamut before it is combined with the working space sun colour.
     uv.x *= 0.5;
-    scattering = texture(ATMOSPHERE_SCATTERING_LUT, uv).rgb;
+    scattering = texture(ATMOSPHERE_SCATTERING_LUT, uv).rgb
+        * rec2020ToWorkingColor;
 
     // Single mie scattering
     uv.x += 0.5;
-    scattering += texture(ATMOSPHERE_SCATTERING_LUT, uv).rgb * miePhase;
+    scattering += texture(ATMOSPHERE_SCATTERING_LUT, uv).rgb
+        * rec2020ToWorkingColor * miePhase;
 
 #if defined ozoneLayer && defined ozoneSky
 
@@ -583,10 +599,16 @@ vec3 atmosphereScattering(
         uMuMoon
     ); // Mie scattering, moonlight
 
-    vec3 scatteringSc = texture(ATMOSPHERE_SCATTERING_LUT, uvSc).rgb;
-    vec3 scatteringSm = texture(ATMOSPHERE_SCATTERING_LUT, uvSm).rgb;
-    vec3 scatteringMc = texture(ATMOSPHERE_SCATTERING_LUT, uvMc).rgb;
-    vec3 scatteringMm = texture(ATMOSPHERE_SCATTERING_LUT, uvMm).rgb;
+    // The LUT is baked in Rec. 2020, so it is converted into the working
+    // gamut before it is combined with the working space sun colour.
+    vec3 scatteringSc = texture(ATMOSPHERE_SCATTERING_LUT, uvSc).rgb
+        * rec2020ToWorkingColor;
+    vec3 scatteringSm = texture(ATMOSPHERE_SCATTERING_LUT, uvSm).rgb
+        * rec2020ToWorkingColor;
+    vec3 scatteringMc = texture(ATMOSPHERE_SCATTERING_LUT, uvMc).rgb
+        * rec2020ToWorkingColor;
+    vec3 scatteringMm = texture(ATMOSPHERE_SCATTERING_LUT, uvMm).rgb
+        * rec2020ToWorkingColor;
 
     vec3 miePhaseSun = atmosphereMiePhaseSun(nuSun);
     vec3 miePhaseMoon = atmosphereMiePhaseMoon(nuMoon);

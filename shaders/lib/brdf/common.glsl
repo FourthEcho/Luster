@@ -26,7 +26,9 @@
 #include "/lib/brdf/material.glsl"
 #include "/lib/util/fastMath.glsl"
 #include "/lib/util/phaseFunctions.glsl"
-#ifdef handheldLight
+// Handheld light mode 0 is "Off", so it compiles the handheld light out
+// entirely. Every consumer is gated by LUSTER_INCLUDE_HANDHELD_LIGHT.
+#if defined(handheldLight) && handheldLightMode != handheldLightOff
 #define LUSTER_INCLUDE_HANDHELD_LIGHT
 #if defined(LUSTER_INCLUDE_CLOUD_SHADOWS)
 // Cloud-shadow projection and sampling.
