@@ -839,8 +839,9 @@ void main() {
     ivec2 texel = ivec2(gl_FragCoord.xy);
 
     if (abs(MC_RENDER_QUALITY - 1.0) < 0.01) {
+        // Sharpness runs from -1 (no sharpening) to 1 (strongest).
         fragmentColor
-            = casFilter(colortex0, texel, 0.50 * 2.0 - 1.0);
+            = casFilter(colortex0, texel, casIntensity - 1.0);
     } else {
         fragmentColor = catmullRomFilterFastRgb(colortex0, uv, 0.6);
         fragmentColor = displayEotf(fragmentColor);
@@ -850,7 +851,7 @@ void main() {
         colortex0,
         texel,
         fragmentColor,
-        0.50
+        0.50 * casIntensity
     );
 
     fragmentColor = dither8bit(fragmentColor, bayer16(vec2(texel)));

@@ -315,7 +315,9 @@ void main() {
     float distanceFactor = 1.0 - exp2(-0.025 * length(closestView));
 
 
-    float blendWeight = mix(0.35, 0.10, distanceFactor) * rcp(1.00);
+    // Higher TAA intensity keeps more of the previous frame: smoother, but
+    // more ghosting on fast motion.
+    float blendWeight = mix(0.35, 0.10, distanceFactor) * rcp(taaIntensity);
     float alpha = max(1.0 / pixelAge, blendWeight);
 
 #ifndef taau
