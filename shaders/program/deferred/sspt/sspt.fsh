@@ -1108,7 +1108,10 @@ vec3 hitDirectLight(HitData hit, vec3 hitViewPos) {
 #endif
 
 
-    return hit.albedo * (sunMoonDirect + indirectDirect * ssptIntensity);
+    // The sun/moon bounce and the traced sky/handheld bounce are indirect
+    // light, so they follow the indirect lighting intensity. Emission is
+    // scaled separately by the emission intensity.
+    return hit.albedo * (sunMoonDirect + indirectDirect) * indirectLightingIntensity;
 }
 
 #endif // defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE || defined DIRECT_SKY_BOUNCE

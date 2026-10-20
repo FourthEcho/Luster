@@ -96,6 +96,20 @@ vec3 ozoneMultipleScattering(float order) {
 #endif
 }
 
+// Ozone removes green much faster than red and blue. The view path towards
+// the horizon is the longest one, so applying the full extinction there
+// strips the green out of the pale horizon haze and turns it violet. Keep
+// only a fraction of that chromatic shift: the ozone still dims and cools
+// the sky, but the horizon stays neutral (warm towards the sun at
+// sunrise/sunset, blue at noon).
+const float ozoneViewChroma = 0.25;
+
+vec3 ozoneLayerViewTransmittance(float mu, float r) {
+    vec3 transmittance = ozoneLayerTransmittance(mu, r);
+    float luminance = dot(transmittance, luminanceWeights);
+    return mix(vec3(luminance), transmittance, ozoneViewChroma);
+}
+
 #endif // INCLUDE_ATMOS_AIR_OVERWORLD_OZONE
 
 #if !defined INCLUDE_ATMOS_AIR_OVERWORLD_SANDBORMDSTORM

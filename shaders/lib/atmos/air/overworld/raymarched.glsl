@@ -344,13 +344,35 @@ vec3 getHandheldLight(vec3 scenePos, float ao) {
 #if mistMode != mistModeOff
 
 
+// The noise texture is 2D, so a plain XZ lookup extrudes the mist pattern
+// along Y: seen edge-on at the horizon the mist breaks up into vertical
+// curtains. Blending two height-shifted slices of the noise into a
+// pseudo-3D field keeps the layer soft in every direction instead.
+float mistNoise(vec3 worldPos, float scale, vec2 wind) {
+    float slice = worldPos.y * 0.2;
+    float base = floor(slice);
+    float blend = fract(slice);
+
+    // Offset between the slices is irrational-ish so the repetition of the
+    // noise texture does not line up from one slice to the next.
+    vec2 sliceOffset = vec2(0.21, 0.34);
+
+    float n0 = texture(noisetex, worldPos.xz * scale + sliceOffset * base + wind).w;
+    float n1 = texture(
+        noisetex,
+        worldPos.xz * scale + sliceOffset * (base + 1.0) + wind
+    ).w;
+
+    return mix(n0, n1, blend);
+}
+
 float mistDensityProfile(vec3 worldPos) {
     // Slow horizontal drift — two independent directions for each octave
     vec2 wind0 = vec2(frameTimeCounter * 0.004,  frameTimeCounter * 0.0025);
     vec2 wind1 = vec2(frameTimeCounter * 0.0068, frameTimeCounter * 0.0041);
 
-    float n0 = texture(noisetex, worldPos.xz * 0.008 + wind0).w;
-    float n1 = texture(noisetex, worldPos.xz * 0.022 + wind1).w;
+    float n0 = mistNoise(worldPos, 0.008, wind0);
+    float n1 = mistNoise(worldPos, 0.022, wind1);
     float noise = n0 * 0.7 + n1 * 0.3;
 
     float altitude = worldPos.y;
@@ -373,7 +395,8 @@ float mistDensityProfile(vec3 worldPos) {
 
 
 float mistPhase(float cosTheta, float localDensity) {
-    float g = mix(0.75, 0.40, clamp01(localDensity * 8.0));
+    // Thin mist scatters more forward, thick mist is closer to isotropic.
+    float g = mix(0.75, 0.40, clamp01(localDensity * 4.0));
     return 0.8 * henyeyGreensteinPhase(cosTheta, g)
          + 0.2 * henyeyGreensteinPhase(cosTheta, -0.1);
 }
@@ -511,6 +534,12 @@ mat2x3 raymarchAirFog(
     mat2x3 lightSun = mat2x3(0.0); // Rayleigh, mie
     mat2x3 lightSky = mat2x3(0.0); // Rayleigh, mie
 
+    // The mist is a medium of its own: its scattering already carries the
+    // mist coefficient, so it must not be scaled by the Mie coefficient the
+    // way the fog's Mie medium is.
+    vec3 mistSunLight = vec3(0.0);
+    vec3 mistSkyLight = vec3(0.0);
+
     for (int i = 0; i < stepCount;
          ++i, worldPos += worldStep, shadowPos += shadowStep) {
         vec3 shadowScreenPos = distortShadowSpace(shadowPos) * 0.5 + 0.5;
@@ -595,9 +624,9 @@ mat2x3 raymarchAirFog(
             float mistPhaseVal  = mistPhase(LoV, mistD / stepLength);
 #endif
 
-            vec3 mistScatter = fogParams.mistScatteringCoeff * mistD * visibleScattering;
-            lightSun[1] += mistScatter * mistPhaseVal * mistSunShadow;
-            lightSky[1] += mistScatter * isotropicPhase;
+            vec3 mistScatter = mistD * visibleScattering;
+            mistSunLight += mistScatter * mistPhaseVal * mistSunShadow;
+            mistSkyLight += mistScatter * isotropicPhase;
         }
 #endif
 
@@ -613,6 +642,9 @@ mat2x3 raymarchAirFog(
     lightSun[1] *= fogParams.mieScatteringCoeff;
     lightSky[0] *= fogParams.rayleighScatteringCoeff;
     lightSky[1] *= fogParams.mieScatteringCoeff;
+
+    mistSunLight *= fogParams.mistScatteringCoeff;
+    mistSkyLight *= fogParams.mistScatteringCoeff;
 
     if (!sky) {
         // Skylight falloff
@@ -639,7 +671,7 @@ mat2x3 raymarchAirFog(
     vec3 ambientColor = ambientColorFog;
 #endif
 
-    scattering += 2.0 * lightSky * vec2(isotropicPhase)
+    scattering += 2.0 * (lightSky * vec2(isotropicPhase) + mistSkyLight)
         * ambientColor;
 
     for (int i = 0; i < 4; ++i) {
@@ -654,7 +686,8 @@ mat2x3 raymarchAirFog(
 #endif
 
         scattering += scatterAmount
-            * (lightSun * vec2(isotropicPhase, miePhase)) * orderLight
+            * (lightSun * vec2(isotropicPhase, miePhase) + mistSunLight)
+            * orderLight
             * (1.0 - 0.9 * rainStrength);
 
         scatterAmount *= 0.5;

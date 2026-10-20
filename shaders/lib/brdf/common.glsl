@@ -495,7 +495,7 @@ vec3 getSkyLight(
 #if defined WORLD_NETHER
     // Nether keeps the caller-provided sky irradiance as its only ambient
     // contribution here.
-    vec3 skylight = skyIrradiance * ao * ssptIntensity;
+    vec3 skylight = skyIrradiance * ao * indirectLightingIntensity;
     vec3 skylightUp = skylight;
 
     skylight = mix(skylight, 0.5 * skylightUp * ao, material.sssAmount);
@@ -508,11 +508,11 @@ vec3 getSkyLight(
 #else
 
 
-    vec3 skylightBase = skyIrradiance * ao * ssptIntensity;
+    vec3 skylightBase = skyIrradiance * ao * indirectLightingIntensity;
     // sss translucency wrap always references the live ambient, so leaves
     // keep their glow in every mode.
     vec3 skylight = skylightBase;
-    vec3 skylightUp = skyIrradiance * ao * ssptIntensity;
+    vec3 skylightUp = skyIrradiance * ao * indirectLightingIntensity;
 
     skylight = mix(skylight, 0.5 * skylightUp * ao, material.sssAmount);
     skylight += ambientSss * skylightUp * material.sssAmount * 2.0;

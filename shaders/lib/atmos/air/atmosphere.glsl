@@ -379,7 +379,7 @@ vec3 atmosphereScattering(
 #if defined ozoneLayer && defined ozoneSky
 
 
-    scattering *= ozoneLayerTransmittance(muView, planetRadius);
+    scattering *= ozoneLayerViewTransmittance(muView, planetRadius);
 #endif
 
 #if defined desertSandstorm && defined sandstormSky
@@ -598,7 +598,7 @@ vec3 atmosphereScattering(
 #if defined ozoneLayer && defined ozoneSky
 
 
-    lutScattering *= ozoneLayerTransmittance(muView, planetRadius);
+    lutScattering *= ozoneLayerViewTransmittance(muView, planetRadius);
 #endif
 #if defined desertSandstorm && defined sandstormSky
     // View-path dust extinction. Planet bounce carries its own up-path

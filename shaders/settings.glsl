@@ -34,10 +34,14 @@ const float wetnessHalflife         = 70.0;
   #define slantedRain
   #define moonPhaseAffectsBrightness
   #define desertSandstorm
+// The sandstorm sub-toggles only exist while the sandstorm itself is
+// enabled, so none of them can change anything on its own.
+#ifdef desertSandstorm
   #define sandstormLayer
   #define sandstormSky
   #define sandstormMist
   #define sandstormBounce
+#endif
   #define endGlow
 
 // Weather
@@ -393,10 +397,14 @@ const float wetnessHalflife         = 70.0;
   #define ozoneColorG 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.40 1.50 1.75 2.00]
   #define ozoneColorB 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.40 1.50 1.75 2.00]
 
-#define ozoneSky
-#define ozoneFog
-#define ozoneMist
-#define ozonePlanetBounce
+// The ozone sub-toggles only exist while the ozone layer itself is
+// enabled, so none of them can change anything on its own.
+#ifdef ozoneLayer
+  #define ozoneSky
+  #define ozoneFog
+  #define ozoneMist
+  #define ozonePlanetBounce
+#endif
 
 // Mie Coefficient
 
@@ -846,6 +854,7 @@ const float wetnessHalflife         = 70.0;
   #define ssptLightmapBlend 1.0 // [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
   #define ssptEmissionMode 0 // [0 1 2] 0 = Hardcoded, 1 = Hardcoded + LabPBR, 2 = LabPBR only. Only affects SSPT.
   #define ssptIntensity 1.00 // [0.00 0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.45 0.50 0.55 0.60 0.65 0.70 0.75 0.80 0.85 0.90 0.95 1.00]
+  #define indirectLightingIntensity 0.50 // [0.00 0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.45 0.50 0.55 0.60 0.65 0.70 0.75 0.80 0.85 0.90 0.95 1.00 1.05 1.10 1.15 1.20 1.25 1.30 1.35 1.40 1.45 1.50 1.55 1.60 1.65 1.70 1.75 1.80 1.85 1.90 1.95 2.00]
 
   #define maxFrames 128.0 // [16.0 32.0 64.0 128.0 192.0 256.0 384.0 512.0 768.0 1024.0]
 
