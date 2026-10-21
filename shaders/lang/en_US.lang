@@ -1191,7 +1191,7 @@ option.ssptEnabled=SSPT
 option.ssptEnabled.comment=Screen-space path traced emission and colored lighting. Big performance impact.
 option.ssptFullRangeRT=Long Range SSPT
 option.ssptFullRangeRT.comment=Traces the whole screen instead of a short range. Needs more samples for similar quality.
-option.indirectResReduction=Indirect Lighting Res.
+option.indirectResReduction=Indirect Lighting Res
 option.indirectResReduction.comment=Resolution of the SSPT trace and filter buffers, relative to the screen. Lower = faster but softer indirect light.
 value.indirectResReduction.1=100%
 value.indirectResReduction.2=50%
