@@ -107,10 +107,6 @@ float avgOf(vec2 v) {
     return (v.x + v.y) * 0.5;
 }
 
-// Depth-aware 2x2 upscale of the quarter-res AO buffer for the lightmap
-// fallback finishing. Mirrors the shading-pass bilateral resolve (10.0 depth
-// scale) so DSSAO and DGTAO finish without bleeding across discontinuities
-// at any indirectResReduction. Returns 1.0 for hands and shaderAoNone.
 float fetchFallbackAo(vec2 uv, float linZ, bool isHand) {
     if (isHand) {
         return 1.0;

@@ -1000,11 +1000,6 @@ vec3 hitEmission(vec4 hitData0, ivec2 hitTexel, vec3 hitViewPos) {
 
 #define DIRECT_SKY_BOUNCE 1
 
-// The screen-space tracer has no notion of volume: traced radiance is
-// computed at air strength even when both path vertices sit underwater.
-// Water absorption over the traced segment brings traced emission and
-// bounce light down to the medium's response, so side faces no longer
-// read as coated by an air-strength film of indirect light.
 vec3 tracedWaterAttenuation(vec3 viewPos, vec3 hitViewPos) {
     if (isEyeInWater != 1) return vec3(1.0);
     const vec3 absorptionCoeff
@@ -1108,9 +1103,6 @@ vec3 hitDirectLight(HitData hit, vec3 hitViewPos) {
 #endif
 
 
-    // The sun/moon bounce and the traced sky/handheld bounce are indirect
-    // light, so they follow the indirect lighting intensity. Emission is
-    // scaled separately by the emission intensity.
     return hit.albedo * (sunMoonDirect + indirectDirect) * indirectLightingIntensity;
 }
 
@@ -1330,12 +1322,6 @@ vec3 traceIndirect(
 #include "/lib/util/encode.glsl"
 #include "/lib/util/spaceConversion.glsl"
 
-// Depth-aware 2x2 upscale of the quarter-res AO buffer (colortex6.x with
-// colortex14 depth weights, same 10.0 scale as the shading pass bilateral
-// resolve). Works at any SSPT buffer resolution set by indirectResReduction
-// and for both DSSAO (scalar) and DGTAO (scalar visibility; bent normal stays
-// in the shading pass for directional sky). Bilinear texture() would bleed AO
-// across depth discontinuities and leak/halo the bounce finishing.
 float fetchSsptContactAo(vec2 uv, float linZ) {
 #if shaderAo == shaderAoNone
     return 1.0;

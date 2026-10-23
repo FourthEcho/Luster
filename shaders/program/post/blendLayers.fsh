@@ -29,9 +29,14 @@ float luminance(vec3 c) {
 vec3 fogSpatialFilter(
     sampler2D scatteringTex,
     vec2 uv,
-    vec2 pixelSize,
     int radius
 ) {
+    // Steps are in units of the fog buffer's own texels, not screen pixels:
+    // the fog buffers render at half resolution, so stepping by viewPixelSize
+    // made the effective blur radius ~2x the slider value and misaligned the
+    // taps against the underlying texels.
+    vec2 texelSize = rcp(vec2(textureSize(scatteringTex, 0)));
+
     vec3 center = texture(scatteringTex, uv).rgb;
     vec3 sum = center;
     float wSum = 1.0;
@@ -46,7 +51,7 @@ vec3 fogSpatialFilter(
             if (x == 0 && y == 0) continue;
 
             vec2 offset = vec2(float(x), float(y));
-            vec2 sampleUv = uv + offset * pixelSize;
+            vec2 sampleUv = uv + offset * texelSize;
             if (clamp01(sampleUv) != sampleUv) continue;
 
             vec3 sampleValue = texture(scatteringTex, sampleUv).rgb;
@@ -95,8 +100,8 @@ uniform sampler2D colortex0; // scene color
 uniform sampler2D colortex3; // refraction data
 uniform sampler2D colortex4; // sky map
 uniform sampler2D colortex5; // scene history (used by SSR reflection reprojection)
-uniform sampler2D colortex6; // volumetric fog scattering
-uniform sampler2D colortex7; // volumetric fog transmittance
+uniform sampler2D colortex6; // volumetric fog transmittance
+uniform sampler2D colortex7; // volumetric fog scattering
 uniform sampler2D colortex11; // clouds history
 uniform sampler2D colortex12; // clouds data
 uniform sampler2D colortex13; // rendered translucent layer
@@ -1148,14 +1153,8 @@ void main() {
 #ifdef fogSmoothing
     // Denoise the fog buffers themselves. Do not use scene/taa history as a
     // substitute for volumetric radiance.
-    fogTransmittance = fogSpatialFilter(
-        colortex6, uv, vec2(viewPixelSize.x, viewPixelSize.y),
-        max(fogSmoothingRadius, 1)
-    );
-    fogScattering = fogSpatialFilter(
-        colortex7, uv, vec2(viewPixelSize.x, viewPixelSize.y),
-        max(fogSmoothingRadius, 1)
-    );
+    fogTransmittance = fogSpatialFilter(colortex6, uv, max(fogSmoothingRadius, 1));
+    fogScattering = fogSpatialFilter(colortex7, uv, max(fogSmoothingRadius, 1));
 #endif
 #endif
 

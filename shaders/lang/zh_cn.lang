@@ -642,9 +642,9 @@ option.vl.comment=添加光轴和可变雾气密度.
 option.overworldFogIntensity=主世界雾气强度
 option.overworldFogIntensity.comment=Overall strength of the overworld air fog. Higher values thicken the haze and reduce how far you can see.
 option.fogSmoothing=Fog Smoothing
-option.fogSmoothing.comment=When enabled, smoothly blends fog between frames to reduce flickering. Small performance cost.
+option.fogSmoothing.comment=Gaussian blur over the volumetric fog buffers to hide ray-march noise and blockiness. Edge-aware, so fog does not bleed across solid geometry. Runs on the current frame only, so nothing smears on fast movement. Small performance cost.
 option.fogSmoothingRadius=Fog Blur Radius
-option.fogSmoothingRadius.comment=Adjusts the spatial blur radius for fog smoothing. Higher = softer, more blended fog at higher cost.
+option.fogSmoothingRadius.comment=Radius of the fog blur, measured in fog-buffer texels. Higher is softer at higher cost, while respecting hard density edges.
 screen.crepRays=Crepuscular Rays
 option.crepRays=Enabled
 option.crepRays.comment=Enables god rays (light shafts) visible when the sun is near the horizon through fog and clouds. Best seen at sunrise/sunset.
