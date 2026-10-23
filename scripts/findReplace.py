@@ -1,33 +1,32 @@
-import os 
-import glob 
+"""
+Find and replace text in every shader file, setting file, and language file.
+
+Usage (run from the Luster-main root):
+python3 scripts/findReplace.py
+"""
+
+import os
 
 find = input("find: ")
 replace = input("replace with: ")
-directory = input("directory: ")
+directory = input("directory (default: shaders): ").strip() or "shaders"
 
-paths = glob.glob(f"{directory}/**", recursive=True) 
-extensions = [".glsl", ".fsh", ".vsh", ".csh"]
+extensions = {".glsl", ".fsh", ".vsh", ".csh", ".properties", ".lang", ".json"}
 
-for path in paths:
-    if not os.path.isfile(path):
-        continue
-    if not os.path.splitext(path)[1] in extensions:
-        continue
+if not find:
+    raise SystemExit("nothing to find")
 
-    with open(path, "r") as file:
-        file_content = file.read()
+for root, _, files in os.walk(directory):
+    for name in files:
+        if os.path.splitext(name)[1] not in extensions:
+            continue
+        path = os.path.join(root, name)
 
-    file_lines = file_content.splitlines()
-    updated_lines = []
-    modified = False
+        # newline="" keeps line endings and the trailing newline exactly as they were
+        with open(path, "r", encoding="utf-8", newline="") as file:
+            content = file.read()
 
-    for line in file_lines:
-        if find in line:
-            line = line.replace(find, replace)
-            modified = True
-
-        updated_lines.append(line)
-
-    if modified:
-        with open(path, "w") as file:
-            file.write("\n".join(updated_lines))
+        if find in content:
+            with open(path, "w", encoding="utf-8", newline="") as file:
+                file.write(content.replace(find, replace))
+            print(f"updated {path}")
