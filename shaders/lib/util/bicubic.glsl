@@ -1,0 +1,303 @@
+/*
+====================================================================================================
+
+    Copyright (C) 2026 FourthEcho
+
+    All Rights Reserved unless otherwise explicitly stated.
+
+
+    By downloading this you have agreed to the license and terms of use.
+    These can be found inside the included license-file.
+
+    Violating these terms may be penalized with actions according to the Digital Millennium
+    Copyright Act (DMCA), the Information Society Directive and/or similar laws
+    depending on your country.
+
+====================================================================================================
+*/
+
+#if !defined INCLUDE_UTILITY_BICUBIC
+#define INCLUDE_UTILITY_BICUBIC
+
+// Source for bicubic filter:
+// https://stackoverflow.com/questions/13501081/efficient-bicubic-filtering-code-in-glsl
+
+// License:
+/*
+MIT License
+Copyright (c) 2019 MJP
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+vec4 bicubicWeights(float v) {
+    vec4 n = vec4(1.0, 2.0, 3.0, 4.0) - v;
+    vec4 s = n * n * n;
+    float x = s.x;
+    float y = s.y - 4.0 * s.x;
+    float z = s.z - 4.0 * s.y + 6.0 * s.x;
+    float w = 6.0 - x - y - z;
+    return vec4(x, y, z, w) * (1.0 / 6.0);
+}
+
+vec4 bicubicFilterLod(sampler2D sampler, vec2 coord, int lod) {
+    vec2 res = textureSize(sampler, lod);
+    vec2 viewPixelSize = 1.0 / res;
+
+    coord = coord * res - 0.5;
+
+    vec2 fxy = fract(coord);
+    coord -= fxy;
+
+    vec4 xWeights = bicubicWeights(fxy.x);
+    vec4 yWeights = bicubicWeights(fxy.y);
+
+    vec4 c = coord.xxyy + vec2(-0.5, 1.5).xyxy;
+
+    vec4 s = vec4(xWeights.xz + xWeights.yw, yWeights.xz + yWeights.yw);
+    vec4 offset = c + vec4(xWeights.yw, yWeights.yw) / s;
+
+    offset *= viewPixelSize.xxyy;
+
+    vec4 sample0 = textureLod(sampler, offset.xz, lod);
+    vec4 sample1 = textureLod(sampler, offset.yz, lod);
+    vec4 sample2 = textureLod(sampler, offset.xw, lod);
+    vec4 sample3 = textureLod(sampler, offset.yw, lod);
+
+    float sx = s.x / (s.x + s.y);
+    float sy = s.z / (s.z + s.w);
+
+    return mix(mix(sample3, sample2, sx), mix(sample1, sample0, sx), sy);
+}
+
+vec4 bicubicFilter(sampler2D sampler, vec2 coord) {
+    return bicubicFilterLod(sampler, coord, 0);
+}
+
+// Source: https://gist.github.com/TheRealMJP/c83b8c0f46b63f3a88a5986f4fa982b1
+// (MIT license)
+vec4 catmullRomFilter(sampler2D sampler, vec2 coord, out float confidence) {
+    vec2 res = textureSize(sampler, 0);
+    vec2 viewPixelSize = 1.0 / res;
+
+
+    // coordinate. We'll do this by rounding down the sample location to get the
+
+
+    vec2 samplePos = coord * res;
+    vec2 texPos1 = floor(samplePos - 0.5) + 0.5;
+
+
+    vec2 f = samplePos - texPos1;
+
+
+    vec2 w0 = f * (-0.5 + f * (1.0 - 0.5 * f));
+    vec2 w1 = 1.0 + f * f * (-2.5 + 1.5 * f);
+    vec2 w2 = f * (0.5 + f * (2.0 - 1.5 * f));
+    vec2 w3 = f * f * (-0.5 + 0.5 * f);
+
+
+    vec2 w12 = w1 + w2;
+    vec2 offset12 = w2 / (w1 + w2);
+
+    // Compute the final UV coordinates we'll use for sampling the texture
+    vec2 texPos0 = texPos1 - 1.0;
+    vec2 texPos3 = texPos1 + 2.0;
+    vec2 texPos12 = texPos1 + offset12;
+
+    texPos0 *= viewPixelSize;
+    texPos3 *= viewPixelSize;
+    texPos12 *= viewPixelSize;
+
+    vec4 result = vec4(0.0);
+    result
+        += textureLod(sampler, vec2(texPos0.x, texPos0.y), 0.0) * w0.x * w0.y;
+    result += textureLod(sampler, vec2(texPos12.x, texPos0.y), 0.0) * w12.x
+        * w0.y;
+    result
+        += textureLod(sampler, vec2(texPos3.x, texPos0.y), 0.0) * w3.x * w0.y;
+
+    result += textureLod(sampler, vec2(texPos0.x, texPos12.y), 0.0) * w0.x
+        * w12.y;
+    result += textureLod(sampler, vec2(texPos12.x, texPos12.y), 0.0) * w12.x
+        * w12.y;
+    result += textureLod(sampler, vec2(texPos3.x, texPos12.y), 0.0) * w3.x
+        * w12.y;
+
+    result
+        += textureLod(sampler, vec2(texPos0.x, texPos3.y), 0.0) * w0.x * w3.y;
+    result += textureLod(sampler, vec2(texPos12.x, texPos3.y), 0.0) * w12.x
+        * w3.y;
+    result
+        += textureLod(sampler, vec2(texPos3.x, texPos3.y), 0.0) * w3.x * w3.y;
+
+    // Calculate confidence-of-quality factor using UE method (maximum weight)
+    confidence = maxOf(vec4(w0.x, w1.x, w2.x, w3.x))
+        * maxOf(vec4(w0.y, w1.y, w2.y, w3.y));
+
+    return result;
+}
+
+vec4 catmullRomFilter(sampler2D sampler, vec2 coord) {
+    float confidence;
+    return catmullRomFilter(sampler, coord, confidence);
+}
+
+// Approximation from Siggraph 2016 SMAA presentation
+// Ignores the corner texels, reducing the overhead from 9 to 5 bilinear samples
+vec4 catmullRomFilterFast(
+    sampler2D sampler,
+    vec2 coord,
+    const float sharpness
+) {
+    vec2 res = vec2(textureSize(sampler, 0));
+    vec2 viewPixelSize = 1.0 / res;
+
+    vec2 position = res * coord;
+    vec2 centerPosition = floor(position - 0.5) + 0.5;
+    vec2 f = position - centerPosition;
+    vec2 f2 = f * f;
+    vec2 f3 = f * f2;
+
+    vec2 w0 = -sharpness * f3 + 2.0 * sharpness * f2 - sharpness * f;
+    vec2 w1 = (2.0 - sharpness) * f3 - (3.0 - sharpness) * f2 + 1.0;
+    vec2 w2 = -(2.0 - sharpness) * f3 + (3.0 - 2.0 * sharpness) * f2
+        + sharpness * f;
+    vec2 w3 = sharpness * f3 - sharpness * f2;
+
+    vec2 w12 = w1 + w2;
+    vec2 tc12 = viewPixelSize * (centerPosition + w2 / w12);
+    vec4 centerColor = texture(sampler, vec2(tc12.x, tc12.y));
+
+    vec2 tc0 = viewPixelSize * (centerPosition - 1.0);
+    vec2 tc3 = viewPixelSize * (centerPosition + 2.0);
+
+    float l0 = w12.x * w0.y;
+    float l1 = w0.x * w12.y;
+    float l2 = w12.x * w12.y;
+    float l3 = w3.x * w12.y;
+    float l4 = w12.x * w3.y;
+
+    vec4 color = texture(sampler, vec2(tc12.x, tc0.y)) * l0
+        + texture(sampler, vec2(tc0.x, tc12.y)) * l1 + centerColor * l2
+        + texture(sampler, vec2(tc3.x, tc12.y)) * l3
+        + texture(sampler, vec2(tc12.x, tc3.y)) * l4;
+
+    return color / (l0 + l1 + l2 + l3 + l4);
+}
+
+vec3 catmullRomFilterFastRgb(
+    sampler2D sampler,
+    vec2 coord,
+    const float sharpness
+) {
+    vec2 res = vec2(textureSize(sampler, 0));
+    vec2 viewPixelSize = 1.0 / res;
+
+    vec2 position = res * coord;
+    vec2 centerPosition = floor(position - 0.5) + 0.5;
+    vec2 f = position - centerPosition;
+    vec2 f2 = f * f;
+    vec2 f3 = f * f2;
+
+    vec2 w0 = -sharpness * f3 + 2.0 * sharpness * f2 - sharpness * f;
+    vec2 w1 = (2.0 - sharpness) * f3 - (3.0 - sharpness) * f2 + 1.0;
+    vec2 w2 = -(2.0 - sharpness) * f3 + (3.0 - 2.0 * sharpness) * f2
+        + sharpness * f;
+    vec2 w3 = sharpness * f3 - sharpness * f2;
+
+    vec2 w12 = w1 + w2;
+    vec2 tc12 = viewPixelSize * (centerPosition + w2 / w12);
+    vec3 centerColor = texture(sampler, vec2(tc12.x, tc12.y)).rgb;
+
+    vec2 tc0 = viewPixelSize * (centerPosition - 1.0);
+    vec2 tc3 = viewPixelSize * (centerPosition + 2.0);
+
+    vec4 color
+        = vec4(texture(sampler, vec2(tc12.x, tc0.y)).rgb, 1.0) * (w12.x * w0.y)
+        + vec4(texture(sampler, vec2(tc0.x, tc12.y)).rgb, 1.0) * (w0.x * w12.y)
+        + vec4(centerColor, 1.0) * (w12.x * w12.y)
+        + vec4(texture(sampler, vec2(tc3.x, tc12.y)).rgb, 1.0) * (w3.x * w12.y)
+        + vec4(texture(sampler, vec2(tc12.x, tc3.y)).rgb, 1.0) * (w12.x * w3.y);
+
+    return color.rgb / color.a;
+}
+
+
+// Checkerboard sampling patterns (used by the temporal cloud upscaler)
+
+#define INCLUDE_UTILITY_CHECKERBOARD
+
+const ivec2[2] checkerboardOffsets2x1 = ivec2[2](ivec2(0, 0), ivec2(1, 0));
+
+const ivec2[4] checkerboardOffsets2x2
+    = ivec2[4](ivec2(0, 0), ivec2(1, 1), ivec2(1, 0), ivec2(0, 1));
+
+const ivec2[8] checkerboardOffsets4x2 = ivec2[8](
+    ivec2(0, 0),
+    ivec2(2, 0),
+    ivec2(1, 1),
+    ivec2(3, 1),
+    ivec2(1, 0),
+    ivec2(3, 0),
+    ivec2(0, 1),
+    ivec2(2, 1)
+);
+
+const ivec2[9] checkerboardOffsets3x3 = ivec2[9](
+    ivec2(0, 0),
+    ivec2(2, 0),
+    ivec2(0, 2),
+    ivec2(2, 2),
+    ivec2(1, 1),
+    ivec2(1, 0),
+    ivec2(1, 2),
+    ivec2(0, 1),
+    ivec2(2, 1)
+);
+
+const ivec2[16] checkerboardOffsets4x4 = ivec2[16](
+    ivec2(0, 0),
+    ivec2(2, 0),
+    ivec2(0, 2),
+    ivec2(2, 2),
+    ivec2(1, 1),
+    ivec2(3, 1),
+    ivec2(1, 3),
+    ivec2(3, 3),
+    ivec2(1, 0),
+    ivec2(3, 0),
+    ivec2(1, 2),
+    ivec2(3, 2),
+    ivec2(0, 1),
+    ivec2(2, 1),
+    ivec2(0, 3),
+    ivec2(2, 3)
+);
+
+#if cloudsTemporalUpscaling == 1
+#define cloudsCheckerboardOffsets ivec2[1](ivec2(0))
+#elif cloudsTemporalUpscaling == 2
+#define cloudsCheckerboardOffsets checkerboardOffsets2x2
+#elif cloudsTemporalUpscaling == 3
+#define cloudsCheckerboardOffsets checkerboardOffsets3x3
+#elif cloudsTemporalUpscaling == 4
+#define cloudsCheckerboardOffsets checkerboardOffsets4x4
+#endif
+
+
+#endif // INCLUDE_UTILITY_BICUBIC
