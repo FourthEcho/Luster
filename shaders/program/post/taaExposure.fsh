@@ -79,8 +79,8 @@ uniform vec2 taaOffset;
     0.25 // Reduces blur when moving quickly. Too much offcenter rejection
          // results in aliasing and jittering in motion
 #define TAAU_CONFIDENCE_REJECTION \
-    5.0 // Controls the impact of the "confidence-of-quality" factor on temporal
-        // upscaling. Tradeoff between image clarity and time taken to converge
+    5.0 // Preserves temporal history when the current reconstruction has low
+        // confidence, important for thin, high-frequency leaves.
 #define TAAU_FLICKER_REDUCTION \
     1.0 // Increases ghosting but reduces flickering caused by aggressive
         // clipping
@@ -97,11 +97,30 @@ uniform vec2 taaOffset;
 
 #include "/lib/util/color.glsl"
 
-// Invertible tonemapping operator (Reinhard) applied before blending the
-// current and previous frames Improves the appearance of emissive objects
-vec3 reinhard(vec3 rgb) { return rgb / (rgb + 1.0); }
+// Sanitize temporal samples before color-space transforms. A single invalid
+// history value must not poison a whole neighborhood during clipping.
+vec3 sanitizeTemporalColor(vec3 rgb) {
+    rgb.r = (isnan(rgb.r) || isinf(rgb.r)) ? 0.0 : rgb.r;
+    rgb.g = (isnan(rgb.g) || isinf(rgb.g)) ? 0.0 : rgb.g;
+    rgb.b = (isnan(rgb.b) || isinf(rgb.b)) ? 0.0 : rgb.b;
+    return max(rgb, vec3(0.0));
+}
 
-vec3 reinhardInverse(vec3 rgb) { return rgb / (1.0 - rgb); }
+// Invertible tonemapping operator (Reinhard) applied before blending the
+// current and previous frames. Keeps temporal clipping in a bounded domain.
+vec3 reinhard(vec3 rgb) {
+    rgb = sanitizeTemporalColor(rgb);
+    return rgb / (rgb + 1.0);
+}
+
+// YCoCg AABB clipping can reconstruct RGB values outside the valid Reinhard
+// domain. Guard the inverse so one invalid history sample cannot become an
+// enormous HDR value after exposure and tonemapping.
+vec3 reinhardInverse(vec3 rgb) {
+    rgb = sanitizeTemporalColor(rgb);
+    rgb = clamp(rgb, vec3(0.0), vec3(1.0 - 1e-4));
+    return rgb / max(vec3(1e-4), 1.0 - rgb);
+}
 
 // Estimates the closest fragment in a 5x5 radius with 5 samples in a cross
 // pattern Improves reprojection for objects in motion
@@ -161,12 +180,34 @@ float getFlickerReduction(
 ) {
     const float flickerSensitivity = 5.0;
 
-    vec3 minOffset = (historyColor - minColor);
-    vec3 maxOffset = (maxColor - historyColor);
+    vec3 minOffset = historyColor - minColor;
+    vec3 maxOffset = maxColor - historyColor;
 
+    // TAAU clipping happens in Reinhard-compressed, pre-exposure space.
+    // Do not multiply this distance by the display exposure: doing so makes
+    // temporal history weight change as the global exposure meter adapts.
     float distanceToClip
-        = length(min(minOffset, maxOffset)) * flickerSensitivity * exposure;
+        = length(min(minOffset, maxOffset)) * flickerSensitivity;
     return clamp01(distanceToClip);
+}
+
+// Convert a component-wise RGB box into a conservative YCoCg AABB. The
+// prepass stores RGB bounds so the upscaler can also constrain ringing and
+// clamp reconstructed history without a second 3x3 texture-fetch pass.
+vec3 rgbBoundsToYcocgMin(vec3 minRgb, vec3 maxRgb) {
+    return vec3(
+        0.25 * minRgb.r + 0.50 * minRgb.g + 0.25 * minRgb.b,
+        0.50 * minRgb.r - 0.50 * maxRgb.b,
+        -0.25 * maxRgb.r + 0.50 * minRgb.g - 0.25 * maxRgb.b
+    );
+}
+
+vec3 rgbBoundsToYcocgMax(vec3 minRgb, vec3 maxRgb) {
+    return vec3(
+        0.25 * maxRgb.r + 0.50 * maxRgb.g + 0.25 * maxRgb.b,
+        0.50 * maxRgb.r - 0.50 * minRgb.b,
+        -0.25 * minRgb.r + 0.50 * maxRgb.g - 0.25 * minRgb.b
+    );
 }
 
 vec3 neighborhoodClipping(
@@ -191,19 +232,37 @@ vec3 neighborhoodClipping(
     vec3 h = texelFetch(colortex0, texel + ivec2(0, -1), 0).rgb;
     vec3 i = texelFetch(colortex0, texel + ivec2(1, -1), 0).rgb;
 
-    // Convert to YCoCg
+    // Save the actual RGB neighborhood before converting to YCoCg. The YCoCg
+    // AABB can include invalid RGB corners, so use these bounds after clipping.
+    a = reinhard(a);
+    b = reinhard(b);
+    c = reinhard(c);
+    d = reinhard(d);
+    e = reinhard(e);
+    f = reinhard(f);
+    g = reinhard(g);
+    h = reinhard(h);
+    i = reinhard(i);
 
+    vec3 minRgb = min(
+        min(min(a, b), min(c, d)),
+        min(min(e, f), min(g, min(h, i)))
+    );
+    vec3 maxRgb = max(
+        max(max(a, b), max(c, d)),
+        max(max(e, f), max(g, max(h, i)))
+    );
 
-    a = rgbToYcocg(reinhard(a));
-    b = rgbToYcocg(reinhard(b));
-    c = rgbToYcocg(reinhard(c));
-    d = rgbToYcocg(reinhard(d));
-    e = rgbToYcocg(reinhard(e));
-    f = rgbToYcocg(reinhard(f));
-    g = rgbToYcocg(reinhard(g));
-    h = rgbToYcocg(reinhard(h));
-    i = rgbToYcocg(reinhard(i));
-
+    // Convert to YCoCg.
+    a = rgbToYcocg(a);
+    b = rgbToYcocg(b);
+    c = rgbToYcocg(c);
+    d = rgbToYcocg(d);
+    e = rgbToYcocg(e);
+    f = rgbToYcocg(f);
+    g = rgbToYcocg(g);
+    h = rgbToYcocg(h);
+    i = rgbToYcocg(i);
 
     // family; cf. Yang et al., "A Survey of Temporal Antialiasing
 
@@ -239,6 +298,7 @@ vec3 neighborhoodClipping(
     historyColor = rgbToYcocg(historyColor);
     historyColor = clipAabb(historyColor, minColor, maxColor);
     historyColor = ycocgToRgb(historyColor);
+    historyColor = clamp(historyColor, minRgb, maxRgb);
 
     return historyColor;
 }
@@ -302,9 +362,9 @@ void main() {
         = closest.xy - reprojectSceneSpace(closestScene, hand, isLod).xy;
     vec2 previousUv = uv - velocity;
 
-    vec3 historyColor
-        = catmullRomFilterFastRgb(colortex5, previousUv, 0.6);
-    historyColor = max0(historyColor); // Eliminate NaNs in the history
+    vec3 historyColor = sanitizeTemporalColor(
+        catmullRomFilterFastRgb(colortex5, previousUv, 0.6)
+    );
 
     float pixelAge = texelFetch(colortex5, ivec2(previousUv * viewRes), 0).a;
     pixelAge
@@ -321,11 +381,9 @@ void main() {
     float alpha = max(1.0 / pixelAge, blendWeight);
 
 #ifndef taau
-    // Native resolution taa
+    // Native-resolution TAA. Keep currentColor scene-linear until neighborhood
+    // clipping has converted the complete neighborhood into Reinhard space.
     vec3 currentColor = texelFetch(colortex0, texel, 0).rgb;
-
-
-    currentColor = reinhard(currentColor);
     historyColor = reinhard(historyColor);
 
     historyColor = neighborhoodClipping(
@@ -334,6 +392,7 @@ void main() {
         historyColor,
         distanceFactor
     );
+    currentColor = reinhard(currentColor);
 #else
     // Temporal upscaling
     vec2 pos = clamp01(uv + 0.5 * taaOffset * rcp(taauViewportScale))
@@ -342,18 +401,28 @@ void main() {
     float confidence; // Confidence-of-quality factor, see "A Survey of Temporal
                       // Antialiasing Techniques" section 5.1
     vec3 currentColor = catmullRomFilter(colortex0, pos, confidence).rgb;
-
-    if (minOf(currentColor) < 0.0) {
-        // Fix negatives arising around very dark objects
+    bool invalidCurrent = any(isnan(currentColor)) || any(isinf(currentColor));
+    if (invalidCurrent || minOf(currentColor) < 0.0) {
+        // Avoid ringing and invalid values around very dark objects.
         currentColor = texture(colortex0, pos).rgb;
     }
+    currentColor = sanitizeTemporalColor(currentColor);
 
     currentColor = reinhard(currentColor);
     historyColor = reinhard(historyColor);
 
-    // Interpolate AABB bounds across pixels
-    vec3 minColor = texture(colortex1, pos).rgb * 2.0 - 1.0;
-    vec3 maxColor = texture(colortex2, pos).rgb * 2.0 - 1.0;
+    // Interpolated RGB neighborhood bounds from the prep pass.
+    vec3 minRgb = texture(colortex1, pos).rgb;
+    vec3 maxRgb = texture(colortex2, pos).rgb;
+
+    // Catmull-Rom is intentionally sharp but may ring at alpha-tested leaf
+    // edges. Clamp that reconstruction to the valid neighborhood before it
+    // participates in temporal blending.
+    currentColor = clamp(currentColor, minRgb, maxRgb);
+
+    // Enclose the RGB box in YCoCg for standard temporal AABB clipping.
+    vec3 minColor = rgbBoundsToYcocgMin(minRgb, maxRgb);
+    vec3 maxColor = rgbBoundsToYcocgMax(minRgb, maxRgb);
 
     bool historyClipped;
     historyColor = rgbToYcocg(historyColor);
@@ -362,8 +431,25 @@ void main() {
     float flickerReduction = historyClipped
         ? 0.0
         : getFlickerReduction(historyColor, minColor, maxColor);
+
     historyColor = ycocgToRgb(historyColor);
 
+    // A component-wise RGB clamp is still required: an AABB corner in YCoCg
+    // can be outside the RGB range even when it is inside the transformed box.
+    // Without this guard, Reinhard inversion can turn the overshoot into a
+    // huge HDR value, visible as white sparks after global exposure.
+    vec3 boundedHistory = clamp(historyColor, minRgb, maxRgb);
+    bool rgbHistoryClipped = any(
+        greaterThan(abs(boundedHistory - historyColor), vec3(1e-4))
+    );
+    historyClipped = historyClipped || rgbHistoryClipped;
+    historyColor = boundedHistory;
+    if (historyClipped) flickerReduction = 0.0;
+
+    // alpha is the current-frame weight. When history sits safely inside the
+    // neighborhood, lower that weight and accumulate more history; when the
+    // history is clipped, retain more of the current frame. Keep this decision
+    // exposure-independent because the clipping bounds are pre-exposure.
     alpha *= pow(confidence, TAAU_CONFIDENCE_REJECTION);
     alpha *= 1.0 - TAAU_FLICKER_REDUCTION * flickerReduction;
 #endif
