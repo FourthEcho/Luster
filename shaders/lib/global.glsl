@@ -89,6 +89,7 @@ const float pi = acos(-1.0);
 const float tau = 2.0 * pi;
 const float halfPi = 0.5 * pi;
 const float rcpPi = 1.0 / pi;
+const float sqrPi = pi * pi;
 const float degree
     = tau / 360.0; // Size of one degree in radians, useful because radians() is
                    // not a constant expression on all platforms

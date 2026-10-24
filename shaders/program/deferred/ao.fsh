@@ -95,8 +95,6 @@ vec3 slerp(vec3 v0, vec3 v1, float t) {
 #include "/lib/util/fastMath.glsl"
 #include "/lib/util/spaceConversion.glsl"
 
-// DSSAO paired-depth sampling adapted from the BSL-derived method credited
-// by Kappa v5.3 to Capt Tatsu (used with permission).
 vec2 getDssaoSampleOffset(float radiusStep) {
     float angle = fract(radiusStep * 8.0) * pi;
     return vec2(cos(angle), sin(angle)) * radiusStep;

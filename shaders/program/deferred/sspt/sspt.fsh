@@ -1109,7 +1109,7 @@ vec3 hitDirectLight(HitData hit, vec3 hitViewPos) {
 #endif // defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE || defined DIRECT_SKY_BOUNCE
 
 // ----------------------------------------------------------------------------
-/* HAMMON DIFFUSE BRDF (Kappa-style lib; includes fresnelSchlickInverse) */
+/* HAMMON DIFFUSE BRDF 
 // ----------------------------------------------------------------------------
 
 #include "/lib/brdf/hammon.glsl"
@@ -1127,11 +1127,14 @@ vec3 traceIndirect(
     vec2 dither,
     bool hand,
     float contactAo,
+    float skyOcclusion,
+    vec3 bentNormalScene,
     out bool geometryHit
 ) {
     vec3 viewNormal = mat3(gbufferModelView) * sceneNormal;
 
     vec3 emission = vec3(0.0);
+    vec3 skylight = vec3(0.0);
     geometryHit = false;
 
 #if defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE || defined DIRECT_SKY_BOUNCE
@@ -1200,6 +1203,14 @@ vec3 traceIndirect(
             bounce += hitDirectLight(unpackHit(hitData0), hitViewPos)
                     * brdf * hitAttenuation;
 #endif
+        } else {
+            // Ray escaped to sky — sample sky map in the escaped direction.
+            // This replaces the flat ambient term for SSPT-enabled pixels.
+            vec3 worldDir = mat3(gbufferModelViewInverse) * rayDirection;
+            float groundOcclusion = exp(-max0(-worldDir.y) * sqrPi);
+            vec3 escapedSky = texture(colortex4, projectSky(worldDir)).rgb
+                * cube(skyOcclusion) * groundOcclusion;
+            skylight += escapedSky * brdf;
         }
     }
 
@@ -1225,10 +1236,14 @@ vec3 traceIndirect(
 
         vec3 contribution = vec3(1.0);
 
-        vec3 rayDirection = -normalize(viewPos);
+        // Initialized so that -oldDirection is the surface-to-eye direction
+        // on the first bounce, matching the single-bounce path's brdfWeight
+        // argument convention.
+        vec3 rayDirection = normalize(viewPos);
 
         vec3 hitNormal = viewNormal;
         vec3 hitNormalScene = sceneNormal;
+        vec3 rayOrigin = viewPos;
 
         for (uint n = 0; n < ssptBounces; ++n) {
             ++quasirandomCurr;
@@ -1245,7 +1260,7 @@ vec3 traceIndirect(
 
             if (dot(hitNormal, rayDirection) < 0.0) rayDirection = -rayDirection;
 
-            vec3 hitPosition = screenspaceRT(viewPos, rayDirection, dither.y);
+            vec3 hitPosition = screenspaceRT(rayOrigin, rayDirection, dither.y);
 
             float brdf = brdfWeight(hitNormal, -oldDirection, rayDirection);
                 contribution *= brdf;
@@ -1265,6 +1280,10 @@ vec3 traceIndirect(
                 vec3 hitViewPos = screenToViewSpace(TRACE_PROJ_INV, hitPosition, true);
                 vec3 hitAttenuation = tracedWaterAttenuation(viewPos, hitViewPos);
 
+                // Deeper bounces continue from the hit surface, not the
+                // shaded point.
+                rayOrigin = hitViewPos;
+
                 float emissionFalloff = 1.0 - linearStep(
                     ssptEmissionDistance * rcpPi,
                     ssptEmissionDistance,
@@ -1283,7 +1302,12 @@ vec3 traceIndirect(
 
                 contribution *= hitAlbedo; // colored bleed into deeper bounces
             } else {
-                // miss: sky escape contributes no emission; stop the chain
+                // Ray escaped to sky — sample sky map in the escaped direction.
+                vec3 worldDir = mat3(gbufferModelViewInverse) * rayDirection;
+                float groundOcclusion = exp(-max0(-worldDir.y) * sqrPi);
+                vec3 escapedSky = texture(colortex4, projectSky(worldDir)).rgb
+                    * cube(skyOcclusion) * groundOcclusion;
+                skylight += escapedSky * contribution;
                 break;
             }
         }
@@ -1292,6 +1316,7 @@ vec3 traceIndirect(
     #endif
 
     emission /= float(ssptSPP);
+    skylight /= float(ssptSPP);
 
 
     float emissionLuma = dot(max0(emission), luminanceWeights);
@@ -1307,14 +1332,25 @@ vec3 traceIndirect(
     bounce *= clamp01(contactAo);
 #endif
 
-    emission *= float(!hand); // hand geometry gets no emission or sky
-    // (hand keeps its direct-light bounce)
+    emission *= float(!hand); // hand geometry gets no emission
 
+    // Pure-ambient pixels (every ray escaped): blend the single-sample sky
+    // estimate toward a bent-normal sky lookup. The bent normal approximates
+    // the cosine-weighted mean open direction, so this halves directional
+    // noise at low SPP without biasing pixels where bounce geometry was hit.
+    if (!geometryHit) {
+        vec3 bentSky = texture(colortex4, projectSky(bentNormalScene)).rgb
+            * cube(skyOcclusion)
+            * exp(-max0(-bentNormalScene.y) * sqrPi);
+        skylight = mix(skylight, bentSky, 0.5);
+    }
+
+    skylight *= indirectLightingIntensity;
 
 #if defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE || defined DIRECT_SKY_BOUNCE
-    return emission + bounce;
+    return emission + bounce + skylight;
 #else
-    return emission;
+    return emission + skylight;
 #endif
 }
 
@@ -1322,45 +1358,7 @@ vec3 traceIndirect(
 #include "/lib/util/encode.glsl"
 #include "/lib/util/spaceConversion.glsl"
 
-float fetchSsptContactAo(vec2 uv, float linZ) {
-#if shaderAo == shaderAoNone
-    return 1.0;
-#else
-    vec2 aoSize = vec2(textureSize(colortex6, 0));
-    vec2 aoPos = uv * aoSize - 0.5;
-    ivec2 base = ivec2(floor(aoPos));
-    vec2 f = fract(aoPos);
-
-    vec4 aoTaps;
-    vec4 aoDepths;
-    aoTaps.x = texelFetch(colortex6, clamp(base, ivec2(0), ivec2(aoSize) - 1), 0).x;
-    aoTaps.y = texelFetch(colortex6, clamp(base + ivec2(1, 0), ivec2(0), ivec2(aoSize) - 1), 0).x;
-    aoTaps.z = texelFetch(colortex6, clamp(base + ivec2(0, 1), ivec2(0), ivec2(aoSize) - 1), 0).x;
-    aoTaps.w = texelFetch(colortex6, clamp(base + ivec2(1, 1), ivec2(0), ivec2(aoSize) - 1), 0).x;
-
-    aoDepths.x = texelFetch(colortex14, clamp(base, ivec2(0), ivec2(aoSize) - 1), 0).x;
-    aoDepths.y = texelFetch(colortex14, clamp(base + ivec2(1, 0), ivec2(0), ivec2(aoSize) - 1), 0).x;
-    aoDepths.z = texelFetch(colortex14, clamp(base + ivec2(0, 1), ivec2(0), ivec2(aoSize) - 1), 0).x;
-    aoDepths.w = texelFetch(colortex14, clamp(base + ivec2(1, 1), ivec2(0), ivec2(aoSize) - 1), 0).x;
-
-    vec4 w;
-    w.x = exp2(-10.0 * abs(screenToViewSpaceDepth(combinedProjectionMatrixInverse, 1.0 - aoDepths.x) - linZ));
-    w.y = exp2(-10.0 * abs(screenToViewSpaceDepth(combinedProjectionMatrixInverse, 1.0 - aoDepths.y) - linZ));
-    w.z = exp2(-10.0 * abs(screenToViewSpaceDepth(combinedProjectionMatrixInverse, 1.0 - aoDepths.z) - linZ));
-    w.w = exp2(-10.0 * abs(screenToViewSpaceDepth(combinedProjectionMatrixInverse, 1.0 - aoDepths.w) - linZ));
-
-    w.x *= (1.0 - f.x) * (1.0 - f.y);
-    w.y *= f.x * (1.0 - f.y);
-    w.z *= (1.0 - f.x) * f.y;
-    w.w *= f.x * f.y;
-
-    float wSum = w.x + w.y + w.z + w.w;
-    if (wSum <= 1e-6) {
-        return clamp01(dot(aoTaps, vec4(0.25)));
-    }
-    return clamp01(dot(aoTaps, w) / wSum);
-#endif
-}
+#include "/program/deferred/sspt/indirectAO.glsl"
 
 // ------------
 //   Main
@@ -1401,6 +1399,7 @@ void main() {
 
     vec3 flatNormal = decodeUnitVector(unpackUnorm2x8(gbufferData0.z));
     vec3 viewNormal = mat3(gbufferModelView) * flatNormal;
+    float skyOcclusion = unpackUnorm2x8(gbufferData0.w).y;
 
     // ---- filter gbuffer side-data ----
 
@@ -1423,13 +1422,22 @@ void main() {
 
     // AO is already temporally stabilized by deferred3. Its selected scalar
     // visibility is applied to traced bounce lighting, not to emission.
-    // DSSAO and DGTAO share this scalar finishing path; DGTAO's bent normal
-    // additionally steers directional sky in the shading pass.
+    // DSSAO and DGTAO share this scalar finishing path; the bent normal
+    // steers directional sky here and in the shading pass.
     float linZ = screenToViewSpaceDepth(
         combinedProjectionMatrixInverse,
         depth
     );
-    float contactAo = isHand ? 1.0 : fetchSsptContactAo(uv, linZ);
+    float contactAo = fetchFinishingAo(colortex6, colortex14, uv, linZ, isHand);
+
+    // Bent normal from deferred3 (view space), steering the pure-ambient
+    // sky estimate in traceIndirect. Degenerate directions fall back to the
+    // flat normal.
+    vec3 bentNormalScene
+        = mat3(gbufferModelViewInverse) * fetchBentNormalView(colortex6, uv);
+    if (dot(bentNormalScene, flatNormal) < eps) {
+        bentNormalScene = flatNormal;
+    }
 
     bool geometryHit;
     vec3 indirectLight = traceIndirect(
@@ -1438,6 +1446,8 @@ void main() {
         dither,
         isHand,
         contactAo,
+        skyOcclusion,
+        bentNormalScene,
         geometryHit
     );
 

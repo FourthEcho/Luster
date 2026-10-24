@@ -107,48 +107,7 @@ float avgOf(vec2 v) {
     return (v.x + v.y) * 0.5;
 }
 
-float fetchFallbackAo(vec2 uv, float linZ, bool isHand) {
-    if (isHand) {
-        return 1.0;
-    }
-#if shaderAo == shaderAoNone
-    return 1.0;
-#else
-    vec2 aoSize = vec2(textureSize(colortex6, 0));
-    vec2 aoPos = uv * aoSize - 0.5;
-    ivec2 base = ivec2(floor(aoPos));
-    vec2 f = fract(aoPos);
-
-    vec4 aoTaps;
-    vec4 aoDepths;
-    aoTaps.x = texelFetch(colortex6, clamp(base, ivec2(0), ivec2(aoSize) - 1), 0).x;
-    aoTaps.y = texelFetch(colortex6, clamp(base + ivec2(1, 0), ivec2(0), ivec2(aoSize) - 1), 0).x;
-    aoTaps.z = texelFetch(colortex6, clamp(base + ivec2(0, 1), ivec2(0), ivec2(aoSize) - 1), 0).x;
-    aoTaps.w = texelFetch(colortex6, clamp(base + ivec2(1, 1), ivec2(0), ivec2(aoSize) - 1), 0).x;
-
-    aoDepths.x = texelFetch(colortex14, clamp(base, ivec2(0), ivec2(aoSize) - 1), 0).x;
-    aoDepths.y = texelFetch(colortex14, clamp(base + ivec2(1, 0), ivec2(0), ivec2(aoSize) - 1), 0).x;
-    aoDepths.z = texelFetch(colortex14, clamp(base + ivec2(0, 1), ivec2(0), ivec2(aoSize) - 1), 0).x;
-    aoDepths.w = texelFetch(colortex14, clamp(base + ivec2(1, 1), ivec2(0), ivec2(aoSize) - 1), 0).x;
-
-    vec4 w;
-    w.x = exp2(-10.0 * abs(screenToViewSpaceDepth(combinedProjectionMatrixInverse, 1.0 - aoDepths.x) - linZ));
-    w.y = exp2(-10.0 * abs(screenToViewSpaceDepth(combinedProjectionMatrixInverse, 1.0 - aoDepths.y) - linZ));
-    w.z = exp2(-10.0 * abs(screenToViewSpaceDepth(combinedProjectionMatrixInverse, 1.0 - aoDepths.z) - linZ));
-    w.w = exp2(-10.0 * abs(screenToViewSpaceDepth(combinedProjectionMatrixInverse, 1.0 - aoDepths.w) - linZ));
-
-    w.x *= (1.0 - f.x) * (1.0 - f.y);
-    w.y *= f.x * (1.0 - f.y);
-    w.z *= (1.0 - f.x) * f.y;
-    w.w *= f.x * f.y;
-
-    float wSum = w.x + w.y + w.z + w.w;
-    if (wSum <= 1e-6) {
-        return clamp01(dot(aoTaps, vec4(0.25)));
-    }
-    return clamp01(dot(aoTaps, w) / wSum);
-#endif
-}
+#include "/program/deferred/sspt/indirectAO.glsl"
 
 /* ------ REPROJECTION ------ */
 
@@ -306,7 +265,7 @@ void main() {
         depth
     );
     bool isHand = depth < handDepth;
-    float ao = fetchFallbackAo(uv, linZ, isHand);
+    float ao = fetchFinishingAo(colortex6, colortex14, uv, linZ, isHand);
 
     vec3 rtLight = vec3(0.0);
     float samples = 0.0;
@@ -323,8 +282,14 @@ void main() {
 
     if (offscreen || worldAgeChanged) {
         // Offscreen / world-change path: spatial estimate only.
-        rtLight = spatialColor7x7(texel, varianceData, variance);
+        float maxLum;
+        rtLight = spatialColor7x7(texel, varianceData, maxLum);
         samples = 1.0;
+        // Same relative variance the temporal path stores, scaled for a
+        // single accumulated frame.
+        variance = sqrt(max0(varianceData.y - sqr(varianceData.x)))
+                 / max(varianceData.x, 1e-8);
+        variance *= 4.0;
     } else {
         vec4 previousLight = vec4(0.0); // rgb + frames
         vec3 previousAux = vec3(0.0);   // variance moments + lightmap
@@ -345,9 +310,9 @@ void main() {
 
             float depthDelta = max(0.0, distance(sqr(historyG.w), currentDistance)
                               - abs(cameraMovement.z / far));
-            bool depthRejection = (depthDelta / max(currentDistance, 1e-6)) < 0.1;
+            bool depthMatch = (depthDelta / max(currentDistance, 1e-6)) < 0.1;
 
-            if (depthRejection) {
+            if (depthMatch) {
                 previousLight += max0(texelFetch(colortex18, historyTexel, 0)) * weight[i];
                 previousAux += historyG.xyz * weight[i];
                 sumWeight += weight[i];
@@ -390,8 +355,12 @@ void main() {
 
             lightmap = mix(previousAux.z, lightmap, max(0.2, 1.0 / frames));
         } else {
-            rtLight = spatialColor7x7(texel, varianceData, variance);
+            float maxLum;
+            rtLight = spatialColor7x7(texel, varianceData, maxLum);
             samples = 1.0;
+            variance = sqrt(max0(varianceData.y - sqr(varianceData.x)))
+                     / max(varianceData.x, 1e-8);
+            variance *= 4.0;
         }
     }
 

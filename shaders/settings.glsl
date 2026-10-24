@@ -188,13 +188,10 @@ const float wetnessHalflife         = 70.0;
   #define svgfNormalexp 1.0 // [0.2 0.4 0.6 0.8 1.0 1.2 1.4 1.6 1.8 2.0]
 
 // -------------------
-//   Ambient lighting 
+//   Ambient lighting
 // -------------------
-
-
-  #define hBasisSkylight
-  #define hBasisIntensity 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.40 1.50 1.60 1.70 1.80 1.90 2.00]
-  #define hBasisSkySamples 64 // [16 32 48 64 96 128]
+//   Sky ambient is now fully handled by SSPT traced rays (ray misses sample
+//   the sky map directly). hBasisSkylight and its settings are removed.
 
 // -------
 //   Sky

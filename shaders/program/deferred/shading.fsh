@@ -38,9 +38,6 @@ in vec2 uv;
 
 flat in vec3 ambientColor;
 flat in vec3 lightColor;
-#ifdef hBasisSkylight
-flat in vec3 hSky[6];
-#endif
 
 #if defined WORLD_OVERWORLD
 flat in vec3 sunColor;
@@ -179,60 +176,6 @@ const bool colortex11MipmapEnabled = true;
 #define TEMPORAL_REPROJECTION
 
 #include "/lib/atmos/air/simple.glsl"
-#if !defined INCLUDE_LIGHT_AMBIENT_H_BASIS_SKYLIGHT
-#define INCLUDE_LIGHT_AMBIENT_H_BASIS_SKYLIGHT
-
-// H-basis directional sky ambient.
-
-#include "/lib/atmos/projection.glsl"
-
-void projectSkyHBasis(out vec3 h[6]) {
-    for (int i = 0; i < 6; ++i) {
-        h[i] = vec3(0.0);
-    }
-
-    for (int i = 0; i < hBasisSkySamples; ++i) {
-        // Uniform-sphere low-discrepancy sequence (deterministic by design).
-        vec2 u = vec2(
-            (float(i) + 0.5) / float(hBasisSkySamples),
-            fract(float(i) * 0.61803398875)
-        );
-
-        float phi = tau * u.y;
-        float cosTheta = 2.0 * u.x - 1.0;
-        float sinTheta = sqrt(max(1.0 - cosTheta * cosTheta, 0.0));
-        vec3 d = vec3(
-            sinTheta * cos(phi), cosTheta, sinTheta * sin(phi)
-        );
-
-        vec3 radiance = max0(texture(colortex4, projectSky(d)).rgb);
-
-        h[0] += radiance;
-        h[1] += radiance * d.x;
-        h[2] += radiance * d.y;
-        h[3] += radiance * d.z;
-        h[4] += radiance * (1.5 * d.y * d.y - 0.5);
-        h[5] += radiance * (d.x * d.x - d.z * d.z) * 0.5;
-    }
-
-    float invN = 1.0 / float(hBasisSkySamples);
-    for (int i = 0; i < 6; ++i) {
-        h[i] *= invN;
-    }
-}
-
-vec3 evaluateHBasisIrradiance(vec3 h[6], vec3 normal) {
-    vec3 n = normalize(normal);
-
-    vec3 result = h[0] * pi;
-    result += (2.0 * pi / 3.0) * (h[1] * n.x + h[2] * n.y + h[3] * n.z);
-    result += (pi * 0.125) * h[4] * (3.0 * n.y * n.y - 1.0);
-    result += (pi * 0.125) * h[5] * (n.x * n.x - n.z * n.z);
-
-    return max0(result);
-}
-
-#endif // INCLUDE_LIGHTING_AMBIENT_H_BASIS_SKYLIGHT
 #include "/lib/brdf/common.glsl"
 #include "/lib/light/common.glsl"
 #include "/lib/light/pcss.glsl"
@@ -1701,12 +1644,7 @@ void main() {
         const float sssDepth = 0.0;
 #endif
 
-#ifdef hBasisSkylight
-        vec3 skyIrradiance = hBasisIntensity
-            * evaluateHBasisIrradiance(hSky, bentNormal);
-#else
-        vec3 skyIrradiance = hBasisIntensity * ambientColor;
-#endif
+        vec3 skyIrradiance = ambientColor;
 
         fragmentColor = getDiffuseLight(
             material,

@@ -649,7 +649,10 @@ vec3 getDiffuseLight(
 #endif
 
     // Skylight
-
+    // When ssptEnabled, sky ambient is fully owned by the SSPT traced sky
+    // (ray misses sample the sky map directly). Skip the flat term to avoid
+    // double-counting.
+#ifndef ssptEnabled
     light += getSkyLight(
         material,
         lightLevels,
@@ -658,6 +661,7 @@ vec3 getDiffuseLight(
         directionalLight,
         skyIrradiance
     );
+#endif
 
     // Blocklight
 
