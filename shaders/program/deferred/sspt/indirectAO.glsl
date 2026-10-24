@@ -83,10 +83,6 @@ float fetchFinishingAo(
 #endif
 }
 
-// Bilinear fetch of the octahedrally-encoded bent normal stored alongside
-// the AO (deferred3: view-space xy in .zw, z reconstructed). With
-// shaderAoNone the AO pass stores the flat view normal here, so the result
-// is always a usable direction.
 vec3 fetchBentNormalView(sampler2D aoBuffer, vec2 uv) {
     vec2 aoSize = vec2(textureSize(aoBuffer, 0));
     vec2 aoPos = uv * aoSize - 0.5;

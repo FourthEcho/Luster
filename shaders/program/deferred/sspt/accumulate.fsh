@@ -41,7 +41,10 @@ uniform sampler2D colortex18; // sspt history color + frames
 uniform sampler2D colortex19; // sspt gbuffer data
 uniform sampler2D colortex20; // sspt history gdata
 
-uniform sampler2D depthtex1;  // geometry depth (non-DH path)
+// Required on the non-DH path: combinedDepthTex expands to depthtex1 in
+// lodMod.glsl, so this must stay declared even though the name never
+// appears literally in this file.
+uniform sampler2D depthtex1;
 
 uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
@@ -369,8 +372,11 @@ void main() {
 
     indirectCurrent = vec4(current, variance);
     indirectHistory = vec4(rtLight, samples);
+    // Variance moments are stored unclamped: they legitimately exceed 1 on
+    // noisy frames and colortex20 is RGBA16F, so clamping only degraded the
+    // SVGF estimate exactly when it mattered most.
     historyGData = vec4(
-        clamp01(varianceData),
+        varianceData,
         lightmap,
         sqrt(currentDistance)
     );

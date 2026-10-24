@@ -19,9 +19,6 @@
 #include "/lib/global.glsl"
 
 
-#ifdef svgfFilter
-#endif
-
 #ifndef SVGF_SIZE
 #define SVGF_SIZE 4
 #endif
@@ -40,7 +37,8 @@ uniform sampler2D colortex17; // sspt color + sigma
 uniform sampler2D colortex18; // sspt history frames
 uniform sampler2D colortex19; // sspt gbuffer data
 
-uniform sampler2D depthtex1; // vanilla geometry depth
+// Required on the non-DH path: SSPT_FILTER_DEPTH_TEX expands to depthtex1.
+uniform sampler2D depthtex1;
 
 // SVGF pass only needs combined depth; avoid full LoD include because Voxy's
 // patched deferred programs don't expose required projection uniforms.
