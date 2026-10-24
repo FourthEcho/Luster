@@ -19,8 +19,9 @@
 #include "/lib/global.glsl"
 
 layout(location = 0) out vec3 skyMap;
+layout(location = 1) out vec4 transmittanceLut;
 
-/* RENDERTARGETS: 4 */
+/* RENDERTARGETS: 4,21 */
 
 in vec2 uv;
 
@@ -136,6 +137,12 @@ uniform float biomeMaySnow;
 
 void main() {
     ivec2 texel = ivec2(gl_FragCoord.xy);
+
+    // Bake the atmosphere transmittance LUT (colortex21). One LUT texel per
+    // fragment in the 160x64 corner region; writes beyond it are clipped by
+    // the smaller render target. Must run before any early return so every
+    // LUT texel is covered.
+    transmittanceLut = vec4(renderTransmittanceLut(gl_FragCoord.xy), 1.0);
 
     if (texel.x == skyMapRes.x) { // Store lighting colors
         skyMap = vec3(0.0);

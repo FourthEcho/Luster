@@ -60,6 +60,9 @@ const bool colortex19Clear = false;
 const int colortex20Format = RGBA16F; // SSPT history gdata: variance moments, lightmap, sqrt distance
 const bool colortex20Clear = false;
 
+const int colortex21Format = RGBA16F; // 192x108    | atmosphere transmittance LUT, 160x64 region (d0 -> d1+)
+const bool colortex21Clear = true;
+
 */
 
 #endif // INCLUDE_BUFFERS

@@ -116,6 +116,10 @@ uniform float biomeHumidity;
 // ------------
 
 #define ATMOSPHERE_SCATTERING_LUT depthtex0
+
+// Baked once per frame by deferred0 (sky map) into colortex21; every
+// consumer of atmosphereTransmittance from this pass onward uses it.
+#define ATMOSPHERE_TRANSMITTANCE_LUT colortex21
 #define MIE_PHASE_CLAMP
 
 #ifdef cloudsCumulusPrecomputeLocalCoverage

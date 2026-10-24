@@ -41,7 +41,9 @@ const vec3 sunlightColor = vec3(
 const float sunAngularSizeRad = sunAngularRadius * degree;
 const float moonAngularSizeRad = moonAngularRadius * degree;
 
-const ivec2 transmittanceRes = ivec2(/* mu */ 256, /* r */ 64);
+// Must stay within the sky-map pass viewport (191x108 usable texels) since
+// deferred0 bakes the LUT from its own fragments.
+const ivec2 transmittanceRes = ivec2(/* mu */ 160, /* r */ 64);
 const ivec3 scatteringRes = ivec3(/* nu */ 16, /* mu */ 64, /* muS */ 32);
 
 const float minMuS = -0.35;
@@ -680,7 +682,6 @@ vec3 atmosphereScattering(
 vec3 atmosphereScattering(vec3 rayDir, vec3 lightDir) { return vec3(0.0); }
 #endif
 
-#if defined ATMOSPHERE_TRANSMITTANCE_LUT || defined ATMOSPHERE_IRRADIANCE_LUT
 vec2 atmosphereTransmittanceUv(float mu, float r) {
     // Distance to the atmosphere outer limit for a horizontal ray at ground
     // level
@@ -704,16 +705,31 @@ vec2 atmosphereTransmittanceUv(float mu, float r) {
 
     return vec2(uMu, uR);
 }
-#endif
 
 #if defined ATMOSPHERE_TRANSMITTANCE_LUT
+uniform sampler2D ATMOSPHERE_TRANSMITTANCE_LUT;
+
 vec3 atmosphereTransmittance(float mu, float r) {
     if (intersectSphere(mu, r, planetRadius).x >= 0.0) {
         return vec3(0.0);
     }
 
     vec2 uv = atmosphereTransmittanceUv(mu, r);
-    return texture(ATMOSPHERE_TRANSMITTANCE_LUT, uv).rgb;
+
+    // The LUT occupies the top-left transmittanceRes corner of colortex21,
+    // which is allocated at the sky-map resolution (192x108) because all
+    // drawbuffers of a pass must share one size.
+    uv *= vec2(transmittanceRes)
+        / vec2(textureSize(ATMOSPHERE_TRANSMITTANCE_LUT, 0));
+
+    vec3 transmittance = texture(ATMOSPHERE_TRANSMITTANCE_LUT, uv).rgb;
+
+#ifdef desertSandstorm
+    // Applied live on top of the bake: storm strength varies per frame.
+    transmittance *= sandstormTransmittance(mu);
+#endif
+
+    return transmittance;
 }
 #else
 // Source: http://www.thetenthplanet.de/archives/4519
@@ -729,7 +745,7 @@ float chapmanFunctionApprox(float x, float cosTheta) {
     }
 }
 
-vec3 atmosphereTransmittance(float mu, float r) {
+vec3 atmosphereTransmittanceAnalytic(float mu, float r) {
     if (intersectSphere(mu, max(r, planetRadius + 10.0), planetRadius).x
         >= 0.0) {
         return vec3(0.0);
@@ -767,6 +783,38 @@ vec3 atmosphereTransmittance(float mu, float r) {
 #endif
 
     return transmittance;
+}
+
+// Inverts atmosphereTransmittanceUv at texel centers and evaluates the
+// analytic transmittance for the parameters each LUT texel represents.
+// Baked once per frame by the sky-map pass (deferred0) into colortex21.
+vec3 renderTransmittanceLut(vec2 lutFragCoord) {
+    vec2 uv = (floor(lutFragCoord) + 0.5) / vec2(transmittanceRes);
+
+    // Inverse of getUvFromUnitRange
+    vec2 unit = (uv * vec2(transmittanceRes) - 0.5)
+              / (vec2(transmittanceRes) - 1.0);
+
+    const float H
+        = sqrt(max(atmosphereOuterRadiusSq - atmosphereInnerRadiusSq, 0.0));
+
+    // v: horizon distance rho -> radius r; u: distance to atmosphere top
+    float rho = unit.y * H;
+    float r = sqrt(sqr(rho) + atmosphereInnerRadiusSq);
+
+    float dMin = atmosphereOuterRadius - r;
+    float dMax = rho + H;
+    float d = dMin + unit.x * (dMax - dMin);
+
+    float mu = (atmosphereOuterRadiusSq - sqr(r) - sqr(d))
+             / (2.0 * max(d, 1e-4) * r);
+        mu = clamp(mu, -1.0, 1.0);
+
+    return atmosphereTransmittanceAnalytic(mu, r);
+}
+
+vec3 atmosphereTransmittance(float mu, float r) {
+    return atmosphereTransmittanceAnalytic(mu, r);
 }
 #endif
 
