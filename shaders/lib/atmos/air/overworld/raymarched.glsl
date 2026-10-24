@@ -388,7 +388,10 @@ float mistDensityProfile(vec3 worldPos) {
     ));
     envelope *= 1.0 + 0.4 * wetness;
 
-    return linearStep(0.35, 0.75, noise) * envelope * mistDensity;
+    // The Mist Density slider lives in fogParams.mistScatteringCoeff, which
+    // carries both scattering and extinction. Applying it here as well made
+    // the slider act squared.
+    return linearStep(0.35, 0.75, noise) * envelope;
 }
 
 // Density-varying phase function.
@@ -404,25 +407,29 @@ float mistPhase(float cosTheta, float localDensity) {
 #if mistMode == mistModeAdvanced
 
 
-float mistShadowOd(vec3 worldPos, float localDensity) {
-    if (localDensity < 0.01 || sunDir.y > 0.3) return 0.0;
+// Optical depth from a mist sample toward the light, in real units (profile
+// density times metres times the mist extinction coefficient), so it can feed
+// a transmittance directly. The ray runs the distance the light needs to leave
+// the layer (long at a low sun, short at noon), capped, in steps of at least
+// mistShadowStepLength; samples sit at the middle of each step.
+float mistShadowOd(vec3 worldPos, float localDensity, float extinction) {
+    if (localDensity < 0.01) return 0.0;
 
-    const int   steps     = mistShadowSteps;
-    const float stepSize = mistShadowStepLength;
+    const int steps = mistShadowSteps;
+
+    float toTop = max(float(mistAltitude) - worldPos.y, 0.0);
+    float pathLength = clamp(toTop / max(lightDir.y, 0.1), 0.0, 800.0);
+    float stepSize = max(mistShadowStepLength, pathLength / float(steps));
 
     float od = 0.0;
-    vec3  pos = worldPos;
 
-    for (int i = 0; i < steps; ++i, pos += lightDir * stepSize) {
+    for (int i = 0; i < steps; ++i) {
+        vec3 pos = worldPos + lightDir * (stepSize * (float(i) + 0.5));
         if (pos.y > float(mistAltitude)) break;
-        od += mistDensityProfile(pos) * stepSize;
+        od += mistDensityProfile(pos);
     }
 
-#ifdef cloudShadows
-    od *= getCloudShadows(colortex8, worldPos - cameraPosition);
-#endif
-
-    return od;
+    return od * stepSize * extinction;
 }
 #endif // mistModeAdvanced
 
@@ -614,9 +621,13 @@ mat2x3 raymarchAirFog(
             float LoV = dot(worldDir, lightDir);
 
 #if mistMode == mistModeAdvanced
-            float mistOd  = mistShadowOd(worldPos, mistD / stepLength);
-            // Power-law self-extinction keeps dense mist from glowing
-            // through itself, plus cloud occlusion above the mist layer
+            float mistOd = mistShadowOd(
+                worldPos,
+                mistD / stepLength,
+                dot(fogParams.mistScatteringCoeff, vec3(1.0 / 3.0))
+            );
+            // Power-law self-extinction (multiple-scattering tail of
+            // Beer-Lambert) keeps dense mist from glowing through itself
             float mistSunShadow = pow(1.0 + 0.7 * mistOd, -1.0 / 0.7) * shadowBinary;
             float mistPhaseVal  = mistPhase(LoV, mistD / stepLength);
 #else
@@ -636,20 +647,23 @@ mat2x3 raymarchAirFog(
 
     vec3 midWorldPos = worldStartPos
         + worldDir * (distanceToVolumeStart + rayLength * 0.5);
-    lightSun *= getCloudShadows(colortex8, midWorldPos - cameraPosition);
+    float cloudShadowMid
+        = getCloudShadows(colortex8, midWorldPos - cameraPosition);
+    lightSun *= cloudShadowMid;
 
     lightSun[0] *= fogParams.rayleighScatteringCoeff;
     lightSun[1] *= fogParams.mieScatteringCoeff;
     lightSky[0] *= fogParams.rayleighScatteringCoeff;
     lightSky[1] *= fogParams.mieScatteringCoeff;
 
-    mistSunLight *= fogParams.mistScatteringCoeff;
+    mistSunLight *= fogParams.mistScatteringCoeff * cloudShadowMid;
     mistSkyLight *= fogParams.mistScatteringCoeff;
 
     if (!sky) {
         // Skylight falloff
         lightSky[0] *= max(skylight, eyeSkylight);
         lightSky[1] *= max(skylight, eyeSkylight);
+        mistSkyLight *= max(skylight, eyeSkylight);
     }
 
     float LoV = dot(worldDir, lightDir);

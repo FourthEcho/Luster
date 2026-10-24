@@ -457,90 +457,117 @@ float localExposureLuma(vec3 rgb) {
 }
 
 #ifdef localExposure
-float computeLocalExposureEv(vec2 texelUv, vec3 centerRgb, float anchorLog) {
-    float centerLog = log2(localExposureLuma(centerRgb));
+// Scene luminance in stops, bounded to a window around the global meter so a
+// sun disc, an emissive or a pitch-black void cannot dominate a pooled
+// average.
+float localExposureLog(vec3 rgb, float anchorLog) {
+    return clamp(
+        log2(localExposureLuma(rgb)),
+        anchorLog - 9.0,
+        anchorLog + 6.0
+    );
+}
 
-    float sumLog = centerLog * 4.0;
-    float sumW = 4.0;
-
-
-    // a per-pixel post pass; larger-scale adaptation is already handled by the
-
-    const vec2 o = vec2(2.0);
-    vec3 s;
-    float l, w, d;
-
-    s = textureLod(colortex5, texelUv + viewPixelSize * vec2(-o.x, 0.0), 0.0).rgb;
-    l = log2(localExposureLuma(s));
-    d = abs(l - centerLog);
-    w = 2.0 * exp2(-d * 1.442695); // ~= exp(-d)
-    sumLog += l * w; sumW += w;
-
-    s = textureLod(colortex5, texelUv + viewPixelSize * vec2( o.x, 0.0), 0.0).rgb;
-    l = log2(localExposureLuma(s));
-    d = abs(l - centerLog);
-    w = 2.0 * exp2(-d * 1.442695);
-    sumLog += l * w; sumW += w;
-
-    s = textureLod(colortex5, texelUv + viewPixelSize * vec2(0.0, -o.y), 0.0).rgb;
-    l = log2(localExposureLuma(s));
-    d = abs(l - centerLog);
-    w = 2.0 * exp2(-d * 1.442695);
-    sumLog += l * w; sumW += w;
-
-    s = textureLod(colortex5, texelUv + viewPixelSize * vec2(0.0,  o.y), 0.0).rgb;
-    l = log2(localExposureLuma(s));
-    d = abs(l - centerLog);
-    w = 2.0 * exp2(-d * 1.442695);
-    sumLog += l * w; sumW += w;
-
-    const float diag = 1.41421356 * 2.0;
-    s = textureLod(colortex5, texelUv + viewPixelSize * vec2(-diag, -diag), 0.0).rgb;
-    l = log2(localExposureLuma(s));
-    d = abs(l - centerLog);
-    w = exp2(-d * 1.442695);
-    sumLog += l * w; sumW += w;
-
-    s = textureLod(colortex5, texelUv + viewPixelSize * vec2( diag, -diag), 0.0).rgb;
-    l = log2(localExposureLuma(s));
-    d = abs(l - centerLog);
-    w = exp2(-d * 1.442695);
-    sumLog += l * w; sumW += w;
-
-    s = textureLod(colortex5, texelUv + viewPixelSize * vec2(-diag,  diag), 0.0).rgb;
-    l = log2(localExposureLuma(s));
-    d = abs(l - centerLog);
-    w = exp2(-d * 1.442695);
-    sumLog += l * w; sumW += w;
-
-    s = textureLod(colortex5, texelUv + viewPixelSize * vec2( diag,  diag), 0.0).rgb;
-    l = log2(localExposureLuma(s));
-    d = abs(l - centerLog);
-    w = exp2(-d * 1.442695);
-    sumLog += l * w; sumW += w;
-
-    float localLog = sumLog / max(sumW, 1e-5);
-
-    // Centered on the global meter anchor, not an absolute middle gray.
-    // Same adaptation for detail and regional so the two stages agree.
-    const float adaptation = 0.28;
-    float ev = (anchorLog - localLog) * adaptation;
-
-
-    ev = clamp(ev * localExposureDetail, -0.6666667, 0.6666667);
-
-
-    float regionLod = ceil(log2(maxOf(rcp(viewPixelSize)) * 0.02));
-    vec3 regionRgb
-        = textureLod(colortex5, texelUv, regionLod).rgb;
-    float regionLog = log2(localExposureLuma(regionRgb));
-    float regionEv = clamp(
-        (anchorLog - regionLog) * adaptation,
-        -localExposureRange,
-        localExposureRange
+// Edge-aware log-average of the pre-exposure history at one spatial scale.
+// A hexagonal ring of mip taps is weighted by how close each tap is to the
+// pixel's own luminance: a dark pixel beside a bright one is not averaged with
+// it (no halo), and a pixel inside a region adapts to that region.
+float localExposurePool(
+    vec2 uv,
+    float centerLog,
+    float anchorLog,
+    float radiusPx,
+    float lod,
+    float edgeStop,
+    float rotation
+) {
+    const vec2 hexRing[6] = vec2[6](
+        vec2(1.0, 0.0),
+        vec2(0.5, 0.8660254),
+        vec2(-0.5, 0.8660254),
+        vec2(-1.0, 0.0),
+        vec2(-0.5, -0.8660254),
+        vec2(0.5, -0.8660254)
     );
 
-    return mix(ev, regionEv, localExposureRegional);
+    float cs = cos(rotation);
+    float sn = sin(rotation);
+
+    float sumLog
+        = localExposureLog(textureLod(colortex5, uv, lod).rgb, anchorLog);
+    float sumW = 1.0;
+
+    for (int i = 0; i < 6; ++i) {
+        vec2 d = hexRing[i];
+        d = vec2(cs * d.x - sn * d.y, sn * d.x + cs * d.y) * radiusPx
+            * viewPixelSize;
+
+        vec2 tapUv = clamp(uv + d, viewPixelSize, 1.0 - viewPixelSize);
+        float l = localExposureLog(textureLod(colortex5, tapUv, lod).rgb, anchorLog);
+
+        float w = exp2(-edgeStop * abs(l - centerLog));
+        sumLog += l * w;
+        sumW += w;
+    }
+
+    return sumLog / sumW;
+}
+
+// Returns the local exposure offset in stops, relative to the global exposure.
+// The pooled luminance is a multi-scale local adaptation level; the offset
+// pulls each region toward the global meter anchor, so the global exposure
+// stays in charge of overall brightness and the local pass only redistributes
+// it inside the frame. The gain is a plain scalar on all three channels,
+// which is exactly what changing exposure does, so hue and saturation hold.
+float computeLocalExposureEv(vec2 texelUv, float anchorLog, float exposure) {
+    vec3 centerRgb = textureLod(colortex5, texelUv, 0.0).rgb;
+    float centerLuma = localExposureLuma(centerRgb);
+    float centerLog = localExposureLog(centerRgb, anchorLog);
+
+    float screenPx = maxOf(rcp(viewPixelSize));
+
+    float radiusFine = max(2.0, 0.0015 * screenPx) * localExposureScale;
+    float radiusMid = 0.012 * screenPx * localExposureScale;
+    float radiusCoarse = 0.045 * screenPx * localExposureScale;
+
+    float lodMid = ceil(log2(max(radiusMid * 0.6, 1.0)));
+    float lodCoarse = ceil(log2(max(radiusCoarse * 0.6, 1.0)));
+
+    float fine = localExposurePool(
+        texelUv, centerLog, anchorLog, radiusFine, 0.0, 1.0, 0.0
+    );
+    float mid = localExposurePool(
+        texelUv, centerLog, anchorLog, radiusMid, lodMid, 0.6, 0.5235988
+    );
+    float coarse = localExposurePool(
+        texelUv, centerLog, anchorLog, radiusCoarse, lodCoarse, 0.3, 0.2617994
+    );
+
+    float wFine = 0.40 * localExposureDetail;
+    const float wMid = 0.35;
+    const float wCoarse = 0.40;
+
+    float adaptationLog
+        = (wFine * fine + wMid * mid + wCoarse * coarse)
+        / (wFine + wMid + wCoarse);
+
+    // Stops by which the surroundings sit below (+) or above (-) the meter.
+    float deficit = anchorLog - adaptationLog;
+
+    float ev = localExposureStrength * deficit;
+    ev *= deficit > 0.0 ? localExposureShadows : localExposureHighlights;
+
+    // Smooth saturation toward +-range: slope 1 at zero, never a hard clip, so
+    // no banding or contouring where a limit would be hit.
+    float range = max(localExposureRange, 1e-3);
+    ev /= 1.0 + abs(ev) / range;
+
+    // Never lift a pixel that is already close to white after the global
+    // exposure; shadow lift must not push highlights into clipping.
+    float exposedLuma = centerLuma * exposure;
+    ev *= ev > 0.0 ? 1.0 - smoothstep(0.35, 1.5, exposedLuma) : 1.0;
+
+    return ev;
 }
 #endif
 
@@ -746,7 +773,7 @@ void main() {
     sceneColor *= exposure;
 
 #ifdef localExposure
-    float localEv = computeLocalExposureEv(uv, sceneColor / max(exposure, 1e-6), anchorLog);
+    float localEv = computeLocalExposureEv(uv, anchorLog, exposure);
     sceneColor *= exp2(localEv);
 #endif
 

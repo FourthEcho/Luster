@@ -139,9 +139,8 @@ OverworldFogParams getFogParams(Weather weather) {
     params.mieScatteringCoeff = vec3(mieAlbedo * mie) * mieTint;
     params.mieExtinctionCoeff = vec3(mie) * mieTint;
 
-    // ---- Mist scattering coefficient ----
-    // Tinted by the current Rayleigh colour so mist picks up the correct
-
+    params.rayleighScatteringCoeff
+        = gamutExpand(params.rayleighScatteringCoeff);
 
 #if mistMode != mistModeOff
     {
@@ -198,9 +197,6 @@ OverworldFogParams getFogParams(Weather weather) {
         += desertSandstormWeather * desertSandstormExtinction;
 #endif
 
-
-    params.rayleighScatteringCoeff
-        = gamutExpand(params.rayleighScatteringCoeff);
 
     return params;
 }

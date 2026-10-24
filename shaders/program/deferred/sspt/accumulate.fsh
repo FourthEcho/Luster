@@ -343,8 +343,8 @@ void main() {
 
             vec4 historyG = texelFetch(colortex20, historyTexel, 0);
 
-            float depthDelta = distance(sqr(historyG.w), currentDistance)
-                              - abs(cameraMovement.z / far);
+            float depthDelta = max(0.0, distance(sqr(historyG.w), currentDistance)
+                              - abs(cameraMovement.z / far));
             bool depthRejection = (depthDelta / max(currentDistance, 1e-6)) < 0.1;
 
             if (depthRejection) {

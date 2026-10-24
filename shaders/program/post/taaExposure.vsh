@@ -95,10 +95,20 @@ const float K = 12.5; // Light-meter calibration constant
 const float sensitivity = 100.0; // ISO
 const float calibration = K / sensitivity / 1.2;
 
-const float minLuminance
-    = getLuminanceFromExposure(getExposureFromEv100(autoExposureMin));
-const float maxLuminance
-    = getLuminanceFromExposure(getExposureFromEv100(autoExposureMax));
+// The EV Min/Max sliders are rails on the *output* exposure. The meter itself
+// looks at a window padded beyond them, so the percentiles keep resolving real
+// scene luminance when the scene is outside the rails instead of piling up in
+// the end bins. Ordered defensively since the sliders can be set inverted.
+const float meterPaddingEv = 4.0;
+const float railMinEv = min(autoExposureMin, autoExposureMax);
+const float railMaxEv = max(autoExposureMin, autoExposureMax);
+
+const float minLuminance = getLuminanceFromExposure(
+    getExposureFromEv100(railMinEv - meterPaddingEv)
+);
+const float maxLuminance = getLuminanceFromExposure(
+    getExposureFromEv100(railMaxEv + meterPaddingEv)
+);
 const float minLogLuminance = log2(minLuminance);
 const float maxLogLuminance = log2(maxLuminance);
 
@@ -110,7 +120,7 @@ const float manualExposureTarget = manualExposureValue;
 #endif
 
 float getBinFromLuminance(float luminance) {
-    const float binCount = histogramBins;
+    const float binSpan = histogramBins - 1.0;
     const float rcpLogLuminanceRange
         = 1.0 / (maxLogLuminance - minLogLuminance);
     const float scaledMinLogLuminance
@@ -124,13 +134,16 @@ float getBinFromLuminance(float luminance) {
         log2(luminance) * rcpLogLuminanceRange - scaledMinLogLuminance
     );
 
-    return min(binCount * logLuminance, binCount - 1.0);
+    return binSpan * logLuminance;
 }
 
-float getLuminanceFromBin(int bin) {
+// Inverse of getBinFromLuminance, continuous so percentiles can land between
+// bins.
+float getLuminanceFromBin(float bin) {
+    const float binSpan = histogramBins - 1.0;
     const float logLuminanceRange = maxLogLuminance - minLogLuminance;
 
-    float logLuminance = bin * rcp(float(histogramBins));
+    float logLuminance = clamp(bin, 0.0, binSpan) * rcp(binSpan);
 
     return exp2(logLuminance * logLuminanceRange + minLogLuminance);
 }
@@ -182,30 +195,62 @@ void buildHistogram(out float[histogramBins] pdf) {
     }
 }
 
+// Luminance at a CDF target. The crossing is interpolated inside the bin that
+// holds it, so metered luminance is continuous instead of stepping bin by bin.
 float getPercentileLuminance(float[histogramBins] pdf, float target) {
     float cdf = 0.0;
 
     for (int i = 0; i < histogramBins; ++i) {
-        cdf += pdf[i];
-        if (cdf > target) {
-            return getLuminanceFromBin(i);
+        float next = cdf + pdf[i];
+
+        if (next > target) {
+            // Mass is splatted into two neighbouring bins by a linear tent, so
+            // a bin's mass is centred on its index.
+            float t = clamp01((target - cdf) / max(pdf[i], 1e-6));
+            return getLuminanceFromBin(float(i) - 0.5 + t);
         }
+
+        cdf = next;
     }
 
-    return 0.0; // ??
+    return maxLuminance;
 }
 
-
+// Three-population meter, combined as a weighted geometric mean. Luminance is
+// perceived (and a camera responds) logarithmically, so a log-domain blend
+// weighs a stop of shadow against a stop of highlight, instead of letting one
+// very bright percentile outvote the rest of the frame.
 float getMeteredLuminance(float[histogramBins] pdf) {
-    float luminanceMid = getPercentileLuminance(pdf, histogramTarget);
-    float luminanceDark = getPercentileLuminance(pdf, 0.2);
-    float luminanceBright = getPercentileLuminance(pdf, 0.8);
+    float luminanceMid
+        = max(getPercentileLuminance(pdf, histogramTarget), minLuminance);
+    float luminanceDark = max(getPercentileLuminance(pdf, 0.2), minLuminance);
+    float luminanceBright
+        = max(getPercentileLuminance(pdf, 0.8), minLuminance);
 
     float weightSum = 1.0 + histogramShadowWeight + histogramHighlightWeight;
 
-    return (luminanceMid + histogramShadowWeight * luminanceDark
-            + histogramHighlightWeight * luminanceBright)
+    float meteredLog = (log2(luminanceMid)
+                        + histogramShadowWeight * log2(luminanceDark)
+                        + histogramHighlightWeight * log2(luminanceBright))
         / weightSum;
+
+    return exp2(meteredLog);
+}
+
+// Polynomial smooth min/max: C1 knees instead of a hard clamp snap.
+float smoothMaxEv(float a, float b, float k) {
+    float h = max(k - abs(a - b), 0.0) / k;
+    return max(a, b) + h * h * k * 0.25;
+}
+
+float smoothMinEv(float a, float b, float k) {
+    float h = max(k - abs(a - b), 0.0) / k;
+    return min(a, b) - h * h * k * 0.25;
+}
+
+float softClampEv(float ev, float lo, float hi) {
+    float knee = max(min(0.30, 0.5 * (hi - lo)), 1e-4);
+    return smoothMinEv(smoothMaxEv(ev, lo, knee), hi, knee);
 }
 
 void main() {
@@ -214,10 +259,13 @@ void main() {
     // Auto exposure
 
 #ifndef autoExposure
+    #ifdef manualExposureUseScreenBrightness
+    exposure = getExposureFromLuminance(manualExposureTarget);
+    #else
     exposure = getExposureFromEv100(manualExposureTarget);
+    #endif
 #else
-
-
+    // Physically based reflected-light meter, adapted in log space.
     float previousExposure = texelFetch(colortex5, ivec2(0), 0).a
         / max(cameraExposureTriangleFactor(), 1e-6);
 
@@ -226,45 +274,41 @@ void main() {
 
     float luminance = getMeteredLuminance(pdf);
 
-    // Sigmoid highlight rolloff into the rails: linear cal/lum through
-    // the mid-tones with a soft knee at both ends instead of a hard
-    // clamp snap. Bounds come from our EV Min/Max histogram rails, so
-    // the sliders stay the single source of truth for calibration.
-    float minAllowedExposure = calibration / maxLuminance;
-    float maxAllowedExposure = calibration / minLuminance;
-    float sigmoidA = maxLuminance;
-    float sigmoidB = max(maxLuminance - minLuminance, 1e-6);
-    float targetExposure = calibration
-        / (sigmoidA - sigmoidB * exp(-luminance / sigmoidB));
-
+    // Rails on the output exposure, in stops of exposure (exposure = 2^ev).
+    float railLoEv = -railMaxEv;
+    float railHiEv = -railMinEv;
 
     bool previousBad = isnan(previousExposure) || isinf(previousExposure)
         || previousExposure <= 0.0;
-    bool targetBad = isnan(targetExposure) || isinf(targetExposure)
-        || targetExposure <= 0.0;
+
+    // ISO 2720 reflected-light metering: exposure = K / (S * L). Between the
+    // rails exposure tracks the metered luminance exactly, there is no
+    // compressive curve in the middle of the range.
+    float targetEv = log2(calibration / max(luminance, eps));
+
+    bool targetBad = isnan(targetEv) || isinf(targetEv);
     if (targetBad) {
-        targetExposure = previousBad
-            ? getExposureFromEv100(manualExposureTarget)
-            : previousExposure;
-    }
-    if (previousBad) {
-        previousExposure = targetExposure;
+        targetEv = previousBad ? -manualExposureTarget : log2(previousExposure);
     }
 
-    // Hard rails from the EV Min/Max sliders: neither a spike frame nor
-    // a stale history texel can push exposure outside calibration.
-    // Ordered defensively since the sliders can be set inverted.
-    float railLo = min(minAllowedExposure, maxAllowedExposure);
-    float railHi = max(minAllowedExposure, maxAllowedExposure);
-    targetExposure = clamp(targetExposure, railLo, railHi);
-    previousExposure = clamp(previousExposure, railLo, railHi);
+    float previousEv = previousBad ? targetEv : log2(previousExposure);
 
-    float adjustmentRate = targetExposure < previousExposure
+    // Soft knee into the rails, then hard rails: neither a spike frame nor a
+    // stale history texel can push exposure outside calibration.
+    targetEv = softClampEv(targetEv, railLoEv, railHiEv);
+    targetEv = clamp(targetEv, railLoEv, railHiEv);
+    previousEv = clamp(previousEv, railLoEv, railHiEv);
+
+    // The eye (and a camera's AE servo) adapts roughly linearly in stops per
+    // second, so the exponential approach runs on EV, not on the linear gain.
+    // Linear blending made a one-stop step brighten and darken at visibly
+    // different speeds and overshot large jumps.
+    float adjustmentRate = targetEv < previousEv
         ? autoExposureRateDimToBright
         : autoExposureRateBrightToDim;
     float blendWeight = exp(-adjustmentRate * frameTime);
 
-    exposure = mix(targetExposure, previousExposure, blendWeight);
+    exposure = exp2(mix(targetEv, previousEv, blendWeight));
 #endif
 
 
