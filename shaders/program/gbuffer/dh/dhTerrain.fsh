@@ -91,6 +91,24 @@ void main() {
         return;
     }
 
+#ifdef DISTANT_HORIZONS_TEXTURES
+    // Iris provides this API when DH LOD block textures are available.
+    // Match DH's texture tinting, and skip the synthetic noise fallback.
+    if (dh_hasTexture()) {
+        vec4 tile = dh_sampleTexture();
+        vec3 adjustedColor =
+            mix(color, clamp01(color * tile.rgb * 2.0), tile.a);
+        gbufferData0.x = packUnorm2x8(adjustedColor.rg);
+        gbufferData0.y = packUnorm2x8(
+            adjustedColor.b,
+            clamp01(float(materialMask) * rcp(255.0))
+        );
+        gbufferData0.z = packUnorm2x8(encodeUnitVector(normal));
+        gbufferData0.w = packUnorm2x8(lightLevels);
+        return;
+    }
+#endif
+
 #ifdef noiseOnDhTerrain
     mat3 tbn = getTbnMatrix(normal);
     vec3 worldPos = scenePos + cameraPosition;
