@@ -19,11 +19,12 @@ A realistic shader with Apple Silicon in mind - Work in Progress
 * Fully revamped sky, weather, water, and lighting
 * Detailed clouds with multiple different types and layers
 * Immersive weather providing different skies each day
-* Screen space path tracing
+* Screen-space path tracing
 * Soft shadows with variable-size penumbras
 * Detailed ambient occlusion (GTAO)
 * Full labPBR material support
 * screen-space reflections
+* Volumetric fog
 * Improved image quality TAA, FXAA, and CAS
 * Advanced temporal upscaling with TAAU
 * ACES tonemapping
