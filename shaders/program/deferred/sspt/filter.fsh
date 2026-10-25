@@ -18,6 +18,12 @@
 
 #include "/lib/global.glsl"
 
+// This pass only runs when the SVGF filter is enabled (see program.*.enabled in
+// shaders.properties), but Iris only registers a boolean option as a settings toggle if
+// it is #ifdef-checked in shader code at least once.
+#ifdef svgfFilter
+#define SVGF_FILTER_ACTIVE 1
+#endif
 
 #ifndef SVGF_SIZE
 #define SVGF_SIZE 4
