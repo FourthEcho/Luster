@@ -54,32 +54,6 @@ const Material waterMaterial = Material(
 );
 
 
-// same curve/intensity pair is shared by direct lighting and SSPT.
-void decodeEmission(vec4 specularMap, inout Material material) {
-#ifdef hardcodedEmission
-    // Hardcoded source was populated by materialFrom().
-#else
-    #if textureFormat == textureFormatLab
-    float hasEmissionMap = step(specularMap.a, 254.5 / 255.0);
-    float emissionValue = (specularMap.a * 255.0 - 1.0) / 254.0;
-    // Exclusive: unmapped texels emit nothing (no hardcoded fallback).
-    material.emission = material.albedo * emissionValue * hasEmissionMap;
-    #else
-    float hasEmissionMap = step(0.5 / 255.0, specularMap.b);
-    // Exclusive: unmapped texels emit nothing (no hardcoded fallback).
-    material.emission = material.albedo * specularMap.b * hasEmissionMap;
-    #endif
-#endif
-
-    material.emission = pow(
-        max(material.emission, vec3(0.0)),
-        vec3(globalEmissionCurve)
-    );
-
-
-    material.emission *= globalEmissionIntensity;
-}
-
 #if textureFormat == textureFormatLab
 void decodeSpecularMap(vec4 specularMap, inout Material material) {
 
@@ -109,8 +83,19 @@ void decodeSpecularMap(vec4 specularMap, inout Material material) {
     material.roughness = sqr(1.0 - specularMap.r);
 
     // ---- Emission ----
-    // decodeEmission() applies the shared global emission system.
-    decodeEmission(specularMap, material);
+#ifdef hardcodedEmission
+    // Built-in emission was populated by materialFrom().
+#else
+    float hasEmissionMap = step(specularMap.a, 254.5 / 255.0);
+    float emissionValue = (specularMap.a * 255.0 - 1.0) / 254.0;
+    // Unmapped texels do not fall back to hardcoded emission.
+    material.emission = material.albedo * emissionValue * hasEmissionMap;
+#endif
+    material.emission = pow(
+        max(material.emission, vec3(0.0)),
+        vec3(globalEmissionCurve)
+    );
+    material.emission *= globalEmissionIntensity;
 
     if (specularMap.g < 229.5 / 255.0) {
         // Dielectrics
@@ -161,8 +146,6 @@ void decodeSpecularMap(vec4 specularMap, inout Material material) {
         material.f0 = material.albedo;
         material.isMetal = true;
     }
-
-    // decodeEmission() already normalized material.emission above.
     material.ssrMultiplier = step(
         0.01,
         (material.f0.x
@@ -176,9 +159,18 @@ void decodeSpecularMap(vec4 specularMap, inout Material material) {
     material.f0 = material.isMetal ? material.albedo : material.f0;
 
     // Old format encodes emission directly in specular.b.
-    decodeEmission(specularMap, material);
-
-    // decodeEmission() already normalized material.emission above.
+#ifdef hardcodedEmission
+    // Built-in emission was populated by materialFrom().
+#else
+    float hasEmissionMap = step(0.5 / 255.0, specularMap.b);
+    // Unmapped texels do not fall back to hardcoded emission.
+    material.emission = material.albedo * specularMap.b * hasEmissionMap;
+#endif
+    material.emission = pow(
+        max(material.emission, vec3(0.0)),
+        vec3(globalEmissionCurve)
+    );
+    material.emission *= globalEmissionIntensity;
     material.ssrMultiplier = step(
         0.01,
         (material.f0.x
@@ -958,9 +950,7 @@ Material materialFrom(
 
 #endif
     }
-
-    // Emissive baseline remains albedo-shaped like Luster; decodeEmission()
-    // applies the shared curve/intensity later when the material is finalized.
+    // Global curve and intensity are applied when the specular map is decoded.
 
 #ifdef porosity
 

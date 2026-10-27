@@ -99,7 +99,7 @@ vec4 fetchGbuffer(ivec2 texel) {
     return vec4(val.rgb * 2.0 - 1.0, sqr(val.a));
 }
 
-#endif // INCLUDE_LIGHTING_INDIRECT_LIGHTING_TEMPORAL
+#endif // INCLUDE_LIGHT_INDIRECT_LIGHT_TEMPORAL
 #include "/lib/util/lodMod.glsl"
 #include "/lib/util/encode.glsl"
 #include "/lib/util/fastMath.glsl"

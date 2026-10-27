@@ -135,143 +135,6 @@ uniform vec4 entityColor;
 
 #ifdef directionalLightmaps
 #define LUSTER_INCLUDE_DIRECTIONAL_LIGHTMAPS
-#if defined(LUSTER_INCLUDE_CLOUD_SHADOWS)
-// Cloud-shadow projection and sampling.
-#if !defined INCLUDE_LIGHT_CLOUD_SHADOWS
-#define INCLUDE_LIGHT_CLOUD_SHADOWS
-
-#include "/lib/atmos/clouds/util/constants.glsl"
-#include "/lib/util/bicubic.glsl"
-
-const ivec2 cloudShadowRes = ivec2(512);
-
-const float cloudShadowExtent = 256.0 / (cloudsScale / 10.0);
-
-vec2 shadowViewToCloudShadowSpace(vec3 shadowViewPos) {
-    vec2 cloudShadowPos = shadowViewPos.xy / cloudShadowExtent;
-    cloudShadowPos /= 1.0 + length(cloudShadowPos);
-    cloudShadowPos = cloudShadowPos * 0.5 + 0.5;
-
-    return cloudShadowPos;
-}
-
-vec2 projectCloudShadowMap(vec3 scenePos) {
-    return shadowViewToCloudShadowSpace(
-        transform(shadowModelView, scenePos)
-    );
-}
-
-vec3 unprojectCloudShadowMap(vec2 cloudShadowPos) {
-    cloudShadowPos = cloudShadowPos * 2.0 - 1.0;
-    cloudShadowPos /= 1.0 - length(cloudShadowPos);
-
-    vec3 shadowViewPos = vec3(cloudShadowPos * cloudShadowExtent, 1.0);
-
-    return transform(shadowModelViewInverse, shadowViewPos);
-}
-
-float getCloudShadows(sampler2D cloudShadowMap, vec3 scenePos) {
-#ifndef cloudShadows
-    return 1.0;
-#else
-    vec2 cloudShadowPos = projectCloudShadowMap(scenePos)
-        * vec2(cloudShadowRes) / vec2(textureSize(cloudShadowMap, 0));
-
-    if (clamp01(cloudShadowPos) != cloudShadowPos) {
-        return 1.0;
-    }
-
-    // fade out cloud shadows when:
-    //  - the fragment is above the cloud layer
-    //  - the sun is near the horizon
-    float r = planetRadius
-        + (scenePos.y + eyeAltitude - 63.0) * cloudsScale;
-    float altitudeFraction
-        = linearStep(cloudsCumulusRadius, cloudsCumulusTopRadius, r);
-    float cloudShadowFade = smoothstep(0.05, 0.15, lightDir.y)
-        * clamp01(1.0 - altitudeFraction);
-
-    float cloudShadow = bicubicFilter(cloudShadowMap, cloudShadowPos).x;
-    cloudShadow = cloudShadow * cloudShadowFade + (1.0 - cloudShadowFade);
-
-    return cloudShadow * cloudShadowsIntensity
-        + (1.0 - cloudShadowsIntensity);
-#endif
-}
-
-#if defined PROGRAM_PREPARE && defined cloudShadows
-#include "/lib/atmos/clouds/altocumulus.glsl"
-#include "/lib/atmos/clouds/cirrus.glsl"
-#include "/lib/atmos/clouds/cumulus.glsl"
-#include "/lib/atmos/clouds/cumulusCongestus.glsl"
-
-vec2 renderCloudShadowMap(vec2 uv) {
-    // Transform position from scene-space to clouds-space
-    vec3 rayOrigin = unprojectCloudShadowMap(uv);
-    rayOrigin = vec3(rayOrigin.xz, rayOrigin.y + eyeAltitude - 63.0).xzy
-            * cloudsScale
-        + vec3(0.0, planetRadius, 0.0);
-
-    vec3 pos;
-    float t, density, extinctionCoeff;
-    float shadowVis = 1.0;
-    float shadowCumulusOnly = 1.0;
-    float distanceFade;
-    float distanceFadeStrength = 0.00000001 * pulse(lightDir.y, -0.01, 0.2);
-
-#ifdef cloudsCumulus
-    extinctionCoeff = 0.25 * cloudsParams.l0ExtinctionCoeff;
-    t = intersectSphere(
-            rayOrigin,
-            lightDir,
-            cloudsCumulusRadius + 0.25 * cumulusLayerThickness
-    )
-            .y;
-    pos = rayOrigin + lightDir * t;
-    distanceFade = exp2(-distanceFadeStrength * length(pos.xy));
-    density = cumulusDensityProfile(pos);
-    shadowVis *= exp(
-        -1.00 * distanceFade * extinctionCoeff * cumulusLayerThickness
-        * rcp(abs(lightDir.y) + eps) * density
-    );
-    shadowCumulusOnly = shadowVis;
-#endif
-
-#ifdef cloudsAltocumulus
-    extinctionCoeff = mix(0.05, 0.1, dayFactor) * cloudsAltocumulusDensity
-        * (1.0 - 0.33 * rainStrength);
-    t = intersectSphere(
-            rayOrigin,
-            lightDir,
-            cloudsAltocumulusRadius + 0.5 * altocumulusLayerThickness
-    )
-            .y;
-    pos = rayOrigin + lightDir * t;
-    distanceFade = exp2(-distanceFadeStrength * length(pos.xy));
-    density = altocumulusDensityProfile(pos);
-    shadowVis *= exp(
-        -1.00 * distanceFade * extinctionCoeff * altocumulusLayerThickness
-        * rcp(abs(lightDir.y) + eps) * density
-    );
-#endif
-
-#ifdef cloudsCirrus
-    t = intersectSphere(rayOrigin, lightDir, cloudsCirrusRadius).y;
-    pos = rayOrigin + lightDir * t;
-    distanceFade = exp2(-distanceFadeStrength * length(pos.xy));
-    density = cirrusDensityProfile(pos.xz, 0.5);
-    shadowVis *= exp(-1.00 * distanceFade * cloudsCirrusExtinctionCoeff
-                  * cirrusLayerThickness * rcp(abs(lightDir.y) + eps)
-                  * density)
-            * 0.5
-        + 0.5;
-#endif
-
-    return vec2(shadowVis, shadowCumulusOnly);
-}
-#endif
-#endif // INCLUDE_LIGHTING_CLOUD_SHADOWS
-#endif
 
 #if defined(LUSTER_INCLUDE_DIRECTIONAL_LIGHTMAPS)
 // Directional lightmap modulation.
@@ -334,7 +197,7 @@ vec2 getDirectionalLightmaps(vec3 positionScene, vec3 normal) {
     return lightmapMul;
 }
 
-#endif // INCLUDE_LIGHTING_DIRECTIONAL_LIGHTMAPS
+#endif // INCLUDE_LIGHT_DIRECTIONAL_LIGHTMAPS
 #endif
 
 #if defined(LUSTER_INCLUDE_HANDHELD_LIGHT)
@@ -395,7 +258,7 @@ const vec3 handheldEmitterLightColor[48] = vec3[48](
     vec3(1.00, 0.20, 0.90) * 10.0, // 46 - Magenta     (block 78)
     vec3(1.00, 0.55, 0.85) * 10.0  // 47 - Pink        (block 79)
 );
-#endif // handheldLightingMode == handheldLightingColored
+#endif // handheldLightMode == handheldLightColored
 
 #ifdef IS_IRIS
 uniform vec3 relativeEyePosition;
@@ -443,7 +306,7 @@ vec3 getHandheldLight(vec3 scenePos, float ao) {
     return lightColor * falloff;
 }
 
-#endif // INCLUDE_LIGHTING_HANDHELD_LIGHTING
+#endif // INCLUDE_LIGHT_HANDHELD_LIGHT
 #endif
 
 #undef LUSTER_INCLUDE_DIRECTIONAL_LIGHTMAPS

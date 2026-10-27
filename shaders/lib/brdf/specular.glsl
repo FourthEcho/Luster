@@ -588,4 +588,4 @@ vec3 getSpecularReflections(
     return reflection * material.ssrMultiplier;
 }
 
-#endif // INCLUDE_LIGHTING_BSDF_SPECULAR_LIGHTING
+#endif // INCLUDE_LIGHT_BSDF_SPECULAR_LIGHT

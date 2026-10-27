@@ -53,4 +53,4 @@ vec3 getShadowBias(vec3 scenePos, vec3 normal, float NoL, float skylight) {
         * (2.0 - clamp01(NoL));
 }
 
-#endif // INCLUDE_LIGHTING_DIRECT_LIGHTING_DISTORTION
+#endif // INCLUDE_LIGHT_DIRECT_LIGHT_DISTORTION

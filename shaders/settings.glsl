@@ -166,17 +166,16 @@ const float wetnessHalflife         = 70.0;
   #define gtaoFalloffStart 0.75 // Fraction of gtaoRadius where the occlusion falloff begins (no longer a GUI slider)
   #define gtaoMultibounceIntensity 1.00 // Blends the surface-albedo-based GTAO multibounce approximation in/out (no longer a GUI slider)
 
-// ---- SSPT — Screen Space Path Tracing ----
-
+// ---- Screen-Space Path Tracing ----
 
   //#define ssptEnabled
   //#define ssptFullRangeRT
   #define indirectResReduction 2 // [1 2 3 4]
   #define ssptSPP 1 // [1 2 3 4 5 6]
   #define ssptBounces 1 // [1 2 3 4 5 6]
-  #define ssptEmissionDistance 8.0 // [2.0 4.0 6.0 8.0 10.0 12.0 14.0 16.0 18.0 20.0 22.0 24.0 26.0 28.0 30.0 32.0 36.0 40.0 44.0 48.0 52.0 56.0 60.0 64.0]
-  #define ssptLightmapBlend 1.0 // [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
+  #define ssptEmissionDistance 8.00 // [2.00 4.00 6.00 8.00 10.00 12.00 14.00 16.00 18.00 20.00 22.00 24.00 26.00 28.00 30.00 32.00]
   #define ssptEmissionMode 0 // [0 1 2] 0 = Hardcoded, 1 = Hardcoded + LabPBR, 2 = LabPBR only. Only affects SSPT.
+  #define ssptLightmapBlend 1.0 // [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
   #define ssptIntensity 1.00 // [0.00 0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.45 0.50 0.55 0.60 0.65 0.70 0.75 0.80 0.85 0.90 0.95 1.00]
   #define indirectLightingIntensity 0.50 // [0.00 0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.45 0.50 0.55 0.60 0.65 0.70 0.75 0.80 0.85 0.90 0.95 1.00 1.05 1.10 1.15 1.20 1.25 1.30 1.35 1.40 1.45 1.50 1.55 1.60 1.65 1.70 1.75 1.80 1.85 1.90 1.95 2.00]
 
@@ -186,12 +185,6 @@ const float wetnessHalflife         = 70.0;
   #define svgfRad 1 // [1 2 3]
   #define svgfStrictness 1.0 // [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
   #define svgfNormalexp 1.0 // [0.2 0.4 0.6 0.8 1.0 1.2 1.4 1.6 1.8 2.0]
-
-// -------------------
-//   Ambient lighting
-// -------------------
-//   Sky ambient is now fully handled by SSPT traced rays (ray misses sample
-//   the sky map directly). hBasisSkylight and its settings are removed.
 
 // -------
 //   Sky
@@ -461,8 +454,6 @@ const float wetnessHalflife         = 70.0;
   #define materialMappingSpecularOnly 2
   #define materialMappingNormalsOnly 3
   #define materialMappingSpecularNormals 4
-// ---- Texture cavity AO: darker albedo texels occlude ambient more.
-// Off by default (commented out).
   //#define textureAo
 
 #if materialMappingMode == materialMappingHardcoded

@@ -16,8 +16,8 @@
 ====================================================================================================
 */
 
-#if !defined INCLUDE_LIGHT_BSDF_DIFFUSE_LIGHT
-#define INCLUDE_LIGHT_BSDF_DIFFUSE_LIGHT
+#if !defined INCLUDE_LIGHT_DIFFUSE_LIGHT
+#define INCLUDE_LIGHT_DIFFUSE_LIGHT
 
 #include "/lib/brdf/hammon.glsl"
 #define LUSTER_INCLUDE_BLOCKLIGHT_COLOR
@@ -165,7 +165,7 @@ vec2 renderCloudShadowMap(vec2 uv) {
     return vec2(shadowVis, shadowCumulusOnly);
 }
 #endif
-#endif // INCLUDE_LIGHTING_CLOUD_SHADOWS
+#endif // INCLUDE_LIGHT_CLOUD_SHADOWS
 #endif
 
 #if defined(LUSTER_INCLUDE_DIRECTIONAL_LIGHTMAPS)
@@ -229,7 +229,7 @@ vec2 getDirectionalLightmaps(vec3 positionScene, vec3 normal) {
     return lightmapMul;
 }
 
-#endif // INCLUDE_LIGHTING_DIRECTIONAL_LIGHTMAPS
+#endif // INCLUDE_LIGHT_DIRECTIONAL_LIGHTMAPS
 #endif
 
 #if defined(LUSTER_INCLUDE_HANDHELD_LIGHT)
@@ -290,7 +290,7 @@ const vec3 handheldEmitterLightColor[48] = vec3[48](
     vec3(1.00, 0.20, 0.90) * 10.0, // 46 - Magenta     (block 78)
     vec3(1.00, 0.55, 0.85) * 10.0  // 47 - Pink        (block 79)
 );
-#endif // handheldLightingMode == handheldLightingColored
+#endif // handheldLightMode == handheldLightColored
 
 #ifdef IS_IRIS
 uniform vec3 relativeEyePosition;
@@ -338,7 +338,7 @@ vec3 getHandheldLight(vec3 scenePos, float ao) {
     return lightColor * falloff;
 }
 
-#endif // INCLUDE_LIGHTING_HANDHELD_LIGHTING
+#endif // INCLUDE_LIGHT_HANDHELD_LIGHT
 #endif
 
 #undef LUSTER_INCLUDE_HANDHELD_LIGHT
@@ -673,7 +673,6 @@ vec3 getDiffuseLight(
         directionalLight
     );
 
-
     light += material.emission * emissionScale;
 
 #if defined WORLD_OVERWORLD
@@ -689,4 +688,4 @@ vec3 getDiffuseLight(
         * mix(1.0, metalDiffuseAmount, float(material.isMetal));
 }
 
-#endif // INCLUDE_LIGHTING_BSDF_DIFFUSE_LIGHTING
+#endif // INCLUDE_LIGHT_DIFFUSE_LIGHT

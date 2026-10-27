@@ -167,7 +167,7 @@ const vec3 handheldEmitterLightColor[48] = vec3[48](
     vec3(1.00, 0.20, 0.90) * 10.0, // 46 - Magenta     (block 78)
     vec3(1.00, 0.55, 0.85) * 10.0  // 47 - Pink        (block 79)
 );
-#endif // handheldLightingMode == handheldLightingColored
+#endif // handheldLightMode == handheldLightColored
 
 #ifdef IS_IRIS
 uniform vec3 relativeEyePosition;
@@ -215,7 +215,7 @@ vec3 getHandheldLight(vec3 scenePos, float ao) {
     return lightColor * falloff;
 }
 
-#endif // INCLUDE_LIGHTING_HANDHELD_LIGHTING
+#endif // INCLUDE_LIGHT_HANDHELD_LIGHT
 #endif
 
 #undef LUSTER_INCLUDE_HANDHELD_LIGHT
@@ -355,7 +355,7 @@ vec2 renderCloudShadowMap(vec2 uv) {
     return vec2(shadowVis, shadowCumulusOnly);
 }
 #endif
-#endif // INCLUDE_LIGHTING_CLOUD_SHADOWS
+#endif // INCLUDE_LIGHT_CLOUD_SHADOWS
 #endif
 
 #undef LUSTER_INCLUDE_CLOUD_SHADOWS
@@ -737,7 +737,7 @@ vec3 hitDirectLight(HitData hit, vec3 hitViewPos) {
 #endif // defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE || defined DIRECT_SKY_BOUNCE
 
 // ----------------------------------------------------------------------------
-/* HAMMON DIFFUSE BRDF 
+/* HAMMON DIFFUSE BRDF */
 // ----------------------------------------------------------------------------
 
 #include "/lib/brdf/hammon.glsl"
@@ -948,9 +948,7 @@ vec3 traceIndirect(
 
 
     float emissionLuma = dot(max0(emission), luminanceWeights);
-    emission *= rcp(1.0 + emissionLuma * rcp(8.0));
-    float compressedLuma = dot(max0(emission), luminanceWeights);
-    emission = mix(vec3(compressedLuma), emission, 1.4);
+    emission = mix(vec3(emissionLuma), emission, 1.4);
 
 #if defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE || defined DIRECT_SKY_BOUNCE
     // Bounce averages over candidates, matching emission's normalization.
@@ -982,7 +980,7 @@ vec3 traceIndirect(
 #endif
 }
 
-#endif // INCLUDE_LIGHTING_INDIRECT_LIGHTING_SSPT
+#endif // INCLUDE_LIGHT_INDIRECT_LIGHT_SSPT
 #include "/lib/util/encode.glsl"
 #include "/lib/util/spaceConversion.glsl"
 

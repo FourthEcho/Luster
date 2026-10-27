@@ -19,9 +19,38 @@
 #if !defined INCLUDE_LIGHT_DIRECT_LIGHT_PCSS
 #define INCLUDE_LIGHT_DIRECT_LIGHT_PCSS
 
+// ---- Shadow-range helpers (merged from lib/light/common.glsl). Kept outside
+// the shadow gate below: getLightmapShadows and getLightmapLightLeakPrevention
+// are also used by the lightmap/SSRT fallback paths where the shadow-map
+// pipeline is compiled out. ----
+
+// Fade from close shadows (shadow maps) to distant shadows (lightmap or SSRT)
+float getShadowDistanceFade(vec3 scenePos, vec3 shadowScreenPos) {
+    float effectiveShadowDistance = min(shadowDistance, far);
+    return linearStep(
+        0.1,
+        1.0,
+        pow32(
+            max(maxOf(abs(shadowScreenPos.xy * 2.0 - 1.0)),
+                lengthSquared(scenePos) * rcp(sqr(effectiveShadowDistance)))
+        )
+    );
+}
+
+// Fake, lightmap-based shadows for outside of the shadow range or when shadows
+// are disabled
+float getLightmapShadows(float skylight) {
+    return smoothstep(13.5 / 15.0, 14.5 / 15.0, skylight);
+}
+
+// Prevents light leaking in caves by cancelling out sunlight in very low
+// skylight
+float getLightmapLightLeakPrevention(float skylight) {
+    return smoothstep(0.0 / 15.0, 2.0 / 15.0, skylight);
+}
+
 #if defined shadow && (defined WORLD_OVERWORLD || defined WORLD_END)
 
-#include "/lib/light/common.glsl"
 #include "/lib/light/distortion.glsl"
 #include "/lib/util/color.glsl"
 #include "/lib/util/random.glsl"
@@ -314,4 +343,4 @@ vec3 getFilteredShadows(
 }
 #endif
 
-#endif // INCLUDE_LIGHTING_DIRECT_LIGHTING_PCSS
+#endif // INCLUDE_LIGHT_DIRECT_LIGHT_PCSS

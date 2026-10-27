@@ -75,7 +75,7 @@ const float emissionScale = 40.0;
 #define blocklightColor \
     (fromDisplay(vec3(blocklightR, blocklightG, blocklightB)) * blocklightI)
 
-#endif // INCLUDE_LIGHTING_COLORS_BLOCKLIGHT_COLOR
+#endif // INCLUDE_LIGHT_COLORS_BLOCKLIGHT_COLOR
 #endif
 
 #if defined(LUSTER_INCLUDE_LIGHT_COLOR)
@@ -164,7 +164,7 @@ vec3 getLightColor() {
     return lightColor;
 }
 
-#endif // INCLUDE_LIGHTING_COLORS_LIGHT_COLOR
+#endif // INCLUDE_LIGHT_COLORS_LIGHT_COLOR
 #endif
 
 #if defined(LUSTER_INCLUDE_WEATHER_COLOR)
@@ -205,5 +205,5 @@ vec3 getWeatherColor() {
     return weatherColor;
 }
 
-#endif // INCLUDE_LIGHTING_COLORS_WEATHER_COLOR
+#endif // INCLUDE_LIGHT_COLORS_WEATHER_COLOR
 #endif

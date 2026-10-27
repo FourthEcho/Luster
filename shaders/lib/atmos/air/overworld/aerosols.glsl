@@ -112,8 +112,8 @@ vec3 ozoneLayerViewTransmittance(float mu, float r) {
 
 #endif // INCLUDE_ATMOS_AIR_OVERWORLD_OZONE
 
-#if !defined INCLUDE_ATMOS_AIR_OVERWORLD_SANDBORMDSTORM
-#define INCLUDE_ATMOS_AIR_OVERWORLD_SANDBORMDSTORM
+#if !defined INCLUDE_ATMOS_AIR_OVERWORLD_SANDSTORM
+#define INCLUDE_ATMOS_AIR_OVERWORLD_SANDSTORM
 
 
 #ifdef desertSandstorm
@@ -183,4 +183,4 @@ vec3 sandstormTransmittance(float mu) { return vec3(1.0); }
 vec3 sandstormTint() { return vec3(1.0); }
 #endif
 
-#endif // INCLUDE_ATMOS_AIR_OVERWORLD_SANDBORMDSTORM
+#endif // INCLUDE_ATMOS_AIR_OVERWORLD_SANDSTORM

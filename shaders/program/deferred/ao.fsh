@@ -172,7 +172,7 @@ float computeDssao(
     return clamp01(visibility / float(sampleCount));
 }
 
-#endif // INCLUDE_LIGHTING_INDIRECT_LIGHTING_SSAO
+#endif // INCLUDE_LIGHT_INDIRECT_LIGHT_SSAO
 #endif
 
 #if shaderAo == shaderAoGtao
@@ -358,7 +358,7 @@ vec2 computeGtao(
     return clamp01(vec2(ao, ambientSss));
 }
 
-#endif // INCLUDE_LIGHTING_INDIRECT_LIGHTING_GTAO
+#endif // INCLUDE_LIGHT_INDIRECT_LIGHT_GTAO
 #endif
 
 const float aoRenderScale = 0.5;
