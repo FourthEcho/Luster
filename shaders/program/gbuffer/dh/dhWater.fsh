@@ -52,6 +52,7 @@ flat in OverworldFogParams fogParams;
 
 uniform sampler2D noisetex;
 
+uniform sampler2D colortex4; // Sky map, lighting colors (needed by lib/brdf/specular.glsl sky reflections)
 uniform sampler2D colortex5; // scene history (used by SSR reflection reprojection)
 uniform sampler2D colortex7; // fog scattering history (used by SSR reflection reprojection)
 
