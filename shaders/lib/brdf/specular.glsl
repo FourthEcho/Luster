@@ -473,7 +473,7 @@ vec3 getSpecularReflections(
     screenPos = viewToScreenSpace(SSRT_PROJECTION_MATRIX, viewPos, true);
 #endif
 
-#if defined ssrRoughnessSupport && defined specularMapping
+#if defined ssrRoughnessSupport && defined specularMapping && !defined specularAuxOnly
     if (!isWater) { // Rough reflection
         float mipLevel
             = min(8.0 * (1.0 - pow8(1.0 - material.roughness)), 5.0);

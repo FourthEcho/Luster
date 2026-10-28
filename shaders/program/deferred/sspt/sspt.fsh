@@ -570,16 +570,14 @@ vec3 hitEmission(vec4 hitData0, ivec2 hitTexel, vec3 hitViewPos) {
         unpackUnorm2x8(hitSpecularMap.z),
         unpackUnorm2x8(hitSpecularMap.w)
     );
-    vec3 mapRaw;
-    #if textureFormat == textureFormatLab
+    vec3 mapRaw = vec3(0.0);
+    #if textureFormat == textureFormatLab11 || textureFormat == textureFormatLab12Plus
+    // LabPBR 1.1 and 1.2+ both store emission in specular alpha:
+    // 0-254 encode 0-100% emission, while 255 means no emission map.
+    // The 1.2 change affects normal-map AO, not emission decoding.
     float hasEmissionMap = step(ssptMap.a, 254.5 / 255.0);
-    float emissionValue = (ssptMap.a * 255.0 - 1.0) / 254.0;
-    // Exclusive: unmapped texels emit nothing (no hardcoded fallback).
+    float emissionValue = ssptMap.a * (255.0 / 254.0);
     mapRaw = hitMaterial.albedo * emissionValue * hasEmissionMap;
-    #else
-    float hasEmissionMap = step(0.5 / 255.0, ssptMap.b);
-    // Exclusive: unmapped texels emit nothing (no hardcoded fallback).
-    mapRaw = hitMaterial.albedo * ssptMap.b * hasEmissionMap;
     #endif
 #endif
 

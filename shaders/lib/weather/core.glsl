@@ -113,7 +113,21 @@ float weatherWind() {
         noise1d(worldAge * windVariationSpeed + 83.236)
     );
 #else
+    // Hardcoded neutral wind keeps foliage moving when variation is disabled.
     float wind = 0.5;
+#endif
+
+#ifdef biomeWeatherVariation
+    // Warm, dry biomes receive slightly stronger wind; cool, humid biomes
+    // receive gentler wind. Keep the biome influence deliberately subtle.
+    float biomeTemperature01 = clamp01(0.5 + 0.5 * biomeTemperature);
+    float biomeHumidity01 = clamp01(0.5 + 0.5 * biomeHumidity);
+    float biomeWindFactor = mix(
+        0.85,
+        1.15,
+        clamp01(0.5 * biomeTemperature01 + 0.5 * (1.0 - biomeHumidity01))
+    );
+    wind *= biomeWindFactor;
 #endif
 
     // Weather-based variation

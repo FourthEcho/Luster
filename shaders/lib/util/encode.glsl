@@ -88,13 +88,13 @@ float unsplit2x8(vec2 v) {
     return float(i) * rcp(65535.0);
 }
 
-#if textureFormat == textureFormatLab
+#if textureFormat == textureFormatLab12Plus
 void decodeNormalMap(vec3 normalMap, out vec3 normal, out float ao) {
     normal.xy = normalMap.xy * 2.0 - 1.0;
     normal.z = sqrt(clamp01(1.0 - dot(normal.xy, normal.xy)));
     ao = normalMap.z;
 }
-#elif textureFormat == textureFormatOld
+#elif textureFormat == textureFormatLab11
 void decodeNormalMap(vec3 normalMap, out vec3 normal, out float ao) {
     normal = normalMap * 2.0 - 1.0;
     ao = length(normal);

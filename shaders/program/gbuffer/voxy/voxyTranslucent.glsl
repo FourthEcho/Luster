@@ -86,7 +86,6 @@ vec3 ambientColor;
 vec3 lightColor;
 
 #ifdef WORLD_OVERWORLD
-// Unused
 OverworldFogParams fogParams;
 #endif
 

@@ -54,10 +54,55 @@ const Material waterMaterial = Material(
 );
 
 
-#if textureFormat == textureFormatLab
+#if defined sssUseMaps || defined porosityUseMaps
+// LabPBR 1.1 and 1.2+ use the same specular-blue channel layout:
+// 0-64 = porosity, 65-255 = subsurface scattering. Both ranges are linear.
+void decodeLabPbrSubsurfaceAndPorosity(vec4 specularMap, inout Material material) {
+    // LabPBR assigns blue-channel porosity/SSS data to dielectrics only.
+    if (specularMap.g < 229.5 / 255.0) {
+        float blueValue = specularMap.b * 255.0;
+        bool hasSssRegion = blueValue >= 64.5;
+
+#ifdef sssUseMaps
+        // 65 encodes 0% SSS; 255 encodes 100% SSS.
+        if (hasSssRegion) {
+            material.sssAmount = clamp((blueValue - 65.0) / 190.0, 0.0, 1.0);
+#ifdef sssSheen
+            material.sheenAmount = 1.0;
+#endif
+        }
+#endif
+
+#ifdef porosityUseMaps
+#if porosityMode == porosityMaps
+        // LabPBR Only: no hardcoded fallback when blue is zero or reserved for SSS.
+        material.porosityAmount = hasSssRegion
+            ? 0.0
+            : clamp(blueValue / 64.0, 0.0, 1.0) * porosityStrength;
+#else
+        // Hardcoded + LabPBR: the map overrides hardcoded porosity whenever
+        // blue encodes porosity (including an explicit value of zero). When
+        // blue encodes SSS, retain the hardcoded porosity fallback because
+        // the shared channel carries no porosity value for that texel.
+        if (!hasSssRegion) {
+            material.porosityAmount = clamp(blueValue / 64.0, 0.0, 1.0)
+                * porosityStrength;
+        }
+#endif
+#endif
+    }
+}
+#endif
+
+
+#if textureFormat == textureFormatLab12Plus || textureFormat == textureFormatLab11
 void decodeSpecularMap(vec4 specularMap, inout Material material) {
-
-
+#ifdef specularAuxOnly
+#if defined sssUseMaps || defined porosityUseMaps
+    decodeLabPbrSubsurfaceAndPorosity(specularMap, material);
+#endif
+#else
+    // Full LabPBR specular-map decoding.
     // Measured complex refractive indices. Sources: Palik "Handbook of Optical Constants", refractiveindex.info.
     const vec3[] metalN = vec3[](
         vec3(2.9114, 2.9497, 2.7743), // Iron
@@ -87,7 +132,7 @@ void decodeSpecularMap(vec4 specularMap, inout Material material) {
     // Built-in emission was populated by materialFrom().
 #else
     float hasEmissionMap = step(specularMap.a, 254.5 / 255.0);
-    float emissionValue = (specularMap.a * 255.0 - 1.0) / 254.0;
+    float emissionValue = specularMap.a * (255.0 / 254.0);
     // Unmapped texels do not fall back to hardcoded emission.
     material.emission = material.albedo * emissionValue * hasEmissionMap;
 #endif
@@ -101,37 +146,8 @@ void decodeSpecularMap(vec4 specularMap, inout Material material) {
         // Dielectrics
         material.f0 = max(material.f0, specularMap.g);
 
-        // ---- sss (Subsurface Scattering) ----
-
-
-        float hasSssRegion = step(64.5 / 255.0, specularMap.b);
-#ifdef sssUseMaps
-        float mapSss = linearStep(
-            64.0 / 255.0,
-            1.0,
-            specularMap.b * hasSssRegion
-        );
-        material.sssAmount = mapSss * hasSssRegion;
-#ifdef sssSheen
-
-
-        material.sheenAmount = hasSssRegion;
-#endif
-#endif
-
-        // ---- Porosity ----
-
-
-#ifdef porosityUseMaps
-        float mapPorosity = linearStep(
-            0.0,
-            64.0 / 255.0,
-            max0(specularMap.b - specularMap.b * hasSssRegion)
-        );
-        // Any non-zero B means the pack carries data (porosityAmount or sss);
-        // B == 0 (vanilla) means no data -> 0, no hardcoded fallback.
-        float hasPorosityData = step(0.5 / 255.0, specularMap.b);
-        material.porosityAmount = mapPorosity * porosityStrength * hasPorosityData;
+#if defined sssUseMaps || defined porosityUseMaps
+        decodeLabPbrSubsurfaceAndPorosity(specularMap, material);
 #endif
     } else if (specularMap.g < 237.5 / 255.0) {
         // Hardcoded metals
@@ -151,31 +167,7 @@ void decodeSpecularMap(vec4 specularMap, inout Material material) {
         (material.f0.x
          - material.f0.x * material.roughness * ssrRoughnessThresh)
     ); // based on Kneemund's method
-}
-#elif textureFormat == textureFormatOld
-void decodeSpecularMap(vec4 specularMap, inout Material material) {
-    material.roughness = sqr(1.0 - specularMap.r);
-    material.isMetal = specularMap.g > 0.5;
-    material.f0 = material.isMetal ? material.albedo : material.f0;
-
-    // Old format encodes emission directly in specular.b.
-#ifdef hardcodedEmission
-    // Built-in emission was populated by materialFrom().
-#else
-    float hasEmissionMap = step(0.5 / 255.0, specularMap.b);
-    // Unmapped texels do not fall back to hardcoded emission.
-    material.emission = material.albedo * specularMap.b * hasEmissionMap;
 #endif
-    material.emission = pow(
-        max(material.emission, vec3(0.0)),
-        vec3(globalEmissionCurve)
-    );
-    material.emission *= globalEmissionIntensity;
-    material.ssrMultiplier = step(
-        0.01,
-        (material.f0.x
-         - material.f0.x * material.roughness * ssrRoughnessThresh)
-    ); // based on Kneemund's method
 }
 #endif
 
@@ -235,7 +227,7 @@ Material materialFrom(
                             material.roughness = sqr(1.0 - smoothness);
                             material.f0 = vec3(0.02);
 #endif
-#ifdef porosity
+#ifdef hardcodedPorosity
                             // Stone-like default: slightly porous so rain
                             // can darken it a touch.
                             material.porosityAmount = 0.15;
@@ -282,7 +274,7 @@ Material materialFrom(
                         }
                     } else { // 6-8
                         if (materialMask == 6u) { // 6
-#ifdef porosity
+#ifdef hardcodedPorosity
 
 
                             material.porosityAmount = 0.6;
@@ -295,7 +287,7 @@ Material materialFrom(
                             material.roughness = sqr(1.0 - smoothness);
                             material.f0 = vec3(0.02);
 #endif
-#ifdef porosity
+#ifdef hardcodedPorosity
 
 
                             material.porosityAmount = 0.85;
@@ -328,7 +320,7 @@ Material materialFrom(
                             material.roughness = sqr(1.0 - smoothness);
                             material.f0 = vec3(0.02);
 #endif
-#ifdef porosity
+#ifdef hardcodedPorosity
                             // Red sand is highly porous; birch planks are
                             // only slightly porous. We pick a middle ground.
                             material.porosityAmount = 0.45;
@@ -343,7 +335,7 @@ Material materialFrom(
                             material.roughness = sqr(1.0 - smoothness);
                             material.f0 = vec3(0.02);
 #endif
-#ifdef porosity
+#ifdef hardcodedPorosity
                             // Planks and soft stone — moderately porous.
                             material.porosityAmount = 0.35;
 #endif
@@ -387,7 +379,7 @@ Material materialFrom(
                             // Strong sss
                             material.sssAmount = 0.6;
 #endif
-#ifdef porosity
+#ifdef hardcodedPorosity
                             // Snow, sponges and other strong-sss organic
                             // blocks are typically very porous.
                             material.porosityAmount = 0.7;
@@ -397,7 +389,7 @@ Material materialFrom(
                             // Weak sss
                             material.sssAmount = 0.1;
 #endif
-#ifdef porosity
+#ifdef hardcodedPorosity
                             // Weak-sss organic: mildly porous.
                             material.porosityAmount = 0.3;
 #endif
@@ -614,7 +606,7 @@ Material materialFrom(
                                 = max(sqr(1.0 - smoothness), 0.4);
                             material.f0 = vec3(0.03);
 #endif
-#ifdef porosity
+#ifdef hardcodedPorosity
                             // Wood is moderately porous along the grain,
                             // but we use a flat value for simplicity.
                             material.porosityAmount = 0.3;
@@ -629,7 +621,7 @@ Material materialFrom(
                                 = max(sqr(1.0 - smoothness), 0.4);
                             material.f0 = vec3(0.03);
 #endif
-#ifdef porosity
+#ifdef hardcodedPorosity
                             // Wood-derived (signs etc.) — same porosityAmount
                             // family as logs.
                             material.porosityAmount = 0.3;
@@ -945,10 +937,6 @@ Material materialFrom(
         material.sssAmount = 0.5;
 #endif
 
-#ifdef porosity
-
-
-#endif
     }
     // Global curve and intensity are applied when the specular map is decoded.
 

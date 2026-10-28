@@ -26,9 +26,6 @@
 #define OZONE_FOG_OPTION_ENABLED
 #endif
 #ifdef ozoneLayer
-#define OZONE_MIST_OPTION_ENABLED
-#endif
-#ifdef ozoneLayer
 #define OZONE_PLANET_BOUNCE_OPTION_ENABLED
 #endif
 

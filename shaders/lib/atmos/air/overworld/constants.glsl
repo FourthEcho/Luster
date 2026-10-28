@@ -33,6 +33,6 @@ const vec2 airFogFalloffHalfLife
 // ---- Mist constants ----
 
 
-const float mistBaseScatterCoeff = 8e-3;
+const float mistBaseScatterCoeff = 1e-2;
 
 #endif // INCLUDE_ATMOS_AIR_OVERWORLD_CONSTANTS

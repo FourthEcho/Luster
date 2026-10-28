@@ -801,14 +801,4 @@ void main() {
     sceneColor = colorGradeOutput(sceneColor);
 #endif
 
-#if 0 // Tonemap plot
-        const float scale = 2.0;
-        vec2 uvScaled = uv * scale * vec2(1.0, 1.0 / aspectRatio);
-        float x = uvScaled.x;
-        float y = tonemap(vec3(x)).x;
-
-        if (abs(uvScaled.x - 1.0) < 0.001 * scale) sceneColor = vec3(1.0, 0.0, 0.0);
-        if (abs(uvScaled.y - 1.0) < 0.001 * scale) sceneColor = vec3(1.0, 0.0, 0.0);
-        if (abs(uvScaled.y - y) < 0.001 * scale) sceneColor = vec3(1.0);
-#endif
 }

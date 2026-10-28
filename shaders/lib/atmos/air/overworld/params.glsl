@@ -23,7 +23,7 @@ struct OverworldFogParams {
     vec3 rayleighScatteringCoeff;
     vec3 mieScatteringCoeff;
     vec3 mieExtinctionCoeff;
-    vec3 mistScatteringCoeff; // tinted by live horizon sky colour
+    vec3 mistScatteringCoeff;
 };
 
 #endif // INCLUDE_ATMOS_AIR_OVERWORLD_PARAMS

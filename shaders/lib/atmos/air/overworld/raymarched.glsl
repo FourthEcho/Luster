@@ -21,6 +21,8 @@
 
 #include "/lib/atmos/air/overworld/constants.glsl"
 #include "/lib/util/phaseFunctions.glsl"
+// Needed early: the ground mist couples with the ozone and sandstorm media
+#include "/lib/atmos/air/overworld/aerosols.glsl"
 #define LUSTER_INCLUDE_CLOUD_SHADOWS
 #if defined(LUSTER_INCLUDE_CLOUD_SHADOWS)
 // Cloud-shadow projection and sampling.
@@ -334,106 +336,129 @@ vec3 getHandheldLight(vec3 scenePos, float ao) {
 #endif
 
 #undef LUSTER_INCLUDE_CLOUD_SHADOWS
-// ---- Mist mode sentinels (also defined in settings.glsl for Iris) ----
-#ifndef mistModeOff
-#define mistModeOff      0
-#define mistModeBasic    1
-#define mistModeAdvanced 2
-#endif
+// ---- Ground mist ----
 
-#if mistMode != mistModeOff
+// Position hashing for the mist volume: lattice value noise keeps the layer
+// solid in every direction, where a 2D texture would extrude the pattern
+// into vertical curtains when seen edge-on.
+float mistHash(vec3 cell) {
+    cell = fract(cell * 0.3183099 + vec3(0.11, 0.37, 0.53));
+    cell *= 17.0;
+    return fract(cell.x * cell.y * cell.z * (cell.x + cell.y + cell.z));
+}
 
+float mistValueNoise(vec3 pos) {
+    vec3 cell = floor(pos);
+    vec3 blend = fract(pos);
+    blend = blend * blend * (3.0 - 2.0 * blend); // smooth Hermite falloff
 
-// The noise texture is 2D, so a plain XZ lookup extrudes the mist pattern
-// along Y: seen edge-on at the horizon the mist breaks up into vertical
-// curtains. Blending two height-shifted slices of the noise into a
-// pseudo-3D field keeps the layer soft in every direction instead.
-float mistNoise(vec3 worldPos, float scale, vec2 wind) {
-    float slice = worldPos.y * 0.2;
-    float base = floor(slice);
-    float blend = fract(slice);
+    float n000 = mistHash(cell);
+    float n100 = mistHash(cell + vec3(1.0, 0.0, 0.0));
+    float n010 = mistHash(cell + vec3(0.0, 1.0, 0.0));
+    float n110 = mistHash(cell + vec3(1.0, 1.0, 0.0));
+    float n001 = mistHash(cell + vec3(0.0, 0.0, 1.0));
+    float n101 = mistHash(cell + vec3(1.0, 0.0, 1.0));
+    float n011 = mistHash(cell + vec3(0.0, 1.0, 1.0));
+    float n111 = mistHash(cell + vec3(1.0, 1.0, 1.0));
 
-    // Offset between the slices is irrational-ish so the repetition of the
-    // noise texture does not line up from one slice to the next.
-    vec2 sliceOffset = vec2(0.21, 0.34);
-
-    float n0 = texture(noisetex, worldPos.xz * scale + sliceOffset * base + wind).w;
-    float n1 = texture(
-        noisetex,
-        worldPos.xz * scale + sliceOffset * (base + 1.0) + wind
-    ).w;
-
-    return mix(n0, n1, blend);
+    return mix(
+        mix(mix(n000, n100, blend.x), mix(n010, n110, blend.x), blend.y),
+        mix(mix(n001, n101, blend.x), mix(n011, n111, blend.x), blend.y),
+        blend.z
+    );
 }
 
 float mistDensityProfile(vec3 worldPos) {
-    // Slow horizontal drift — two independent directions for each octave
-    vec2 wind0 = vec2(frameTimeCounter * 0.004,  frameTimeCounter * 0.0025);
-    vec2 wind1 = vec2(frameTimeCounter * 0.0068, frameTimeCounter * 0.0041);
+    // Two octaves of drifting value noise, plus a dust octave while a
+    // sandstorm rages.
+    float drift = frameTimeCounter * 0.006;
+    vec3 wind = vec3(drift, 0.0, drift * 0.5);
 
-    float n0 = mistNoise(worldPos, 0.008, wind0);
-    float n1 = mistNoise(worldPos, 0.022, wind1);
-    float noise = n0 * 0.7 + n1 * 0.3;
+    float noise = mistValueNoise(worldPos * 0.03 + wind)
+        + mistValueNoise(worldPos * 0.06 + wind * pi) * 0.5;
+
+#ifdef desertSandstorm
+    if (sandstormStrength() > 0.1) {
+        noise += smoothstep(0.0, 1.0,
+            mistValueNoise(worldPos * 0.08 + wind * sqrPi)
+        ) * 0.3 * sandstormStrength();
+    }
+#endif
 
     float altitude = worldPos.y;
 
-    // Exponential falloff above sea level, hard cap at mistAltitude.
-    // wetness thickens the layer — after rain, evaporation raises mist density.
-    float altAboveSea = altitude - (63.0 + mistSeaLevelBias);
-    float envelope = exp2(-max0(altAboveSea) * mistFalloffRate);
-    envelope *= sqr(1.0 - linearStep(
-        float(mistAltitude) - 12.0,
+    // Exponential falloff above sea level: the falloff multiplier sets how
+    // quickly the layer thins with altitude.
+    float envelope = exp(
+        -max0(altitude - (63.0 + mistSeaLevelBias)) * 0.01 * mistFalloff
+    );
+
+    // The noise cuts holes into thin mist, and the layer solidifies as the
+    // envelope thickens: the envelope itself sets the noise threshold.
+    float density = smoothstep(
+        0.4,
+        0.7,
+        noise * rcp(1.5) - (1.0 - envelope) * 0.5
+    );
+
+    // Hard cap: fade out below the ceiling with a wide band.
+    density *= sqr(1.0 - linearStep(
+        float(mistAltitude) - 15.0,
         float(mistAltitude),
         altitude
     ));
-    envelope *= 1.0 + 0.4 * wetness;
 
-    // The Mist Density slider lives in fogParams.mistScatteringCoeff, which
-    // carries both scattering and extinction. Applying it here as well made
-    // the slider act squared.
-    return linearStep(0.35, 0.75, noise) * envelope;
+    return density;
 }
 
-// Density-varying phase function.
+// The mist lobe, recomputed for every multiple-scattering order: the aniso-
+// tropy narrows by half each order so the deeper bounces stay open and
+// diffuse instead of piling up in the forward peak.
+float mistOrderPhase(float cosTheta, float orderScale) {
+    float g = fogMieAnisotropy * orderScale * mistMieAnisotropy;
 
-
-float mistPhase(float cosTheta, float localDensity) {
-    // Thin mist scatters more forward, thick mist is closer to isotropic.
-    float g = mix(0.75, 0.40, clamp01(localDensity * 4.0));
-    return 0.8 * henyeyGreensteinPhase(cosTheta, g)
-         + 0.2 * henyeyGreensteinPhase(cosTheta, -0.1);
+    return mix(
+        cornetteShanksPhase(cosTheta, g),
+        henyeyGreensteinPhase(cosTheta, -g * rcpPi),
+        mistMieAnisotropy * 0.25
+    );
 }
 
-#if mistMode == mistModeAdvanced
+#ifdef fogMistAdvanced
+// Phase shaped by the optical depth crossed toward the sun: mist the sun
+// light has passed through cheapens the forward glow, reading as true
+// multiple scattering.
+float mistDepthPhase(float cosTheta, float opticalDepth) {
+    return mix(
+        cornetteShanksPhase(cosTheta, pow(fogMieAnisotropy, 1.0 + opticalDepth)),
+        henyeyGreensteinPhase(cosTheta, -fogMieAnisotropy * rcpPi),
+        0.19
+    );
+}
 
-
-// Optical depth from a mist sample toward the light, in real units (profile
-// density times metres times the mist extinction coefficient), so it can feed
-// a transmittance directly. The ray runs the distance the light needs to leave
-// the layer (long at a low sun, short at noon), capped, in steps of at least
-// mistShadowStepLength; samples sit at the middle of each step.
-float mistShadowOd(vec3 worldPos, float localDensity, float extinction) {
-    if (localDensity < 0.01) return 0.0;
-
-    const int steps = mistShadowSteps;
-
-    float toTop = max(float(mistAltitude) - worldPos.y, 0.0);
-    float pathLength = clamp(toTop / max(lightDir.y, 0.1), 0.0, 800.0);
-    float stepSize = max(mistShadowStepLength, pathLength / float(steps));
-
+// Optical depth of the mist between a sample and the sun: fixed-length steps
+// along the light direction, skipped once the ray climbs above the ceiling
+// or below the world.
+float mistLightOd(vec3 worldPos) {
+    const float stepSize = 12.0;
     float od = 0.0;
 
-    for (int i = 0; i < steps; ++i) {
-        vec3 pos = worldPos + lightDir * (stepSize * (float(i) + 0.5));
-        if (pos.y > float(mistAltitude)) break;
-        od += mistDensityProfile(pos);
+    vec3 pos = worldPos;
+    for (int i = 0; i < mistLightingSteps; ++i) {
+        if (pos.y > float(mistAltitude) || pos.y < 0.0) {
+            pos += lightDir * stepSize;
+            continue;
+        }
+
+        float density = mistDensityProfile(pos);
+        if (density > 0.0) od += density * stepSize;
+
+        pos += lightDir * stepSize;
     }
 
-    return od * stepSize * extinction;
+    return od;
 }
-#endif // mistModeAdvanced
-
-#endif // mistMode != mistModeOff
+#endif // fogMistAdvanced
 #include "/lib/light/distortion.glsl"
 #include "/lib/util/lodMod.glsl"
 #include "/lib/atmos/air/atmosphere.glsl"
@@ -600,10 +625,13 @@ mat2x3 raymarchAirFog(
             = fogParams.rayleighScatteringCoeff * density.x
             + fogParams.mieExtinctionCoeff * density.y;
 
-#if mistMode != mistModeOff
-        float mistD = mistDensityProfile(worldPos) * stepLength;
-        stepOpticalDepth += fogParams.mistScatteringCoeff * mistD;
-#endif
+        // Mist is a medium of its own: only march the noise when the medium
+        // exists at all, its coefficient carries the total density.
+        float mistD = 0.0;
+        if (maxOf(fogParams.mistScatteringCoeff) > 1e-5) {
+            mistD = mistDensityProfile(worldPos) * stepLength;
+            stepOpticalDepth += fogParams.mistScatteringCoeff * mistD;
+        }
 
         vec3 stepTransmittance = exp(-stepOpticalDepth);
         vec3 stepTransmittedFraction
@@ -616,30 +644,27 @@ mat2x3 raymarchAirFog(
         lightSky[0] += visibleScattering * density.x;
         lightSky[1] += visibleScattering * density.y;
 
-#if mistMode != mistModeOff
         if (mistD > 1e-5) {
-            float LoV = dot(worldDir, lightDir);
-
-#if mistMode == mistModeAdvanced
-            float mistOd = mistShadowOd(
-                worldPos,
-                mistD / stepLength,
-                dot(fogParams.mistScatteringCoeff, vec3(1.0 / 3.0))
-            );
-            // Power-law self-extinction (multiple-scattering tail of
-            // Beer-Lambert) keeps dense mist from glowing through itself
-            float mistSunShadow = pow(1.0 + 0.7 * mistOd, -1.0 / 0.7) * shadowBinary;
-            float mistPhaseVal  = mistPhase(LoV, mistD / stepLength);
-#else
-            float mistSunShadow = shadowBinary;
-            float mistPhaseVal  = mistPhase(LoV, mistD / stepLength);
-#endif
-
             vec3 mistScatter = mistD * visibleScattering;
-            mistSunLight += mistScatter * mistPhaseVal * mistSunShadow;
+
+#ifdef fogMistAdvanced
+            // Optical depth of the mist between this sample and the sun.
+            // It dims the remaining sunlight and reshapes the forward glow.
+            float mistOd = mistLightOd(worldPos)
+                * dot(fogParams.mistScatteringCoeff, vec3(1.0 / 3.0));
+            // Power-law self-extinction: dense mist softly extinguishes its
+            // own sunlight instead of going black
+            float mistSunShadow
+                = pow(1.0 + 0.7 * mistOd, -1.0 / 0.7) * shadowBinary;
+
+            mistSunLight += mistScatter * mistSunShadow
+                * mistDepthPhase(dot(worldDir, lightDir), mistOd);
+#else
+            // The phase depends on the order: applied below
+            mistSunLight += mistScatter * shadowBinary;
+#endif
             mistSkyLight += mistScatter * isotropicPhase;
         }
-#endif
 
         transmittance *= stepTransmittance;
     }
@@ -670,16 +695,11 @@ mat2x3 raymarchAirFog(
     float miePhase = 0.7 * henyeyGreensteinPhase(LoV, fogMieAnisotropy)
         + 0.3 * henyeyGreensteinPhase(LoV, -0.2);
 
-    /*
-    // Single scattering
-    vec3 scattering  = lightColor * (lightSun * vec2(isotropicPhase,
-    miePhase)); scattering += ambientColor * (lightSky *
-    vec2(isotropicPhase));
-    /*/
     // Multiple scattering
     vec3 scattering = vec3(0.0);
     float scatterAmount = 1.0;
     float anisotropy = 1.0;
+    float mistNarrowing = 1.0;
 
 #if defined PROGRAM_DEFERRED0
     vec3 ambientColor = ambientColorFog;
@@ -699,15 +719,24 @@ mat2x3 raymarchAirFog(
         orderLight *= ozoneMultipleScattering(float(i));
 #endif
 
+#ifndef fogMistAdvanced
+        // The mist lobe narrows each order along with the fog's
+        float mistPhaseVal = mistOrderPhase(LoV, mistNarrowing);
+#else
+        // Advanced shapes the mist phase per step instead
+        float mistPhaseVal = 1.0;
+#endif
+
         scattering += scatterAmount
-            * (lightSun * vec2(isotropicPhase, miePhase) + mistSunLight)
+            * (lightSun * vec2(isotropicPhase, miePhase)
+               + mistSunLight * mistPhaseVal)
             * orderLight
             * (1.0 - 0.9 * rainStrength);
 
         scatterAmount *= 0.5;
         anisotropy *= 0.7;
+        mistNarrowing *= 0.5;
     }
-    //*/
 
     scattering *= clamp01(1.0 - blindness - darknessFactor);
 

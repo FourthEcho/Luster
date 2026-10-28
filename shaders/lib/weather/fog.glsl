@@ -25,14 +25,6 @@
 #include "/lib/util/color.glsl"
 #include "/lib/weather/core.glsl"
 
-// Sentinel guards so mistMode comparisons compile even when mist.glsl
-// has not been included yet (e.g. in vertex shaders).
-#ifndef mistModeOff
-#define mistModeOff      0
-#define mistModeBasic    1
-#define mistModeAdvanced 2
-#endif
-
 uniform float biomePaleGarden;
 
 OverworldFogParams getFogParams(Weather weather) {
@@ -142,45 +134,17 @@ OverworldFogParams getFogParams(Weather weather) {
     params.rayleighScatteringCoeff
         = gamutExpand(params.rayleighScatteringCoeff);
 
-#if mistMode != mistModeOff
-    {
-        vec3 horizonTint = normalize(params.rayleighScatteringCoeff + 1e-6);
+    params.mistScatteringCoeff = mistBaseScatterCoeff
+        * mistDensity
+        * vec3(mistColorR, mistColorG, mistColorB);
 
-#ifdef ozoneLayer
-
-
-#if mistMode == mistModeAdvanced
-        float mistOzoneMu = sunDir.y;
-#else
-        float mistOzoneMu = 0.1;
-#endif
-        vec3 ozoneFiltered = horizonTint
-            * ozoneLayerTransmittance(mistOzoneMu, ozonePlanetRadius);
-        float twilight = linearStep(0.7, 1.0, 1.0 - abs(sunDir.y));
-        horizonTint = mix(
-            horizonTint,
-            normalize(ozoneFiltered + 1e-6),
-            twilight
-        );
-#endif
 #ifdef desertSandstorm
-
-
-        horizonTint = normalize(mix(
-            horizonTint,
-            sandstormTint(),
-            sandstormStrength()
-        ) + 1e-6);
-#endif
-
-        params.mistScatteringCoeff = mistBaseScatterCoeff
-            * mistDensity * horizonTint
-            * vec3(mistColorR, mistColorG, mistColorB);
-        // Thicken mist during and after rain
-        params.mistScatteringCoeff *= 1.0 + 0.5 * rainStrength * biomeMayRain;
-    }
-#else
-    params.mistScatteringCoeff = vec3(0.0);
+    // A sandstorm buries the layer in dust no matter how thin the mist is
+    // set to be — the storm density dominates over the user's coefficient.
+    params.mistScatteringCoeff = max(
+        params.mistScatteringCoeff,
+        vec3(sandstormStrength() * 12.0)
+    );
 #endif
 
 #ifdef desertSandstorm

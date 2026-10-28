@@ -95,12 +95,6 @@ mat2x3 airFogAnalytic(
     float miePhase = 0.7 * henyeyGreensteinPhase(LoV, fogMieAnisotropy)
         + 0.3 * henyeyGreensteinPhase(LoV, -0.2);
 
-    /*
-    // Single scattering
-    vec3 scattering  = lightColor * (lightSun * vec2(isotropicPhase,
-    miePhase)); scattering += ambientColor * (lightSky *
-    vec2(isotropicPhase));
-    /*/
     // Multiple scattering
     vec3 scattering = vec3(0.0);
     float scatterAmount = 1.0;
@@ -128,7 +122,6 @@ mat2x3 airFogAnalytic(
         scatterAmount *= 0.5;
         anisotropy *= 0.7;
     }
-    //*/
 
     scattering *= max(skylight, eyeSkylight);
     scattering *= clamp01(1.0 - blindness - darknessFactor);

@@ -27,19 +27,22 @@ const float wetnessHalflife         = 70.0;
 //   World
 // ---------
 
+  #define windEffects
+#ifdef windEffects
   #define wavingPlants
   #define wavingLeaves
+#endif
 //#define edgeHighlight
   #define edgeHighlightScale 16.0 // [4.0 8.0 16.0 32.0 64.0 128.0 256.0]
   #define slantedRain
   #define moonPhaseAffectsBrightness
 
 #define moonPhaseNightAtmosphere
-  #define moonPhaseNightAtmosphereIntensity 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.20 1.50 2.00]
+  #define moonPhaseNightAtmosphereIntensity 1.00
   #define moonPhaseReflections
-  #define moonPhaseReflectionsIntensity 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.20 1.50 2.00]
+  #define moonPhaseReflectionsIntensity 1.00
 
-  #define moonPhaseInfluenceIntensity 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.20 1.50 2.00]
+  #define moonPhaseInfluenceIntensity 1.00
   #define entityShadows
 #define blockEntityShadows
   #define desertSandstorm
@@ -335,16 +338,13 @@ const float wetnessHalflife         = 70.0;
   #define fogSmoothingRadius 2 // [1 2 3 4 5 6 8 10]
 
   // ---- Ground Mist ----
-  #define mistModeOff      0
-  #define mistModeBasic    1
-  #define mistModeAdvanced 2
-  #define mistMode mistModeOff // [mistModeOff mistModeBasic mistModeAdvanced]
+//#define fogMistAdvanced
   #define mistDensity 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.20 1.50 2.00 2.50 3.00]
   #define mistAltitude 120 // [40 50 60 70 80 90 100 110 120 130 140 150 160 180 200]
-  #define mistFalloffRate 0.04 // [0.01 0.02 0.03 0.04 0.05 0.06 0.08 0.10 0.15 0.20]
+  #define mistFalloff 1.0 // [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
   #define mistSeaLevelBias 0.0 // [-16.0 -12.0 -8.0 -4.0 0.0 4.0 8.0 12.0 16.0]
-  #define mistShadowSteps 4 // [2 3 4 6 8 10 12]
-  #define mistShadowStepLength 10.0 // [2.5 5.0 7.5 10.0 12.5 15.0 20.0]
+  #define mistMieAnisotropy 0.80 // [0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90]
+  #define mistLightingSteps 2 // [2 4 6 8 10 12]
   #define mistColorR 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.40 1.50 1.75 2.00]
   #define mistColorG 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.40 1.50 1.75 2.00]
   #define mistColorB 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.40 1.50 1.75 2.00]
@@ -444,8 +444,8 @@ const float wetnessHalflife         = 70.0;
 //   Materials
 // -------------
 
-  #define textureFormatLab 0
-  #define textureFormatOld 1
+  #define textureFormatLab12Plus 0
+  #define textureFormatLab11 1
 
 // Material mapping mode controls exactly which resource-pack material maps are read.
   #define materialMappingMode materialMappingHardcoded // [materialMappingOff materialMappingHardcoded materialMappingSpecularOnly materialMappingNormalsOnly materialMappingSpecularNormals]
@@ -477,23 +477,22 @@ const float wetnessHalflife         = 70.0;
 #if defined POM_SLOPE_NORMAL && !defined pomSlopeNormals
   #define pomSlopeNormals
 #endif
-// pom depth write: displaces gl_FragDepth by the raymarched pom relief so
-
-// the displaced surface instead of the flat quad. Enabled by the
-
+// Write the POM raymarched surface depth instead of the flat quad depth.
   #define pomDepthWrite
   #define hardcodedEmission
-// ---- sss mode: Off = no sss, Hardcoded = built-in masks only,
-// Maps = read labPBR specular.B only (no fallback) ----
+// ---- SSS source: Hardcoded, Hardcoded + LabPBR, or LabPBR Only ----
   #define sssOff 0
   #define sssHardcoded 1
-  #define sssMaps 2
-  #define sssMode sssHardcoded // [sssOff sssHardcoded sssMaps]
+  #define sssHardcodedMaps 2
+  #define sssMaps 3
+  #define sssMode sssHardcoded // [sssHardcoded sssHardcodedMaps sssMaps]
 #if sssMode != sssOff
   #define sss
+#endif
+#if sssMode == sssHardcoded || sssMode == sssHardcodedMaps
   #define hardcodedSss
 #endif
-#if sssMode == sssMaps
+#if sssMode == sssHardcodedMaps || sssMode == sssMaps
   #define sssUseMaps
 #endif
 #ifdef sss
@@ -501,37 +500,43 @@ const float wetnessHalflife         = 70.0;
   #define sssSheenIntensity 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.20 1.50 2.00]
 #endif
 
-// ---- Porosity mode: Off = no wetness, Hardcoded = built-in masks only,
-// Maps = read labPBR specular.B only (no fallback) ----
+// ---- Porosity source: Hardcoded, Hardcoded + LabPBR, or LabPBR Only ----
   #define porosityOff 0
   #define porosityHardcoded 1
-  #define porosityMaps 2
-  #define porosityMode porosityHardcoded // [porosityOff porosityHardcoded porosityMaps]
+  #define porosityHardcodedMaps 2
+  #define porosityMaps 3
+  #define porosityMode porosityHardcoded // [porosityHardcoded porosityHardcodedMaps porosityMaps]
 #if porosityMode != porosityOff
   #define porosity
 #endif
-#if porosityMode == porosityMaps
+#if porosityMode == porosityHardcoded || porosityMode == porosityHardcodedMaps
+  #define hardcodedPorosity
+#endif
+#if porosityMode == porosityHardcodedMaps || porosityMode == porosityMaps
   #define porosityUseMaps
 #endif
+
+// SSS/porosity map modes need the LabPBR specular texture even when general
+// specular mapping is disabled. In this case, decode only the blue-channel
+// auxiliary data so roughness, F0, and emission remain hardcoded/unmapped.
+#if (defined sssUseMaps || defined porosityUseMaps) && !defined specularMapping
+  #define specularMapping
+  #define specularAuxOnly
+#endif
+
   #define porosityStrength 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.20 1.50 2.00]
 
   #define rainPuddles
 
 // Resource Pack Settings
 
-  #define textureFormat textureFormatLab // [textureFormatLab textureFormatOld]
+  #define textureFormat textureFormatLab12Plus // [textureFormatLab12Plus textureFormatLab11]
 
-
-// hardcodedEmission picks the emission source: ON = built-in per-block
-
-
-// pair is used by primary/direct lighting and SSPT so emissive surfaces stay
-
-//#define directionalLightmaps
 // ---- Global emission shaping: curve reshapes the response (1.0 = neutral),
 // intensity sets final emissive brightness. ----
   #define globalEmissionCurve 1.00 // [0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.40 1.50 1.60 1.70 1.80 1.90 2.00 2.10 2.20 2.30 2.40 2.50 2.60 2.70 2.80 2.90 3.00]
   #define globalEmissionIntensity 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.40 1.50 1.60 1.70 1.80 1.90 2.00]
+//#define directionalLightmaps
   #define directionalLightmapsIntensity 0.20 // [0.00 0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.45 0.50 0.55 0.60 0.65 0.70 0.75 0.80 0.85 0.90 0.95 1.00]
   #define pomSamples 40 // [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128]
 //#define pomShadow
