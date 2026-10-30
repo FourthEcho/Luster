@@ -72,6 +72,10 @@ const float blocklightScale = 6.0;
 
 const float emissionScale = 40.0;
 
+// Indirect lighting (skylight and the sun/moon bounce) sits at half
+// strength so traced emission stays the dominant indirect term.
+const float indirectLightScale = 0.50;
+
 #define blocklightColor \
     (fromDisplay(vec3(blocklightR, blocklightG, blocklightB)) * blocklightI)
 

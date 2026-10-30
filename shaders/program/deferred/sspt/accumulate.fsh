@@ -69,7 +69,7 @@ uniform bool worldAgeChanged;
 // ------------
 
 #define LUSTER_INCLUDE_BLOCKLIGHT_COLOR
-#include "/lib/light/colors.glsl"
+#include "/lib/weather/colors.glsl"
 #undef LUSTER_INCLUDE_BLOCKLIGHT_COLOR
 #if !defined INCLUDE_LIGHT_INDIRECT_LIGHT_TEMPORAL
 #define INCLUDE_LIGHT_INDIRECT_LIGHT_TEMPORAL

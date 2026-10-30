@@ -68,13 +68,6 @@ const float wetnessHalflife         = 70.0;
 //   Lighting
 // ------------
 
-  // Handheld lighting mode: Off, Normal, or Colored.
-  #define handheldLightOff      0
-  #define handheldLightColored   2
-  #define handheldLightMode 2 // [0 1 2] Handheld lighting mode: 0 = Off, 1 = Normal, 2 = Colored.
-#if handheldLightMode != handheldLightOff
-  #define handheldLight
-#endif
   #define cloudShadows
   #define cloudShadowsIntensity 0.80 // [0.00 0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.10 0.11 0.12 0.13 0.14 0.15 0.16 0.17 0.18 0.19 0.20 0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29 0.30 0.31 0.32 0.33 0.34 0.35 0.36 0.37 0.38 0.39 0.40 0.41 0.42 0.43 0.44 0.45 0.46 0.47 0.48 0.49 0.50 0.51 0.52 0.53 0.54 0.55 0.56 0.57 0.58 0.59 0.60 0.61 0.62 0.63 0.64 0.65 0.66 0.67 0.68 0.69 0.70 0.71 0.72 0.73 0.74 0.75 0.76 0.77 0.78 0.79 0.80 0.81 0.82 0.83 0.84 0.85 0.86 0.87 0.88 0.89 0.90 0.91 0.92 0.93 0.94 0.95 0.96 0.97 0.98 0.99 1.00]
   #define vanillaAo
@@ -178,9 +171,8 @@ const float wetnessHalflife         = 70.0;
   #define ssptBounces 1 // [1 2 3 4 5 6]
   #define ssptEmissionDistance 8.00 // [2.00 4.00 6.00 8.00 10.00 12.00 14.00 16.00 18.00 20.00 22.00 24.00 26.00 28.00 30.00 32.00]
   #define ssptEmissionMode 0 // [0 1 2] 0 = Hardcoded, 1 = Hardcoded + LabPBR, 2 = LabPBR only. Only affects SSPT.
+  #define labEmissionCurve 1.00 // [1.00 1.20 1.40 1.60 1.80 2.00 2.20 2.40 2.60 2.80 3.00] Curve applied to labPBR emission-map strength; higher crushes toward bright cores.
   #define ssptLightmapBlend 1.0 // [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
-  #define ssptIntensity 1.00 // [0.00 0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.45 0.50 0.55 0.60 0.65 0.70 0.75 0.80 0.85 0.90 0.95 1.00]
-  #define indirectLightingIntensity 0.50 // [0.00 0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.45 0.50 0.55 0.60 0.65 0.70 0.75 0.80 0.85 0.90 0.95 1.00 1.05 1.10 1.15 1.20 1.25 1.30 1.35 1.40 1.45 1.50 1.55 1.60 1.65 1.70 1.75 1.80 1.85 1.90 1.95 2.00]
 
   #define maxFrames 128.0 // [16.0 32.0 64.0 128.0 192.0 256.0 384.0 512.0 768.0 1024.0]
 
@@ -480,12 +472,12 @@ const float wetnessHalflife         = 70.0;
 // Write the POM raymarched surface depth instead of the flat quad depth.
   #define pomDepthWrite
   #define hardcodedEmission
-// ---- SSS source: Hardcoded, Hardcoded + LabPBR, or LabPBR Only ----
+// ---- SSS source: Off, Hardcoded (default), Hardcoded + LabPBR, or LabPBR Only ----
   #define sssOff 0
   #define sssHardcoded 1
   #define sssHardcodedMaps 2
   #define sssMaps 3
-  #define sssMode sssHardcoded // [sssHardcoded sssHardcodedMaps sssMaps]
+  #define sssMode sssHardcoded // [sssOff sssHardcoded sssHardcodedMaps sssMaps]
 #if sssMode != sssOff
   #define sss
 #endif
@@ -500,12 +492,12 @@ const float wetnessHalflife         = 70.0;
   #define sssSheenIntensity 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.20 1.50 2.00]
 #endif
 
-// ---- Porosity source: Hardcoded, Hardcoded + LabPBR, or LabPBR Only ----
+// ---- Porosity source: Off, Hardcoded (default), Hardcoded + LabPBR, or LabPBR Only ----
   #define porosityOff 0
   #define porosityHardcoded 1
   #define porosityHardcodedMaps 2
   #define porosityMaps 3
-  #define porosityMode porosityHardcoded // [porosityHardcoded porosityHardcodedMaps porosityMaps]
+  #define porosityMode porosityHardcoded // [porosityOff porosityHardcoded porosityHardcodedMaps porosityMaps]
 #if porosityMode != porosityOff
   #define porosity
 #endif
@@ -532,10 +524,6 @@ const float wetnessHalflife         = 70.0;
 
   #define textureFormat textureFormatLab12Plus // [textureFormatLab12Plus textureFormatLab11]
 
-// ---- Global emission shaping: curve reshapes the response (1.0 = neutral),
-// intensity sets final emissive brightness. ----
-  #define globalEmissionCurve 1.00 // [0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.40 1.50 1.60 1.70 1.80 1.90 2.00 2.10 2.20 2.30 2.40 2.50 2.60 2.70 2.80 2.90 3.00]
-  #define globalEmissionIntensity 1.00 // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.40 1.50 1.60 1.70 1.80 1.90 2.00]
 //#define directionalLightmaps
   #define directionalLightmapsIntensity 0.20 // [0.00 0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.45 0.50 0.55 0.60 0.65 0.70 0.75 0.80 0.85 0.90 0.95 1.00]
   #define pomSamples 40 // [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128]
@@ -793,7 +781,7 @@ const float wetnessHalflife         = 70.0;
   #define debugViewWeather   3
 
   #define debugView debugViewNone // [debugViewNone debugViewSampler debugViewHistogram debugViewWeather]
-  #define debugSampler colortex1 // [colortex0 colortex1 colortex2 colortex3 colortex4 colortex5 colortex6 colortex7 colortex8 colortex9 colortex10 colortex11 colortex12 colortex13 colortex14 colortex15 colortex16 colortex17 colortex18 colortex19 colortex20 depthtex0 depthtex1 depthtex2 shadowtex0 shadowtex1 shadowcolor0 noisetex]
+  #define debugSampler colortex1 // [colortex0 colortex1 colortex2 colortex3 colortex4 colortex5 colortex6 colortex7 colortex8 colortex9 colortex10 colortex11 colortex12 colortex13 colortex14 colortex15 colortex16 colortex17 colortex18 colortex19 colortex20 colortex21 colortex22 depthtex0 depthtex1 depthtex2 shadowtex0 shadowtex1 shadowcolor0 noisetex]
 //#define tonemapComparison
   #define tonemapComparisonSplit 0.50 // [0.10 0.11 0.12 0.13 0.14 0.15 0.16 0.17 0.18 0.19 0.20 0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29 0.30 0.31 0.32 0.33 0.34 0.35 0.36 0.37 0.38 0.39 0.40 0.41 0.42 0.43 0.44 0.45 0.46 0.47 0.48 0.49 0.50 0.51 0.52 0.53 0.54 0.55 0.56 0.57 0.58 0.59 0.60 0.61 0.62 0.63 0.64 0.65 0.66 0.67 0.68 0.69 0.70 0.71 0.72 0.73 0.74 0.75 0.76 0.77 0.78 0.79 0.80 0.81 0.82 0.83 0.84 0.85 0.86 0.87 0.88 0.89 0.90]
   #define tonemapLeft tonemapLottes // [tonemapAcesFit tonemapAcesFull tonemapLottes tonemapHejl2015 tonemapHejlBurgess tonemapTech tonemapUncharted2 tonemapOzius tonemapReinhard tonemapReinhardJodie]

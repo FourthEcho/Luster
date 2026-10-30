@@ -25,8 +25,17 @@ layout(
 layout(
     location = 2
 ) out vec4 gbufferData1; // detailed normal, specular map (optional)
+#ifdef ssptEnabled
+layout(
+    location = 3
+) out vec4 emissionRadiance; // zeroed: basic geometry never emits
+#endif
 
 /* RENDERTARGETS: 0,1,2 */
+
+#ifdef ssptEnabled
+/* RENDERTARGETS: 0,1,2,22 */
+#endif
 
 flat in vec2 lightLevels;
 flat in vec4 tint;
@@ -97,6 +106,13 @@ void main() {
     }
 
     vec2 encodedNormal = encodeUnitVector(normal);
+
+#ifdef ssptEnabled
+    // This pass overwrites colortex1 with mask-0 geometry that never
+    // emits; zero the bake so SSPT hits here cannot read stale emission
+    // from whatever wrote the texel before.
+    emissionRadiance = vec4(0.0);
+#endif
 
     gbufferData0.x = packUnorm2x8(baseColor.rg);
     gbufferData0.y = packUnorm2x8(baseColor.b, 0.0);

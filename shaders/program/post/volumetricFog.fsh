@@ -116,7 +116,7 @@ uniform float timeMidnight;
 #if !defined INCLUDE_FOG_END_FOG_VL
 #define INCLUDE_FOG_END_FOG_VL
 
-#include "/lib/light/distortion.glsl"
+#include "/lib/light/direct/distortion.glsl"
 #include "/lib/util/color.glsl"
 #include "/lib/util/fastMath.glsl"
 #include "/lib/util/phaseFunctions.glsl"
@@ -318,7 +318,7 @@ mat2x3 raymarchEndFog(
 #if !defined INCLUDE_FOG_WATER_FOG_VL
 #define INCLUDE_FOG_WATER_FOG_VL
 
-#include "/lib/light/distortion.glsl"
+#include "/lib/light/direct/distortion.glsl"
 #include "/lib/util/color.glsl"
 #include "/lib/util/fastMath.glsl"
 #include "/lib/util/phaseFunctions.glsl"
@@ -481,7 +481,7 @@ mat2x3 raymarchWaterFog(
 #if !defined INCLUDE_FOG_NETHER_FOG_VL
 #define INCLUDE_FOG_NETHER_FOG_VL
 
-#include "/lib/light/distortion.glsl"
+#include "/lib/light/direct/distortion.glsl"
 #include "/lib/util/color.glsl"
 #include "/lib/util/fastMath.glsl"
 #include "/lib/util/phaseFunctions.glsl"

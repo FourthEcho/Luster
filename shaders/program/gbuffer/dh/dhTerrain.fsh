@@ -21,6 +21,11 @@
 layout(
     location = 0
 ) out vec4 gbufferData0; // albedo, block ID, flat normal, light levels
+#ifdef ssptEnabled
+layout(
+    location = 2
+) out vec4 emissionRadiance; // emission radiance bake for the SSPT tracer
+#endif
 
 /* RENDERTARGETS: 1 */
 
@@ -30,6 +35,10 @@ layout(
 
 #ifdef specularMapping
 /* RENDERTARGETS: 1,2 */
+#endif
+
+#ifdef ssptEnabled
+/* RENDERTARGETS: 1,2,22 */
 #endif
 
 in vec2 lightLevels;
@@ -44,6 +53,10 @@ uniform int frameCounter;
 
 #include "/lib/util/encode.glsl"
 #include "/lib/util/random.glsl"
+
+#ifdef ssptEnabled
+#include "/lib/light/emission.glsl"
+#endif
 
 // ------------
 //   Uniforms
@@ -105,6 +118,24 @@ void main() {
         );
         gbufferData0.z = packUnorm2x8(encodeUnitVector(normal));
         gbufferData0.w = packUnorm2x8(lightLevels);
+#ifdef ssptEnabled
+        // No specular sampling on DH terrain: the labPBR map path bakes to
+        // zero and only the hardcoded emitter path contributes.
+        {
+            vec2 bakeLightLevels = lightLevels;
+            emissionRadiance = vec4(
+                computeEmissionRadiance(
+                    adjustedColor,
+                    materialMask,
+                    scenePos + cameraPosition,
+                    normal,
+                    bakeLightLevels,
+                    vec4(0.0)
+                ),
+                1.0
+            );
+        }
+#endif
         return;
     }
 #endif
@@ -127,4 +158,23 @@ void main() {
     );
     gbufferData0.z = packUnorm2x8(encodeUnitVector(normal));
     gbufferData0.w = packUnorm2x8(lightLevels);
+
+#ifdef ssptEnabled
+    // Same bake as the DH-textures path above, for the vanilla-style
+    // fallback shading.
+    {
+        vec2 bakeLightLevels = lightLevels;
+        emissionRadiance = vec4(
+            computeEmissionRadiance(
+                adjustedColor,
+                materialMask,
+                scenePos + cameraPosition,
+                normal,
+                bakeLightLevels,
+                vec4(0.0)
+            ),
+            1.0
+        );
+    }
+#endif
 }

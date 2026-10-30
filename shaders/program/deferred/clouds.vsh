@@ -89,13 +89,13 @@ uniform float desertSandstormWeather;
 
 #if defined WORLD_OVERWORLD
 #define LUSTER_INCLUDE_MOON_PHASE_COLOR
-#include "/lib/light/colors.glsl"
+#include "/lib/weather/colors.glsl"
 #undef LUSTER_INCLUDE_MOON_PHASE_COLOR
 #define LUSTER_INCLUDE_LIGHT_COLOR
-#include "/lib/light/colors.glsl"
+#include "/lib/weather/colors.glsl"
 #undef LUSTER_INCLUDE_LIGHT_COLOR
 #define LUSTER_INCLUDE_WEATHER_COLOR
-#include "/lib/light/colors.glsl"
+#include "/lib/weather/colors.glsl"
 #undef LUSTER_INCLUDE_WEATHER_COLOR
 #include "/lib/atmos/air/atmosphere.glsl"
 #include "/lib/atmos/aurora.glsl"

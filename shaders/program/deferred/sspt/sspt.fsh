@@ -32,7 +32,7 @@ in vec2 uv;
 uniform sampler2D noisetex;
 
 uniform sampler2D colortex1; // gbuffer 0
-uniform sampler2D colortex2; // gbuffer 1
+uniform sampler2D colortex22; // baked emission radiance (gbuffer writers)
 uniform sampler2D colortex4; // sky map (skylight bounce sampling)
 uniform sampler2D colortex6; // selected AO for SSPT contact-shadow finishing
 uniform sampler2D colortex14; // AO history depth for depth-aware AO upscale
@@ -106,119 +106,10 @@ uniform int isEyeInWater;
 
 
 #define LUSTER_INCLUDE_BLOCKLIGHT_COLOR
-#include "/lib/light/colors.glsl"
+#include "/lib/weather/colors.glsl"
 #undef LUSTER_INCLUDE_BLOCKLIGHT_COLOR
-#define LUSTER_INCLUDE_HANDHELD_LIGHT
-#if defined(LUSTER_INCLUDE_HANDHELD_LIGHT)
-// Handheld light source data and evaluation.
-#if !defined INCLUDE_LIGHT_HANDHELD_LIGHT
-#define INCLUDE_LIGHT_HANDHELD_LIGHT
+#include "/lib/light/direct/handheld.glsl"
 
-#define HANDHELD_LIGHT_COLORS
-#if handheldLightMode == handheldLightColored
-const vec3 handheldEmitterLightColor[48] = vec3[48](
-    vec3(1.00, 1.00, 1.00) * 12.0, // Strong white light
-    vec3(1.00, 1.00, 1.00) * 6.0, // Medium white light
-    vec3(1.00, 1.00, 1.00) * 1.0, // Weak white light
-    vec3(1.00, 0.55, 0.27) * 14.0, // Strong golden light
-    vec3(1.00, 0.57, 0.30) * 8.0, // Medium golden light
-    vec3(1.00, 0.57, 0.30) * 6.0, // Weak golden light
-    vec3(1.00, 0.18, 0.10) * 5.0, // Redstone components
-    vec3(1.00, 0.38, 0.10) * 7.0, // Lava
-    vec3(1.00, 0.45, 0.10) * 9.0, // Medium orange light
-    vec3(1.00, 0.63, 0.15) * 4.0, // Brewing stand
-    vec3(1.00, 0.57, 0.30) * 12.0, // Medium golden light
-    vec3(0.45, 0.73, 1.00) * 6.0, // Soul lights
-    vec3(0.45, 0.73, 1.00) * 14.0, // Beacon
-    vec3(0.75, 1.00, 0.83) * 3.0, // Sculk
-    vec3(0.75, 1.00, 0.83) * 1.0, // End portal frame
-    vec3(0.60, 0.10, 1.00) * 2.5, // Pink glow
-    vec3(0.75, 1.00, 0.50) * 1.0, // Sea pickle
-    vec3(1.00, 0.50, 0.25) * 4.0, // Nether plants
-    vec3(1.00, 0.57, 0.30) * 8.0, // Medium golden light
-    vec3(1.00, 0.65, 0.30) * 8.0, // Ochre froglight
-    vec3(0.86, 1.00, 0.44) * 8.0, // Verdant froglight
-    vec3(0.75, 0.44, 1.00) * 8.0, // Pearlescent froglight
-    vec3(0.60, 0.10, 1.00) * 2.0, // Enchanting table
-    vec3(0.75, 0.44, 1.00) * 4.0, // Amethyst cluster
-    vec3(0.75, 0.44, 1.00) * 4.0, // Calibrated sculk sensor
-    vec3(0.75, 1.00, 0.83) * 6.0, // Active sculk sensor
-    vec3(1.00, 0.18, 0.10) * 3.3, // Redstone block
-    vec3(1.00, 0.50, 0.25) * 3.0, // Open eyeblossom
-    vec3(0.85, 1.3, 1.0) * 3.9, // Copper torch and lanterns
-    vec3(1.00, 0.57, 0.30) * 8.0, // Copper Bulbs
-    vec3(0.60, 0.10, 1.00) * 12.0, // Nether portal
-    vec3(0.0), // End portal
-    // Colors for modded light sources (block IDs 64-79)
-    vec3(1.00, 1.00, 1.00) * 10.0, // 32 - White       (block 64)
-    vec3(0.85, 0.85, 0.85) *  9.0, // 33 - Light Gray  (block 65)
-    vec3(0.55, 0.55, 0.55) *  8.0, // 34 - Gray        (block 66)
-    vec3(0.20, 0.20, 0.22) *  6.0, // 35 - Black       (block 67)
-    vec3(0.55, 0.35, 0.20) *  8.0, // 36 - Brown       (block 68)
-    vec3(1.00, 0.10, 0.10) * 10.0, // 37 - Red         (block 69)
-    vec3(1.00, 0.45, 0.10) * 10.0, // 38 - Orange      (block 70)
-    vec3(1.00, 0.95, 0.20) * 10.0, // 39 - Yellow      (block 71)
-    vec3(0.55, 1.00, 0.20) * 10.0, // 40 - Lime        (block 72)
-    vec3(0.15, 1.00, 0.20) * 10.0, // 41 - Green       (block 73)
-    vec3(0.15, 0.95, 1.00) * 10.0, // 42 - Cyan        (block 74)
-    vec3(0.45, 0.75, 1.00) * 10.0, // 43 - Light Blue  (block 75)
-    vec3(0.15, 0.30, 1.00) * 10.0, // 44 - Blue        (block 76)
-    vec3(0.55, 0.15, 1.00) * 10.0, // 45 - Purple      (block 77)
-    vec3(1.00, 0.20, 0.90) * 10.0, // 46 - Magenta     (block 78)
-    vec3(1.00, 0.55, 0.85) * 10.0  // 47 - Pink        (block 79)
-);
-#endif // handheldLightMode == handheldLightColored
-
-#ifdef IS_IRIS
-uniform vec3 relativeEyePosition;
-#endif
-
-uniform int heldItemId;
-uniform int heldItemId2;
-uniform int heldBlockLightValue;
-uniform int heldBlockLightValue2;
-
-vec3 getHandheldLightColor(int handItemId, int heldItemLightValue) {
-#if handheldLightMode == handheldLightColored
-    const int firstEmitterId = 10032;
-    const int emitterCount = 48;
-    int emitterIndex = handItemId - firstEmitterId;
-
-    if (emitterIndex >= 0 && emitterIndex < emitterCount) {
-        return handheldEmitterLightColor[emitterIndex];
-    }
-#endif
-
-    return (blocklightColor * blocklightScale * rcp(15.0))
-        * heldItemLightValue;
-}
-
-float getHandheldLightFalloff(vec3 scenePos, float ao) {
-    float falloff = lift(rcp(dot(scenePos, scenePos) + 1.0), 3.0);
-    return falloff * mix(ao, 1.0, falloff * falloff)
-        * 1.00;
-}
-
-vec3 getHandheldLight(vec3 scenePos, float ao) {
-#ifdef IS_IRIS
-    // Center light on player rather than camera
-    scenePos += relativeEyePosition;
-#endif
-
-    vec3 lightColor = max(
-        getHandheldLightColor(heldItemId, heldBlockLightValue),
-        getHandheldLightColor(heldItemId2, heldBlockLightValue2)
-    );
-
-    float falloff = getHandheldLightFalloff(scenePos, ao);
-
-    return lightColor * falloff;
-}
-
-#endif // INCLUDE_LIGHT_HANDHELD_LIGHT
-#endif
-
-#undef LUSTER_INCLUDE_HANDHELD_LIGHT
 #define LUSTER_INCLUDE_CLOUD_SHADOWS
 #if defined(LUSTER_INCLUDE_CLOUD_SHADOWS)
 // Cloud-shadow projection and sampling.
@@ -359,14 +250,13 @@ vec2 renderCloudShadowMap(vec2 uv) {
 #endif
 
 #undef LUSTER_INCLUDE_CLOUD_SHADOWS
-#include "/lib/light/distortion.glsl"
+#include "/lib/light/direct/distortion.glsl"
 #include "/lib/util/lodMod.glsl"
 #include "/lib/util/color.glsl"
 #include "/lib/util/encode.glsl"
 #include "/lib/util/fastMath.glsl"
 #include "/lib/util/random.glsl"
 #include "/lib/util/spaceConversion.glsl"
-#include "/lib/brdf/material.glsl"
 #include "/lib/atmos/projection.glsl"
 
 
@@ -535,75 +425,28 @@ HitData unpackHit(vec4 gbufferData) {
 }
 
 // ----------------------------------------------------------------------------
-/* HIT SURFACE EMISSION — material path */
+/* HIT SURFACE EMISSION — baked radiance fetch */
 
 
-vec3 hitEmission(vec4 hitData0, ivec2 hitTexel, vec3 hitViewPos) {
-    vec3 hitAlbedo = vec3(
-        unpackUnorm2x8(hitData0.x),
-        unpackUnorm2x8(hitData0.y).x
-    );
-    uint hitMask = uint(255.0 * unpackUnorm2x8(hitData0.y).y);
-    vec3 hitSceneNormal = decodeUnitVector(unpackUnorm2x8(hitData0.z));
-    vec2 hitLightLevels = unpackUnorm2x8(hitData0.w);
+// Emission radiance is baked into colortex22 by the gbuffer writers from
+// the same material decode the direct path uses: tier-scaled hardcoded
+// emitters, the chroma-boosted color path, and the labPBR map path curved
+// by labEmissionCurve, all selected by ssptEmissionMode at bake time.
+// The fetch is patch-weighted: sampling at a mip level matched to the
+// travelled ray distance returns the average radiance of the hit's
+// screen-space neighborhood instead of one point texel. A point fetch feeds
+// a pixel the full emitter radiance only when one of the few rays per frame
+// clips the emitter patch, reading as blinking speckle on the surfaces the
+// emitter lights; patch-averaged radiance keeps that contribution continuous
+// in ray count. Requires colortex22MipmapEnabled in shaders.properties.
+vec3 hitEmission(ivec2 hitTexel, float hitDistance) {
+    float mip = log2(clamp(hitDistance, 1.0, 16.0));
 
-    // world position for position-dependent hardcoded emission
-    vec3 hitWorldPos = viewToSceneSpace(hitViewPos) + cameraPosition;
-
-    Material hitMaterial = materialFrom(
-        hitAlbedo,
-        hitMask,
-        hitWorldPos,
-        hitSceneNormal,
-        hitLightLevels
-    );
-
-    // Raw hardcoded source (populated by materialFrom() only when
-    // hardcodedEmission is on; otherwise zero).
-    vec3 hardcodedRaw = hitMaterial.emission;
-
-#if ssptEmissionMode != 0
-    // Raw resource-pack map source (same channel decoding as
-    // decodeEmission()'s map path, pre-curve).
-    vec4 hitSpecularMap = texelFetch(colortex2, hitTexel, 0);
-    vec4 ssptMap = vec4(
-        unpackUnorm2x8(hitSpecularMap.z),
-        unpackUnorm2x8(hitSpecularMap.w)
-    );
-    vec3 mapRaw = vec3(0.0);
-    #if textureFormat == textureFormatLab11 || textureFormat == textureFormatLab12Plus
-    // LabPBR 1.1 and 1.2+ both store emission in specular alpha:
-    // 0-254 encode 0-100% emission, while 255 means no emission map.
-    // The 1.2 change affects normal-map AO, not emission decoding.
-    float hasEmissionMap = step(ssptMap.a, 254.5 / 255.0);
-    float emissionValue = ssptMap.a * (255.0 / 254.0);
-    mapRaw = hitMaterial.albedo * emissionValue * hasEmissionMap;
-    #endif
-#endif
-
-    // SSPT-only source selection. Direct lighting is untouched.
-    #if ssptEmissionMode == 2
-    vec3 emissionRaw = mapRaw;
-    #elif ssptEmissionMode == 1
-    // Brighter source wins (luminance comparison, whole vector kept so
-    // hue is preserved instead of mixing channels).
-    float hardcodedLuma = dot(max0(hardcodedRaw), luminanceWeights);
-    float mapLuma = dot(max0(mapRaw), luminanceWeights);
-    vec3 emissionRaw = mapLuma > hardcodedLuma ? mapRaw : hardcodedRaw;
-    #else
-    vec3 emissionRaw = hardcodedRaw;
-    #endif
-
-    // Same global shaping as the primary pass so bounced and directly
-    // viewed emitters agree on response.
-    hitMaterial.emission = pow(
-        max(emissionRaw, vec3(0.0)),
-        vec3(globalEmissionCurve)
-    ) * globalEmissionIntensity;
-
-
-    return hitMaterial.emission * hitMaterial.albedo
-        * emissionScale * ssptIntensity;
+    return textureLod(
+        colortex22,
+        (vec2(hitTexel) + 0.5) / vec2(textureSize(colortex22, 0)),
+        mip
+    ).rgb;
 }
 
 // ----------------------------------------------------------------------------
@@ -619,9 +462,7 @@ vec3 hitEmission(vec4 hitData0, ivec2 hitTexel, vec3 hitViewPos) {
 #if defined shadow && !defined WORLD_NETHER
 #define DIRECT_SUN_BOUNCE 1
 #endif
-#ifdef handheldLight
 #define DIRECT_HANDHELD_BOUNCE 1
-#endif
 
 
 #define DIRECT_SKY_BOUNCE 1
@@ -729,7 +570,7 @@ vec3 hitDirectLight(HitData hit, vec3 hitViewPos) {
 #endif
 
 
-    return hit.albedo * (sunMoonDirect + indirectDirect) * indirectLightingIntensity;
+    return hit.albedo * (sunMoonDirect + indirectDirect) * indirectLightScale;
 }
 
 #endif // defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE || defined DIRECT_SKY_BOUNCE
@@ -820,8 +661,10 @@ vec3 traceIndirect(
             );
                 emissionFalloff = cube(emissionFalloff);
 
-            emission += hitEmission(hitData0, hitTexel, hitViewPos)
-                      * emissionFalloff * brdf * hitAttenuation;
+            // Emission is radiance: no BRDF weighting, so emitters stay
+            // bright at grazing hits and keep the baked magnitude.
+            emission += hitEmission(hitTexel, distance(hitViewPos, viewPos))
+                      * emissionFalloff * hitAttenuation;
 
 #if defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE || defined DIRECT_SKY_BOUNCE
             // Direct-light bounce: no distance falloff, BRDF-weighted.
@@ -889,6 +732,9 @@ vec3 traceIndirect(
             vec3 hitPosition = screenspaceRT(rayOrigin, rayDirection, dither.y);
 
             float brdf = brdfWeight(hitNormal, -oldDirection, rayDirection);
+            // Emission gathers radiance, so it skips the BRDF weight; the
+            // bounce term below keeps the full path throughput.
+            vec3 preBrdfThroughput = contribution;
                 contribution *= brdf;
 
             if (hitPosition.z < 1.0) {
@@ -917,8 +763,9 @@ vec3 traceIndirect(
                 );
                     emissionFalloff = cube(emissionFalloff);
 
-                emission += hitEmission(hitData0, hitTexel, hitViewPos)
-                          * emissionFalloff * contribution * hitAttenuation;
+                emission += hitEmission(hitTexel, distance(hitViewPos, viewPos))
+                          * emissionFalloff * preBrdfThroughput
+                          * hitAttenuation;
 
 #if defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE || defined DIRECT_SKY_BOUNCE
                 // Direct-light bounce on every path vertex.
@@ -969,7 +816,7 @@ vec3 traceIndirect(
         skylight = mix(skylight, bentSky, 0.5);
     }
 
-    skylight *= indirectLightingIntensity;
+    skylight *= indirectLightScale;
 
 #if defined DIRECT_SUN_BOUNCE || defined DIRECT_HANDHELD_BOUNCE || defined DIRECT_SKY_BOUNCE
     return emission + bounce + skylight;

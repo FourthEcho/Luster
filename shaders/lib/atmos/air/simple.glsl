@@ -20,7 +20,7 @@
 #define INCLUDE_ATMOS_AIR_SIMPLE
 
 #define LUSTER_INCLUDE_BLOCKLIGHT_COLOR
-#include "/lib/light/colors.glsl"
+#include "/lib/weather/colors.glsl"
 #undef LUSTER_INCLUDE_BLOCKLIGHT_COLOR
 
 // waterAbsorption.glsl (inlined: consumers air/simple + shadow fragment)

@@ -28,7 +28,7 @@ uniform mat4 shadowModelViewInverse;
 
 uniform vec3 cameraPosition;
 
-#include "/lib/light/distortion.glsl"
+#include "/lib/light/direct/distortion.glsl"
 
 out vec3 cageNormal;
 out vec3 worldPos;

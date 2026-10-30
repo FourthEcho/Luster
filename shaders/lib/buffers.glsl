@@ -63,6 +63,12 @@ const bool colortex20Clear = false;
 const int colortex21Format = RGBA16F; // 192x108    | atmosphere transmittance LUT, 160x64 region (d0 -> d1+)
 const bool colortex21Clear = true;
 
+// Emission radiance bake, written by the gbuffer writers (solid, DH terrain)
+// and fetched once per SSPT ray hit. Radiance reaches the emitter tier scale
+// (up to ~200), so a float format is required.
+const int colortex22Format = RGBA16F;
+const bool colortex22Clear = true;
+
 */
 
 #endif // INCLUDE_BUFFERS

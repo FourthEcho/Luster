@@ -129,18 +129,17 @@ void decodeSpecularMap(vec4 specularMap, inout Material material) {
 
     // ---- Emission ----
 #ifdef hardcodedEmission
-    // Built-in emission was populated by materialFrom().
+    // Built-in emission was populated by materialFrom(). Hardcoded emitters
+    // bypass the emission curve: it shapes labPBR map emission only.
 #else
     float hasEmissionMap = step(specularMap.a, 254.5 / 255.0);
     float emissionValue = specularMap.a * (255.0 / 254.0);
     // Unmapped texels do not fall back to hardcoded emission.
-    material.emission = material.albedo * emissionValue * hasEmissionMap;
-#endif
     material.emission = pow(
-        max(material.emission, vec3(0.0)),
-        vec3(globalEmissionCurve)
+        max(material.albedo * emissionValue * hasEmissionMap, vec3(0.0)),
+        vec3(labEmissionCurve)
     );
-    material.emission *= globalEmissionIntensity;
+#endif
 
     if (specularMap.g < 229.5 / 255.0) {
         // Dielectrics

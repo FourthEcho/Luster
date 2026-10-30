@@ -46,7 +46,7 @@ uniform vec2 viewPixelSize;
 uniform float biomeMaySnow;
 
 #define LUSTER_INCLUDE_WEATHER_COLOR
-#include "/lib/light/colors.glsl"
+#include "/lib/weather/colors.glsl"
 #undef LUSTER_INCLUDE_WEATHER_COLOR
 #include "/lib/util/encode.glsl"
 
