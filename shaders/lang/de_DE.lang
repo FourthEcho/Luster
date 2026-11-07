@@ -761,7 +761,7 @@ value.tonemap_right.tonemap_ozius          = Ozius
 value.tonemap_right.tonemap_reinhard       = Reinhard
 value.tonemap_right.tonemap_reinhard_jodie = Reinhard-Jodie
 
-# Distance View 
+# Distance View
 
 option.DISTANCE_VIEW                   = Aktiviert
 option.DISTANCE_VIEW_METHOD            = Methode
