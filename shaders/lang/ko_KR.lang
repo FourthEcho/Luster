@@ -138,7 +138,7 @@ option.SH_SKYLIGHT                     = SH 하늘빛
 option.SH_SKYLIGHT.comment             = 오버월드에서 방향성 하늘빛을 구면 조화 함수로 인코딩하여 매우 자연스러운 결과를 제공합니다.\nGTAO와 함께 사용하면 효과적입니다
 option.SH_SKYLIGHT_INTENSITY          = 강도
 option.SH_SKYLIGHT_INTENSITY.comment = 오버월드에서 구면 조화 함수로 계산되는 하늘빛의 밝기를 조절합니다.
-option.SH_SKYLIGHT_QUALITY            = 품질
+option.SH_SKYLIGHT_QUALITY             = 샘플 수
 option.SH_SKYLIGHT_QUALITY.comment   = 하늘빛을 계산하는 데 사용할 샘플 수를 조절합니다. 값이 높을수록 조명 정확도가 높아지지만 성능이 저하될 수 있습니다.
 value.SH_SKYLIGHT_QUALITY.64 = 64
 value.SH_SKYLIGHT_QUALITY.96 = 96
@@ -795,7 +795,7 @@ option.BOX_LINE_WIDTH           = 선 굵기
 
 
 screen.end_dimension                        = 엔드
-screen.shadow_quality                       = Samples (SH Samples)
+screen.shadow_quality                      = 품질
 screen.sss_settings                         = SSS 설정
 option.END_FOG_INTENSITY                    = 엔드 안개 강도
 option.END_FOG_INTENSITY.comment            = 엔드의 볼류메트릭 안개 밀도를 조절합니다. 볼류메트릭 안개가 필요합니다.
