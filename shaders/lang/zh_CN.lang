@@ -139,7 +139,7 @@ option.SH_SKYLIGHT                     = 球谐天空光
 option.SH_SKYLIGHT.comment             = 在主世界中使用球谐函数编码指向天空光, 可提供非常自然的效果. 与 GTAO 效果相得益彰.
 option.SH_SKYLIGHT_INTENSITY          = 强度
 option.SH_SKYLIGHT_INTENSITY.comment = 调整主世界中球谐天空光照的亮度。
-option.SH_SKYLIGHT_QUALITY            = 质量
+option.SH_SKYLIGHT_QUALITY             = 样本数
 option.SH_SKYLIGHT_QUALITY.comment   = 控制计算球谐天空光照时使用的采样数量。较高的数值可提高光照精度，但可能降低性能。
 value.SH_SKYLIGHT_QUALITY.64 = 64
 value.SH_SKYLIGHT_QUALITY.96 = 96
@@ -791,7 +791,7 @@ option.NOISE_ON_DH_TERRAIN     = DH 地形噪声
 option.NOISE_ON_DH_TERRAIN.comment = 将着色器噪声应用于 Distant Horizons 地形。
 
 screen.end_dimension                        = 末地
-screen.shadow_quality                       = Samples (SH Samples)
+screen.shadow_quality                      = 质量
 screen.sss_settings                         = SSS 设置
 option.END_FOG_INTENSITY                    = 末地雾气强度
 option.END_FOG_INTENSITY.comment            = 调整末地体积雾的密度。需要启用体积雾。
