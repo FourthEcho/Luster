@@ -139,7 +139,7 @@ option.SH_SKYLIGHT                     = SH taevalgus
 option.SH_SKYLIGHT.comment             = Kasutab sfääriliste harmoonikate kodeerimist suunatud taevalguse jaoks Overworldis, andes loomuliku tulemuse.\nTöötab hästi koos GTAO-ga
 option.SH_SKYLIGHT_INTENSITY          = Intensiivsus
 option.SH_SKYLIGHT_INTENSITY.comment = Reguleerib sfääriliste harmoonikutega arvutatud taevavalguse heledust Overworldis.
-option.SH_SKYLIGHT_QUALITY            = Kvaliteet
+option.SH_SKYLIGHT_QUALITY             = Proovid
 option.SH_SKYLIGHT_QUALITY.comment   = Määrab taevavalguse arvutamiseks kasutatavate proovide arvu. Suurem väärtus parandab valgustuse täpsust, kuid võib vähendada jõudlust.
 value.SH_SKYLIGHT_QUALITY.64 = 64
 value.SH_SKYLIGHT_QUALITY.96 = 96
@@ -779,7 +779,7 @@ option.NOISE_ON_DH_TERRAIN     = Mürastatud maastik
 option.NOISE_ON_DH_TERRAIN.comment = Rakendab Distant Horizonsi maastikule varjundaja müra.
 
 screen.end_dimension                        = End
-screen.shadow_quality                       = Samples (SH Samples)
+screen.shadow_quality                      = Kvaliteet
 screen.sss_settings                         = SSS-i seaded
 option.END_FOG_INTENSITY                    = Endi udu intensiivsus
 option.END_FOG_INTENSITY.comment            = Reguleerib Endi volumetrilise udu tihedust. Vajab volumetrilist udu.
