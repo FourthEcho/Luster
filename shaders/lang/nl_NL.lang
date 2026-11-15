@@ -139,7 +139,7 @@ option.SH_SKYLIGHT                     = SH Luchtlicht
 option.SH_SKYLIGHT.comment             = Gebruikt een 'Spherical Harmonics'-codering voor directioneel licht van de lucht, wat een heel natuurlijk resultaat creëert.\nDit werkt goed samen met GTAO.
 option.SH_SKYLIGHT_INTENSITY          = Intensiteit
 option.SH_SKYLIGHT_INTENSITY.comment = Past de helderheid aan van de hemelverlichting met sferische harmonischen in de Overworld.
-option.SH_SKYLIGHT_QUALITY            = Kwaliteit
+option.SH_SKYLIGHT_QUALITY             = Samples
 option.SH_SKYLIGHT_QUALITY.comment   = Bepaalt het aantal samples dat wordt gebruikt om de hemelverlichting met sferische harmonischen te berekenen. Hogere waarden verbeteren de nauwkeurigheid, maar kunnen de prestaties verlagen.
 value.SH_SKYLIGHT_QUALITY.64 = 64
 value.SH_SKYLIGHT_QUALITY.96 = 96
@@ -789,7 +789,7 @@ option.NOISE_ON_DH_TERRAIN     = Ruis Op DH Terrein
 option.NOISE_ON_DH_TERRAIN.comment = Past shaderruis toe op Distant Horizons-terrein.
 
 screen.end_dimension                        = De End
-screen.shadow_quality                       = Samples (SH Samples)
+screen.shadow_quality                      = Kwaliteit
 screen.sss_settings                         = SSS-instellingen
 option.END_FOG_INTENSITY                    = Endmistintensiteit
 option.END_FOG_INTENSITY.comment            = Past de dichtheid van volumetrische mist in de End aan. Vereist volumetrische mist.
