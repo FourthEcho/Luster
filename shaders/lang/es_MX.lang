@@ -142,7 +142,7 @@ option.SH_SKYLIGHT = Tragaluz SH
 option.SH_SKYLIGHT.comment = Utiliza codificación de armónicos esféricos para la luz del cielo direccional en el Overworld, lo que proporciona un resultado muy natural.\nEsto funciona bien con GTAO.
 option.SH_SKYLIGHT_INTENSITY          = Intensidad
 option.SH_SKYLIGHT_INTENSITY.comment = Ajusta el brillo de la iluminación del cielo mediante armónicos esféricos en el Overworld.
-option.SH_SKYLIGHT_QUALITY            = Calidad
+option.SH_SKYLIGHT_QUALITY             = Muestras
 option.SH_SKYLIGHT_QUALITY.comment   = Controla la cantidad de muestras utilizadas para calcular la iluminación del cielo mediante armónicos esféricos. Los valores más altos mejoran la precisión, pero pueden reducir el rendimiento.
 value.SH_SKYLIGHT_QUALITY.64 = 64
 value.SH_SKYLIGHT_QUALITY.96 = 96
@@ -858,7 +858,7 @@ option.PHOTONICS_RESTIR_COMBINED_GI.comment = Si la GI debe pasar por el denoise
 
 
 screen.end_dimension                        = El End
-screen.shadow_quality                       = Samples (SH Samples)
+screen.shadow_quality                      = Calidad
 screen.sss_settings                         = Ajustes de SSS
 option.END_FOG_INTENSITY                    = Intensidad de la niebla del End
 option.END_FOG_INTENSITY.comment            = Ajusta la densidad de la niebla volumétrica en el End. Requiere niebla volumétrica.
