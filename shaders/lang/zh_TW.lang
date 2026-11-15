@@ -139,7 +139,7 @@ option.SH_SKYLIGHT                     = SH 天光
 option.SH_SKYLIGHT.comment             = 在主世界使用球面調和編碼天光，效果自然。適合搭配 GTAO
 option.SH_SKYLIGHT_INTENSITY          = 強度
 option.SH_SKYLIGHT_INTENSITY.comment = 調整主世界中球面調和天光的亮度。
-option.SH_SKYLIGHT_QUALITY            = 品質
+option.SH_SKYLIGHT_QUALITY             = 樣本數
 option.SH_SKYLIGHT_QUALITY.comment   = 控制計算球面調和天光時使用的取樣數量。較高的數值可提升光照精確度，但可能降低效能。
 value.SH_SKYLIGHT_QUALITY.64 = 64
 value.SH_SKYLIGHT_QUALITY.96 = 96
@@ -780,7 +780,7 @@ option.NOISE_ON_DH_TERRAIN     = 地平線地形雜訊
 option.NOISE_ON_DH_TERRAIN.comment = 將著色器雜訊套用至 Distant Horizons 地形。
 
 screen.end_dimension                        = 終界
-screen.shadow_quality                       = Samples (SH Samples)
+screen.shadow_quality                      = 品質
 screen.sss_settings                         = SSS 設定
 option.END_FOG_INTENSITY                    = 終界霧強度
 option.END_FOG_INTENSITY.comment            = 調整終界體積霧的密度。需要啟用體積霧。
