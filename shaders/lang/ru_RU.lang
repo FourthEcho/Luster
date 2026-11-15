@@ -137,7 +137,7 @@ option.SH_SKYLIGHT                     = SH Неба
 option.SH_SKYLIGHT.comment             = Использует кодировку сферических гармоник для направленного светового потока в окружающем мире, что обеспечивает очень естественный результат.\nЭто хорошо работает с GTAO
 option.SH_SKYLIGHT_INTENSITY          = Интенсивность
 option.SH_SKYLIGHT_INTENSITY.comment = Регулирует яркость освещения неба с помощью сферических гармоник в Верхнем мире.
-option.SH_SKYLIGHT_QUALITY            = Качество
+option.SH_SKYLIGHT_QUALITY             = Образцы
 option.SH_SKYLIGHT_QUALITY.comment   = Задает количество выборок для расчета освещения неба с помощью сферических гармоник. Большее значение повышает точность освещения, но может снизить производительность.
 value.SH_SKYLIGHT_QUALITY.64 = 64
 value.SH_SKYLIGHT_QUALITY.96 = 96
@@ -796,7 +796,7 @@ option.NOISE_ON_DH_TERRAIN     = Шум на ландшафте DH
 option.NOISE_ON_DH_TERRAIN.comment = Применяет шейдерный шум к рельефу Distant Horizons.
 
 screen.end_dimension                        = Энд
-screen.shadow_quality                       = Samples (SH Samples)
+screen.shadow_quality                      = Качество
 screen.sss_settings                         = Настройки SSS
 option.END_FOG_INTENSITY                    = Плотность тумана Энда
 option.END_FOG_INTENSITY.comment            = Настраивает плотность объёмного тумана в Энде. Требуется объёмный туман.
